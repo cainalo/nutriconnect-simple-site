@@ -1,36 +1,34 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { AuthGateLoading } from "@/components/site-chrome";
+import { Landing } from "@/components/landing";
+import { useAuth } from "@/hooks/use-auth";
+import { HOME_ROUTES, loadAppearance } from "@/lib/appearance";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Nutri-Connect" },
+      { title: "NutriConnect — Uma rede social sobre alimentação" },
       {
         name: "description",
         content:
-          "Nutri-Connect — conectando você a uma vida mais saudável.",
+          "Uma rede social para descobrir receitas, compartilhar experiências, participar de comunidades e construir hábitos alimentares junto com outras pessoas.",
       },
-      { property: "og:title", content: "Nutri-Connect" },
-      {
-        property: "og:description",
-        content:
-          "Nutri-Connect — conectando você a uma vida mais saudável.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Index,
+  component: HomeGate,
 });
 
-function Index() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-      <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-        Nutri-Connect
-      </h1>
-      <p className="mt-4 max-w-md text-lg text-muted-foreground">
-        Conectando você a uma vida mais saudável.
-      </p>
-    </div>
-  );
+function HomeGate() {
+  const { user, hydrated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (user) navigate({ to: (HOME_ROUTES[loadAppearance().homePage] ?? "/espaco") as "/espaco" });
+  }, [hydrated, user, navigate]);
+
+  // Quem não entrou vê a página que apresenta o site (sem acesso ao conteúdo).
+  if (hydrated && !user) return <Landing />;
+  return <AuthGateLoading />;
 }

@@ -1,1 +1,50 @@
 project_id = "mtwtlbbgkzexyaavcboe"
+
+# Edge Functions públicas: chamadas por serviços externos, sem o JWT do Supabase.
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.stripe-checkout]
+verify_jwt = false
+
+[functions.stripe-refund]
+verify_jwt = false
+
+[functions.weekly-theme]
+verify_jwt = false
+
+[functions.moderate-content]
+verify_jwt = false
+
+# Valida o login dentro da funcao (requireUser); a chave de IA fica so nos segredos.
+[functions.ai-chat]
+verify_jwt = false
+
+# Valida o login dentro da funcao (requireUser); analisa posts e comentarios antes de publicar.
+[functions.check-content]
+verify_jwt = false
+
+# Foto de perfil/capa e pagina do perfil: validam o login dentro da funcao (requireUser).
+[functions.profile-image]
+verify_jwt = false
+
+[functions.profile-page]
+verify_jwt = false
+
+# Servidores ICE (STUN/TURN) da videoconsulta: valida o login dentro da funcao (requireUser).
+[functions.call-ice]
+verify_jwt = false
+
+# Perfil de membros (Stripe Connect e assinaturas): validam o login dentro da funcao (requireUser).
+[functions.member-connect]
+verify_jwt = false
+
+[functions.member-checkout]
+verify_jwt = false
+
+[functions.member-cancel]
+verify_jwt = false
+
+# Notificações push: o pg_cron chama com x-cron-secret; o botão "Testar" valida o login (requireUser).
+[functions.push-send]
+verify_jwt = false

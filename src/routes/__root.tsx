@@ -9,9 +9,20 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Toaster } from "sonner";
+import { ConsentGate } from "../components/consent-gate";
+import { useAppSounds } from "../hooks/use-app-sounds";
+import { AccessibilityTools } from "../components/accessibility-tools";
+import { SideRails } from "../components/side-rails";
+import { FeatureGate } from "../components/feature-gate";
+import { AnnouncementBar } from "../components/announcement-bar";
+import { useAppearanceSync } from "../hooks/use-appearance-sync";
+import { usePushSync } from "../hooks/use-push-sync";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { APPEARANCE_INIT_SCRIPT, initAppearance } from "../lib/appearance";
+import { LANG_INIT_SCRIPT, initI18n } from "../lib/i18n";
 
 function NotFoundComponent() {
   return (
@@ -78,22 +89,43 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "NutriConnect — Uma rede social sobre alimentação" },
+      {
+        name: "description",
+        content:
+          "Uma rede social para descobrir receitas, compartilhar experiências, participar de comunidades e construir hábitos alimentares junto com outras pessoas.",
+      },
+      {
+        property: "og:title",
+        content: "NutriConnect — Uma rede social sobre alimentação",
+      },
+      {
+        property: "og:description",
+        content:
+          "Descubra receitas, participe de comunidades e desafios, e compartilhe sua jornada alimentar.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      // App instalável (PWA).
+      { name: "theme-color", content: "#555f36" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "NutriConnect" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],
+    // Aplica o tema e o idioma salvos antes da primeira pintura, para não piscar o padrão.
+    scripts: [{ children: APPEARANCE_INIT_SCRIPT }, { children: LANG_INIT_SCRIPT }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -103,7 +135,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // O tema e o idioma salvos são aplicados por script antes da hidratação (ver head.scripts).
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
@@ -118,10 +151,22 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => initAppearance(), []);
+  useEffect(() => initI18n(), []);
+  useAppearanceSync();
+  useAppSounds();
+  usePushSync();
+
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <FeatureGate>
+        <Outlet />
+      </FeatureGate>
+      <ConsentGate />
+      <AccessibilityTools />
+      <SideRails />
+      <AnnouncementBar />
+      <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );
 }
