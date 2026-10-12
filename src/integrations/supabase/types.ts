@@ -14,16 +14,1050 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          hold_expires_at: string | null
+          id: string
+          location: string | null
+          meeting_url: string | null
+          modality: Database["public"]["Enums"]["appointment_modality"]
+          patient_id: string
+          patient_notes: string | null
+          price_cents: number
+          professional_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          summary_for_patient: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at: string
+          hold_expires_at?: string | null
+          id?: string
+          location?: string | null
+          meeting_url?: string | null
+          modality: Database["public"]["Enums"]["appointment_modality"]
+          patient_id: string
+          patient_notes?: string | null
+          price_cents?: number
+          professional_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          summary_for_patient?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string
+          hold_expires_at?: string | null
+          id?: string
+          location?: string | null
+          meeting_url?: string | null
+          modality?: Database["public"]["Enums"]["appointment_modality"]
+          patient_id?: string
+          patient_notes?: string | null
+          price_cents?: number
+          professional_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          summary_for_patient?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      availability_blocks: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          professional_id: string
+          reason: string | null
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          professional_id: string
+          reason?: string | null
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          professional_id?: string
+          reason?: string | null
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_blocks_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      availability_rules: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          modality: string
+          professional_id: string
+          start_time: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          modality?: string
+          professional_id: string
+          start_time: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          modality?: string
+          professional_id?: string
+          start_time?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_rules_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      care_invites: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          invitee_email: string | null
+          invitee_name: string | null
+          note: string | null
+          professional_id: string
+          revoked_at: string | null
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          invitee_email?: string | null
+          invitee_name?: string | null
+          note?: string | null
+          professional_id: string
+          revoked_at?: string | null
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          invitee_email?: string | null
+          invitee_name?: string | null
+          note?: string | null
+          professional_id?: string
+          revoked_at?: string | null
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_invites_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "care_invites_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_invites_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      care_links: {
+        Row: {
+          community_slug: string | null
+          created_at: string
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          message: string | null
+          origin: Database["public"]["Enums"]["link_origin"]
+          patient_id: string
+          professional_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["link_status"]
+        }
+        Insert: {
+          community_slug?: string | null
+          created_at?: string
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          message?: string | null
+          origin?: Database["public"]["Enums"]["link_origin"]
+          patient_id: string
+          professional_id: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["link_status"]
+        }
+        Update: {
+          community_slug?: string | null
+          created_at?: string
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          message?: string | null
+          origin?: Database["public"]["Enums"]["link_origin"]
+          patient_id?: string
+          professional_id?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["link_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_links_ended_by_fkey"
+            columns: ["ended_by"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_links_ended_by_fkey"
+            columns: ["ended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_links_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_links_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_links_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          appointment_id: string
+          checkout_url: string | null
+          created_at: string
+          id: string
+          method: string | null
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          paid_at: string | null
+          patient_id: string
+          platform_fee_cents: number
+          professional_id: string
+          provider: string
+          raw: Json | null
+          refunded_at: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          appointment_id: string
+          checkout_url?: string | null
+          created_at?: string
+          id?: string
+          method?: string | null
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          paid_at?: string | null
+          patient_id: string
+          platform_fee_cents?: number
+          professional_id: string
+          provider?: string
+          raw?: Json | null
+          refunded_at?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          appointment_id?: string
+          checkout_url?: string | null
+          created_at?: string
+          id?: string
+          method?: string | null
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          paid_at?: string | null
+          patient_id?: string
+          platform_fee_cents?: number
+          professional_id?: string
+          provider?: string
+          raw?: Json | null
+          refunded_at?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      platform_admins: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      professional_mp_accounts: {
+        Row: {
+          access_token: string
+          expires_at: string | null
+          live_mode: boolean
+          mp_user_id: string
+          professional_id: string
+          public_key: string | null
+          refresh_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          expires_at?: string | null
+          live_mode?: boolean
+          mp_user_id: string
+          professional_id: string
+          public_key?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          expires_at?: string | null
+          live_mode?: boolean
+          mp_user_id?: string
+          professional_id?: string
+          public_key?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_mp_accounts_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: true
+            referencedRelation: "professionals"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      professionals: {
+        Row: {
+          accepting_patients: boolean
+          address: string | null
+          consultation_duration_min: number
+          consultation_price_cents: number
+          council: string
+          headline: string | null
+          mp_connected: boolean
+          offers_online: boolean
+          offers_presential: boolean
+          online_instructions: string | null
+          profession: string
+          registration: string
+          specialties: string[]
+          timezone: string
+          uf: string
+          updated_at: string
+          user_id: string
+          verified_at: string
+        }
+        Insert: {
+          accepting_patients?: boolean
+          address?: string | null
+          consultation_duration_min?: number
+          consultation_price_cents?: number
+          council: string
+          headline?: string | null
+          mp_connected?: boolean
+          offers_online?: boolean
+          offers_presential?: boolean
+          online_instructions?: string | null
+          profession: string
+          registration: string
+          specialties?: string[]
+          timezone?: string
+          uf: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string
+        }
+        Update: {
+          accepting_patients?: boolean
+          address?: string | null
+          consultation_duration_min?: number
+          consultation_price_cents?: number
+          council?: string
+          headline?: string | null
+          mp_connected?: boolean
+          offers_online?: boolean
+          offers_presential?: boolean
+          online_instructions?: string | null
+          profession?: string
+          registration?: string
+          specialties?: string[]
+          timezone?: string
+          uf?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professionals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professionals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_private: {
+        Row: {
+          birth_date: string | null
+          cpf: string | null
+          email: string | null
+          id: string
+          phone: string | null
+          sex: string | null
+          updated_at: string
+        }
+        Insert: {
+          birth_date?: string | null
+          cpf?: string | null
+          email?: string | null
+          id: string
+          phone?: string | null
+          sex?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birth_date?: string | null
+          cpf?: string | null
+          email?: string | null
+          id?: string
+          phone?: string | null
+          sex?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_private_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_private_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string
+          created_at: string
+          goal: string | null
+          id: string
+          journey_goal: string | null
+          name: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string
+          created_at?: string
+          goal?: string | null
+          id: string
+          journey_goal?: string | null
+          name?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string
+          created_at?: string
+          goal?: string | null
+          id?: string
+          journey_goal?: string | null
+          name?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      verification_requests: {
+        Row: {
+          bio: string | null
+          council: string
+          document_path: string
+          full_name: string
+          id: string
+          profession: string
+          public_lookup_url: string | null
+          registration: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_path: string
+          specialties: string[]
+          status: Database["public"]["Enums"]["verification_status"]
+          submitted_at: string
+          uf: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          council: string
+          document_path: string
+          full_name: string
+          id?: string
+          profession: string
+          public_lookup_url?: string | null
+          registration: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path: string
+          specialties?: string[]
+          status?: Database["public"]["Enums"]["verification_status"]
+          submitted_at?: string
+          uf: string
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          council?: string
+          document_path?: string
+          full_name?: string
+          id?: string
+          profession?: string
+          public_lookup_url?: string | null
+          registration?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path?: string
+          specialties?: string[]
+          status?: Database["public"]["Enums"]["verification_status"]
+          submitted_at?: string
+          uf?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      professional_directory: {
+        Row: {
+          accepting_patients: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          consultation_duration_min: number | null
+          consultation_price_cents: number | null
+          council: string | null
+          headline: string | null
+          id: string | null
+          mp_connected: boolean | null
+          name: string | null
+          offers_online: boolean | null
+          offers_presential: boolean | null
+          profession: string | null
+          registration: string | null
+          specialties: string[] | null
+          uf: string | null
+          verified_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      accept_care_invite: {
+        Args: { p_code: string }
+        Returns: {
+          community_slug: string | null
+          created_at: string
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          message: string | null
+          origin: Database["public"]["Enums"]["link_origin"]
+          patient_id: string
+          professional_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["link_status"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "care_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      book_appointment: {
+        Args: {
+          p_community_slug?: string
+          p_modality: Database["public"]["Enums"]["appointment_modality"]
+          p_notes?: string
+          p_professional: string
+          p_starts_at: string
+        }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          hold_expires_at: string | null
+          id: string
+          location: string | null
+          meeting_url: string | null
+          modality: Database["public"]["Enums"]["appointment_modality"]
+          patient_id: string
+          patient_notes: string | null
+          price_cents: number
+          professional_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          summary_for_patient: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cancel_appointment: {
+        Args: { p_appointment: string; p_reason?: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          hold_expires_at: string | null
+          id: string
+          location: string | null
+          meeting_url: string | null
+          modality: Database["public"]["Enums"]["appointment_modality"]
+          patient_id: string
+          patient_notes: string | null
+          price_cents: number
+          professional_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          summary_for_patient: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      end_care_link: {
+        Args: { p_link: string }
+        Returns: {
+          community_slug: string | null
+          created_at: string
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          message: string | null
+          origin: Database["public"]["Enums"]["link_origin"]
+          patient_id: string
+          professional_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["link_status"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "care_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      ever_linked: {
+        Args: { p_patient: string; p_professional?: string }
+        Returns: boolean
+      }
+      expire_payment_holds: {
+        Args: { p_professional?: string }
+        Returns: number
+      }
+      get_available_slots: {
+        Args: { p_from: string; p_professional: string; p_to: string }
+        Returns: {
+          ends_at: string
+          modality: string
+          starts_at: string
+        }[]
+      }
+      get_care_invite: {
+        Args: { p_code: string }
+        Returns: {
+          code: string
+          invitee_name: string
+          professional_id: string
+          professional_name: string
+          valid: boolean
+        }[]
+      }
+      has_active_link: {
+        Args: { p_patient: string; p_professional?: string }
+        Returns: boolean
+      }
+      is_platform_admin: { Args: { uid?: string }; Returns: boolean }
+      is_verified_professional: { Args: { uid?: string }; Returns: boolean }
+      register_manual_payment: {
+        Args: {
+          p_amount_cents?: number
+          p_appointment: string
+          p_method: string
+        }
+        Returns: {
+          amount_cents: number
+          appointment_id: string
+          checkout_url: string | null
+          created_at: string
+          id: string
+          method: string | null
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          paid_at: string | null
+          patient_id: string
+          platform_fee_cents: number
+          professional_id: string
+          provider: string
+          raw: Json | null
+          refunded_at: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reschedule_appointment: {
+        Args: { p_appointment: string; p_starts_at: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          hold_expires_at: string | null
+          id: string
+          location: string | null
+          meeting_url: string | null
+          modality: Database["public"]["Enums"]["appointment_modality"]
+          patient_id: string
+          patient_notes: string | null
+          price_cents: number
+          professional_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          summary_for_patient: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      respond_care_link: {
+        Args: { p_accept: boolean; p_link: string }
+        Returns: {
+          community_slug: string | null
+          created_at: string
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          message: string | null
+          origin: Database["public"]["Enums"]["link_origin"]
+          patient_id: string
+          professional_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["link_status"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "care_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      review_verification: {
+        Args: { p_approve: boolean; p_reason?: string; p_request: string }
+        Returns: {
+          bio: string | null
+          council: string
+          document_path: string
+          full_name: string
+          id: string
+          profession: string
+          public_lookup_url: string | null
+          registration: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_path: string
+          specialties: string[]
+          status: Database["public"]["Enums"]["verification_status"]
+          submitted_at: string
+          uf: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "verification_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      setting_int: {
+        Args: { p_default: number; p_key: string }
+        Returns: number
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "paciente" | "profissional"
+      appointment_modality: "presencial" | "online"
+      appointment_status:
+        | "aguardando_pagamento"
+        | "agendada"
+        | "confirmada"
+        | "realizada"
+        | "cancelada"
+        | "faltou"
+      link_origin: "solicitacao" | "convite" | "comunidade" | "agendamento"
+      link_status: "pendente" | "ativo" | "recusado" | "encerrado"
+      payment_status:
+        | "pendente"
+        | "em_processamento"
+        | "aprovado"
+        | "recusado"
+        | "reembolsado"
+        | "cancelado"
+      verification_status: "em_analise" | "aprovado" | "recusado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +1184,28 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["paciente", "profissional"],
+      appointment_modality: ["presencial", "online"],
+      appointment_status: [
+        "aguardando_pagamento",
+        "agendada",
+        "confirmada",
+        "realizada",
+        "cancelada",
+        "faltou",
+      ],
+      link_origin: ["solicitacao", "convite", "comunidade", "agendamento"],
+      link_status: ["pendente", "ativo", "recusado", "encerrado"],
+      payment_status: [
+        "pendente",
+        "em_processamento",
+        "aprovado",
+        "recusado",
+        "reembolsado",
+        "cancelado",
+      ],
+      verification_status: ["em_analise", "aprovado", "recusado"],
+    },
   },
 } as const
