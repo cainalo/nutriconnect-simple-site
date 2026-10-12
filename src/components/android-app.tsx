@@ -8,7 +8,7 @@ import { isNativeApp } from "@/lib/push";
 import { cn } from "@/lib/utils";
 
 export const ANDROID_APK_URL =
-  "https://github.com/alicejardimj2006-max/nutri-connect/releases/download/android-teste/NutriConnect.apk";
+  "https://github.com/cainalo/nutriconnect-simple-site/releases/download/android-teste/NutriConnect.apk";
 
 const BANNER_KEY = "nc_android_banner_until";
 
