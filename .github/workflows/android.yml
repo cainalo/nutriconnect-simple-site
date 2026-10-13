@@ -50,7 +50,9 @@ jobs:
         working-directory: mobile/android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -PversionCode=${{ github.run_number }}
+          # +1000: o contador recomeçou neste repositório; sem isso, quem tem o app do projeto
+          # anterior (versão maior) não consegue instalar por cima ("pacote inválido").
+          ./gradlew assembleDebug --no-daemon -PversionCode=$((1000 + ${{ github.run_number }}))
 
       - uses: actions/upload-artifact@v4
         with:
