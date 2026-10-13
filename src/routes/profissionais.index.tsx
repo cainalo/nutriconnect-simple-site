@@ -28,6 +28,10 @@ import { AppScreen } from "@/components/app-screen";
 
 export const Route = createFileRoute("/profissionais/")({
   head: () => ({ meta: [{ title: "Profissionais verificados — NutriConnect" }] }),
+  // Profissão já filtrada (ex.: "Qual profissional combina com você?" na página Funções).
+  validateSearch: (search: Record<string, unknown>): { profissao?: string } => ({
+    profissao: typeof search.profissao === "string" ? search.profissao : undefined,
+  }),
   component: DirectoryPage,
 });
 
@@ -66,7 +70,12 @@ function DirectoryPage() {
   const { data, isLoading } = useDirectory();
   const [query, setQuery] = useState("");
   const [specialty, setSpecialty] = useState<string | null>(null);
-  const [profession, setProfession] = useState<ProfessionKey | null>(null);
+  const search = Route.useSearch();
+  const [profession, setProfession] = useState<ProfessionKey | null>(() =>
+    PROFESSION_FILTERS.some((p) => p.key === search.profissao)
+      ? (search.profissao as ProfessionKey)
+      : null,
+  );
   const [modality, setModality] = useState<ModalityFilter>("todos");
   const [onlyAccepting, setOnlyAccepting] = useState(true);
   // O card "Qual profissional combina com você?" filtra a lista.

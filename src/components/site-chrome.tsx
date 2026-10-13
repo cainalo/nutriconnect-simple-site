@@ -9,6 +9,7 @@ import {
   Plus,
   Sparkles,
   CalendarDays,
+  LayoutGrid,
   type LucideIcon,
 } from "lucide-react";
 import { featureOfPath, useFeatures } from "@/lib/features";
@@ -84,6 +85,7 @@ const NAV_COLORS = {
   explorar: ["#0f9aa8", "#4fc3cf"],
   notificacoes: ["#d6456b", "#ef7a98"],
   tema: ["#4f8a4b", "#78b873"],
+  funcoes: ["#2f7d6d", "#5fbfa9"],
   perfil: ["#5b6fd6", "#8f9df0"],
 } as const;
 type NavKey = keyof typeof NAV_COLORS;
@@ -95,13 +97,24 @@ type NavPath =
   | "/nina"
   | "/explorar"
   | "/notificacoes"
-  | "/tema-da-semana";
+  | "/tema-da-semana"
+  | "/funcoes";
 
-function useNavState(navKey: NavKey, base: string) {
+/** Páginas que se abrem pela página Funções: a aba Funções fica acesa nelas também. */
+const FUNCOES_AREA = [
+  "/desafios",
+  "/tema-da-semana",
+  "/geladeira",
+  "/cardapio",
+  "/feira",
+  "/lancheira",
+];
+
+function useNavState(navKey: NavKey, base: string, also: string[] = []) {
   const dark = useIsDark();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const color = NAV_COLORS[navKey][dark ? 1 : 0];
-  const active = pathname === base || pathname.startsWith(`${base}/`);
+  const active = [base, ...also].some((p) => pathname === p || pathname.startsWith(`${p}/`));
   return { color, active, tint: `color-mix(in srgb, ${color} 15%, transparent)` };
 }
 
@@ -114,6 +127,7 @@ function NavTab({
   label,
   variant,
   showLabel = true,
+  also,
 }: {
   to: NavPath;
   navKey: NavKey;
@@ -121,8 +135,10 @@ function NavTab({
   label: string;
   variant: NavVariant;
   showLabel?: boolean;
+  /** Outros endereços em que a aba também fica acesa. */
+  also?: string[];
 }) {
-  const { color, active, tint } = useNavState(navKey, to);
+  const { color, active, tint } = useNavState(navKey, to, also);
   const { user } = useAuth();
   const features = useFeatures();
   const feature = featureOfPath(to);
@@ -307,6 +323,16 @@ export function SiteHeader() {
           </Link>
 
           <div className="flex items-center gap-2 shrink-0">
+            {user && (
+              <NavTab
+                to="/funcoes"
+                navKey="funcoes"
+                icon={LayoutGrid}
+                label={t("nav.functions")}
+                variant="desktop"
+                showLabel={false}
+              />
+            )}
             <NavTab
               to="/explorar"
               navKey="explorar"
@@ -415,11 +441,12 @@ export function SiteHeader() {
           </div>
 
           <NavTab
-            to="/desafios"
-            navKey="desafios"
-            icon={Award}
-            label={t("nav.challenges")}
+            to="/funcoes"
+            navKey="funcoes"
+            icon={LayoutGrid}
+            label={t("nav.functions")}
             variant="bottom"
+            also={FUNCOES_AREA}
           />
 
           <AccountMenu

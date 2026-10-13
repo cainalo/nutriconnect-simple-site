@@ -23,6 +23,7 @@ const ptBR = {
   "nav.space": "Espaço",
   "nav.communities": "Comunidades",
   "nav.challenges": "Desafios",
+  "nav.functions": "Funções",
   "nav.care": "Acompanhamento",
   "nav.clinic": "Painel clínico",
   "nav.clinicShort": "Painel",

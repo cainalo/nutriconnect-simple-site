@@ -261,9 +261,12 @@ export interface ShareRecipeDraft {
 export function ShareModal({
   triggerButton,
   initialRecipe,
+  initialPost,
 }: {
   triggerButton?: React.ReactNode;
   initialRecipe?: ShareRecipeDraft;
+  /** Publicação já começada (ex.: a pergunta do card "Puxe assunto"). */
+  initialPost?: { type: PostType; title?: string; text?: string };
 }) {
   const { user } = useAuth();
   const { t } = useI18n();
@@ -653,6 +656,10 @@ export function ShareModal({
       setServings(initialRecipe.servings ?? "");
       setIngredientsText(initialRecipe.ingredients.join("\n"));
       setStepsText(initialRecipe.steps.join("\n"));
+    } else if (initialPost) {
+      setType(initialPost.type);
+      setTitle(initialPost.title ?? "");
+      setText(initialPost.text ?? "");
     }
   };
 

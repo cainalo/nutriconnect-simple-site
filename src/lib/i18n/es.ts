@@ -20,6 +20,7 @@ const es: Record<DictKey, string> = {
   "nav.space": "Inicio",
   "nav.communities": "Comunidades",
   "nav.challenges": "Desafíos",
+  "nav.functions": "Funciones",
   "nav.care": "Seguimiento",
   "nav.clinic": "Panel clínico",
   "nav.clinicShort": "Panel",

@@ -1,8 +1,8 @@
 // Cards interativos das páginas: pequenos jogos, ferramentas e rituais do dia a dia. Cada página
-// escolhe os seus em rails-pages.tsx. O progresso fica só neste aparelho (localStorage), sem dados
-// de saúde enviados a servidor; a exceção é a água do dia, que a pessoa registra na própria conta
-// (ver water-tracker). Textos nos 4 idiomas, no mesmo formato do restante do site.
-import { Link } from "@tanstack/react-router";
+// escolhe os seus em rails-pages.tsx, e a página Funções (/funcoes) reúne todos. O que a pessoa
+// registra (água, lista de compras, hábitos, humor, compromisso da semana, refeições com calma e
+// quiz) fica na conta, só para ela (ver lib/checkins e water-tracker). Textos nos 4 idiomas.
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Apple,
@@ -29,6 +29,7 @@ import {
   RotateCcw,
   Scale,
   Search,
+  Send,
   Shuffle,
   ShoppingBasket,
   Target,
@@ -54,6 +55,16 @@ import {
   useUpdateShoppingItem,
 } from "@/lib/fridge";
 import { useAuth } from "@/hooks/use-auth";
+import { ShareModal } from "@/components/share-modal";
+import {
+  checkinDay,
+  checkinsByDay,
+  daysAgo,
+  streakOf,
+  useCheckins,
+  useSaveCheckin,
+  weekStartDay,
+} from "@/lib/checkins";
 import { useCommunities } from "@/lib/social/communities-queries";
 import { useI18n } from "@/hooks/use-i18n";
 import { pickName, type Names } from "@/lib/appearance-data";
@@ -69,39 +80,7 @@ function useTr() {
   return useCallback((names: Names) => pickName(names, locale), [locale]);
 }
 
-/** Estado salvo neste aparelho, separado por pessoa. Nunca quebra se o navegador bloquear o armazenamento. */
-function useLocal<T>(name: string, initial: T) {
-  const { user } = useAuth();
-  const key = `nc_fun_${name}_${user?.id ?? "anon"}`;
-  const [value, setValue] = useState<T>(initial);
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(key);
-      if (raw) setValue(JSON.parse(raw) as T);
-    } catch {
-      /* sem armazenamento: segue só nesta sessão */
-    }
-  }, [key]);
-  const set = useCallback(
-    (next: T | ((prev: T) => T)) =>
-      setValue((prev) => {
-        const v = typeof next === "function" ? (next as (p: T) => T)(prev) : next;
-        try {
-          window.localStorage.setItem(key, JSON.stringify(v));
-        } catch {
-          /* ignorar */
-        }
-        return v;
-      }),
-    [key],
-  );
-  return [value, set] as const;
-}
-
 const pad = (n: number) => String(n).padStart(2, "0");
-/** Data local no formato AAAA-MM-DD. */
-const dayKey = (d = new Date()) =>
-  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 /** Semente do dia: a "dica do dia" muda sozinha à meia-noite. */
 function dayNumber() {
@@ -505,7 +484,11 @@ function shuffled<T>(list: T[]): T[] {
 
 export function QuizCard() {
   const tr = useTr();
-  const [best, setBest] = useLocal<number>("quiz_best", 0);
+  const { user } = useAuth();
+  const checkins = useCheckins(user?.id);
+  const save = useSaveCheckin(user?.id);
+  // Recorde dos últimos 30 dias (cada dia guarda o melhor resultado do dia).
+  const best = Math.max(0, ...(checkins.data ?? []).map((c) => c.quiz_best ?? 0));
   const [burst, fire] = useBurst();
   const [round, setRound] = useState<Question[]>(() => QUESTIONS.slice(0, ROUND));
   const [index, setIndex] = useState(0);
@@ -532,7 +515,9 @@ export function QuizCard() {
     setPicked(null);
     if (last) {
       const final = score;
-      if (final > best) setBest(final);
+      const today = checkinDay();
+      const todayBest = checkinsByDay(checkins.data).get(today)?.quiz_best ?? -1;
+      if (user && final > todayBest) save.mutate({ day: today, patch: { quiz_best: final } });
       if (final >= 4) {
         fire();
         playSound("achievement");
@@ -555,6 +540,9 @@ export function QuizCard() {
         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
           <Trophy className="h-3 w-3" />
           {best}/{ROUND}
+          <span className="sr-only">
+            {tr(["recorde do mês", "best this month", "récord del mes", "record du mois"])}
+          </span>
         </span>
       }
     >
@@ -1254,36 +1242,24 @@ const HABITS: { id: string; emoji: string; name: Names }[] = [
   { id: "sleep", emoji: "😴", name: ["Dormi bem", "Slept well", "Dormí bien", "J'ai bien dormi"] },
 ];
 
-/** Dias em sequência com pelo menos 3 hábitos marcados (hoje conta se já tiver 3, senão começa de ontem). */
-function habitStreak(log: Record<string, string[]>) {
-  let streak = 0;
-  const d = new Date();
-  if ((log[dayKey(d)]?.length ?? 0) < 3) d.setDate(d.getDate() - 1);
-  while ((log[dayKey(d)]?.length ?? 0) >= 3) {
-    streak += 1;
-    d.setDate(d.getDate() - 1);
-  }
-  return streak;
-}
-
+/** Hábitos do dia na conta: sequência de dias com 3 ou mais e os últimos 7 dias. */
 export function HabitCheckinCard() {
   const tr = useTr();
-  const [log, setLog] = useLocal<Record<string, string[]>>("habits", {});
+  const { user } = useAuth();
+  const checkins = useCheckins(user?.id);
+  const save = useSaveCheckin(user?.id);
   const [burst, fire] = useBurst();
-  const today = dayKey();
-  const marked = log[today] ?? [];
-  const streak = habitStreak(log);
+  const today = checkinDay();
+  const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
+  const marked = map.get(today)?.habits ?? [];
+  const streak = streakOf(map, (c) => (c?.habits.length ?? 0) >= 3);
+  const week = Array.from({ length: 7 }, (_, i) => map.get(daysAgo(6 - i))?.habits.length ?? 0);
 
   const toggle = (id: string) => {
+    if (!user) return;
     const has = marked.includes(id);
     const nextList = has ? marked.filter((x) => x !== id) : [...marked, id];
-    // Guarda só os últimos 60 dias.
-    const keep = Object.fromEntries(
-      Object.entries({ ...log, [today]: nextList })
-        .sort()
-        .slice(-60),
-    );
-    setLog(keep);
+    save.mutate({ day: today, patch: { habits: nextList } });
     if (!has && nextList.length === HABITS.length) {
       fire();
       playSound("achievement");
@@ -1336,6 +1312,19 @@ export function HabitCheckinCard() {
       <div className="mt-3">
         <Bar value={marked.length} max={HABITS.length} />
       </div>
+      <div
+        className="mt-3 flex items-end gap-1"
+        aria-label={tr(["Últimos 7 dias", "Last 7 days", "Últimos 7 días", "7 derniers jours"])}
+      >
+        {week.map((n, i) => (
+          <span
+            key={i}
+            title={`${n}/${HABITS.length}`}
+            className={`flex-1 rounded-sm ${n >= 3 ? "bg-accent" : n > 0 ? "bg-accent/40" : "bg-secondary"}`}
+            style={{ height: `${6 + n * 4}px` }}
+          />
+        ))}
+      </div>
       <p className={note}>
         {tr([
           "Marque 3 ou mais por dia para manter a sequência 🔥",
@@ -1350,38 +1339,46 @@ export function HabitCheckinCard() {
 
 // ───────────────────────────── Compromisso da semana ─────────────────────────────
 
-/** Segunda-feira da semana de `d`, no formato AAAA-MM-DD. */
-function weekStart(d = new Date()) {
-  const x = new Date(d);
-  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
-  return dayKey(x);
+/** Os 7 dias (AAAA-MM-DD) da semana que começa na segunda-feira `monday`. */
+function weekDays(monday: string): string[] {
+  const start = new Date(monday + "T12:00:00");
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return checkinDay(d);
+  });
 }
 
 export function WeeklyPledgeCard() {
   const tr = useTr();
   const { locale } = useI18n();
+  const { user } = useAuth();
   const theme = useActiveTheme();
-  const [log, setLog] = useLocal<Record<string, number[]>>("pledge", {});
+  const checkins = useCheckins(user?.id);
+  const save = useSaveCheckin(user?.id);
   const [burst, fire] = useBurst();
-  const week = weekStart();
-  const days = log[week] ?? [];
+  const week = weekStartDay();
+  const dates = useMemo(() => weekDays(week), [week]);
+  const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
+  const days = dates.flatMap((d, i) => (map.get(d)?.pledge ? [i] : []));
   const todayIndex = (new Date().getDay() + 6) % 7;
-  const labels = useMemo(() => {
-    const monday = new Date(week + "T12:00:00");
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(d).replace(".", "");
-    });
-  }, [week, locale]);
+  const labels = useMemo(
+    () =>
+      dates.map((d) =>
+        new Intl.DateTimeFormat(locale, { weekday: "short" })
+          .format(new Date(d + "T12:00:00"))
+          .replace(".", ""),
+      ),
+    [dates, locale],
+  );
 
   const title = theme.data ? themeText(theme.data, locale).title : null;
 
   const toggle = (i: number) => {
-    if (i > todayIndex) return;
+    if (i > todayIndex || !user) return;
     const has = days.includes(i);
     const next = has ? days.filter((x) => x !== i) : [...days, i];
-    setLog({ [week]: next });
+    save.mutate({ day: dates[i], patch: { pledge: !has } });
     if (!has && next.length === 7) {
       fire();
       playSound("achievement");
@@ -1610,6 +1607,16 @@ export function IcebreakerCard() {
             ? tr(["Copiado!", "Copied!", "¡Copiado!", "Copié !"])
             : tr(["Copiar", "Copy", "Copiar", "Copier"])}
         </button>
+        {/* Publica a pergunta na rede (abre o Publicar já preenchido). */}
+        <ShareModal
+          initialPost={{ type: "pergunta", text }}
+          triggerButton={
+            <button type="button" className={primaryBtn}>
+              <Send className="h-3 w-3" />
+              {tr(["Perguntar", "Ask", "Preguntar", "Demander"])}
+            </button>
+          }
+        />
       </div>
     </Panel>
   );
@@ -1631,6 +1638,8 @@ const TOPICS: Names[] = [
 /** Atalhos de busca: preenchem o campo da página Explorar. */
 export function ExploreTopicsCard() {
   const tr = useTr();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <Panel
       title={tr([
@@ -1647,7 +1656,10 @@ export function ExploreTopicsCard() {
             type="button"
             className={iconBtn}
             onClick={() => {
-              window.dispatchEvent(new CustomEvent("explore:query", { detail: tr(topic) }));
+              // Na própria Explorar o card só preenche a busca; fora dela, leva até lá.
+              if (pathname.startsWith("/explorar"))
+                window.dispatchEvent(new CustomEvent("explore:query", { detail: tr(topic) }));
+              else void navigate({ to: "/explorar", search: { q: tr(topic) } });
               playSound("click");
             }}
           >
@@ -1722,6 +1734,9 @@ const PRO_GOALS: { label: Names; profession: ProfessionKey; icon: typeof Utensil
 /** Escolha um objetivo e a lista de profissionais filtra sozinha. */
 export function ProMatchCard() {
   const tr = useTr();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const onDirectory = pathname.startsWith("/profissionais");
   const [goal, setGoal] = useState<number | null>(null);
   return (
     <Panel
@@ -1739,9 +1754,14 @@ export function ProMatchCard() {
             type="button"
             aria-pressed={goal === i}
             onClick={() => {
+              playSound("click");
+              // Fora da lista de profissionais, leva até ela já filtrada.
+              if (!onDirectory) {
+                void navigate({ to: "/profissionais", search: { profissao: g.profession } });
+                return;
+              }
               setGoal(i);
               window.dispatchEvent(new CustomEvent("pros:profession", { detail: g.profession }));
-              playSound("click");
             }}
             className={`flex w-full cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-medium transition active:scale-[0.98] ${
               goal === i
@@ -1817,9 +1837,17 @@ const MOODS: { emoji: string; label: Names; reply: Names }[] = [
 
 export function MoodCard() {
   const tr = useTr();
-  const [log, setLog] = useLocal<Record<string, number>>("mood", {});
-  const today = dayKey();
-  const picked = log[today] ?? null;
+  const { locale } = useI18n();
+  const { user } = useAuth();
+  const checkins = useCheckins(user?.id);
+  const save = useSaveCheckin(user?.id);
+  const today = checkinDay();
+  const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
+  const picked = map.get(today)?.mood ?? null;
+  const lastWeek = Array.from({ length: 7 }, (_, i) => {
+    const day = daysAgo(6 - i);
+    return { day, mood: map.get(day)?.mood ?? null };
+  });
   return (
     <Panel
       title={tr([
@@ -1836,7 +1864,8 @@ export function MoodCard() {
             type="button"
             aria-pressed={picked === i}
             onClick={() => {
-              setLog({ [today]: i });
+              if (!user) return;
+              save.mutate({ day: today, patch: { mood: i } });
               playSound("click");
             }}
             className={`grid cursor-pointer place-items-center gap-0.5 rounded-xl border py-2 transition active:scale-90 ${
@@ -1873,12 +1902,28 @@ export function MoodCard() {
           )}
         </div>
       )}
+      <div className="mt-3 grid grid-cols-7 gap-1">
+        {lastWeek.map(({ day, mood }) => (
+          <div key={day} className="grid place-items-center gap-0.5">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ background: mood === null ? "var(--color-secondary)" : MOOD_COLORS[mood] }}
+              title={mood === null ? "—" : tr(MOODS[mood].label)}
+            />
+            <span className="text-[9px] uppercase text-muted-foreground">
+              {new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(
+                new Date(day + "T12:00:00"),
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
       <p className={note}>
         {tr([
-          "Registro só seu, guardado neste aparelho.",
-          "A private log, saved on this device only.",
-          "Registro solo tuyo, guardado en este dispositivo.",
-          "Un journal privé, enregistré sur cet appareil uniquement.",
+          "Registro só seu, salvo na sua conta. Nenhum profissional vê.",
+          "A private log saved to your account. No professional sees it.",
+          "Registro solo tuyo, guardado en tu cuenta. Ningún profesional lo ve.",
+          "Un journal privé, enregistré dans votre compte. Aucun professionnel ne le voit.",
         ])}
       </p>
     </Panel>
@@ -1915,10 +1960,26 @@ const MEAL_TIPS: Names[] = [
 /** Refeição com calma: respiração guiada e um relógio de 20 minutos. */
 export function MindfulMealCard() {
   const tr = useTr();
+  const { user } = useAuth();
+  const checkins = useCheckins(user?.id);
+  const save = useSaveCheckin(user?.id);
   const [running, setRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [burst, fire] = useBurst();
   const GOAL = 20 * 60;
+  const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
+  const weekFrom = weekStartDay();
+  const thisWeek = (checkins.data ?? [])
+    .filter((c) => c.day >= weekFrom)
+    .reduce((sum, c) => sum + c.mindful_meals, 0);
+  // Conta a refeição concluída no dia (lido na hora, não no começo do relógio).
+  const countMeal = useRef(() => {});
+  countMeal.current = () => {
+    if (!user) return;
+    const today = checkinDay();
+    const done = map.get(today)?.mindful_meals ?? 0;
+    save.mutate({ day: today, patch: { mindful_meals: Math.min(10, done + 1) } });
+  };
 
   useEffect(() => {
     if (!running) return;
@@ -1930,6 +1991,7 @@ export function MindfulMealCard() {
         setRunning(false);
         fire();
         playSound("achievement");
+        countMeal.current();
       }
     }, 500);
     return () => window.clearInterval(id);
@@ -1970,7 +2032,15 @@ export function MindfulMealCard() {
             ])}
       </p>
       <div className="mt-2 flex justify-center gap-2">
-        <button type="button" className={primaryBtn} onClick={() => setRunning((r) => !r)}>
+        <button
+          type="button"
+          className={primaryBtn}
+          onClick={() => {
+            // Depois de concluir, começar de novo é uma refeição nova.
+            if (!running && seconds >= GOAL) setSeconds(0);
+            setRunning((r) => !r);
+          }}
+        >
           {running ? <Pause className="h-3.5 w-3.5" /> : <Timer className="h-3.5 w-3.5" />}
           {running
             ? tr(["Pausar", "Pause", "Pausar", "Pause"])
@@ -1989,6 +2059,16 @@ export function MindfulMealCard() {
           </button>
         )}
       </div>
+      {thisWeek > 0 && (
+        <p className="mt-3 text-center text-[11px] font-semibold text-accent">
+          {tr([
+            `${thisWeek} refeição(ões) com calma nesta semana`,
+            `${thisWeek} mindful meal(s) this week`,
+            `${thisWeek} comida(s) con calma esta semana`,
+            `${thisWeek} repas en pleine conscience cette semaine`,
+          ])}
+        </p>
+      )}
     </Panel>
   );
 }

@@ -23,6 +23,7 @@ import { Route as DiretrizesRouteImport } from './routes/diretrizes'
 import { Route as EspacoRouteImport } from './routes/espaco'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as FeiraRouteImport } from './routes/feira'
+import { Route as FuncoesRouteImport } from './routes/funcoes'
 import { Route as GeladeiraRouteImport } from './routes/geladeira'
 import { Route as LancheiraRouteImport } from './routes/lancheira'
 import { Route as LoginRouteImport } from './routes/login'
@@ -147,6 +148,11 @@ const ExplorarRoute = ExplorarRouteImport.update({
 const FeiraRoute = FeiraRouteImport.update({
   id: '/feira',
   path: '/feira',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuncoesRoute = FuncoesRouteImport.update({
+  id: '/funcoes',
+  path: '/funcoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GeladeiraRoute = GeladeiraRouteImport.update({
@@ -448,6 +454,7 @@ export interface FileRoutesByFullPath {
   '/espaco': typeof EspacoRoute
   '/explorar': typeof ExplorarRoute
   '/feira': typeof FeiraRoute
+  '/funcoes': typeof FuncoesRoute
   '/geladeira': typeof GeladeiraRoute
   '/lancheira': typeof LancheiraRoute
   '/login': typeof LoginRoute
@@ -516,6 +523,7 @@ export interface FileRoutesByTo {
   '/espaco': typeof EspacoRoute
   '/explorar': typeof ExplorarRoute
   '/feira': typeof FeiraRoute
+  '/funcoes': typeof FuncoesRoute
   '/geladeira': typeof GeladeiraRoute
   '/lancheira': typeof LancheiraRoute
   '/login': typeof LoginRoute
@@ -586,6 +594,7 @@ export interface FileRoutesById {
   '/espaco': typeof EspacoRoute
   '/explorar': typeof ExplorarRoute
   '/feira': typeof FeiraRoute
+  '/funcoes': typeof FuncoesRoute
   '/geladeira': typeof GeladeiraRoute
   '/lancheira': typeof LancheiraRoute
   '/login': typeof LoginRoute
@@ -659,6 +668,7 @@ export interface FileRouteTypes {
     | '/espaco'
     | '/explorar'
     | '/feira'
+    | '/funcoes'
     | '/geladeira'
     | '/lancheira'
     | '/login'
@@ -727,6 +737,7 @@ export interface FileRouteTypes {
     | '/espaco'
     | '/explorar'
     | '/feira'
+    | '/funcoes'
     | '/geladeira'
     | '/lancheira'
     | '/login'
@@ -796,6 +807,7 @@ export interface FileRouteTypes {
     | '/espaco'
     | '/explorar'
     | '/feira'
+    | '/funcoes'
     | '/geladeira'
     | '/lancheira'
     | '/login'
@@ -868,6 +880,7 @@ export interface RootRouteChildren {
   EspacoRoute: typeof EspacoRoute
   ExplorarRoute: typeof ExplorarRoute
   FeiraRoute: typeof FeiraRoute
+  FuncoesRoute: typeof FuncoesRoute
   GeladeiraRoute: typeof GeladeiraRoute
   LancheiraRoute: typeof LancheiraRoute
   LoginRoute: typeof LoginRoute
@@ -993,6 +1006,13 @@ declare module '@tanstack/react-router' {
       path: '/feira'
       fullPath: '/feira'
       preLoaderRoute: typeof FeiraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funcoes': {
+      id: '/funcoes'
+      path: '/funcoes'
+      fullPath: '/funcoes'
+      preLoaderRoute: typeof FuncoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/geladeira': {
@@ -1506,6 +1526,7 @@ const rootRouteChildren: RootRouteChildren = {
   EspacoRoute: EspacoRoute,
   ExplorarRoute: ExplorarRoute,
   FeiraRoute: FeiraRoute,
+  FuncoesRoute: FuncoesRoute,
   GeladeiraRoute: GeladeiraRoute,
   LancheiraRoute: LancheiraRoute,
   LoginRoute: LoginRoute,

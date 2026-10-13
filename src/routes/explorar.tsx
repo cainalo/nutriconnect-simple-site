@@ -18,9 +18,13 @@ import { useFeed, useFeedRealtime, usePost } from "@/lib/social/feed-queries";
 import { useSearchUsers } from "@/lib/social/queries";
 
 export const Route = createFileRoute("/explorar")({
-  validateSearch: (search: Record<string, unknown>): { tipo?: string; post?: string } => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { tipo?: string; post?: string; q?: string } => ({
     tipo: typeof search.tipo === "string" ? search.tipo : undefined,
     post: typeof search.post === "string" ? search.post : undefined,
+    // Busca já preenchida (ex.: "Temas para explorar" na página Funções).
+    q: typeof search.q === "string" ? search.q.slice(0, 80) : undefined,
   }),
   head: () => ({
     meta: [
@@ -67,8 +71,8 @@ function ExplorarPage() {
     PAGE_DEFS.findIndex((p) => p.id === initialId),
   );
 
-  const [query, setQuery] = useState("");
-  const [debounced, setDebounced] = useState("");
+  const [query, setQuery] = useState(search.q ?? "");
+  const [debounced, setDebounced] = useState(search.q?.trim() ?? "");
   const [visited, setVisited] = useState<Set<string>>(() => new Set([PAGE_DEFS[initialPage].id]));
   const [more, setMore] = useState<Record<string, number>>({});
   const [onlyPros, setOnlyPros] = useState(false);
