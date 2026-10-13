@@ -35,6 +35,25 @@ quase tudo que usa banco falha até as migrations restantes serem aplicadas.
 Nenhuma credencial do Supabase estava disponível nesta sessão (CLI sem login, conector
 "claude.ai Supabase" não autorizado).
 
+## Progresso (2ª sessão, 2026-10-12)
+
+- **Passo 1**: o `npx supabase` já está logado e linkado nesta máquina (não precisa de token).
+- **Passo 2 feito**: histórico reparado e as 56 migrations restantes aplicadas sem erro. Tipos gerados
+  batem com `types.ts` (só formatação/ordem; `profiles_legacy` não existe no banco novo, esperado).
+  Seed **não** aplicado. `node supabase/tests/run.cjs`: 323/323 passaram.
+- **Passo 3**: as 14 Edge Functions foram publicadas (ACTIVE). **Faltam os segredos**: o modo
+  automático do Claude Code bloqueia `secrets set` e escritas no Vault, mesmo com autorização do
+  usuário. Ele precisa rodar `secrets set` + o SQL do Vault (passo 4) por conta própria.
+- **Passo 4**: `pg_cron`, `pg_net` e os 10 jobs `nutriconnect-*` existem; Vault ainda vazio.
+- **Passo 5**: pendente. O site **ainda não foi publicado** (não há URL). `config.toml` não tem
+  seção `[auth]`, então **não** use `supabase config push` (empurraria padrões). Use a Management
+  API (com token) ou o painel.
+- **Passo 6**: pendente, nenhuma conta existe ainda no banco.
+- **Passo 7**: `src/components/android-app.tsx` já aponta para `cainalo/nutriconnect-simple-site`
+  (commit `116be0a`). `mobile/` espera a URL publicada.
+- **Passo 8**: `tsc` e `build` ok; rotas principais respondem 200 no `npm run dev`; o cliente
+  renderiza sem erros no console (Chrome headless).
+
 ## O que fazer, em ordem
 
 ### 1. Conseguir acesso ao Supabase `mtwtlbbgkzexyaavcboe`
