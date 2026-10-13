@@ -23,7 +23,7 @@ Para compilar localmente: Java 21 + Android SDK, `npm ci`, `npx cap sync android
 ## Versão de teste para o público
 
 Cada build também é publicado na Release `android-teste` do GitHub, em
-`https://github.com/alicejardimj2006-max/nutri-connect/releases/download/android-teste/NutriConnect.apk`.
+`https://github.com/cainalo/nutriconnect-simple-site/releases/download/android-teste/NutriConnect.apk`.
 O site mostra "Baixar o app Android" (faixa do topo, página inicial e Configurações) só para quem
 o abre num celular Android (`src/components/android-app.tsx`).
 
