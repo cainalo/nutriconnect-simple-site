@@ -9,7 +9,10 @@ import { burstFrom, celebrate, fireConfetti, GOLD_COLORS } from "@/lib/confetti"
 import {
   LEVEL_META,
   completeLevel,
+  getStopProgress,
+  getTrailScope,
   isGraded,
+  loadTrailProgress,
   starsFor,
   type Activity,
   type AchievementDef,
@@ -21,7 +24,21 @@ import {
   type Unit,
 } from "@/lib/learning-trail";
 import { getUserLevel } from "@/lib/community";
-import { ALL_HEROES, playCinematic } from "@/lib/cinematic";
+import { ALL_HEROES, playCinematic, playCutscene } from "@/lib/cinematic";
+import {
+  chapterFinaleScene,
+  chapterIntroScene,
+  chapterOf,
+  defeatScene,
+  encounterScene,
+  enemyOfStop,
+  loadSeen,
+  markSeen,
+  prologueScene,
+  type Cutscene,
+  type EnemyState,
+} from "@/lib/trail-story";
+import { BattleHud } from "@/components/story-panels";
 
 /** Emblema da cena de cada nível da pessoa (Semente → Floresta). */
 const LEVEL_EMBLEM: Record<string, string> = {
@@ -1025,6 +1042,9 @@ export function LessonModal({
   const [msgSeed, setMsgSeed] = useState(0);
   const savedRef = useRef(false);
   const checkRef = useRef<HTMLButtonElement>(null);
+  // História: níveis desta parada já vencidos antes de abrir a lição e a reação do inimigo.
+  const [doneBefore] = useState(() => getStopProgress(loadTrailProgress(), stop.id).done);
+  const [enemyFx, setEnemyFx] = useState<{ state: EnemyState; n: number }>({ state: "idle", n: 0 });
 
   const totalGraded = levelData.activities.filter(isGraded).length;
   const current = queue[index]?.activity;
@@ -1062,12 +1082,14 @@ export function LessonModal({
     setMsgSeed((s) => s + 1);
     if (ok) {
       if (!isRetry) setFirstCorrect((v) => v + 1);
+      setEnemyFx((f) => ({ state: "hurt", n: f.n + 1 }));
       const nextCombo = combo + 1;
       setCombo(nextCombo);
       setMaxCombo((m) => Math.max(m, nextCombo));
       burstFrom(checkRef.current, nextCombo >= 3 ? ["#fb923c", "#facc15", "#f97316"] : undefined);
     } else {
       setCombo(0);
+      setEnemyFx((f) => ({ state: "taunt", n: f.n + 1 }));
       navigator.vibrate?.(60);
       if (!isRetry) {
         setMistakes((v) => v + 1);
@@ -1097,6 +1119,44 @@ export function LessonModal({
   // Sem vidas: falha assim que o jogador continua depois de errar.
   const outOfHearts = hearts <= 0;
 
+  // Começo de uma parada nova: o prólogo (uma vez por perfil), a abertura do capítulo e o encontro
+  // com o inimigo, cada cena uma vez só (dá para rever no mapa).
+  useEffect(() => {
+    if (level !== 1 || doneBefore > 0) return;
+    const scope = getTrailScope();
+    const seen = loadSeen(scope);
+    const chapter = chapterOf(unit.id);
+    const scenes = [
+      prologueScene(variant),
+      chapter ? chapterIntroScene(chapter) : null,
+      encounterScene(stop, unit, variant),
+    ].filter((c): c is Cutscene => !!c && !seen.has(c.id));
+    if (!scenes.length) return;
+    markSeen(
+      scope,
+      scenes.map((c) => c.id),
+    );
+    scenes.forEach(playCutscene);
+    // Só ao abrir a lição.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // O inimigo volta a ficar parado depois de reagir.
+  useEffect(() => {
+    if (enemyFx.state === "idle") return;
+    const t = window.setTimeout(() => setEnemyFx((f) => ({ ...f, state: "idle" })), 900);
+    return () => window.clearTimeout(t);
+  }, [enemyFx]);
+
+  // Batalha: só na primeira vez em cada nível. Cada nível tira um terço da vida do inimigo; dentro
+  // do nível, os acertos (até o mínimo para passar) vão tirando esse terço.
+  const enemy = enemyOfStop(stop.id);
+  const battling = !!enemy && level > doneBefore;
+  const needed = Math.max(1, Math.ceil(totalGraded * meta.minPass));
+  const levelDamage = phase === "passed" ? 1 : Math.min(1, firstCorrect / needed);
+  const enemyHp = 1 - (level - 1 + levelDamage) / 3;
+  const enemyState: EnemyState = phase === "passed" && level === 3 ? "defeated" : enemyFx.state;
+
   // Salva o resultado uma única vez ao passar.
   useEffect(() => {
     if (phase !== "passed" || savedRef.current) return;
@@ -1116,17 +1176,21 @@ export function LessonModal({
       icon: a.icon,
       title: t(`ach.${a.id}.title` as DictKey),
     }));
-    if (r.becameUnitGold) {
-      playCinematic({
-        kind: "chapter",
-        title: unit.title,
-        subtitle: t("cine.chapterSub"),
-        emblem: unit.icon,
-        cast,
-        line: t("cine.chapterLine"),
-        extras: achievements,
-      });
-    } else if (after.level > before.level) {
+    // História: vencer o 3º nível derrota o inimigo; fechar todas as paradas encerra o capítulo.
+    const story = [
+      r.firstTime && level === 3 ? defeatScene(stop, unit, variant) : null,
+      r.becameUnitGold && chapterOf(unit.id)
+        ? chapterFinaleScene(chapterOf(unit.id)!, variant)
+        : null,
+    ].filter((c): c is Cutscene => !!c);
+    if (story.length) {
+      markSeen(
+        getTrailScope(),
+        story.map((c) => c.id),
+      );
+      story.forEach(playCutscene);
+    }
+    if (after.level > before.level) {
       const label = LEVEL_LABEL_KEYS[after.label] ? t(LEVEL_LABEL_KEYS[after.label]) : after.label;
       playCinematic({
         kind: "levelup",
@@ -1148,6 +1212,8 @@ export function LessonModal({
         line: t("cine.achLine"),
         extras: achievements.slice(1, 1 + rest.length),
       });
+    } else if (story.length) {
+      // A cena da história já comemora.
     } else if (r.becameGold) celebrate("gold");
     else celebrate("level", !adult);
   }, [
@@ -1162,6 +1228,8 @@ export function LessonModal({
     adult,
     guide,
     unit,
+    stop,
+    variant,
   ]);
 
   // Enter avança
@@ -1249,6 +1317,8 @@ export function LessonModal({
             <Heart className="h-6 w-6 fill-rose-500" /> {Math.max(hearts, 0)}
           </span>
         </div>
+
+        {battling && enemy && <BattleHud def={enemy} hp={enemyHp} state={enemyState} />}
 
         {/* Conteúdo */}
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pb-40 pt-2 sm:px-10">
