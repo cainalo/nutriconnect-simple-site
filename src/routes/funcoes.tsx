@@ -18,6 +18,7 @@ import {
   CookingPot,
   Dices,
   Droplets,
+  FileText,
   Flame,
   HeartHandshake,
   HeartPulse,
@@ -67,6 +68,7 @@ import {
   UnitConverterCard,
   WeeklyPledgeCard,
 } from "@/components/fun-cards";
+import { MonthlyReportCard } from "@/components/monthly-report-card";
 import { useTr } from "@/components/settings-ui";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -110,7 +112,8 @@ type ToolId =
   | "assunto"
   | "comunidade"
   | "temas"
-  | "combina";
+  | "combina"
+  | "relatorio";
 
 const TOOLS: Record<ToolId, () => ReactNode> = {
   agua: () => <HydrationCard />,
@@ -129,6 +132,7 @@ const TOOLS: Record<ToolId, () => ReactNode> = {
   comunidade: () => <CommunityRouletteCard />,
   temas: () => <ExploreTopicsCard />,
   combina: () => <ProMatchCard />,
+  relatorio: () => <MonthlyReportCard />,
 };
 
 /** Um card da grade: abre uma ferramenta (`tool`) ou leva a uma página (`to`). */
@@ -622,6 +626,26 @@ const SECTIONS: Section[] = [
           "Plan, goals and consults",
           "Plan, metas y consultas",
           "Plan, objectifs, consultations",
+        ],
+      },
+      {
+        id: "relatorio",
+        art: "report",
+        color2: "#9fd18c",
+        icon: FileText,
+        color: "#4f8a4b",
+        tool: "relatorio",
+        title: [
+          "Minha evolução (PDF)",
+          "My progress (PDF)",
+          "Mi evolución (PDF)",
+          "Mon évolution (PDF)",
+        ],
+        text: [
+          "O seu mês num relatório",
+          "Your month in a report",
+          "Tu mes en un informe",
+          "Votre mois en un rapport",
         ],
       },
       {

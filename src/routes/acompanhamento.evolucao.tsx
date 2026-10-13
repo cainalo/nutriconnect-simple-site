@@ -22,6 +22,7 @@ import { qk, useAnthropometrics, useClinicalMutation } from "@/lib/clinical/quer
 import { ageFrom, formatDate, formatNumber, toDateKey } from "@/lib/clinical/format";
 import { useClinicalI18n, type ClinicalKey } from "@/lib/clinical/i18n";
 import { PatientAssessments } from "@/components/clinical/assessments-panel";
+import { MonthlyReportCard } from "@/components/monthly-report-card";
 
 export const Route = createFileRoute("/acompanhamento/evolucao")({
   component: PatientEvolutionPage,
@@ -45,6 +46,7 @@ function PatientEvolutionPage() {
     return (
       <>
         <PageHeader title={t("patientEvolution.title")} subtitle={t("patientEvolution.subtitle")} />
+        <MonthlyReportCard className="mb-4" />
         <Card>
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <EyeOff className="h-8 w-8 text-accent" />
@@ -77,6 +79,7 @@ function PatientEvolutionPage() {
   return (
     <>
       <PageHeader title={t("patientEvolution.title")} subtitle={t("patientEvolution.subtitle")} />
+      <MonthlyReportCard className="mb-4" />
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-4">
           {rows.isLoading ? (

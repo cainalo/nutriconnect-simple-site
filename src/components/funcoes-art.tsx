@@ -60,6 +60,7 @@ export type ArtId =
   | "hearts"
   | "pulse"
   | "notebook"
+  | "report"
   | "barcode"
   | "sparkles";
 
@@ -444,6 +445,22 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
       return (
         <Big className="-bottom-2 right-2">
           <NotebookPen className="nc-wobble h-20 w-20" style={soft} strokeWidth={1.5} />
+        </Big>
+      );
+    case "report":
+      return (
+        <Big className="bottom-3 right-3 flex h-14 items-end gap-1.5">
+          {[0.45, 0.7, 0.55, 0.9, 1].map((h, i) => (
+            <span
+              key={i}
+              className="nc-pop w-2.5 rounded-t-md"
+              style={{
+                height: `${h * 100}%`,
+                background: i === 4 ? color : `color-mix(in srgb, ${color} 35%, transparent)`,
+                animationDelay: `${0.2 + i * 0.08}s`,
+              }}
+            />
+          ))}
         </Big>
       );
     case "barcode":
