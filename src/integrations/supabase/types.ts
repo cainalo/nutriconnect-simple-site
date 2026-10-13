@@ -1552,6 +1552,54 @@ export type Database = {
           },
         ]
       }
+      daily_checkins: {
+        Row: {
+          day: string
+          habits: string[]
+          mindful_meals: number
+          mood: number | null
+          pledge: boolean
+          quiz_best: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          day: string
+          habits?: string[]
+          mindful_meals?: number
+          mood?: number | null
+          pledge?: boolean
+          quiz_best?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          day?: string
+          habits?: string[]
+          mindful_meals?: number
+          mood?: number | null
+          pledge?: boolean
+          quiz_best?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_checkins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_checkins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diary_comments: {
         Row: {
           author_id: string

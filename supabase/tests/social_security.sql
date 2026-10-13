@@ -1056,6 +1056,26 @@ begin
     end if;
   end;
 
+  -- ------------------------------------------------------- FUNÇÕES (registros do dia)
+  if to_regclass('public.daily_checkins') is not null then
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.daily_checkins (user_id, day, habits, mood) values (auth.uid(), current_date, array[''water'', ''veg''], 1)');
+    res := res || jsonb_build_object('teste', 'registra os próprios hábitos e humor do dia', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'update public.daily_checkins set pledge = true where day = current_date');
+    res := res || jsonb_build_object('teste', 'marca o compromisso da semana no próprio registro', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.daily_checkins');
+    res := res || jsonb_build_object('teste', 'NÃO vê os registros do dia de outra pessoa', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(b, 'authenticated', format('insert into public.daily_checkins (user_id, day) values (%L, current_date - 1)', a));
+    res := res || jsonb_build_object('teste', 'NÃO cria registro do dia em nome de outra pessoa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(b, 'authenticated', 'update public.daily_checkins set mood = 3');
+    res := res || jsonb_build_object('teste', 'NÃO altera registro do dia de outra pessoa', 'ok', (r = 'OK:0'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.daily_checkins (user_id, day, habits) values (auth.uid(), current_date - 1, array[''cerveja''])');
+    res := res || jsonb_build_object('teste', 'NÃO aceita hábito fora da lista', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.daily_checkins (user_id, day, mood) values (auth.uid(), current_date - 30, 1)');
+    res := res || jsonb_build_object('teste', 'NÃO reescreve registro de semanas atrás', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'select (public.export_my_data() -> ''registros_do_dia'') is not null');
+    res := res || jsonb_build_object('teste', 'exportação de dados inclui os registros do dia', 'ok', (r = 't'), 'obtido', left(r, 90));
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end
