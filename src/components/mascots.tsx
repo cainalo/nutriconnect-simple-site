@@ -336,9 +336,12 @@ export function Mascot({
   className = "",
   style,
   flip = false,
+  action,
 }: {
   id: CharacterId;
   mood?: MascotMood;
+  /** Movimento do 3D no lugar do que vem do humor (ex.: "dance" nas cenas de conquista). */
+  action?: CharacterAction;
   size?: number;
   className?: string;
   style?: CSSProperties;
@@ -354,7 +357,7 @@ export function Mascot({
     // Os movimentos vêm da própria cena 3D; sem as animações CSS do desenho.
     return (
       <NinaLive
-        action={MOOD_ACTION[mood]}
+        action={action ?? MOOD_ACTION[mood]}
         framing={bust ? "bust" : "full"}
         entrance={false}
         className={`inline-block shrink-0 select-none ${className}`}
@@ -365,7 +368,7 @@ export function Mascot({
   return (
     <CharacterLive
       id={id}
-      action={MOOD_ACTION[mood]}
+      action={action ?? MOOD_ACTION[mood]}
       entrance={false}
       className={`inline-block shrink-0 select-none ${className}`}
       style={{ width: size, height, ...flipStyle, ...style }}

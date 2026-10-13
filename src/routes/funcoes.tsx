@@ -122,7 +122,13 @@ const TOOLS: Record<ToolId, () => ReactNode> = {
 interface Tile {
   id: string;
   icon: LucideIcon;
+  /** Cor forte (ícone e desenho) e a segunda cor do degradê do card. */
   color: string;
+  color2: string;
+  /** Desenho animado do card. */
+  art: ArtId;
+  /** No mosaico: ocupa duas colunas ou duas linhas. */
+  span?: "wide" | "tall";
   title: Names;
   text: Names;
   tool?: ToolId;
@@ -133,6 +139,8 @@ interface Tile {
 
 interface Section {
   id: string;
+  icon: LucideIcon;
+  color: string;
   title: Names;
   tiles: Tile[];
 }
@@ -140,10 +148,15 @@ interface Section {
 const SECTIONS: Section[] = [
   {
     id: "dia",
+    icon: Sun,
+    color: "#e0902e",
     title: ["Seu dia", "Your day", "Tu día", "Votre journée"],
     tiles: [
       {
         id: "agua",
+        art: "water",
+        color2: "#67c3f3",
+        span: "wide",
         icon: Droplets,
         color: "#3b7bbf",
         tool: "agua",
@@ -157,6 +170,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "habitos",
+        art: "habits",
+        color2: "#a3d977",
         icon: ListChecks,
         color: "#4f8a4b",
         tool: "habitos",
@@ -170,6 +185,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "humor",
+        art: "mood",
+        color2: "#f59ab5",
         icon: Smile,
         color: "#d6456b",
         tool: "humor",
@@ -183,6 +200,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "calma",
+        art: "breath",
+        color2: "#c4a5e8",
         icon: Wind,
         color: "#8a5fb0",
         tool: "calma",
@@ -198,10 +217,15 @@ const SECTIONS: Section[] = [
   },
   {
     id: "participar",
+    icon: Trophy,
+    color: "#c58a12",
     title: ["Participar", "Take part", "Participar", "Participer"],
     tiles: [
       {
         id: "desafios",
+        art: "trophy",
+        color2: "#f4c84a",
+        span: "tall",
         icon: Award,
         color: "#c58a12",
         to: "/desafios",
@@ -216,6 +240,9 @@ const SECTIONS: Section[] = [
       },
       {
         id: "tema",
+        art: "theme",
+        color2: "#a9d18e",
+        span: "wide",
         icon: CalendarDays,
         color: "#4f8a4b",
         to: "/tema-da-semana",
@@ -230,6 +257,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "compromisso",
+        art: "target",
+        color2: "#f6a76b",
         icon: Target,
         color: "#d9692a",
         tool: "compromisso",
@@ -249,6 +278,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "quiz",
+        art: "quiz",
+        color2: "#9aa8f0",
         icon: Brain,
         color: "#5b6fd6",
         tool: "quiz",
@@ -262,6 +293,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "assunto",
+        art: "chat",
+        color2: "#6fd3dc",
         icon: MessageCircle,
         color: "#0f9aa8",
         tool: "assunto",
@@ -275,6 +308,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "comunidade",
+        art: "people",
+        color2: "#8fbbe8",
         icon: Users,
         color: "#3b7bbf",
         tool: "comunidade",
@@ -294,6 +329,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "temas",
+        art: "search",
+        color2: "#74d0d9",
         icon: Search,
         color: "#0f9aa8",
         tool: "temas",
@@ -313,6 +350,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "dica",
+        art: "bulb",
+        color2: "#f7d66b",
         icon: Lightbulb,
         color: "#c58a12",
         tool: "dica",
@@ -328,10 +367,15 @@ const SECTIONS: Section[] = [
   },
   {
     id: "cozinha",
+    icon: CookingPot,
+    color: "#d9692a",
     title: ["Cozinha e compras", "Kitchen and shopping", "Cocina y compras", "Cuisine et courses"],
     tiles: [
       {
         id: "compras",
+        art: "basket",
+        color2: "#f6b07a",
+        span: "tall",
         icon: ShoppingBasket,
         color: "#d9692a",
         tool: "compras",
@@ -345,6 +389,9 @@ const SECTIONS: Section[] = [
       },
       {
         id: "geladeira",
+        art: "fridge",
+        color2: "#9fd0f0",
+        span: "wide",
         icon: Refrigerator,
         color: "#3b7bbf",
         to: "/geladeira",
@@ -364,6 +411,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "cardapio",
+        art: "calendar",
+        color2: "#9fd18c",
         icon: CalendarRange,
         color: "#4f8a4b",
         to: "/cardapio",
@@ -378,6 +427,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "feira",
+        art: "carrot",
+        color2: "#f7a26a",
         icon: Carrot,
         color: "#d9692a",
         to: "/feira",
@@ -397,6 +448,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "lancheira",
+        art: "backpack",
+        color2: "#f2cf6b",
         icon: Backpack,
         color: "#c58a12",
         to: "/lancheira",
@@ -416,6 +469,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "receitas",
+        art: "chef",
+        color2: "#f39bb0",
         icon: ChefHat,
         color: "#d6456b",
         to: "/receitas",
@@ -430,6 +485,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "roleta",
+        art: "dice",
+        color2: "#c9a6ea",
         icon: Dices,
         color: "#8a5fb0",
         tool: "roleta",
@@ -449,6 +506,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "prato",
+        art: "plate",
+        color2: "#a7d58f",
         icon: Salad,
         color: "#4f8a4b",
         tool: "prato",
@@ -462,6 +521,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "timer",
+        art: "timer",
+        color2: "#f6a76b",
         icon: Timer,
         color: "#d9692a",
         tool: "timer",
@@ -470,6 +531,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "medidas",
+        art: "scale",
+        color2: "#a7b3f2",
         icon: Scale,
         color: "#5b6fd6",
         tool: "medidas",
@@ -485,10 +548,15 @@ const SECTIONS: Section[] = [
   },
   {
     id: "cuidado",
+    icon: HeartPulse,
+    color: "#d6456b",
     title: ["Cuidado e saúde", "Care and health", "Cuidado y salud", "Soins et santé"],
     tiles: [
       {
         id: "profissionais",
+        art: "stetho",
+        color2: "#9fb0f0",
+        span: "wide",
         icon: Stethoscope,
         color: "#5b6fd6",
         to: "/profissionais",
@@ -508,6 +576,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "combina",
+        art: "hearts",
+        color2: "#f6a5bd",
         icon: HeartHandshake,
         color: "#d6456b",
         tool: "combina",
@@ -527,6 +597,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "acompanhamento",
+        art: "pulse",
+        color2: "#f39bb0",
         icon: HeartPulse,
         color: "#d6456b",
         to: "/acompanhamento",
@@ -540,6 +612,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "diario",
+        art: "notebook",
+        color2: "#f4cf7a",
         icon: NotebookPen,
         color: "#c58a12",
         to: "/acompanhamento/diario",
@@ -553,6 +627,8 @@ const SECTIONS: Section[] = [
       },
       {
         id: "rotulos",
+        art: "barcode",
+        color2: "#7fd6dc",
         icon: ScanBarcode,
         color: "#0f9aa8",
         to: "/acompanhamento/rotulos",
@@ -566,6 +642,9 @@ const SECTIONS: Section[] = [
       },
       {
         id: "nina",
+        art: "sparkles",
+        color2: "#c9a6ea",
+        span: "wide",
         icon: Sparkles,
         color: "#8a5fb0",
         to: "/nina",

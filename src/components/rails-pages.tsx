@@ -382,6 +382,14 @@ export const RAIL_PAGES: RailPageDef[] = [
     ],
   },
   {
+    key: "funcoes",
+    label: "Funções",
+    match: exact("/funcoes"),
+    // As ferramentas já estão no miolo: as colunas trazem o que não se repete ali.
+    left: ["perfil", "meus-desafios"],
+    right: ["trilha", "proximas-consultas"],
+  },
+  {
     key: "tema-da-semana",
     label: "Tema da semana",
     match: exact("/tema-da-semana"),

@@ -21,6 +21,19 @@ import {
   type Unit,
 } from "@/lib/learning-trail";
 import { getUserLevel } from "@/lib/community";
+import { ALL_HEROES, playCinematic } from "@/lib/cinematic";
+
+/** Emblema da cena de cada nível da pessoa (Semente → Floresta). */
+const LEVEL_EMBLEM: Record<string, string> = {
+  Semente: "🌱",
+  Broto: "🌿",
+  Folha: "🍃",
+  Flor: "🌸",
+  Fruto: "🍎",
+  Árvore: "🌳",
+  Floresta: "🌲",
+  Mestre: "👑",
+};
 import { EmojiIcon } from "@/components/emoji-icon";
 
 export interface LessonModalProps {
@@ -1095,11 +1108,61 @@ export function LessonModal({
       maxCombo,
     });
     setReward(r);
-    const levelUp = getUserLevel(xpBefore + r.totalGained).level > getUserLevel(xpBefore).level;
-    if (r.becameGold || r.becameUnitGold) celebrate("gold");
-    else if (levelUp) celebrate("levelup", !adult);
+    const before = getUserLevel(xpBefore);
+    const after = getUserLevel(xpBefore + r.totalGained);
+    // Momentos grandes viram cena de filme (com fanfarra e a turma); os outros, confete.
+    const cast = [guide, ...ALL_HEROES.filter((h) => h !== guide)];
+    const achievements = r.newAchievements.map((a) => ({
+      icon: a.icon,
+      title: t(`ach.${a.id}.title` as DictKey),
+    }));
+    if (r.becameUnitGold) {
+      playCinematic({
+        kind: "chapter",
+        title: unit.title,
+        subtitle: t("cine.chapterSub"),
+        emblem: unit.icon,
+        cast,
+        line: t("cine.chapterLine"),
+        extras: achievements,
+      });
+    } else if (after.level > before.level) {
+      const label = LEVEL_LABEL_KEYS[after.label] ? t(LEVEL_LABEL_KEYS[after.label]) : after.label;
+      playCinematic({
+        kind: "levelup",
+        title: t("cine.levelTitle").replace("{n}", String(after.level)).replace("{label}", label),
+        subtitle: t("cine.levelSub"),
+        emblem: LEVEL_EMBLEM[after.label] ?? "🌟",
+        cast,
+        line: t("cine.levelLine").replace("{label}", label),
+        extras: achievements,
+      });
+    } else if (r.newAchievements.length > 0) {
+      const [first, ...rest] = r.newAchievements;
+      playCinematic({
+        kind: "achievement",
+        title: t(`ach.${first.id}.title` as DictKey),
+        subtitle: t(`ach.${first.id}.desc` as DictKey),
+        emblem: first.icon,
+        cast: cast.slice(0, 3),
+        line: t("cine.achLine"),
+        extras: achievements.slice(1, 1 + rest.length),
+      });
+    } else if (r.becameGold) celebrate("gold");
     else celebrate("level", !adult);
-  }, [phase, stop.id, level, firstCorrect, totalGraded, mistakes, maxCombo, xpBefore, adult]);
+  }, [
+    phase,
+    stop.id,
+    level,
+    firstCorrect,
+    totalGraded,
+    mistakes,
+    maxCombo,
+    xpBefore,
+    adult,
+    guide,
+    unit,
+  ]);
 
   // Enter avança
   useEffect(() => {

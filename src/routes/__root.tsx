@@ -11,6 +11,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
 import { ConsentGate } from "../components/consent-gate";
+import { HeroCinematic } from "../components/hero-cinematic";
 import { useAppSounds } from "../hooks/use-app-sounds";
 import { AccessibilityTools } from "../components/accessibility-tools";
 import { SideRails } from "../components/side-rails";
@@ -163,6 +164,7 @@ function RootComponent() {
         <Outlet />
       </FeatureGate>
       <ConsentGate />
+      <HeroCinematic />
       <AccessibilityTools />
       <SideRails />
       <AnnouncementBar />

@@ -85,6 +85,17 @@ function audio(): AudioContext | null {
   return ctx;
 }
 
+/** Volume (0–1) com que este tipo de som pode tocar agora; 0 se estiver desligado ou em silêncio. */
+export function soundVolume(kind: SoundKind): number {
+  const s = settings();
+  if (!s.soundsOn || !s[KINDS[kind].enabled]) return 0;
+  if (s.quietOn && inHourWindow(s.quietFrom, s.quietTo)) return 0;
+  return Math.max(0, Math.min(1, s.soundVolume / 100));
+}
+
+/** O contexto de áudio compartilhado (para trilhas mais longas, como a música das conquistas). */
+export const audioContext = audio;
+
 /**
  * Toca o som se a pessoa deixou sons e este tipo ligados (e não é horário de silêncio).
  * `preview` ignora os interruptores (para os botões "Ouvir" do painel) e aceita estilo, volume e
