@@ -11,10 +11,10 @@ export const COMPANY = {
   /** Endereço completo da sede. */
   address: "",
   /** Canal geral de atendimento. */
-  supportEmail: "suporte@nutriconnect.com.br",
+  supportEmail: "nutriconnect.caina@gmail.com",
   /** Encarregado pelo tratamento de dados pessoais (DPO), art. 41 da LGPD. */
   dpoName: "",
-  dpoEmail: "suporte@nutriconnect.com.br",
+  dpoEmail: "nutriconnect.caina@gmail.com",
 } as const;
 
 /**

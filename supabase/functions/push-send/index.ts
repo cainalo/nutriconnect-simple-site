@@ -324,7 +324,7 @@ async function deliver(items: Item[]) {
 serve(async (req) => {
   if (req.method !== "POST") throw new HttpError(405, "Método não permitido.");
   webpush.setVapidDetails(
-    Deno.env.get("VAPID_SUBJECT") ?? "mailto:suporte@nutriconnect.com.br",
+    Deno.env.get("VAPID_SUBJECT") ?? "mailto:nutriconnect.caina@gmail.com",
     env("VAPID_PUBLIC_KEY"),
     env("VAPID_PRIVATE_KEY"),
   );
