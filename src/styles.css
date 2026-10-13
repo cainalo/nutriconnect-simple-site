@@ -1481,6 +1481,18 @@ html[data-rails="on"]
   animation: nc-gradient-pan 14s ease-in-out infinite;
 }
 
+@keyframes nc-water {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.nc-water {
+  animation: nc-water 4s linear infinite;
+}
+
 /* ─── Cenas de conquista (hero-cinematic.tsx) ───────────────────────────────── */
 @keyframes nc-cine-bar-top {
   from {

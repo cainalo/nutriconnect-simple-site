@@ -80,7 +80,7 @@ function Big({
   className = "",
   style,
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   style?: CSSProperties;
 }) {
@@ -113,7 +113,7 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
             />
           </span>
           <Droplet
-            className="nc-bob absolute right-4 top-4 h-9 w-9"
+            className="nc-bob absolute bottom-6 right-6 h-9 w-9"
             style={strong}
             fill="currentColor"
             fillOpacity={0.25}
@@ -129,7 +129,8 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
               key={i}
               className={`h-3 w-3 rounded-full transition ${i < (data.habits ?? 0) ? "nc-pop" : ""}`}
               style={{
-                background: i < (data.habits ?? 0) ? color : `color-mix(in srgb, ${color} 18%, transparent)`,
+                background:
+                  i < (data.habits ?? 0) ? color : `color-mix(in srgb, ${color} 18%, transparent)`,
                 animationDelay: `${i * 0.12}s`,
               }}
             />
@@ -153,7 +154,10 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
           />
           <span
             className="nc-breathe absolute inset-3 rounded-full"
-            style={{ background: `color-mix(in srgb, ${color} 22%, transparent)`, animationDelay: "-2s" }}
+            style={{
+              background: `color-mix(in srgb, ${color} 22%, transparent)`,
+              animationDelay: "-2s",
+            }}
           />
         </Big>
       );
@@ -173,7 +177,11 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
             { top: "40%", left: "82%", d: "-0.8s" },
             { top: "8%", left: "84%", d: "-1.6s" },
           ].map((s, i) => (
-            <Big key={i} className="nc-twinkle" style={{ top: s.top, left: s.left, animationDelay: s.d }}>
+            <Big
+              key={i}
+              className="nc-twinkle"
+              style={{ top: s.top, left: s.left, animationDelay: s.d }}
+            >
               <Star className="h-3.5 w-3.5" style={strong} fill="currentColor" />
             </Big>
           ))}
@@ -193,7 +201,10 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
     case "target":
       return (
         <Big className="bottom-3 right-3 grid h-16 w-16 place-items-center">
-          <span className="nc-ring absolute inset-0 rounded-full border-2" style={{ borderColor: color }} />
+          <span
+            className="nc-ring absolute inset-0 rounded-full border-2"
+            style={{ borderColor: color }}
+          />
           <span
             className="nc-ring absolute inset-0 rounded-full border-2"
             style={{ borderColor: color, animationDelay: "-0.9s" }}
@@ -226,7 +237,12 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
             <MessageCircle className="h-10 w-10" style={soft} fill="currentColor" />
           </Big>
           <Big className="nc-bob bottom-2 right-2" style={{ animationDelay: "-1.2s" }}>
-            <MessageCircle className="h-8 w-8 -scale-x-100" style={strong} fill="currentColor" fillOpacity={0.3} />
+            <MessageCircle
+              className="h-8 w-8 -scale-x-100"
+              style={strong}
+              fill="currentColor"
+              fillOpacity={0.3}
+            />
           </Big>
         </>
       );
@@ -285,7 +301,11 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
             { t: "14%", l: "70%", d: "0s" },
             { t: "34%", l: "88%", d: "-1s" },
           ].map((s, i) => (
-            <Big key={i} className="nc-twinkle" style={{ top: s.t, left: s.l, animationDelay: s.d }}>
+            <Big
+              key={i}
+              className="nc-twinkle"
+              style={{ top: s.t, left: s.l, animationDelay: s.d }}
+            >
               <Snowflake className="h-4 w-4" style={strong} />
             </Big>
           ))}
@@ -430,7 +450,11 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
       return (
         <Big className="bottom-4 right-4 flex h-12 items-stretch gap-[3px] overflow-hidden">
           {[3, 1, 2, 1, 3, 2, 1, 1, 3, 1, 2].map((w, i) => (
-            <span key={i} className="rounded-[1px]" style={{ width: w, background: `color-mix(in srgb, ${color} 55%, transparent)` }} />
+            <span
+              key={i}
+              className="rounded-[1px]"
+              style={{ width: w, background: `color-mix(in srgb, ${color} 55%, transparent)` }}
+            />
           ))}
           <span className="nc-scan absolute inset-x-[-4px] top-1/2 h-[2px] bg-red-500 shadow-[0_0_8px_2px_rgb(239_68_68/0.6)]" />
         </Big>
@@ -443,7 +467,11 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
             { r: "52px", b: "34px", s: 20, d: "-0.7s" },
             { r: "22px", b: "62px", s: 16, d: "-1.4s" },
           ].map((p, i) => (
-            <Big key={i} className="nc-twinkle" style={{ right: p.r, bottom: p.b, animationDelay: p.d }}>
+            <Big
+              key={i}
+              className="nc-twinkle"
+              style={{ right: p.r, bottom: p.b, animationDelay: p.d }}
+            >
               <Sparkles style={{ ...strong, width: p.s, height: p.s }} />
             </Big>
           ))}

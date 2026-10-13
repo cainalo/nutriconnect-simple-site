@@ -2,20 +2,26 @@
 // Cada card leva a uma página (Geladeira, Desafios, Tema da semana...) ou abre a ferramenta numa
 // gaveta (água, hábitos, lista de compras, quiz...). No celular a página fica na barra inferior; no
 // computador, no ícone ao lado da busca. O que a pessoa registra fica na conta (lib/checkins).
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  Apple,
+  ArrowRight,
   Award,
   Backpack,
   Brain,
   CalendarDays,
   CalendarRange,
   Carrot,
+  CheckCheck,
   ChefHat,
+  CookingPot,
   Dices,
   Droplets,
+  Flame,
   HeartHandshake,
   HeartPulse,
+  Leaf,
   Lightbulb,
   ListChecks,
   MessageCircle,
@@ -29,14 +35,19 @@ import {
   Smile,
   Sparkles,
   Stethoscope,
+  Sun,
   Target,
   Timer,
+  Trophy,
   Users,
   Wind,
   type LucideIcon,
 } from "lucide-react";
 import { AppScreen } from "@/components/app-screen";
 import { AuthGateLoading } from "@/components/site-chrome";
+import { TileArt, type ArtData, type ArtId } from "@/components/funcoes-art";
+import { NinaLive } from "@/components/nina-live";
+import { useAdultTrailProgress } from "@/components/rail-cards";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   CommunityRouletteCard,
@@ -62,6 +73,8 @@ import { useI18n } from "@/hooks/use-i18n";
 import type { Names } from "@/lib/appearance-data";
 import { checkinDay, checkinsByDay, useCheckins, weekStartDay } from "@/lib/checkins";
 import { useFeatures, type FeatureKey } from "@/lib/features";
+import { getActiveStreak } from "@/lib/learning-trail";
+import { cn } from "@/lib/utils";
 import { useShoppingItems } from "@/lib/fridge";
 import { themeText } from "@/lib/social/feed";
 import { useActiveTheme } from "@/lib/social/feed-queries";
@@ -202,6 +215,7 @@ const SECTIONS: Section[] = [
         id: "calma",
         art: "breath",
         color2: "#c4a5e8",
+        span: "wide",
         icon: Wind,
         color: "#8a5fb0",
         tool: "calma",
@@ -666,7 +680,7 @@ function FuncoesPage() {
   const tr = useTr();
   const features = useFeatures();
   const [open, setOpen] = useState<Tile | null>(null);
-  const badges = useBadges(user?.id);
+  const { badges, art, today } = useTileData(user?.id);
   const { locale } = useI18n();
   const theme = useActiveTheme(!!user);
   const themeTitle = theme.data ? themeText(theme.data, locale).title : undefined;
@@ -674,41 +688,54 @@ function FuncoesPage() {
   if (!hydrated || !user) return <AuthGateLoading />;
 
   const visible = (t: Tile) => !t.feature || features[t.feature] || user.isAdmin;
+  // Ordem de entrada em cascata pela página toda.
+  let order = 0;
 
   return (
     <AppScreen>
-      <div className="mx-auto w-full max-w-5xl px-4 pb-8 pt-5 sm:px-6">
-        <header className="mb-5">
-          <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
-            {tr(["Funções", "Tools", "Funciones", "Outils"])}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {tr([
-              "Tudo o que o NutriConnect faz por você, num só lugar.",
-              "Everything NutriConnect does for you, in one place.",
-              "Todo lo que NutriConnect hace por ti, en un solo lugar.",
-              "Tout ce que NutriConnect fait pour vous, au même endroit.",
-            ])}
-          </p>
-        </header>
+      {/* Sem colunas laterais: os cards usam a largura toda da tela (ver rails-pages). */}
+      <div className="@container mx-auto w-full max-w-[120rem] px-4 pb-10 pt-5 sm:px-6 lg:px-10">
+        <Hero name={user.name} today={today} />
 
         {SECTIONS.map((section) => {
           const tiles = section.tiles.filter(visible);
           if (tiles.length === 0) return null;
           return (
-            <section key={section.id} className="mb-6" aria-labelledby={`funcoes-${section.id}`}>
+            <section key={section.id} className="mb-7" aria-labelledby={`funcoes-${section.id}`}>
               <h2
                 id={`funcoes-${section.id}`}
-                className="mb-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                className="mb-3 flex items-center gap-2 font-display text-lg font-bold text-foreground"
               >
+                <span
+                  className="grid h-8 w-8 place-items-center rounded-xl text-white shadow-sm"
+                  style={{ background: section.color }}
+                >
+                  <section.icon className="h-4 w-4" />
+                </span>
                 {tr(section.title)}
+                <span
+                  aria-hidden="true"
+                  className="ml-1 h-[3px] flex-1 rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${section.color}, transparent)`,
+                    opacity: 0.35,
+                  }}
+                />
               </h2>
-              <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+              <ul className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7">
                 {tiles.map((tile) => (
-                  <li key={tile.id}>
+                  <li
+                    key={tile.id}
+                    className={cn(
+                      tile.span === "wide" && "col-span-2",
+                      tile.span === "tall" && "@2xl:row-span-2",
+                    )}
+                  >
                     <TileCard
                       tile={tile}
+                      index={order++}
                       badge={badges[tile.id]}
+                      data={art[tile.id] ?? {}}
                       subtitle={tile.id === "tema" ? themeTitle : undefined}
                       onOpen={() => setOpen(tile)}
                     />
@@ -723,83 +750,285 @@ function FuncoesPage() {
       <Dialog open={!!open} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent
           aria-describedby={undefined}
-          className="max-h-[88dvh] gap-0 overflow-y-auto rounded-t-3xl p-3 pt-10 max-sm:bottom-0 max-sm:top-auto max-sm:translate-y-0 sm:max-w-md sm:rounded-3xl"
+          className="max-h-[88dvh] gap-0 overflow-y-auto rounded-t-[2rem] border-0 p-0 max-sm:bottom-0 max-sm:top-auto max-sm:translate-y-0 sm:max-w-md sm:rounded-[2rem]"
         >
-          <span
-            aria-hidden="true"
-            className="absolute left-1/2 top-3 h-1.5 w-10 -translate-x-1/2 rounded-full bg-border sm:hidden"
-          />
-          <DialogTitle className="sr-only">{open ? tr(open.title) : ""}</DialogTitle>
-          {open?.tool && TOOLS[open.tool]()}
+          {open && (
+            <>
+              <div
+                className="relative overflow-hidden px-5 pb-4 pt-6"
+                style={{ background: tileBackground(open) }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute left-1/2 top-2.5 h-1.5 w-10 -translate-x-1/2 rounded-full bg-foreground/15 sm:hidden"
+                />
+                <div className="flex items-center gap-3">
+                  <span
+                    className="nc-pop grid h-11 w-11 place-items-center rounded-2xl text-white shadow-md"
+                    style={{ background: open.color }}
+                  >
+                    <open.icon className="h-6 w-6" />
+                  </span>
+                  <DialogTitle className="font-display text-xl font-bold text-foreground">
+                    {tr(open.title)}
+                  </DialogTitle>
+                </div>
+              </div>
+              <div className="p-3">{open.tool && TOOLS[open.tool]()}</div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </AppScreen>
   );
 }
 
+/** Abertura da página: a Nina cumprimenta e mostra o resumo do dia. */
+function Hero({
+  name,
+  today,
+}: {
+  name: string;
+  today: { water?: string; habits?: string; streak: number };
+}) {
+  const tr = useTr();
+  const [action, setAction] = useState<"wave" | "talk" | "idle">("wave");
+  useEffect(() => {
+    const a = window.setTimeout(() => setAction("talk"), 1800);
+    const b = window.setTimeout(() => setAction("idle"), 4200);
+    return () => {
+      window.clearTimeout(a);
+      window.clearTimeout(b);
+    };
+  }, []);
+  const hour = new Date().getHours();
+  const hello =
+    hour < 12
+      ? tr(["Bom dia", "Good morning", "Buenos días", "Bonjour"])
+      : hour < 18
+        ? tr(["Boa tarde", "Good afternoon", "Buenas tardes", "Bon après-midi"])
+        : tr(["Boa noite", "Good evening", "Buenas noches", "Bonsoir"]);
+  const first = name.split(" ")[0] || name;
+  const floaters = [
+    { Icon: Apple, c: "#d6456b", cls: "left-[46%] top-3", d: "0s" },
+    { Icon: Carrot, c: "#d9692a", cls: "right-6 top-5", d: "-1.4s" },
+    { Icon: Leaf, c: "#4f8a4b", cls: "right-[28%] bottom-4", d: "-2.2s" },
+    { Icon: Droplets, c: "#3b7bbf", cls: "right-[12%] bottom-10", d: "-3s" },
+    { Icon: Sparkles, c: "#c58a12", cls: "left-[62%] bottom-6", d: "-0.6s" },
+  ];
+  return (
+    <section
+      className="nc-tile-in nc-gradient-pan relative mb-7 overflow-hidden rounded-[2rem] border border-border/60 p-4 shadow-soft sm:p-6"
+      style={{
+        background:
+          "linear-gradient(120deg, color-mix(in srgb, #f6c27a 30%, var(--card)), color-mix(in srgb, #9fd18c 26%, var(--card)), color-mix(in srgb, #9fb0f0 26%, var(--card)), color-mix(in srgb, #f39bb0 26%, var(--card)))",
+      }}
+    >
+      {floaters.map(({ Icon, c, cls, d }, i) => (
+        <span
+          key={i}
+          aria-hidden="true"
+          className={`nc-floaty pointer-events-none absolute hidden opacity-60 @xl:block ${cls}`}
+          style={{ animationDelay: d }}
+        >
+          <Icon className="h-6 w-6" style={{ color: c }} />
+        </span>
+      ))}
+      <div className="relative flex items-center gap-3 sm:gap-5">
+        <NinaLive
+          action={action}
+          framing="bust"
+          className="h-28 w-24 shrink-0 sm:h-36 sm:w-32"
+          label={tr([
+            "Nutri Nina acenando",
+            "Nutri Nina waving",
+            "Nutri Nina saludando",
+            "Nutri Nina qui salue",
+          ])}
+        />
+        <div className="min-w-0 flex-1">
+          <h1 className="font-display text-2xl font-bold leading-tight text-foreground sm:text-3xl">
+            {tr(["Funções", "Tools", "Funciones", "Outils"])}
+          </h1>
+          <p className="relative mt-2 inline-block rounded-2xl rounded-tl-sm bg-card/90 px-3 py-2 text-sm font-medium text-foreground shadow-xs">
+            {hello}, {first}!{" "}
+            {tr([
+              "O que vamos fazer hoje?",
+              "What shall we do today?",
+              "¿Qué hacemos hoy?",
+              "On fait quoi aujourd’hui ?",
+            ])}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {today.water && (
+              <Chip icon={Droplets} color="#3b7bbf">
+                {today.water}
+              </Chip>
+            )}
+            {today.habits && (
+              <Chip icon={CheckCheck} color="#4f8a4b">
+                {today.habits}
+              </Chip>
+            )}
+            {today.streak > 0 && (
+              <Chip icon={Flame} color="#d9692a">
+                {today.streak} {tr(["dias", "days", "días", "jours"])}
+              </Chip>
+            )}
+            <Link
+              to="/desafios"
+              className="group inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-[11px] font-bold text-accent-foreground shadow-soft transition hover:bg-accent/90"
+            >
+              {tr([
+                "Continuar a trilha",
+                "Continue the trail",
+                "Seguir la ruta",
+                "Continuer le parcours",
+              ])}
+              <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Chip({
+  icon: Icon,
+  color,
+  children,
+}: {
+  icon: LucideIcon;
+  color: string;
+  children: ReactNode;
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
+      style={{ background: `color-mix(in srgb, ${color} 16%, var(--card))`, color }}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {children}
+    </span>
+  );
+}
+
+/** Degradê de cada card nas cores dele (claro e escuro: mistura com a cor do cartão do tema). */
+const tileBackground = (t: Tile) =>
+  `linear-gradient(140deg, color-mix(in srgb, ${t.color} 20%, var(--card)) 0%, color-mix(in srgb, ${t.color2} 34%, var(--card)) 100%)`;
+
 const tileClass =
-  "flex h-full min-h-[7.5rem] w-full cursor-pointer flex-col items-start gap-2 rounded-2xl border border-border/80 bg-card p-3 text-left shadow-xs transition hover:border-accent/40 hover:shadow-soft active:scale-[0.98]";
+  "nc-tile group relative flex h-full w-full cursor-pointer flex-col items-start gap-2 overflow-hidden rounded-[1.6rem] border p-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 function TileCard({
   tile,
+  index,
   badge,
+  data,
   subtitle,
   onOpen,
 }: {
   tile: Tile;
+  index: number;
   badge?: string;
+  data: ArtData;
   /** Texto real no lugar da descrição (ex.: o título do tema desta semana). */
   subtitle?: string;
   onOpen: () => void;
 }) {
   const tr = useTr();
+  const ref = useRef<HTMLElement | null>(null);
+  // Inclina o card na direção do mouse (só com mouse; no toque ele só afunda um pouco).
+  const onMove = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse" || !ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    ref.current.style.setProperty("--rx", `${(-y * 7).toFixed(2)}deg`);
+    ref.current.style.setProperty("--ry", `${(x * 9).toFixed(2)}deg`);
+  };
+  const onLeave = () => {
+    ref.current?.style.removeProperty("--rx");
+    ref.current?.style.removeProperty("--ry");
+  };
+  const tall = tile.span === "tall";
+  const props = {
+    className: tileClass,
+    onPointerMove: onMove,
+    onPointerLeave: onLeave,
+    style: {
+      background: tileBackground(tile),
+      borderColor: `color-mix(in srgb, ${tile.color} 22%, transparent)`,
+      "--tile": tile.color,
+    } as CSSProperties,
+  };
   const body = (
     <>
-      <span className="flex w-full items-start justify-between gap-2">
+      <TileArt id={tile.art} color={tile.color} data={data} />
+      <span className="relative flex w-full items-start justify-between gap-2">
         <span
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
+          className={cn(
+            "grid shrink-0 place-items-center rounded-2xl text-white shadow-md transition duration-300 group-hover:-rotate-6 group-hover:scale-110",
+            tall ? "h-12 w-12" : "h-10 w-10",
+          )}
           style={{
-            backgroundColor: `color-mix(in srgb, ${tile.color} 14%, transparent)`,
-            color: tile.color,
+            background: `linear-gradient(145deg, ${tile.color}, color-mix(in srgb, ${tile.color} 70%, #000))`,
           }}
         >
-          <tile.icon className="h-5 w-5" />
+          <tile.icon className={tall ? "h-6 w-6" : "h-5 w-5"} />
         </span>
         {badge && (
-          <span className="max-w-[60%] truncate rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-foreground">
+          <span
+            className="nc-pop max-w-[60%] truncate rounded-full px-2 py-0.5 text-[10px] font-black text-white shadow-sm"
+            style={{ background: tile.color }}
+          >
             {badge}
           </span>
         )}
       </span>
-      <span className="text-[13px] font-semibold leading-tight text-foreground">
+      <span
+        className={cn(
+          "relative mt-auto font-bold leading-tight",
+          tall ? "text-base" : "text-[13px]",
+        )}
+        style={{ color: `color-mix(in srgb, ${tile.color} 45%, var(--foreground))` }}
+      >
         {tr(tile.title)}
       </span>
-      <span className="line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+      <span
+        className={cn(
+          "relative max-w-[78%] text-[11px] leading-snug text-foreground/70",
+          subtitle ? "line-clamp-3 font-semibold" : "line-clamp-2",
+        )}
+      >
         {subtitle ?? tr(tile.text)}
       </span>
     </>
   );
-  if (tile.to) {
-    return (
-      <Link to={tile.to} className={tileClass}>
-        {body}
-      </Link>
-    );
-  }
   return (
-    <button type="button" onClick={onOpen} className={tileClass}>
-      {body}
-    </button>
+    <div className="nc-tile-in h-full" style={{ animationDelay: `${Math.min(index, 24) * 45}ms` }}>
+      {tile.to ? (
+        <Link to={tile.to} ref={(el) => void (ref.current = el)} {...props}>
+          {body}
+        </Link>
+      ) : (
+        <button type="button" onClick={onOpen} ref={(el) => void (ref.current = el)} {...props}>
+          {body}
+        </button>
+      )}
+    </div>
   );
 }
 
-/** Resumo de cada card com os dados reais da pessoa (água, hábitos, lista de compras...). */
-function useBadges(userId: string | undefined): Record<string, string | undefined> {
+/** Dados reais da pessoa para os cards: selos (água, hábitos, lista...) e o que os desenhos mostram. */
+function useTileData(userId: string | undefined) {
   const tr = useTr();
   const checkins = useCheckins(userId);
   const water = useWaterDays(userId, 1);
   const waterSettings = useWaterSettings(userId);
   const shopping = useShoppingItems(userId);
+  const trail = useAdultTrailProgress(userId);
 
   return useMemo(() => {
     const map = checkinsByDay(checkins.data);
@@ -818,14 +1047,29 @@ function useBadges(userId: string | undefined): Record<string, string | undefine
       ["Normal", "Okay", "Normal", "Moyenne"],
       ["Pesada", "Heavy", "Pesada", "Difficile"],
     ];
-    return {
+    const habits = today?.habits.length ?? 0;
+    const badges: Record<string, string | undefined> = {
       agua: water.data ? `${glasses}/${goal}` : undefined,
-      habitos: today ? `${today.habits.length}/4` : undefined,
+      habitos: today ? `${habits}/4` : undefined,
       humor: today?.mood != null ? tr(moods[today.mood]) : undefined,
       compromisso: pledged ? `${pledged}/7` : undefined,
       calma: calm ? `${calm}×` : undefined,
       quiz: quiz ? `${quiz}/5` : undefined,
       compras: openItems ? `${openItems}` : undefined,
     };
-  }, [checkins.data, water.data, waterSettings.data, shopping.data, tr]);
+    const art: Record<string, ArtData> = {
+      agua: { fill: goal ? glasses / goal : 0 },
+      habitos: { habits },
+      humor: { mood: today?.mood ?? null },
+    };
+    return {
+      badges,
+      art,
+      today: {
+        water: water.data ? `${glasses}/${goal}` : undefined,
+        habits: today ? `${habits}/4` : undefined,
+        streak: trail ? getActiveStreak(trail) : 0,
+      },
+    };
+  }, [checkins.data, water.data, waterSettings.data, shopping.data, trail, tr]);
 }
