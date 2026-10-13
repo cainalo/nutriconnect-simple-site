@@ -61,7 +61,6 @@ import {
   MindfulMealCard,
   MoodCard,
   PlateBuilderCard,
-  ProMatchCard,
   QuizCard,
   RecipeRouletteCard,
   ShoppingListCard,
@@ -69,6 +68,7 @@ import {
   WeeklyPledgeCard,
 } from "@/components/fun-cards";
 import { MonthlyReportCard } from "@/components/monthly-report-card";
+import { ProMatchQuiz } from "@/components/pro-match-quiz";
 import { useTr } from "@/components/settings-ui";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -131,7 +131,7 @@ const TOOLS: Record<ToolId, () => ReactNode> = {
   assunto: () => <IcebreakerCard />,
   comunidade: () => <CommunityRouletteCard />,
   temas: () => <ExploreTopicsCard />,
-  combina: () => <ProMatchCard />,
+  combina: () => <ProMatchQuiz />,
   relatorio: () => <MonthlyReportCard />,
 };
 
@@ -798,7 +798,7 @@ function FuncoesPage() {
                   </DialogTitle>
                 </div>
               </div>
-              <div className="p-3">{open.tool && TOOLS[open.tool]()}</div>
+              <div className="min-w-0 p-3">{open.tool && TOOLS[open.tool]()}</div>
             </>
           )}
         </DialogContent>

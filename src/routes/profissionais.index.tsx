@@ -8,6 +8,7 @@ import {
   HeartPulse,
   MapPin,
   Search,
+  Sparkles,
   Stethoscope,
   Video,
   type LucideIcon,
@@ -25,6 +26,8 @@ import type { Names } from "@/lib/appearance-data";
 import { td } from "@/lib/i18n/data";
 import { cn } from "@/lib/utils";
 import { AppScreen } from "@/components/app-screen";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ProMatchQuiz } from "@/components/pro-match-quiz";
 
 export const Route = createFileRoute("/profissionais/")({
   head: () => ({ meta: [{ title: "Profissionais verificados — NutriConnect" }] }),
@@ -78,6 +81,7 @@ function DirectoryPage() {
   );
   const [modality, setModality] = useState<ModalityFilter>("todos");
   const [onlyAccepting, setOnlyAccepting] = useState(true);
+  const [quizOpen, setQuizOpen] = useState(false);
   // O card "Qual profissional combina com você?" filtra a lista.
   useEffect(() => {
     const onQuery = (e: Event) => setQuery(String((e as CustomEvent<string>).detail ?? ""));
@@ -129,6 +133,50 @@ function DirectoryPage() {
     <AppScreen className={plainText}>
       <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
         <h1 className="sr-only">{t("directory.title")}</h1>
+
+        <div className="flex flex-col gap-3 rounded-3xl border border-accent/25 bg-gradient-to-r from-accent-soft/70 via-card to-primary-soft/50 p-4 sm:flex-row sm:items-center">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent text-accent-foreground shadow-sm">
+            <Sparkles className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-base font-bold leading-tight text-foreground">
+              {tr([
+                "Descobrir a nutri ideal",
+                "Find your ideal professional",
+                "Descubrir tu nutri ideal",
+                "Trouver le professionnel idéal",
+              ])}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {tr([
+                "Não sabe por onde começar? Responda 6 perguntas rápidas e veja quem mais combina com você.",
+                "Not sure where to start? Answer 6 quick questions and see who fits you best.",
+                "¿No sabes por dónde empezar? Responde 6 preguntas rápidas y mira quién combina contigo.",
+                "Vous ne savez pas par où commencer ? Répondez à 6 questions et voyez qui vous correspond.",
+              ])}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setQuizOpen(true)}
+            className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-soft transition hover:bg-accent/90"
+          >
+            {tr(["Começar", "Start", "Empezar", "Commencer"])}
+          </button>
+        </div>
+        <Dialog open={quizOpen} onOpenChange={setQuizOpen}>
+          <DialogContent className="max-h-[90dvh] w-[calc(100vw-1.5rem)] overflow-y-auto rounded-3xl border-0 bg-transparent p-0 shadow-none sm:max-w-lg">
+            <DialogTitle className="sr-only">
+              {tr([
+                "Descobrir a nutri ideal",
+                "Find your ideal professional",
+                "Descubrir tu nutri ideal",
+                "Trouver le professionnel idéal",
+              ])}
+            </DialogTitle>
+            <ProMatchQuiz onPicked={() => setQuizOpen(false)} />
+          </DialogContent>
+        </Dialog>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
           <div className="relative">
