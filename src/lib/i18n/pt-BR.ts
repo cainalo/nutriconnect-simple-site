@@ -1362,6 +1362,8 @@ const ptBR = {
   "lm.exitLesson": "Sair da lição",
   "lm.livesAria": "{n} vidas",
   "lm.secondChance": "Segunda chance",
+  "lm.review": "Revisão relâmpago",
+  "lm.reviewDone": "Revisão feita! A próxima é em {n} dia(s).",
   "lm.combo": "Combo x{n}",
   "lm.seeResult": "Ver resultado",
   "lm.continue": "Continuar",

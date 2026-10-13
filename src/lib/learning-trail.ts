@@ -1,12 +1,13 @@
 // Trilha de Aprendizado: montagem do conteúdo, progresso, pontuação e conquistas.
 import { BASE_UNITS } from "./trail-content-base";
-import { STOP_EXTRAS } from "./trail-content-levels";
+import { STOP_EXTRAS, permutation } from "./trail-content-levels";
 import { ADULT_EXTRAS } from "./trail-content-adult";
 import { KID_TRAILS } from "./trail-content-kids";
 import {
   LEVEL_META,
   type Activity,
   type Level,
+  isGraded,
   type LevelNumber,
   type SceneId,
   type ProfileKind,
@@ -14,6 +15,7 @@ import {
   type StopProgress,
   type Trail,
   type TrailProgress,
+  type ReviewState,
   type Unit,
 } from "./trail-types";
 
@@ -469,6 +471,54 @@ export function starsFor(correct: number, total: number): number {
   return ratio >= 1 ? 3 : ratio >= 0.8 ? 2 : 1;
 }
 
+/* ---------------------------- Revisão espaçada ---------------------------- */
+
+/** Dias até cada revisão: a cada revisão bem feita, o intervalo cresce. */
+export const REVIEW_INTERVALS = [1, 3, 7, 14, 30, 60];
+
+const addDays = (day: string, n: number) => {
+  const [y, m, d] = day.split("-").map(Number);
+  return dayKey(new Date(y, m - 1, d + n));
+};
+
+/** Paradas com revisão pendente hoje (das trilhas informadas), da mais atrasada para a mais nova. */
+export function dueReviews(progress: TrailProgress, trails: Trail[]) {
+  const today = dayKey();
+  return trails
+    .flatMap((trail) =>
+      trail.units.flatMap((unit) =>
+        unit.stops.map((stop) => ({ trail, unit, stop, state: progress.reviews?.[stop.id] })),
+      ),
+    )
+    .filter((r): r is typeof r & { state: ReviewState } => !!r.state && r.state.due <= today)
+    .sort((a, b) => a.state.due.localeCompare(b.state.due));
+}
+
+/** Próximo dia com revisão (entre as trilhas informadas), ou null. */
+export function nextReviewDay(progress: TrailProgress, trails: Trail[]): string | null {
+  const ids = new Set(trails.flatMap((t) => t.units.flatMap((u) => u.stops.map((s) => s.id))));
+  const days = Object.entries(progress.reviews ?? {})
+    .filter(([id]) => ids.has(id))
+    .map(([, r]) => r.due)
+    .sort();
+  return days[0] ?? null;
+}
+
+export const daysUntil = (day: string) => daysBetween(dayKey(), day);
+
+/**
+ * Revisão relâmpago de uma parada: a mesma parada, com o nível 3 trocado por algumas perguntas
+ * sorteadas dos três níveis (o sorteio muda a cada dia).
+ */
+export function reviewStop(stop: Stop, size = 8): Stop {
+  const pool = stop.levels.flatMap((l) => l.activities.filter(isGraded));
+  const order = permutation(pool.length, `${stop.id}:${dayKey()}`);
+  const picked = order.slice(0, Math.min(size, pool.length)).map((i) => pool[i]);
+  const levels = [...stop.levels] as Stop["levels"];
+  levels[2] = { ...stop.levels[2], activities: picked };
+  return { ...stop, levels };
+}
+
 export interface LevelReward {
   stars: number;
   previousStars: number;
@@ -482,6 +532,9 @@ export interface LevelReward {
   dailyXP: number;
   dailyGoalReached: boolean;
   newAchievements: AchievementDef[];
+  /** Esta conclusão contou como revisão espaçada; e quando é a próxima. */
+  reviewed: boolean;
+  nextReview: string | null;
 }
 
 /**
@@ -521,6 +574,23 @@ export function completeLevel(
     stars: nextStars,
   };
 
+  // Revisão espaçada: a parada que fica dourada entra na agenda; refazer um nível quando a revisão
+  // está pendente conta como revisão (bem feita, o intervalo cresce; com dificuldade, volta ao começo).
+  const today0 = dayKey();
+  const reviews = (progress.reviews ??= {});
+  let reviewed = false;
+  if (!wasGold && progress.stops[stopId].done === 3) {
+    reviews[stopId] = { due: addDays(today0, REVIEW_INTERVALS[0]), step: 0 };
+  } else if (wasGold && reviews[stopId] && reviews[stopId].due <= today0) {
+    const good = stars >= 2;
+    const step = good ? Math.min(reviews[stopId].step + 1, REVIEW_INTERVALS.length - 1) : 0;
+    reviews[stopId] = { due: addDays(today0, REVIEW_INTERVALS[step]), step };
+    reviewed = true;
+  } else if (wasGold && !reviews[stopId]) {
+    // Paradas douradas de antes da revisão espaçada entram na agenda na primeira vez que voltam.
+    reviews[stopId] = { due: addDays(today0, REVIEW_INTERVALS[1]), step: 1 };
+  }
+
   progress.totalXP += totalGained;
   progress.bestCombo = Math.max(progress.bestCombo, result.maxCombo);
   if (stars === 3 && firstTime) progress.perfectLevels += 1;
@@ -557,5 +627,7 @@ export function completeLevel(
     dailyXP: progress.daily.xp,
     dailyGoalReached: dailyBefore < DAILY_GOAL_XP && progress.daily.xp >= DAILY_GOAL_XP,
     newAchievements,
+    reviewed,
+    nextReview: reviews[stopId]?.due ?? null,
   };
 }

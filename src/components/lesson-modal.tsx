@@ -9,6 +9,7 @@ import { burstFrom, celebrate, fireConfetti, GOLD_COLORS } from "@/lib/confetti"
 import {
   LEVEL_META,
   completeLevel,
+  daysUntil,
   getStopProgress,
   getTrailScope,
   isGraded,
@@ -39,6 +40,7 @@ import {
   type EnemyState,
 } from "@/lib/trail-story";
 import { BattleHud } from "@/components/story-panels";
+import { toast } from "sonner";
 
 /** Emblema da cena de cada nível da pessoa (Semente → Floresta). */
 const LEVEL_EMBLEM: Record<string, string> = {
@@ -63,6 +65,8 @@ export interface LessonModalProps {
   guide: CharacterId;
   /** XP total do usuário antes da lição (trilha + desafios), para detectar subida de nível. */
   xpBefore: number;
+  /** Revisão espaçada: perguntas sorteadas da parada, sem batalha nem cenas. */
+  review?: boolean;
   onClose: () => void;
   onNextLevel: (level: LevelNumber) => void;
 }
@@ -1016,6 +1020,7 @@ export function LessonModal({
   variant,
   guide,
   xpBefore,
+  review = false,
   onClose,
   onNextLevel,
 }: LessonModalProps) {
@@ -1168,6 +1173,10 @@ export function LessonModal({
       maxCombo,
     });
     setReward(r);
+    if (r.reviewed && r.nextReview) {
+      const days = Math.max(1, daysUntil(r.nextReview));
+      toast.success(t("lm.reviewDone").replace("{n}", String(days)));
+    }
     const before = getUserLevel(xpBefore);
     const after = getUserLevel(xpBefore + r.totalGained);
     // Momentos grandes viram cena de filme (com fanfarra e a turma); os outros, confete.
@@ -1331,9 +1340,11 @@ export function LessonModal({
                     className="mr-1 inline h-3 w-3 align-[-1px]"
                     fallback={null}
                   />
-                  {t("tm.levelN")
-                    .replace("{n}", String(level))
-                    .replace("{label}", t(`lv.${level}.label` as DictKey))}
+                  {review
+                    ? t("lm.review")
+                    : t("tm.levelN")
+                        .replace("{n}", String(level))
+                        .replace("{label}", t(`lv.${level}.label` as DictKey))}
                 </span>
                 {isRetry && (
                   <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-amber-600">

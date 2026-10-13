@@ -36,7 +36,7 @@ Cada item ganha o próprio commit depois de testado.
 13. [x] N9 — Relatório "Minha evolução" (PDF mensal)
 14. [ ] M4 — Verificação com e-Nutricionista para teleconsulta (Resolução CFN 760/23)
 15. [ ] N12 — Descobrir a nutri ideal (questionário de compatibilidade)
-16. [ ] M6 — Trilhas com certificado e revisão espaçada
+16. [x] M6 — Trilhas com certificado e revisão espaçada
 17. [ ] N6 — Parceiro de jornada (dupla de apoio com check-in diário)
 18. [ ] M8 — Eventos ao vivo nas comunidades ("Pergunte à nutri": perguntas antes, votação, respostas fixadas)
 19. [ ] N11 — Nina por voz (falar e ouvir as respostas)

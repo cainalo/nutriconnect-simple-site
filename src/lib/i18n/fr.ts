@@ -1368,6 +1368,8 @@ const fr: Record<DictKey, string> = {
   "lm.exitLesson": "Quitter la leçon",
   "lm.livesAria": "{n} vies",
   "lm.secondChance": "Seconde chance",
+  "lm.review": "Révision éclair",
+  "lm.reviewDone": "Révision faite ! La prochaine est dans {n} jour(s).",
   "lm.combo": "Combo x{n}",
   "lm.seeResult": "Voir le résultat",
   "lm.continue": "Continuer",

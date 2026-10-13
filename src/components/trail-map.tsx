@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import {
   Apple,
+  Award,
   Beef,
   Brain,
   Check,
@@ -46,6 +47,7 @@ import {
 import { EmojiIcon } from "@/components/emoji-icon";
 import { ChapterScenes, StopEnemyCard } from "@/components/story-panels";
 import { useTr } from "@/components/settings-ui";
+import { useAuth } from "@/hooks/use-auth";
 import { enemyOfStop } from "@/lib/trail-story";
 
 /** Ícones (lucide) das paradas do perfil adulto. */
@@ -427,6 +429,8 @@ interface LearningTrailMapProps {
   /** Enquanto uma lição está aberta, o mascote espera para caminhar só quando ela fechar. */
   frozen: boolean;
   onOpenStop: (stop: Stop, unit: Unit) => void;
+  /** Nome que vai no certificado da trilha. */
+  learnerName: string;
 }
 
 export function LearningTrailMap({
@@ -435,6 +439,7 @@ export function LearningTrailMap({
   currentStopId,
   frozen,
   onOpenStop,
+  learnerName,
 }: LearningTrailMapProps) {
   const units = trail.units;
   const [shownStopId, setShownStopId] = useState(currentStopId);
@@ -467,7 +472,7 @@ export function LearningTrailMap({
         />
       ))}
 
-      <TrailFinale units={units} progress={progress} variant={trail.kind} />
+      <TrailFinale trail={trail} progress={progress} learnerName={learnerName} />
     </div>
   );
 }
@@ -633,15 +638,20 @@ function UnitSection({
 }
 
 function TrailFinale({
-  units,
+  trail,
   progress,
-  variant,
+  learnerName,
 }: {
-  units: Unit[];
+  trail: Trail;
   progress: TrailProgress;
-  variant: ProfileKind;
+  learnerName: string;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const tr = useTr();
+  const { user } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const units = trail.units;
+  const variant = trail.kind;
   const allGold = units.every((u) => isUnitGold(progress, u));
   const adult = variant === "adult";
   return (
@@ -665,6 +675,36 @@ function TrailFinale({
       <p className="relative z-10 mt-1.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
         {allGold ? (adult ? t("tm.finaleAdultDone") : t("tm.finaleKidDone")) : t("tm.finaleTodo")}
       </p>
+      {allGold && (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              const { exportTrailCertificate } = await import("@/lib/trail-certificate");
+              await exportTrailCertificate({
+                trail,
+                progress,
+                name: learnerName,
+                userId: user?.id ?? "guest",
+                locale,
+              });
+            } finally {
+              setBusy(false);
+            }
+          }}
+          className="relative z-10 mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full bg-amber-500 px-5 py-2.5 text-sm font-black text-white shadow-[0_4px_0_0_#b45309] transition hover:brightness-105 active:translate-y-0.5 active:shadow-none disabled:opacity-70"
+        >
+          <Award className="h-4 w-4" />
+          {tr([
+            "Baixar certificado",
+            "Download certificate",
+            "Descargar certificado",
+            "Télécharger le certificat",
+          ])}
+        </button>
+      )}
     </div>
   );
 }
