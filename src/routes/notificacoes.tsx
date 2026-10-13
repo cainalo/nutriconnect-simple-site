@@ -5,6 +5,7 @@ import {
   BellRing,
   BookOpen,
   GlassWater,
+  HandHeart,
   CalendarCheck,
   CalendarClock,
   CalendarX,
@@ -143,7 +144,10 @@ const CATEGORIES: Category[] = [
 ];
 
 function categoryOf(type: string): CategoryId {
-  if (["reacao", "comentario", "seguidor", "amizade_pedido", "amizade_aceita"].includes(type))
+  if (
+    ["reacao", "comentario", "seguidor", "amizade_pedido", "amizade_aceita"].includes(type) ||
+    type.startsWith("dupla_")
+  )
     return "social";
   if (
     type.startsWith("consulta_") ||
@@ -533,6 +537,50 @@ function describe(
           ]),
         detail: str(data.description) || undefined,
         go: { to: "/desafios" },
+      };
+    case "dupla_convite":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} convidou você para ser parceiro(a) de jornada",
+          "{name} invited you to be journey buddies",
+          "{name} te invitó a ser compañeros de camino",
+          "{name} vous invite à devenir binôme de parcours",
+        ]),
+        go: { to: "/parceiro" },
+      };
+    case "dupla_aceita":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} aceitou ser seu parceiro(a) de jornada",
+          "{name} is now your journey buddy",
+          "{name} aceptó ser tu compañero(a) de camino",
+          "{name} est désormais votre binôme de parcours",
+        ]),
+        go: { to: "/parceiro" },
+      };
+    case "dupla_checkin":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} fez o check-in de hoje",
+          "{name} checked in today",
+          "{name} hizo el registro de hoy",
+          "{name} a fait son point du jour",
+        ]),
+        go: { to: "/parceiro" },
+      };
+    case "dupla_forca":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} mandou força para você 💪",
+          "{name} sent you encouragement 💪",
+          "{name} te mandó ánimo 💪",
+          "{name} vous encourage 💪",
+        ]),
+        go: { to: "/parceiro" },
       };
     default:
       return {

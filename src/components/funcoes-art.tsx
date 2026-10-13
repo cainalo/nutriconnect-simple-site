@@ -12,6 +12,8 @@ import {
   Dices,
   Droplet,
   Frown,
+  HandHeart,
+  Heart,
   HeartHandshake,
   HeartPulse,
   Laugh,
@@ -58,6 +60,7 @@ export type ArtId =
   | "scale"
   | "stetho"
   | "hearts"
+  | "pair"
   | "pulse"
   | "notebook"
   | "report"
@@ -432,6 +435,17 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
           </Big>
           <Big className="nc-floaty right-14 top-3">
             <HeartPulse className="h-5 w-5" style={strong} />
+          </Big>
+        </>
+      );
+    case "pair":
+      return (
+        <>
+          <Big className="-bottom-2 -right-1">
+            <HandHeart className="h-20 w-20" style={soft} strokeWidth={1.5} />
+          </Big>
+          <Big className="right-16 top-4">
+            <Heart className="nc-heartbeat h-5 w-5" style={strong} />
           </Big>
         </>
       );

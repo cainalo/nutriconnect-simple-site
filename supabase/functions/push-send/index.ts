@@ -54,6 +54,30 @@ const AVISOS: Record<string, Names> = {
     "{name} aceptó tu solicitud de amistad",
     "{name} a accepté votre demande d'ami",
   ],
+  dupla_convite: [
+    "{name} convidou você para ser parceiro(a) de jornada",
+    "{name} invited you to be journey buddies",
+    "{name} te invitó a ser compañeros de camino",
+    "{name} vous invite à devenir binôme de parcours",
+  ],
+  dupla_aceita: [
+    "{name} aceitou ser seu parceiro(a) de jornada",
+    "{name} is now your journey buddy",
+    "{name} aceptó ser tu compañero(a) de camino",
+    "{name} est désormais votre binôme de parcours",
+  ],
+  dupla_checkin: [
+    "{name} fez o check-in de hoje",
+    "{name} checked in today",
+    "{name} hizo el registro de hoy",
+    "{name} a fait son point du jour",
+  ],
+  dupla_forca: [
+    "{name} mandou força para você 💪",
+    "{name} sent you encouragement 💪",
+    "{name} te mandó ánimo 💪",
+    "{name} vous encourage 💪",
+  ],
   consulta_agendada: [
     "{name} agendou uma consulta",
     "{name} booked an appointment",

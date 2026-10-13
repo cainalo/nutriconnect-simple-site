@@ -1076,6 +1076,53 @@ begin
     res := res || jsonb_build_object('teste', 'exportação de dados inclui os registros do dia', 'ok', (r = 't'), 'obtido', left(r, 90));
   end if;
 
+  -- ------------------------------------------------ PARCEIRO DE JORNADA (N6)
+  -- Aqui A e E são amigos (pedido aceito acima); F é estranho; B bloqueou A.
+  if to_regclass('public.journey_pairs') is not null then
+    r := pg_temp.as_user(f, 'authenticated', format('select status from public.journey_invite(%L)', a));
+    res := res || jsonb_build_object('teste', 'estranho NÃO convida para a dupla', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', format('select status from public.journey_invite(%L)', b));
+    res := res || jsonb_build_object('teste', 'NÃO convida quem bloqueou (ou desfez a amizade)', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', format('select status from public.journey_invite(%L)', e));
+    res := res || jsonb_build_object('teste', 'convida um amigo para a dupla (fica pendente)', 'ok', (r = 'pendente'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.journey_pairs');
+    res := res || jsonb_build_object('teste', 'terceiro NÃO vê a dupla dos outros', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(a, 'authenticated', 'select status from public.journey_respond((select id from public.journey_pairs limit 1), true)');
+    res := res || jsonb_build_object('teste', 'quem convidou NÃO aceita o próprio convite', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(e, 'authenticated', 'select status from public.journey_respond((select id from public.journey_pairs limit 1), true)');
+    res := res || jsonb_build_object('teste', 'convidado aceita e a dupla fica ativa', 'ok', (r = 'ativa'), 'obtido', left(r, 90));
+    res := res || jsonb_build_object('teste', 'quem convidou é avisado do aceite',
+      'ok', exists (select 1 from public.notifications where user_id = a and type = 'dupla_aceita' and actor_id = e),
+      'obtido', 'verificado como superusuário');
+    r := pg_temp.as_user(a, 'authenticated', 'select mood from public.journey_checkin(current_date, ''cuidei'', ''Bom dia, dupla!'')');
+    res := res || jsonb_build_object('teste', 'faz o check-in do dia', 'ok', (r = 'cuidei'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.journey_checkins (user_id, day, mood) values (auth.uid(), current_date - 1, ''cuidei'')');
+    res := res || jsonb_build_object('teste', 'NÃO grava check-in direto na tabela (só pela função)', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'select mood from public.journey_checkin(current_date - 5, ''cuidei'')');
+    res := res || jsonb_build_object('teste', 'NÃO faz check-in de dias atrás', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', format('select mood from public.journey_checkin(current_date, ''dificil'', %L)', repeat('x', 141)));
+    res := res || jsonb_build_object('teste', 'NÃO aceita recado com mais de 140 caracteres', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(e, 'authenticated', 'select public.journey_partner_status(current_date) -> ''partner_today'' ->> ''note''');
+    res := res || jsonb_build_object('teste', 'parceiro vê o check-in de hoje', 'ok', (r = 'Bom dia, dupla!'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(e, 'authenticated', 'select count(*) from public.journey_checkins');
+    res := res || jsonb_build_object('teste', 'parceiro NÃO lê o histórico de check-ins direto na tabela', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(f, 'authenticated', 'select public.journey_partner_status(current_date) is null');
+    res := res || jsonb_build_object('teste', 'quem não tem dupla não vê nada', 'ok', (r = 't'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(f, 'authenticated', format('select public.journey_partner_id(%L)', a));
+    res := res || jsonb_build_object('teste', 'NÃO descobre com quem outra pessoa faz dupla', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    perform pg_temp.as_user(e, 'authenticated', 'select public.journey_cheer(current_date)');
+    perform pg_temp.as_user(e, 'authenticated', 'select public.journey_cheer(current_date)');
+    res := res || jsonb_build_object('teste', 'mandar força avisa só uma vez por dia',
+      'ok', (select count(*) = 1 from public.notifications where user_id = a and type = 'dupla_forca'),
+      'obtido', (select count(*)::text from public.notifications where user_id = a and type = 'dupla_forca'));
+    r := pg_temp.as_user(a, 'authenticated', 'select (public.export_my_data() -> ''jornada_checkins'') is not null');
+    res := res || jsonb_build_object('teste', 'exportação de dados inclui a jornada', 'ok', (r = 't'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', format('select public.remove_friendship(%L)', e));
+    res := res || jsonb_build_object('teste', 'desfazer a amizade encerra a dupla',
+      'ok', not exists (select 1 from public.journey_pairs where a in (user_a, user_b)),
+      'obtido', 'verificado como superusuário');
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

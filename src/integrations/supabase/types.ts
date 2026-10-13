@@ -1980,6 +1980,96 @@ export type Database = {
           },
         ]
       }
+      journey_checkins: {
+        Row: {
+          created_at: string
+          day: string
+          mood: string
+          note: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          mood: string
+          note?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          mood?: string
+          note?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_checkins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journey_checkins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journey_cheers: {
+        Row: {
+          created_at: string
+          day: string
+          from_id: string
+          to_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          from_id: string
+          to_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          from_id?: string
+          to_id?: string
+        }
+        Relationships: []
+      }
+      journey_pairs: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          status: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
       label_scans: {
         Row: {
           alto_em: Json
@@ -5586,6 +5676,60 @@ export type Database = {
       is_suspended: { Args: { uid: string }; Returns: boolean }
       is_verified_professional: { Args: { uid?: string }; Returns: boolean }
       join_consultation: { Args: { p_appointment: string }; Returns: Json }
+      journey_checkin: {
+        Args: { p_day: string; p_mood: string; p_note?: string }
+        Returns: {
+          created_at: string
+          day: string
+          mood: string
+          note: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "journey_checkins"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      journey_cheer: { Args: { p_day: string }; Returns: undefined }
+      journey_invite: {
+        Args: { p_user: string }
+        Returns: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          status: string
+          user_a: string
+          user_b: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "journey_pairs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      journey_leave: { Args: { p_pair?: string }; Returns: undefined }
+      journey_partner_status: { Args: { p_day: string }; Returns: Json }
+      journey_respond: {
+        Args: { p_accept: boolean; p_pair: string }
+        Returns: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          status: string
+          user_a: string
+          user_b: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "journey_pairs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       leave_community_admin: {
         Args: { p_community: string }
         Returns: {

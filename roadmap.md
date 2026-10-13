@@ -11,7 +11,7 @@
 
 App nativo com Capacitor (pasta `mobile/`), ID `br.com.nutriconnect.app`, APK gerado no GitHub Actions.
 
-1. [ ] A1 — App base: ícone, abertura, barra de status, voltar, tela sem conexão, APK de teste
+1. [x] A1 — App base: ícone, abertura, barra de status, voltar, tela sem conexão, APK de teste
 2. [ ] A2 — Notificações nativas (Firebase Cloud Messaging)
 3. [ ] A3 — Câmera e código de barras nativos (ML Kit)
 4. [ ] A4 — Compartilhar do Android, links que abrem o app, vibração
@@ -37,10 +37,20 @@ Cada item ganha o próprio commit depois de testado.
 14. [ ] M4 — Verificação com e-Nutricionista para teleconsulta (Resolução CFN 760/23)
 15. [x] N12 — Descobrir a nutri ideal (questionário de compatibilidade)
 16. [x] M6 — Trilhas com certificado e revisão espaçada
-17. [ ] N6 — Parceiro de jornada (dupla de apoio com check-in diário)
+17. [x] N6 — Parceiro de jornada (dupla de apoio com check-in diário)
 18. [ ] M8 — Eventos ao vivo nas comunidades ("Pergunte à nutri": perguntas antes, votação, respostas fixadas)
 19. [ ] N11 — Nina por voz (falar e ouvir as respostas)
 20. [ ] N10 — Loja de programas dos profissionais (Stripe; taxa igual à das assinaturas de membros, de 20% a 10% pelo nível)
+
+## Grupo familiar — "Minha casa" (aprovado em 13/10/2026, depois do N6 e antes do M8)
+
+Pessoas que moram juntas compartilham, em tempo real, o que é da casa. Nada clínico é compartilhado
+(diário, metas, peso, plano do nutricionista, check-ins). Uma casa por pessoa, até 8 adultos;
+papéis responsável e membro; convite por link/código ou entre amigos.
+
+1. [ ] F1 — Casa, convites e membros + lista de compras única em tempo real (quem adicionou, quem comprou)
+2. [ ] F2 — Geladeira da casa (sai do navegador para o banco) + cardápio da semana da casa (porções = nº de pessoas)
+3. [ ] F3 — Lancheiras das crianças editáveis pelos adultos da casa + mural de recados
 
 ## Feito
 - [x] Trilha como história de RPG: capítulos, inimigos por parada, batalha durante a lição e cenas de filme (cutscenes) com música

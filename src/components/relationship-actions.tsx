@@ -1,6 +1,10 @@
-import { Check, Clock, UserCheck, UserPlus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Check, Clock, HandHeart, UserCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { useTr } from "@/components/settings-ui";
+import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
+import { useJourneyInvite, usePartnerStatus } from "@/lib/journey";
 import type { Relationship } from "@/lib/social/api";
 import {
   useFollowProfessional,
@@ -87,15 +91,18 @@ export function RelationshipActions({
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
       {relationship === "amigo" ? (
-        <button
-          type="button"
-          disabled={busy}
-          className={outline}
-          onClick={() => remove(t("profile.friendRemovedToast"))}
-          title={t("profile.removeFriend")}
-        >
-          <UserCheck className="h-4 w-4" /> {t("profile.friendsBadge")}
-        </button>
+        <>
+          <button
+            type="button"
+            disabled={busy}
+            className={outline}
+            onClick={() => remove(t("profile.friendRemovedToast"))}
+            title={t("profile.removeFriend")}
+          >
+            <UserCheck className="h-4 w-4" /> {t("profile.friendsBadge")}
+          </button>
+          <JourneyButton userId={userId} className={outline} />
+        </>
       ) : relationship === "pedido_enviado" ? (
         <button
           type="button"
@@ -145,5 +152,52 @@ export function RelationshipActions({
         </button>
       )}
     </div>
+  );
+}
+
+/** Parceiro de jornada (N6): convida o amigo para a dupla, ou leva à dupla se já são parceiros. */
+function JourneyButton({ userId, className }: { userId: string; className: string }) {
+  const tr = useTr();
+  const { user } = useAuth();
+  const status = usePartnerStatus(user?.id);
+  const invite = useJourneyInvite();
+
+  if (status.isLoading) return null;
+  if (status.data) {
+    return status.data.partnerId === userId ? (
+      <Link to="/parceiro" className={className}>
+        <HandHeart className="h-4 w-4" />
+        {tr(["Parceiro(a) de jornada", "Journey buddy", "Compañero(a) de camino", "Binôme"])}
+      </Link>
+    ) : null;
+  }
+  return (
+    <button
+      type="button"
+      disabled={invite.isPending}
+      className={className}
+      onClick={() =>
+        invite.mutate(userId, {
+          onSuccess: () =>
+            toast.success(
+              tr([
+                "Convite para a dupla enviado!",
+                "Pair invitation sent!",
+                "¡Invitación a la pareja enviada!",
+                "Invitation au binôme envoyée !",
+              ]),
+            ),
+          onError: (err) => toast.error((err as Error).message),
+        })
+      }
+    >
+      <HandHeart className="h-4 w-4" />
+      {tr([
+        "Convidar para dupla",
+        "Invite to pair up",
+        "Invitar a la pareja",
+        "Proposer un binôme",
+      ])}
+    </button>
   );
 }
