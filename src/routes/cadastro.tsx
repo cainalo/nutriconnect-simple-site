@@ -99,7 +99,7 @@ function Cadastro() {
           <span className="mb-1.5 block text-xs font-semibold text-foreground">
             {t("signup.goalQuestion")}
           </span>
-          <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1 rounded-xl border border-border/80 bg-secondary/30">
+          <div className="flex flex-wrap gap-1.5 rounded-xl border border-border/80 bg-secondary/30 p-1">
             {JOURNEY_GOALS.map((g) => (
               <button
                 key={g}

@@ -268,8 +268,8 @@ export function Landing() {
     <div className="min-h-screen bg-background text-foreground [&_p]:text-left">
       {/* Topo */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
-          <span className="font-logo-serif text-xl font-bold tracking-tight">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
+          <span className="font-logo-serif text-lg font-bold tracking-tight sm:text-xl">
             Nutri<span className="text-accent">Connect</span>
           </span>
           <nav className="ml-6 hidden items-center gap-5 text-sm text-muted-foreground md:flex">
@@ -288,12 +288,12 @@ export function Landing() {
               {tr(["Dúvidas", "FAQ", "Preguntas", "FAQ"])}
             </a>
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
             <select
               value={locale}
               onChange={(e) => isLocale(e.target.value) && setLocale(e.target.value)}
               aria-label={tr(["Idioma", "Language", "Idioma", "Langue"])}
-              className="h-9 cursor-pointer rounded-full border border-border bg-card px-2 text-xs font-semibold"
+              className="hidden h-9 cursor-pointer rounded-full border border-border bg-card px-1.5 text-xs font-semibold min-[360px]:block sm:px-2"
             >
               {LOCALES.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -303,13 +303,13 @@ export function Landing() {
             </select>
             <Link
               to="/login"
-              className="inline-flex rounded-full px-2.5 py-2 text-sm font-semibold hover:bg-secondary sm:px-4"
+              className="inline-flex whitespace-nowrap rounded-full px-2 py-2 text-xs font-semibold hover:bg-secondary sm:px-4 sm:text-sm"
             >
               {tr(["Entrar", "Log in", "Entrar", "Se connecter"])}
             </Link>
             <Link
               to="/cadastro"
-              className="inline-flex items-center rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-soft transition hover:bg-accent/90"
+              className="inline-flex items-center whitespace-nowrap rounded-full bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground shadow-soft transition hover:bg-accent/90 sm:px-4 sm:text-sm"
             >
               {tr(["Criar conta", "Sign up", "Crear cuenta", "Créer un compte"])}
             </Link>
