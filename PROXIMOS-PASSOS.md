@@ -41,13 +41,17 @@ Nenhuma credencial do Supabase estava disponível nesta sessão (CLI sem login, 
 - **Passo 2 feito**: histórico reparado e as 56 migrations restantes aplicadas sem erro. Tipos gerados
   batem com `types.ts` (só formatação/ordem; `profiles_legacy` não existe no banco novo, esperado).
   Seed **não** aplicado. `node supabase/tests/run.cjs`: 323/323 passaram.
-- **Passo 3**: as 14 Edge Functions foram publicadas (ACTIVE). **Faltam os segredos**: o modo
-  automático do Claude Code bloqueia `secrets set` e escritas no Vault, mesmo com autorização do
-  usuário. Ele precisa rodar `secrets set` + o SQL do Vault (passo 4) por conta própria.
-- **Passo 4**: `pg_cron`, `pg_net` e os 10 jobs `nutriconnect-*` existem; Vault ainda vazio.
-- **Passo 5**: pendente. O site **ainda não foi publicado** (não há URL). `config.toml` não tem
-  seção `[auth]`, então **não** use `supabase config push` (empurraria padrões). Use a Management
-  API (com token) ou o painel.
+- **Passo 3 feito** (exceto Stripe): 14 Edge Functions publicadas; o usuário aplicou os segredos
+  (VAPID, `CRON_SECRET`). `LOVABLE_API_KEY` já existia (posta pelo Lovable). O modo automático do
+  Claude Code bloqueia `secrets set` e escritas no Vault: peça ao usuário para rodar esses comandos.
+- **Passo 4 feito**: as duas entradas do Vault existem; os jobs `nutriconnect-*` rodam com sucesso.
+- **Passo 5 parcial**: `uri_allow_list` = previews do Lovable + `localhost:8080` e `:3000`.
+  **Falta `site_url`** (hoje `http://localhost:3000`): o site **ainda não foi publicado**. Ao ter a
+  URL, faça PATCH em `/v1/projects/mtwtlbbgkzexyaavcboe/config/auth` com `site_url` e acrescente
+  `https://<domínio>/**` à lista, **mantendo** as entradas atuais. O template de recuperação **não
+  pode** ser trocado no plano gratuito sem SMTP próprio (erro da API); o link do e-mail padrão já
+  funciona com `/recuperar-senha` (evento `PASSWORD_RECOVERY`). `config.toml` não tem `[auth]`:
+  **não** use `supabase config push`. O token da Management API é pessoal; peça de novo se preciso.
 - **Passo 6**: pendente, nenhuma conta existe ainda no banco.
 - **Passo 7**: `src/components/android-app.tsx` já aponta para `cainalo/nutriconnect-simple-site`
   (commit `116be0a`). `mobile/` espera a URL publicada.
