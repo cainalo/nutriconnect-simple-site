@@ -54,9 +54,10 @@ export function ClinicalLayout({
       <div className="mx-auto flex min-h-0 w-full max-w-[120rem] flex-1 gap-8 px-4 pt-4 sm:px-6 lg:pt-8 xl:px-8 2xl:px-12">
         <aside className="hidden w-56 shrink-0 overflow-y-auto pb-6 lg:block">
           <div>
-            <p className="px-3 font-display text-lg font-bold text-foreground">{title}</p>
-            {subtitle && <p className="px-3 text-xs text-muted-foreground">{subtitle}</p>}
-            <nav className="mt-4 space-y-1" aria-label={title}>
+            <p className="px-5 font-display text-lg font-bold text-foreground">{title}</p>
+            {subtitle && <p className="px-5 text-xs text-muted-foreground">{subtitle}</p>}
+            {/* Respiro para o contorno de foco (3px + 3px de afastamento) não ser cortado pela rolagem. */}
+            <nav className="mt-2 space-y-1 p-2" aria-label={title}>
               {items.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item);
@@ -96,7 +97,7 @@ export function ClinicalLayout({
           className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pb-28 lg:pb-10"
         >
           <nav
-            className="-mx-4 mb-5 flex gap-1.5 overflow-x-auto border-b border-border/60 px-4 pb-3 lg:hidden"
+            className="-mx-4 mb-5 flex gap-1.5 overflow-x-auto border-b border-border/60 px-4 pt-2 pb-3 lg:hidden"
             aria-label={title}
           >
             {items.map((item) => {

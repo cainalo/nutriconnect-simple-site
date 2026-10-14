@@ -6,6 +6,7 @@ import {
   ExternalLink,
   Mail,
   MoreHorizontal,
+  Trophy,
   ShieldCheck,
   ShieldOff,
   UserCheck,
@@ -65,6 +66,35 @@ export function UsersSection({ me }: { me: string }) {
   const total = list[0]?.total ?? 0;
   const [suspend, setSuspend] = useState<AdminUser | null>(null);
   const [toggleAdmin, setToggleAdmin] = useState<AdminUser | null>(null);
+  const [maxScore, setMaxScore] = useState<AdminUser | null>(null);
+  const [maxBusy, setMaxBusy] = useState(false);
+
+  // Leva o profissional a 2.000 pontos (nível 5) com ajustes registrados no histórico (até 1.000 por vez).
+  const giveMaxScore = async (u: AdminUser) => {
+    setMaxBusy(true);
+    try {
+      const { data, error } = await supabase.rpc("get_pro_status", { p_pro: u.id });
+      if (error) throw error;
+      let missing = 2000 - (data?.[0]?.score ?? 0);
+      while (missing > 0) {
+        const step = Math.min(1000, missing);
+        const { error: err } = await supabase.rpc("admin_adjust_pro_score", {
+          p_pro: u.id,
+          p_points: step,
+          p_note: "Pontuação máxima liberada pela administração",
+        });
+        if (err) throw err;
+        missing -= step;
+      }
+      void adminActions.log("pontuacao_maxima", "profile", u.id, { pontos: 2000 });
+      toast.success(`${u.name} agora está no nível máximo (2.000 pontos).`);
+      setMaxScore(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível ajustar a pontuação.");
+    } finally {
+      setMaxBusy(false);
+    }
+  };
 
   const suspendAction = useAdminAction(adminActions.setSuspended, "Conta atualizada.");
   const adminAction = useAdminAction(adminActions.setAdmin, "Permissão atualizada.");
@@ -226,6 +256,14 @@ export function UsersSection({ me }: { me: string }) {
                           {u.suspended_at ? "Reativar conta" : "Suspender conta"}
                         </DropdownMenuItem>
                       )}
+                      {u.verified && (
+                        <DropdownMenuItem
+                          onClick={() => setMaxScore(u)}
+                          className="flex cursor-pointer items-center gap-2"
+                        >
+                          <Trophy className="h-4 w-4 text-accent" /> Pontuação máxima (nível 5)
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         onClick={() => setToggleAdmin(u)}
                         className="flex cursor-pointer items-center gap-2"
@@ -263,6 +301,15 @@ export function UsersSection({ me }: { me: string }) {
             { onSuccess: () => setSuspend(null) },
           )
         }
+      />
+      <ConfirmDialog
+        open={!!maxScore}
+        title={`Dar a pontuação máxima a ${maxScore?.name ?? ""}?`}
+        description="O profissional vai para 2.000 pontos: nível 5 (excelência), taxa de 10% e todas as funções liberadas. O ajuste fica registrado no histórico de pontos."
+        confirmLabel="Dar pontuação máxima"
+        busy={maxBusy}
+        onClose={() => setMaxScore(null)}
+        onConfirm={() => maxScore && void giveMaxScore(maxScore)}
       />
       <ConfirmDialog
         open={!!toggleAdmin}

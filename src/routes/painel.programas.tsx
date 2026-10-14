@@ -57,6 +57,8 @@ function ProgramsPanel() {
   const { locale } = useClinicalI18n();
   const status = useProStatus(user?.id);
   const unlocked = !!status.data?.features.includes("loja_programas");
+  // Nível suficiente, mas a loja ainda não existe no banco (migration pendente).
+  const pendingSetup = !unlocked && (status.data?.level ?? 1) >= 3;
   const connect = useConnectStatus(unlocked);
   const programs = useProPrograms(user?.id, false);
   const sales = useProgramSales(unlocked);
@@ -79,12 +81,19 @@ function ProgramsPanel() {
           <div className="flex items-start gap-3">
             <Lock className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              {tr([
-                "A loja de programas é liberada a partir do nível 3. Continue atendendo, respondendo dúvidas e publicando conteúdo para subir de nível.",
-                "The program store unlocks at level 3. Keep seeing patients, answering questions and posting to level up.",
-                "La tienda de programas se libera desde el nivel 3. Sigue atendiendo, respondiendo dudas y publicando para subir de nivel.",
-                "La boutique de programmes s'ouvre au niveau 3. Continuez à consulter, répondre et publier pour progresser.",
-              ])}
+              {pendingSetup
+                ? tr([
+                    "A loja de programas ainda está sendo ativada no sistema. Volte em instantes.",
+                    "The program store is still being enabled. Please come back shortly.",
+                    "La tienda de programas aún se está activando. Vuelve en un momento.",
+                    "La boutique de programmes est en cours d'activation. Revenez bientôt.",
+                  ])
+                : tr([
+                    "A loja de programas é liberada a partir do nível 3. Continue atendendo, respondendo dúvidas e publicando conteúdo para subir de nível.",
+                    "The program store unlocks at level 3. Keep seeing patients, answering questions and posting to level up.",
+                    "La tienda de programas se libera desde el nivel 3. Sigue atendiendo, respondiendo dudas y publicando para subir de nivel.",
+                    "La boutique de programmes s'ouvre au niveau 3. Continuez à consulter, répondre et publier pour progresser.",
+                  ])}
             </p>
           </div>
         </Card>
