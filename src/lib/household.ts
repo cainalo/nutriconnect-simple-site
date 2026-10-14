@@ -217,6 +217,7 @@ export function useHouseholdRealtime(houseId: string | undefined) {
       ["fridge_items", ["fridge-items"]],
       ["weekly_menus", ["weekly-menu"]],
       ["household_members", householdKeys.all],
+      ["household_notes", ["household-notes"]],
     ];
     let channel = supabase.channel(`casa-${houseId}-${id}`);
     for (const [table, queryKey] of tables) {
@@ -232,4 +233,68 @@ export function useHouseholdRealtime(houseId: string | undefined) {
       void supabase.removeChannel(channel);
     };
   }, [houseId, id, qc]);
+}
+
+// ---------------------------------------------------------------------------
+// Mural da casa e crianças da casa (F3)
+// ---------------------------------------------------------------------------
+
+export type HouseNote = Tables<"household_notes">;
+export const NOTE_MAX = 200;
+
+/** Recados do mural, do mais novo para o mais antigo. */
+export function useHouseNotes(houseId: string | undefined) {
+  return useQuery({
+    queryKey: ["household-notes", houseId ?? ""],
+    enabled: !!houseId,
+    retry: false,
+    queryFn: async (): Promise<HouseNote[]> => {
+      const { data, error } = await supabase
+        .from("household_notes")
+        .select("*")
+        .eq("household_id", houseId!)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      fail(error);
+      return data ?? [];
+    },
+  });
+}
+
+export function useAddHouseNote(houseId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: string) => {
+      const { error } = await supabase
+        .from("household_notes")
+        .insert({ household_id: houseId!, body: body.trim().slice(0, NOTE_MAX) });
+      fail(error);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["household-notes"] }),
+  });
+}
+
+export function useDeleteHouseNote() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("household_notes").delete().eq("id", id);
+      fail(error);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["household-notes"] }),
+  });
+}
+
+/** Crianças dos outros moradores (a Lancheira mostra junto com as próprias). */
+export function useHouseholdKids(houseId: string | undefined) {
+  return useQuery({
+    queryKey: ["household", "kids", houseId ?? ""],
+    enabled: !!houseId,
+    retry: false,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("household_kids");
+      fail(error);
+      return data ?? [];
+    },
+  });
 }

@@ -1236,6 +1236,57 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ MINHA CASA: LANCHEIRAS E MURAL (F3)
+  if to_regclass('public.household_notes') is not null then
+    declare
+      hid uuid;
+      code text;
+      k3 uuid := 'ffffffff-0000-4000-a000-0000000000c3';
+      note_c uuid;
+    begin
+      perform pg_temp.as_user(c, 'authenticated', 'select public.household_create(''Lanches'')');
+      select household_id into hid from public.household_members where user_id = c;
+      code := pg_temp.as_user(c, 'authenticated', 'select public.household_invite_code() ->> ''code''');
+      perform pg_temp.as_user(f, 'authenticated', format('select public.household_join(%L)', code));
+      insert into public.trail_profiles (id, owner_id, kind, name, avatar) values (k3, c, 'kid', 'Bia', 'nina');
+      r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.household_kids()');
+      res := res || jsonb_build_object('teste', 'vê as crianças dos outros moradores', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.lunchboxes (profile_id, week_start) values (%L, date_trunc(''week'', current_date)::date)', k3));
+      res := res || jsonb_build_object('teste', 'adulto da casa monta a lancheira da criança de outro morador', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', 'a lancheira continua de quem criou o perfil da criança',
+        'ok', exists (select 1 from public.lunchboxes where profile_id = k3 and owner_id = c),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.lunchbox_profiles (profile_id, allergies) values (%L, ''amendoim'')', k3));
+      res := res || jsonb_build_object('teste', 'adulto da casa conta as alergias da criança', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select count(*) from public.lunchboxes where profile_id = %L', k3));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê a lancheira da criança', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.lunchboxes (profile_id, week_start) values (%L, date_trunc(''week'', current_date)::date + 7)', k3));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO monta a lancheira da criança', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.household_kids()');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê as crianças da casa', 'ok', (r = '0'), 'obtido', r);
+
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.household_notes (household_id, body) values (%L, ''sobrou arroz'')', hid));
+      res := res || jsonb_build_object('teste', 'escreve no mural da casa', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'select count(*) from public.household_notes');
+      res := res || jsonb_build_object('teste', 'outro morador lê o mural', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.household_notes');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO lê o mural', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.household_notes (household_id, body) values (%L, ''intruso'')', hid));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO escreve no mural', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(c, 'authenticated', format('insert into public.household_notes (household_id, body) values (%L, ''janto fora'')', hid));
+      select id into note_c from public.household_notes where author_id = c;
+      r := pg_temp.as_user(f, 'authenticated', format('delete from public.household_notes where id = %L', note_c));
+      res := res || jsonb_build_object('teste', 'membro NÃO apaga recado de outra pessoa', 'ok', (r = 'OK:0'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'delete from public.household_notes where body = ''sobrou arroz''');
+      res := res || jsonb_build_object('teste', 'responsável apaga qualquer recado', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+
+      perform pg_temp.as_user(f, 'authenticated', 'select public.household_leave()');
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.lunchboxes where profile_id = %L', k3));
+      res := res || jsonb_build_object('teste', 'quem sai da casa deixa de ver as lancheiras das crianças', 'ok', (r = '0'), 'obtido', r);
+      perform pg_temp.as_user(c, 'authenticated', 'select public.household_leave()');
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

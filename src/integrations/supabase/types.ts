@@ -2033,6 +2033,30 @@ export type Database = {
           },
         ]
       }
+      household_notes: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          household_id: string
+          id: string
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          created_at?: string
+          household_id: string
+          id?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          household_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       households: {
         Row: {
           created_at: string
@@ -5757,6 +5781,15 @@ export type Database = {
         Args: { p_patient: string; p_professional?: string }
         Returns: boolean
       }
+      household_kids: {
+        Args: never
+        Returns: {
+          avatar: string
+          id: string
+          name: string
+          owner_id: string
+        }[]
+      }
       household_bring_my_items: { Args: never; Returns: number }
       household_create: {
         Args: { p_emoji?: string; p_name: string }
@@ -5831,6 +5864,7 @@ export type Database = {
       is_platform_admin: { Args: { uid?: string }; Returns: boolean }
       is_suspended: { Args: { uid: string }; Returns: boolean }
       is_verified_professional: { Args: { uid?: string }; Returns: boolean }
+      kid_lunch_access: { Args: { p_profile: string }; Returns: boolean }
       join_consultation: { Args: { p_appointment: string }; Returns: Json }
       journey_checkin: {
         Args: { p_day: string; p_mood: string; p_note?: string }

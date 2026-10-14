@@ -9,6 +9,7 @@ import {
   Copy,
   Crown,
   Home,
+  Backpack,
   KeyRound,
   Loader2,
   LogOut,
@@ -16,8 +17,10 @@ import {
   Plus,
   RefreshCw,
   Refrigerator,
+  Send,
   Share2,
   ShoppingBasket,
+  StickyNote,
   Trash2,
   UserMinus,
   UserPlus,
@@ -25,6 +28,7 @@ import {
 } from "lucide-react";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { initials } from "@/lib/community";
 import {
   useAddShoppingItems,
@@ -35,10 +39,14 @@ import {
 import {
   HOUSE_EMOJIS,
   MAX_MEMBERS,
+  NOTE_MAX,
   countMyPersonalItems,
   joinLink,
+  useAddHouseNote,
   useBringMyItems,
   useCreateHousehold,
+  useDeleteHouseNote,
+  useHouseNotes,
   useHouseholdPeople,
   useInviteCode,
   useInviteFriendToHouse,
@@ -259,10 +267,10 @@ function NoHouse() {
                 "En partant, votre liste perso revient ; ce que vous avez ajouté à la liste commune reste.",
               ],
               [
-                "Em breve: lancheiras das crianças e mural de recados da casa.",
-                "Coming soon: the kids' lunchboxes and the home message board.",
-                "Próximamente: loncheras de los niños y mural de mensajes de la casa.",
-                "Bientôt : boîtes à goûter des enfants et tableau de messages de la maison.",
+                "Os adultos da casa montam as lancheiras de todas as crianças, e há um mural de recados.",
+                "The adults plan every child's lunchbox, and there's a message board.",
+                "Los adultos arman las loncheras de todos los niños, y hay un mural de mensajes.",
+                "Les adultes préparent les goûters de tous les enfants, et il y a un tableau de messages.",
               ],
             ] as [string, string, string, string][]
           ).map((t) => (
@@ -287,6 +295,7 @@ function HouseView({ mine }: { mine: MyHousehold }) {
         <BringItemsPrompt houseId={mine.house.id} />
         <HouseShopping people={people.data} />
         <HouseKitchen />
+        <HouseNotes mine={mine} people={people.data} me={user?.id} />
       </div>
       <div className="space-y-4">
         {isOwner && <EditHouse mine={mine} />}
@@ -916,9 +925,20 @@ function HouseKitchen() {
         "Déjeuners et dîners de la semaine, avec des portions pour tous",
       ]),
     },
+    {
+      to: "/lancheira" as const,
+      icon: Backpack,
+      title: tr(["Lancheiras", "Lunchboxes", "Loncheras", "Boîtes à goûter"]),
+      text: tr([
+        "Os adultos da casa montam o lanche de todas as crianças",
+        "The adults at home plan every child's snacks",
+        "Los adultos de la casa arman la merienda de todos los niños",
+        "Les adultes préparent les goûters de tous les enfants",
+      ]),
+    },
   ];
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-3 sm:grid-cols-3">
       {links.map((l) => (
         <Link
           key={l.to}
@@ -935,5 +955,112 @@ function HouseKitchen() {
         </Link>
       ))}
     </div>
+  );
+}
+
+/** Mural da casa: recados curtos para quem mora junto, em tempo real. */
+function HouseNotes({
+  mine,
+  people,
+  me,
+}: {
+  mine: MyHousehold;
+  people?: Map<string, PersonCard>;
+  me?: string;
+}) {
+  const tr = useTr();
+  const { locale } = useI18n();
+  const notes = useHouseNotes(mine.house.id);
+  const add = useAddHouseNote(mine.house.id);
+  const remove = useDeleteHouseNote();
+  const [text, setText] = useState("");
+  const isOwner = mine.role === "responsavel";
+
+  const when = (iso: string) =>
+    new Date(iso).toLocaleString(locale, {
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return (
+    <section className={card}>
+      <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+        <StickyNote className="h-4 w-4 text-accent" />
+        {tr(["Mural da casa", "Home board", "Mural de la casa", "Tableau de la maison"])}
+      </h2>
+      <form
+        className="mt-3 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!text.trim()) return;
+          add.mutate(text, { onSuccess: () => setText(""), onError });
+        }}
+      >
+        <input
+          value={text}
+          maxLength={NOTE_MAX}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={tr([
+            "Ex.: hoje janto fora · sobrou arroz",
+            "E.g. eating out tonight · leftover rice",
+            "Ej.: hoy ceno fuera · sobró arroz",
+            "Ex. : je dîne dehors ce soir · il reste du riz",
+          ])}
+          className={field}
+        />
+        <button type="submit" className={btnPrimary} disabled={!text.trim() || add.isPending}>
+          <Send className="h-4 w-4" />
+          <span className="sr-only">{tr(["Enviar", "Send", "Enviar", "Envoyer"])}</span>
+        </button>
+      </form>
+      {notes.isLoading ? (
+        <Loader2 className="mx-auto mt-4 h-5 w-5 animate-spin text-muted-foreground" />
+      ) : (notes.data ?? []).length === 0 ? (
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          {tr([
+            "Nenhum recado ainda.",
+            "No notes yet.",
+            "Aún no hay mensajes.",
+            "Aucun message pour l'instant.",
+          ])}
+        </p>
+      ) : (
+        <ul className="mt-3 space-y-2">
+          {(notes.data ?? []).map((n) => {
+            const author = people?.get(n.author_id);
+            return (
+              <li
+                key={n.id}
+                className="group flex items-start gap-2 rounded-2xl bg-secondary/50 p-2.5"
+              >
+                <Avatar person={author} size={28} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      {n.author_id === me
+                        ? tr(["Você", "You", "Tú", "Vous"])
+                        : (author?.name.split(" ")[0] ?? "…")}
+                    </span>{" "}
+                    · {when(n.created_at)}
+                  </p>
+                  <p className="break-words text-sm text-foreground">{n.body}</p>
+                </div>
+                {(n.author_id === me || isOwner) && (
+                  <button
+                    type="button"
+                    onClick={() => remove.mutate(n.id, { onError })}
+                    className="text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100 focus:opacity-100"
+                    aria-label={tr(["Apagar", "Delete", "Borrar", "Supprimer"])}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
