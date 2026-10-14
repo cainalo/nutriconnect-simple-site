@@ -18,6 +18,7 @@ import { SiteNinaSection } from "@/components/admin/sections-site-nina";
 import { SiteRailsSection } from "@/components/admin/sections-site-rails";
 import { PresentationSection } from "@/components/admin/sections-presentation";
 import { MarketsSection } from "@/components/admin/sections-markets";
+import { SocialStudioSection } from "@/components/admin/social/studio";
 import {
   AnnouncementsSection,
   PostsSection,
@@ -173,6 +174,7 @@ function AdminPage() {
           {section === "temas" && <ThemesSection />}
           {section === "apresentacao" && <PresentationSection />}
           {section === "anuncios" && <AnnouncementsSection />}
+          {section === "redes" && <SocialStudioSection />}
           {section === "site_cards" && <SiteRailsSection />}
           {section === "site_features" && (
             <div className="space-y-4">

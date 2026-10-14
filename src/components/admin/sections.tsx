@@ -15,6 +15,7 @@ import {
   ToggleRight,
   Presentation,
   Settings,
+  Share2,
   ShoppingCart,
   Smile,
   Users,
@@ -34,6 +35,7 @@ export type SectionId =
   | "temas"
   | "apresentacao"
   | "anuncios"
+  | "redes"
   | "site_cards"
   | "site_features"
   | "site_nina"
@@ -62,6 +64,7 @@ export const SECTIONS: SectionDef[] = [
   { id: "temas", label: "Temas da semana", icon: CalendarDays, group: "Conteúdo" },
   { id: "apresentacao", label: "Apresentação", icon: Presentation, group: "Conteúdo" },
   { id: "anuncios", label: "Anúncios", icon: Megaphone, group: "Conteúdo" },
+  { id: "redes", label: "Redes sociais", icon: Share2, group: "Conteúdo" },
   { id: "site_cards", label: "Cards das laterais", icon: PanelsLeftRight, group: "Site" },
   { id: "site_features", label: "Funcionalidades", icon: ToggleRight, group: "Site" },
   { id: "site_nina", label: "Nina", icon: Smile, group: "Site" },

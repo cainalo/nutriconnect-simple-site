@@ -30,6 +30,7 @@ Lovable e para o site).
 | `d878b9d` | N10 — Loja de programas (`/programas`, `/painel/programas`, Edge Function `program-checkout`) |
 | `fdf29d1` | Admin: botão "Pontuação máxima (nível 5)"; contorno do menu do painel clínico corrigido       |
 | `985c0c7` | R1 — Compras nos mercados parceiros (botão "Comprar" + seção "Mercados parceiros" no admin)   |
+| (este)    | S1 — Estúdio de redes sociais no admin (seção "Redes sociais")                                |
 
 Build (`npx vite build`), tipos (`npx tsc --noEmit -p .`) e lint (`npx eslint .`, só avisos de
 fast-refresh que já existiam) passam em todos.
@@ -39,7 +40,7 @@ fast-refresh que já existiam) passam em todos.
 **Nenhuma migration desta sessão está no Supabase de produção** (projeto `mtwtlbbgkzexyaavcboe`).
 Foi conferido em 14/10 sondando a API REST com a chave pública: `daily_checkins` existe, mas
 `journey_pairs`, `households`, `fridge_items`, `household_notes`, `community_events`,
-`pro_programs` e `market_partners` não existem. O site está no ar com o código novo e **funciona**
+`pro_programs`, `market_partners` (e `social_posts`) não existem. O site está no ar com o código novo e **funciona**
 (as telas novas degradam com elegância), mas dupla, casa, eventos, loja e mercados só passam a
 funcionar depois das migrations.
 
@@ -54,6 +55,7 @@ supabase/migrations/20261014150000_community_events.sql
 supabase/migrations/20261014160000_program_store.sql
 supabase/migrations/20261014170000_max_pro_score_owner.sql
 supabase/migrations/20261014180000_market_partners.sql
+supabase/migrations/20261015100000_social_studio.sql
 ```
 
 Por que não foram aplicadas: nesta máquina a CLI do Supabase recusa o token
@@ -63,13 +65,13 @@ Por que não foram aplicadas: nesta máquina a CLI do Supabase recusa o token
 Caminhos para aplicar (do mais fácil para o dono ao mais técnico):
 
 1. **Conector do Supabase no claude.ai**: se o dono autorizar o conector "Supabase" nas
-   configurações de conectores do claude.ai, aplique as 8 migrations por ele, na ordem.
+   configurações de conectores do claude.ai, aplique as 9 migrations por ele, na ordem.
 2. **Arquivo único já pronto**: `APLICAR-NO-SUPABASE.sql` na raiz do projeto (fora do git, listado em
-   `.git/info/exclude`). Tem as 8 migrations numa transação (`begin`/`commit`, se algo falhar nada é
+   `.git/info/exclude`). Tem as 9 migrations numa transação (`begin`/`commit`, se algo falhar nada é
    aplicado) e registra as versões em `supabase_migrations.schema_migrations` se essa tabela
    existir. Basta colar no Supabase → SQL Editor → Run. Foi testado no PGlite sobre o estado atual do
-   banco (até `20261014100000`) e os 443 testes passaram. Se o arquivo sumir, recrie concatenando as
-   8 migrations acima entre `begin;` e `commit;`.
+   banco (até `20261014100000`) e os 450 testes passaram. Se o arquivo sumir, recrie concatenando as
+   9 migrations acima entre `begin;` e `commit;`.
 3. **CLI**: com um token válido (`npx supabase login`) ou `SUPABASE_DB_PASSWORD`:
    `npx supabase link --project-ref mtwtlbbgkzexyaavcboe` e `npx supabase db push`.
    Neste Windows o `curl` precisa de `--ssl-no-revoke`.
@@ -89,6 +91,7 @@ Mudaram nesta sessão e precisam de deploy (mesma limitação de credencial):
 npx supabase functions deploy push-send        # textos dos avisos novos (dupla_, casa_, evento_, programa_vendido)
 npx supabase functions deploy stripe-webhook    # grava compra de programa e estorno
 npx supabase functions deploy program-checkout  # nova (verify_jwt = false já está em supabase/config.toml)
+npx supabase functions deploy ai-chat           # cota de IA "social" do estúdio (até lá o estúdio usa a cota "summary")
 ```
 
 Sem o deploy do `push-send`, o push dos avisos novos chega como "Você tem um novo aviso" (o resto
@@ -99,45 +102,24 @@ os eventos usados pela loja de programas.
 
 `supabase/tests/run-local.mjs` aplica todas as migrations num Postgres em WebAssembly (PGlite) com
 imitações do Supabase e roda `supabase/tests/social_security.sql`. Instruções no topo do arquivo.
-Resultado atual: **61+8 migrations aplicadas, 443 testes, 0 falhas**. Sempre que criar migration,
+Resultado atual: **61+9 migrations aplicadas, 450 testes, 0 falhas**. Sempre que criar migration,
 adicione testes ao `social_security.sql` (blocos `if to_regclass(...) is not null then ... end if;`)
 e rode o harness. Atenção: no `as_user`, texto com espaço ou vírgula volta entre aspas; use valores
 sem espaço nas comparações.
 
-## Próximo item a construir: S1 — Estúdio de redes sociais (admin)
+## S1 — Estúdio de redes sociais (feito em 14/10)
 
-Pedido do dono (13/10): "No painel do admin, uma ferramenta completa de criação de posts para
-Instagram e outras redes, onde nossa IA analise o nosso perfil (via link ou outra opção), sugira
-ideias de posts e de engajamento, crie modelos de postagens e acompanhe as tendências do momento,
-como um verdadeiro profissional de redes sociais." **Hoje só para o admin; no futuro pode ser
-vendida aos profissionais, mas não agora** — construa sem acoplar demais ao admin (dados por dono,
-cota de IA própria) para facilitar isso depois.
+Seção "Redes sociais" no admin (`src/components/admin/social/`): perfis com diagnóstico da IA (bio,
+legendas, números e print), ideias por objetivo e formato (post, carrossel com slides, roteiro de
+Reels/story, hashtags, CTA), editor com "Melhorar com IA", modelos, calendário editorial com datas de
+saúde, tendências internas (`social_trends`, só conteúdo público) e arte em PNG no navegador
+(`src/lib/post-art.ts`). Servidor: `src/lib/social-studio.functions.ts` (regras de ética do CFN no
+prompt). Acesso pelo banco em `social_studio_allowed()` (hoje = admin). **Pode virar recurso pago dos
+profissionais no futuro, mas não agora** (pedido do dono): para liberar, troque a regra de
+`social_studio_allowed()` e a política "todos os admins veem tudo" por "cada um vê o seu".
 
-Limitações reais a respeitar (já explicadas ao dono): o Instagram não permite ler um perfil só pelo
-link (bloqueia leitura automática; a API oficial exige app aprovado pela Meta). A IA também não
-navega na internet em tempo real. Desenho sugerido:
-
-- **Perfis**: cadastrar as redes (Instagram, TikTok, Facebook, LinkedIn, YouTube) com link, e o
-  admin cola bio, legendas recentes e números (seguidores, curtidas, alcance) ou envia **prints**
-  (a IA lê imagens: `aiChat` em `src/lib/ai-gateway.server.ts` aceita `image`).
-- **Análise por IA**: diagnóstico do perfil (tom, frequência, temas, o que engaja), pontos fortes e
-  o que melhorar.
-- **Ideias e modelos**: posts, carrosséis (texto de cada slide), roteiros de Reels, legendas,
-  hashtags e CTAs, no tom da marca; salvar como modelos reutilizáveis.
-- **Calendário editorial** da semana/mês com status (ideia → rascunho → aprovado → publicado).
-- **Tendências** a partir do que o projeto tem: posts em alta da rede (`feed_ranked`), tema da
-  semana, dúvidas da Nina, alimentos da estação (`src/lib/season.ts`), datas comemorativas de saúde
-  e nutrição do Brasil. Deixe claro na tela que não são tendências "ao vivo" do Instagram.
-- **Arte**: gerar a imagem do post no navegador (canvas) com as cores/mascotes do NutriConnect, para
-  baixar em PNG (feed 1080×1350 e story 1080×1920).
-- Técnico: nova seção em `src/components/admin/sections.tsx` + `src/routes/admin.tsx` (grupo
-  "Negócio" ou "Conteúdo"); tabelas `social_profiles`, `social_ideas`/`social_posts` com RLS de
-  `is_platform_admin()` e coluna de dono; funções de servidor no padrão de
-  `src/lib/menu.functions.ts` (`createServerFn` + `requireSupabaseAuth` + `aiChat`); se precisar de
-  novo tipo de cota de IA, ampliar a constraint `ai_usage_kind_check` (ver migrations de `ai_usage`)
-  e a Edge Function `ai-chat` (que precisaria de deploy).
-
-Ao terminar o S1, marque no `roadmap.md` e faça commit + push.
+Ideias para depois: publicar direto pela API da Meta (exige app aprovado pela Meta e conta
+comercial), métricas automáticas do Instagram (Graph API) e gerar imagens com IA.
 
 ## Outros pendentes do roadmap (dependem de algo externo)
 
@@ -165,5 +147,7 @@ Ao terminar o S1, marque no `roadmap.md` e faça commit + push.
   `supabase/functions/program-checkout`.
 - Mercados: `src/lib/markets.ts`, `src/components/buy-at-market.tsx`,
   `src/components/admin/sections-markets.tsx`.
+- Estúdio de redes sociais: `src/components/admin/social/`, `src/lib/social-studio.ts`,
+  `src/lib/social-studio.functions.ts`, `src/lib/post-art.ts`, `src/lib/social-calendar.ts`.
 - Tipos do Supabase (`src/integrations/supabase/types.ts`) foram editados à mão para as tabelas
   novas. **Nunca rode o prettier nesse arquivo** (ele reformata o arquivo inteiro).

@@ -67,7 +67,7 @@ partir do link e de prints/legendas/números enviados), ideias de posts e de eng
 postagem, calendário e tendências do momento. Hoje só para o admin; no futuro pode ser vendida aos
 profissionais (não agora).
 
-1. [ ] S1 — Estúdio de redes sociais: perfis, análise por IA, ideias, modelos, calendário e tendências
+1. [x] S1 — Estúdio de redes sociais: perfis, análise por IA, ideias, modelos, calendário e tendências
 
 ## Feito
 - [x] Trilha como história de RPG: capítulos, inimigos por parada, batalha durante a lição e cenas de filme (cutscenes) com música

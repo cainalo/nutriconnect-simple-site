@@ -1441,6 +1441,25 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ ESTÚDIO DE REDES SOCIAIS (S1)
+  -- G é admin da plataforma; B é usuário comum; P é profissional.
+  if to_regclass('public.social_posts') is not null then
+    r := pg_temp.as_user(g, 'authenticated', 'insert into public.social_profiles (network, handle) values (''instagram'', ''nutriconnect'')');
+    res := res || jsonb_build_object('teste', 'admin cadastra perfil no estúdio', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(g, 'authenticated', 'insert into public.social_posts (title, format, status) values (''Mitos do glúten'', ''carrossel'', ''ideia'')');
+    res := res || jsonb_build_object('teste', 'admin guarda ideia de post', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.social_posts');
+    res := res || jsonb_build_object('teste', 'usuário comum NÃO vê o estúdio', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(p, 'authenticated', 'insert into public.social_posts (title) values (''Meu post'')');
+    res := res || jsonb_build_object('teste', 'profissional ainda NÃO usa o estúdio', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(b, 'authenticated', 'select public.social_trends(14)');
+    res := res || jsonb_build_object('teste', 'tendências internas só para o estúdio', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(g, 'authenticated', 'select public.social_trends(14) ? ''top_posts''');
+    res := res || jsonb_build_object('teste', 'admin vê as tendências internas', 'ok', (r = 't'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(g, 'authenticated', 'insert into public.social_posts (title, status) values (''x'', ''viral'')');
+    res := res || jsonb_build_object('teste', 'status do post só da lista', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

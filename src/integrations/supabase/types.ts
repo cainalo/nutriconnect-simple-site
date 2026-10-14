@@ -4436,6 +4436,120 @@ export type Database = {
           },
         ]
       }
+      social_posts: {
+        Row: {
+          caption: string
+          created_at: string
+          cta: string
+          format: string
+          hashtags: string[]
+          hook: string
+          id: string
+          is_template: boolean
+          network: string
+          owner_id: string
+          pillar: string
+          profile_id: string | null
+          scheduled_for: string | null
+          script: string
+          slides: Json
+          source: string
+          status: string
+          title: string
+          updated_at: string
+          visual_idea: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          cta?: string
+          format?: string
+          hashtags?: string[]
+          hook?: string
+          id?: string
+          is_template?: boolean
+          network?: string
+          owner_id?: string
+          pillar?: string
+          profile_id?: string | null
+          scheduled_for?: string | null
+          script?: string
+          slides?: Json
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+          visual_idea?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          cta?: string
+          format?: string
+          hashtags?: string[]
+          hook?: string
+          id?: string
+          is_template?: boolean
+          network?: string
+          owner_id?: string
+          pillar?: string
+          profile_id?: string | null
+          scheduled_for?: string | null
+          script?: string
+          slides?: Json
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          visual_idea?: string
+        }
+        Relationships: []
+      }
+      social_profiles: {
+        Row: {
+          analysis: Json | null
+          analyzed_at: string | null
+          created_at: string
+          handle: string
+          id: string
+          metrics: Json
+          network: string
+          notes: string
+          owner_id: string
+          sample_posts: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          analysis?: Json | null
+          analyzed_at?: string | null
+          created_at?: string
+          handle: string
+          id?: string
+          metrics?: Json
+          network: string
+          notes?: string
+          owner_id?: string
+          sample_posts?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          analysis?: Json | null
+          analyzed_at?: string | null
+          created_at?: string
+          handle?: string
+          id?: string
+          metrics?: Json
+          network?: string
+          notes?: string
+          owner_id?: string
+          sample_posts?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       theme_poll_options: {
         Row: {
           id: string
@@ -5848,6 +5962,8 @@ export type Database = {
         Args: { p_partner: string; p_query: string; p_source: string }
         Returns: string
       }
+      social_studio_allowed: { Args: { p_user?: string }; Returns: boolean }
+      social_trends: { Args: { p_days?: number }; Returns: Json }
       export_my_data: { Args: never; Returns: Json }
       f_unaccent: { Args: { "": string }; Returns: string }
       friend_ids: { Args: { p_user?: string }; Returns: string[] }
