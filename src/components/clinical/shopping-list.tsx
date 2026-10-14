@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, ShoppingBasket, Trash2 } from "lucide-react";
 import { useTr } from "@/components/appearance-editor";
+import { BuyAtMarket } from "@/components/buy-at-market";
 import { Card, buttonGhost } from "./ui";
 import type { FullMealPlan } from "@/lib/clinical/records";
 import { cn } from "@/lib/utils";
@@ -94,28 +95,34 @@ export function ShoppingList({ plan }: { plan: FullMealPlan }) {
         </div>
       }
       action={
-        done > 0 && (
-          <button
-            type="button"
-            className={cn(buttonGhost, "h-8 px-2 text-xs text-muted-foreground")}
-            onClick={() => {
-              if (
-                window.confirm(
-                  tr([
-                    "Desmarcar todos os itens?",
-                    "Uncheck all items?",
-                    "¿Desmarcar todos los ítems?",
-                    "Décocher tous les articles ?",
-                  ]),
+        <div className="flex items-center gap-1">
+          <BuyAtMarket
+            items={items.filter((i) => !checked[i.id]).map((i) => i.name)}
+            source="plano"
+          />
+          {done > 0 && (
+            <button
+              type="button"
+              className={cn(buttonGhost, "h-8 px-2 text-xs text-muted-foreground")}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    tr([
+                      "Desmarcar todos os itens?",
+                      "Uncheck all items?",
+                      "¿Desmarcar todos los ítems?",
+                      "Décocher tous les articles ?",
+                    ]),
+                  )
                 )
-              )
-                update({});
-            }}
-          >
-            <Trash2 className="mr-1 h-3.5 w-3.5" />
-            {tr(["Desmarcar", "Uncheck", "Desmarcar", "Décocher"])}
-          </button>
-        )
+                  update({});
+              }}
+            >
+              <Trash2 className="mr-1 h-3.5 w-3.5" />
+              {tr(["Desmarcar", "Uncheck", "Desmarcar", "Décocher"])}
+            </button>
+          )}
+        </div>
       }
       className="relative border-t-8 border-t-accent/80"
     >

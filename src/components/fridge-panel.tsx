@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { ShareModal } from "@/components/share-modal";
+import { BuyAtMarket } from "@/components/buy-at-market";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -224,6 +225,7 @@ function RecipeCard({
             ])}
           </button>
         )}
+        {recipe.missing.length > 0 && <BuyAtMarket items={recipe.missing} source="receita" />}
       </div>
     </article>
   );

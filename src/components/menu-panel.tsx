@@ -26,6 +26,7 @@ import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
+import { BuyAtMarket } from "@/components/buy-at-market";
 import { useMyHousehold } from "@/lib/household";
 import { useSeasonNow } from "@/lib/season";
 import type { Names } from "@/lib/appearance-data";
@@ -550,6 +551,11 @@ export function ShoppingSection({ ingredients }: { ingredients: string[] }) {
           ))}
         </div>
       )}
+      <BuyAtMarket
+        items={items.filter((i) => !i.done).map((i) => i.text)}
+        source="cardapio"
+        className="mt-4 mr-3"
+      />
       {done.length > 0 && (
         <button
           type="button"

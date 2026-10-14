@@ -58,7 +58,7 @@ papéis responsável e membro; convite por link/código ou entre amigos.
 Integração com mercados/lojas para comprar os produtos das receitas, da lista de compras e do plano
 alimentar escrito pelo profissional, gerando receita para a plataforma (links de afiliado).
 
-1. [ ] R1 — Mercados parceiros: botão "Comprar" na receita, na lista de compras e no plano alimentar; parceiros e códigos de afiliado no painel do admin; cliques medidos
+1. [x] R1 — Mercados parceiros: botão "Comprar" na receita, na lista de compras e no plano alimentar; parceiros e códigos de afiliado no painel do admin; cliques medidos
 
 ## Estúdio de redes sociais no admin (pedido em 13/10/2026)
 

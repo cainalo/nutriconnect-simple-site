@@ -50,6 +50,7 @@ import {
   getAvatarSrc,
   initials,
 } from "@/lib/community";
+import { BuyAtMarket } from "@/components/buy-at-market";
 import { EmojiIcon } from "@/components/emoji-icon";
 
 interface PostCardProps {
@@ -450,6 +451,11 @@ export function PostCard({ post }: PostCardProps) {
                       </li>
                     ))}
                   </ul>
+                  <BuyAtMarket
+                    items={post.recipeData.ingredients}
+                    source="receita"
+                    className="mt-3"
+                  />
                 </div>
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">

@@ -2494,6 +2494,42 @@ export type Database = {
           },
         ]
       }
+      market_partners: {
+        Row: {
+          active: boolean
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          position: number
+          search_url: string
+          states: string[]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          position?: number
+          search_url: string
+          states?: string[]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          position?: number
+          search_url?: string
+          states?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       meal_plan_templates: {
         Row: {
           created_at: string
@@ -5797,6 +5833,20 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_market_stats: {
+        Args: { p_days?: number }
+        Returns: {
+          clicks: number
+          name: string
+          partner_id: string
+          people: number
+          top_queries: string[] | null
+        }[]
+      }
+      market_click: {
+        Args: { p_partner: string; p_query: string; p_source: string }
+        Returns: string
       }
       export_my_data: { Args: never; Returns: Json }
       f_unaccent: { Args: { "": string }; Returns: string }

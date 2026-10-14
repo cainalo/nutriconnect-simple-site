@@ -15,6 +15,7 @@ import {
   ToggleRight,
   Presentation,
   Settings,
+  ShoppingCart,
   Smile,
   Users,
   UsersRound,
@@ -37,6 +38,7 @@ export type SectionId =
   | "site_features"
   | "site_nina"
   | "financeiro"
+  | "mercados"
   | "ia"
   | "config"
   | "auditoria";
@@ -64,6 +66,7 @@ export const SECTIONS: SectionDef[] = [
   { id: "site_features", label: "Funcionalidades", icon: ToggleRight, group: "Site" },
   { id: "site_nina", label: "Nina", icon: Smile, group: "Site" },
   { id: "financeiro", label: "Financeiro", icon: Banknote, group: "Negócio" },
+  { id: "mercados", label: "Mercados parceiros", icon: ShoppingCart, group: "Negócio" },
   { id: "ia", label: "Inteligência artificial", icon: Brain, group: "Sistema" },
   { id: "config", label: "Configurações", icon: Settings, group: "Sistema" },
   { id: "auditoria", label: "Auditoria", icon: History, group: "Sistema" },

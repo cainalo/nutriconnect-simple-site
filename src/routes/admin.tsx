@@ -17,6 +17,7 @@ import { ClinicalDemoPanel, SiteFeaturesSection } from "@/components/admin/secti
 import { SiteNinaSection } from "@/components/admin/sections-site-nina";
 import { SiteRailsSection } from "@/components/admin/sections-site-rails";
 import { PresentationSection } from "@/components/admin/sections-presentation";
+import { MarketsSection } from "@/components/admin/sections-markets";
 import {
   AnnouncementsSection,
   PostsSection,
@@ -181,6 +182,7 @@ function AdminPage() {
           )}
           {section === "site_nina" && <SiteNinaSection />}
           {section === "financeiro" && <FinanceSection />}
+          {section === "mercados" && <MarketsSection />}
           {section === "ia" && <AiSection />}
           {section === "config" && <SettingsSection />}
           {section === "auditoria" && <AuditSection />}

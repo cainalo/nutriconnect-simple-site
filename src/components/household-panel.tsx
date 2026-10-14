@@ -26,6 +26,7 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
+import { BuyAtMarket } from "@/components/buy-at-market";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -525,6 +526,7 @@ function HouseShopping({ people }: { people?: Map<string, PersonCard> }) {
           "Ce que vous envoyez du Frigo, du Menu, du Marché et de la Boîte à goûter arrive aussi ici.",
         ])}
       </p>
+      <BuyAtMarket items={open.map((i) => i.text)} source="lista" className="mt-2" />
 
       {list.isLoading ? (
         <Loader2 className="mx-auto mt-6 h-5 w-5 animate-spin text-muted-foreground" />

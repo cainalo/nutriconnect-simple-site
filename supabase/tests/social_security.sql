@@ -1413,6 +1413,34 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ MERCADOS PARCEIROS (R1)
+  if to_regclass('public.market_partners') is not null then
+    declare
+      mp uuid;
+    begin
+      select id into mp from public.market_partners where name = 'Amazon';
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) > 0 from public.market_partners');
+      res := res || jsonb_build_object('teste', 'usuário vê os parceiros ativos', 'ok', (r = 't'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'insert into public.market_partners (name, search_url) values (''Golpe'', ''https://golpe.example/{q}'')');
+      res := res || jsonb_build_object('teste', 'usuário NÃO cadastra parceiro', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.market_click(%L, ''receita'', ''azeite de oliva'')', mp));
+      res := res || jsonb_build_object('teste', 'clique devolve a busca com o produto codificado',
+        'ok', (r = 'https://www.amazon.com.br/s?k=azeite%20de%20oliva'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.market_click(%L, ''lista'', ''feijão'')', mp));
+      res := res || jsonb_build_object('teste', 'acentos viram UTF-8 na busca', 'ok', (r like '%feij%C3%A3o'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.market_clicks');
+      res := res || jsonb_build_object('teste', 'usuário NÃO lê os cliques', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.admin_market_stats(30)');
+      res := res || jsonb_build_object('teste', 'relatório de cliques é só da administração', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', 'select clicks from public.admin_market_stats(30) where name = ''Amazon''');
+      res := res || jsonb_build_object('teste', 'administração vê os cliques por parceiro', 'ok', (r = '2'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', 'insert into public.market_partners (name, search_url) values (''Sem busca'', ''https://loja.example/'')');
+      res := res || jsonb_build_object('teste', 'endereço do parceiro precisa ter {q}', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select (public.export_my_data() -> ''compras_em_parceiros'') is not null');
+      res := res || jsonb_build_object('teste', 'exportação de dados inclui os cliques', 'ok', (r = 't'), 'obtido', left(r, 90));
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end
