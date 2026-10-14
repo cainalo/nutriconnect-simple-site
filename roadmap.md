@@ -40,7 +40,7 @@ Cada item ganha o próprio commit depois de testado.
 17. [x] N6 — Parceiro de jornada (dupla de apoio com check-in diário)
 18. [x] M8 — Eventos ao vivo nas comunidades ("Pergunte à nutri": perguntas antes, votação, respostas fixadas)
 19. [x] N11 — Nina por voz (falar e ouvir as respostas)
-20. [ ] N10 — Loja de programas dos profissionais (Stripe; taxa igual à das assinaturas de membros, de 20% a 10% pelo nível)
+20. [x] N10 — Loja de programas dos profissionais (Stripe; taxa igual à das assinaturas de membros, de 20% a 10% pelo nível)
 
 ## Grupo familiar — "Minha casa" (aprovado em 13/10/2026, depois do N6 e antes do M8)
 
@@ -52,6 +52,22 @@ papéis responsável e membro; convite por link/código ou entre amigos.
 1. [x] F1 — Casa, convites e membros + lista de compras única em tempo real (quem adicionou, quem comprou)
 2. [x] F2 — Geladeira da casa (sai do navegador para o banco) + cardápio da semana da casa (porções = nº de pessoas)
 3. [x] F3 — Lancheiras das crianças editáveis pelos adultos da casa + mural de recados
+
+## Compras nos mercados (sugestão de voluntário na apresentação, aprovada em 13/10/2026)
+
+Integração com mercados/lojas para comprar os produtos das receitas, da lista de compras e do plano
+alimentar escrito pelo profissional, gerando receita para a plataforma (links de afiliado).
+
+1. [ ] R1 — Mercados parceiros: botão "Comprar" na receita, na lista de compras e no plano alimentar; parceiros e códigos de afiliado no painel do admin; cliques medidos
+
+## Estúdio de redes sociais no admin (pedido em 13/10/2026)
+
+Ferramenta de social media com IA no painel do admin: análise dos perfis (Instagram e outras redes, a
+partir do link e de prints/legendas/números enviados), ideias de posts e de engajamento, modelos de
+postagem, calendário e tendências do momento. Hoje só para o admin; no futuro pode ser vendida aos
+profissionais (não agora).
+
+1. [ ] S1 — Estúdio de redes sociais: perfis, análise por IA, ideias, modelos, calendário e tendências
 
 ## Feito
 - [x] Trilha como história de RPG: capítulos, inimigos por parada, batalha durante a lição e cenas de filme (cutscenes) com música

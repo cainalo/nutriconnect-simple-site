@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   MessageCircle,
   Settings,
+  ShoppingBag,
   Wallet,
   ShieldCheck,
   Users,
@@ -81,6 +82,11 @@ function ProfessionalPanelLayout() {
       to: "/painel/membros",
       label: tr(["Membros", "Members", "Miembros", "Membres"]),
       icon: Crown,
+    },
+    {
+      to: "/painel/programas",
+      label: tr(["Programas", "Programs", "Programas", "Programmes"]),
+      icon: ShoppingBag,
     },
     { to: "/painel/configuracoes", label: t("panelNav.settings"), icon: Settings },
   ];

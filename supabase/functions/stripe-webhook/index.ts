@@ -1,6 +1,7 @@
 // Webhook do Stripe. Público (verify_jwt = false): a autenticidade vem da assinatura
 // Stripe-Signature, verificada com STRIPE_WEBHOOK_SECRET.
-// Eventos tratados: checkout.session.completed (confirma a consulta) e charge.refunded
+// Eventos tratados: checkout.session.completed (confirma a consulta, a assinatura de membros ou a
+// compra de um programa da loja) e charge.refunded
 // (estorno feito direto no painel do Stripe).
 import { json, serve } from "../_shared/http.ts";
 import {
@@ -33,6 +34,11 @@ serve(async (req) => {
         .update({ status: "reembolsado", refunded_at: new Date().toISOString() })
         .eq("provider", "stripe")
         .eq("mp_payment_id", charge.payment_intent);
+      // Programa da loja estornado: o acesso aos módulos acaba.
+      await db
+        .from("program_purchases")
+        .update({ status: "reembolsada", refunded_at: new Date().toISOString() })
+        .eq("stripe_payment_intent", charge.payment_intent);
     }
     return json({ ok: true });
   }
@@ -64,6 +70,30 @@ serve(async (req) => {
       p_period_end: periodEnd(sub),
     });
     return json({ ok: true, member: true });
+  }
+
+  // ── Loja de programas (pagamento único) ───────────────────────────────────
+  const paid = event.data?.object as {
+    id?: string;
+    payment_intent?: string;
+    payment_status?: string;
+    amount_total?: number;
+    metadata?: Record<string, string>;
+  };
+  if (paid?.metadata?.kind === "program") {
+    if (paid.payment_status !== "paid") return json({ ignored: "não pago" });
+    const amount = paid.amount_total ?? 0;
+    const feePercent = Number(paid.metadata.fee_percent ?? 20);
+    await db.rpc("record_program_purchase", {
+      p_program: paid.metadata.program_id,
+      p_buyer: paid.metadata.buyer_id,
+      p_amount_cents: amount,
+      p_fee_cents: Math.round((amount * feePercent) / 100),
+      p_fee_percent: feePercent,
+      p_stripe_session: paid.id ?? null,
+      p_payment_intent: paid.payment_intent ?? null,
+    });
+    return json({ ok: true, program: true });
   }
 
   const session = event.data?.object as {

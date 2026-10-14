@@ -3390,6 +3390,126 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_programs: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string
+          duration_weeks: number
+          emoji: string
+          id: string
+          price_cents: number
+          professional_id: string
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          duration_weeks?: number
+          emoji?: string
+          id?: string
+          price_cents: number
+          professional_id: string
+          summary?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          duration_weeks?: number
+          emoji?: string
+          id?: string
+          price_cents?: number
+          professional_id?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      program_modules: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          position: number
+          program_id: string
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          position?: number
+          program_id: string
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          position?: number
+          program_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      program_progress: {
+        Row: { done_at: string; module_id: string; user_id: string }
+        Insert: { done_at?: string; module_id: string; user_id: string }
+        Update: { done_at?: string; module_id?: string; user_id?: string }
+        Relationships: []
+      }
+      program_purchases: {
+        Row: {
+          amount_cents: number
+          buyer_id: string
+          fee_percent: number
+          id: string
+          paid_at: string
+          platform_fee_cents: number
+          professional_id: string
+          program_id: string
+          refunded_at: string | null
+          status: string
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          buyer_id: string
+          fee_percent: number
+          id?: string
+          paid_at?: string
+          platform_fee_cents: number
+          professional_id: string
+          program_id: string
+          refunded_at?: string | null
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          buyer_id?: string
+          fee_percent?: number
+          id?: string
+          paid_at?: string
+          platform_fee_cents?: number
+          professional_id?: string
+          program_id?: string
+          refunded_at?: string | null
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+        }
+        Relationships: []
+      }
       pro_score_events: {
         Row: {
           created_at: string
@@ -5618,6 +5738,66 @@ export type Database = {
         }[]
       }
       event_vote: { Args: { p_question: string }; Returns: boolean }
+      delete_program_module: { Args: { p_module: string }; Returns: undefined }
+      has_program: { Args: { p_program: string; p_user?: string }; Returns: boolean }
+      my_program_sales: {
+        Args: { p_days?: number }
+        Returns: { fee_cents: number; gross_cents: number; net_cents: number; sales: number }[]
+      }
+      save_program: {
+        Args: {
+          p_active: boolean
+          p_description: string
+          p_emoji: string
+          p_id: string | null
+          p_price_cents: number
+          p_summary: string
+          p_title: string
+          p_weeks: number
+        }
+        Returns: {
+          active: boolean
+          created_at: string
+          description: string
+          duration_weeks: number
+          emoji: string
+          id: string
+          price_cents: number
+          professional_id: string
+          summary: string
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pro_programs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_program_module: {
+        Args: {
+          p_body: string
+          p_id: string | null
+          p_position: number | null
+          p_program: string
+          p_title: string
+        }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          position: number
+          program_id: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "program_modules"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       export_my_data: { Args: never; Returns: Json }
       f_unaccent: { Args: { "": string }; Returns: string }
       friend_ids: { Args: { p_user?: string }; Returns: string[] }

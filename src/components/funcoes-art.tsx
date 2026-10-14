@@ -26,6 +26,7 @@ import {
   Refrigerator,
   Scale,
   Search,
+  ShoppingBag,
   ShoppingBasket,
   Smile,
   Snowflake,
@@ -63,6 +64,7 @@ export type ArtId =
   | "hearts"
   | "pair"
   | "house"
+  | "bag"
   | "pulse"
   | "notebook"
   | "report"
@@ -459,6 +461,17 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
           </Big>
           <Big className="nc-floaty right-16 top-3">
             <ShoppingBasket className="h-5 w-5" style={strong} />
+          </Big>
+        </>
+      );
+    case "bag":
+      return (
+        <>
+          <Big className="-bottom-2 -right-1">
+            <ShoppingBag className="h-20 w-20" style={soft} strokeWidth={1.5} />
+          </Big>
+          <Big className="nc-floaty right-16 top-3">
+            <Star className="h-5 w-5" style={strong} />
           </Big>
         </>
       );

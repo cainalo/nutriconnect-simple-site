@@ -1355,6 +1355,64 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ LOJA DE PROGRAMAS (N10)
+  if to_regclass('public.pro_programs') is not null then
+    declare
+      prog uuid;
+      modu uuid;
+    begin
+      update public.pro_scores set level = 1 where professional_id = p;
+      r := pg_temp.as_user(p, 'authenticated', 'select id from public.save_program(null, ''Lanches de verdade'', ''4 semanas'', '''', 5000, 4, ''🥕'', false)');
+      res := res || jsonb_build_object('teste', 'loja de programas só a partir do nível 3', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      insert into public.pro_scores (professional_id, score, level) values (p, 200, 3)
+      on conflict (professional_id) do update set level = 3;
+      r := pg_temp.as_user(f, 'authenticated', 'select id from public.save_program(null, ''Meu programa'', '''', '''', 5000, 4, ''🥕'', false)');
+      res := res || jsonb_build_object('teste', 'usuário comum NÃO cria programa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', 'select title from public.save_program(null, ''Lanches de verdade'', ''4 semanas'', '''', 5000, 4, ''🥕'', false)');
+      res := res || jsonb_build_object('teste', 'profissional nível 3 cria programa', 'ok', (r like '%Lanches%'), 'obtido', left(r, 90));
+      select id into prog from public.pro_programs where professional_id = p;
+      r := pg_temp.as_user(p, 'authenticated', format('select active from public.save_program(%L, ''Lanches de verdade'', ''4 semanas'', '''', 5000, 4, ''🥕'', true)', prog));
+      res := res || jsonb_build_object('teste', 'NÃO põe na loja programa sem módulos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(p, 'authenticated', format('select public.save_program_module(%L, null, ''Semana 1'', ''Frutas no lanche'', null)', prog));
+      select id into modu from public.program_modules where program_id = prog;
+      r := pg_temp.as_user(p, 'authenticated', format('select active from public.save_program(%L, ''Lanches de verdade'', ''4 semanas'', '''', 5000, 4, ''🥕'', true)', prog));
+      res := res || jsonb_build_object('teste', 'com módulo, o programa entra na loja', 'ok', (r = 't'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.pro_programs');
+      res := res || jsonb_build_object('teste', 'qualquer pessoa vê o programa na vitrine', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.program_modules');
+      res := res || jsonb_build_object('teste', 'NÃO vê os módulos sem comprar', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.program_purchases (program_id, buyer_id, professional_id, amount_cents, platform_fee_cents, fee_percent) values (%L, auth.uid(), %L, 5000, 0, 0)', prog, p));
+      res := res || jsonb_build_object('teste', 'NÃO registra compra sem pagar', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.record_program_purchase(%L, auth.uid(), 5000, 0, 0, ''cs_x'', ''pi_x'')', prog));
+      res := res || jsonb_build_object('teste', 'só o webhook grava a compra', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      perform public.record_program_purchase(prog, b, 5000, 1000, 20, 'cs_teste', 'pi_teste');
+      perform public.record_program_purchase(prog, b, 5000, 1000, 20, 'cs_teste', 'pi_teste');
+      res := res || jsonb_build_object('teste', 'compra gravada uma vez só (webhook repetido)',
+        'ok', (select count(*) = 1 from public.program_purchases where program_id = prog),
+        'obtido', 'verificado como superusuário');
+      res := res || jsonb_build_object('teste', 'profissional é avisado da venda',
+        'ok', exists (select 1 from public.notifications where user_id = p and type = 'programa_vendido'),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.program_modules');
+      res := res || jsonb_build_object('teste', 'quem comprou vê os módulos', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.program_progress (user_id, module_id) values (auth.uid(), %L)', modu));
+      res := res || jsonb_build_object('teste', 'quem comprou marca o módulo como feito', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.program_progress (user_id, module_id) values (auth.uid(), %L)', modu));
+      res := res || jsonb_build_object('teste', 'quem não comprou NÃO marca progresso', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', 'select net_cents from public.my_program_sales(30)');
+      res := res || jsonb_build_object('teste', 'painel mostra o líquido das vendas', 'ok', (r = '4000'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.program_purchases');
+      res := res || jsonb_build_object('teste', 'terceiro NÃO vê compras alheias', 'ok', (r = '0'), 'obtido', r);
+      update public.program_purchases set status = 'reembolsada' where program_id = prog;
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.program_modules');
+      res := res || jsonb_build_object('teste', 'estorno tira o acesso aos módulos', 'ok', (r = '0'), 'obtido', r);
+      perform pg_temp.as_user(p, 'authenticated', format('select public.delete_program_module(%L)', modu));
+      res := res || jsonb_build_object('teste', 'programa sem módulos sai da loja',
+        'ok', exists (select 1 from public.pro_programs where id = prog and not active),
+        'obtido', 'verificado como superusuário');
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

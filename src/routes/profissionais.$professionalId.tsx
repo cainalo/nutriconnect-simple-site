@@ -14,6 +14,7 @@ import { AuthGateLoading } from "@/components/site-chrome";
 import { VerifiedBadge } from "@/components/person-chip";
 import { SlotPicker } from "@/components/clinical/slot-picker";
 import { MemberPlanCard } from "@/components/member-plan-card";
+import { ProProgramsSection } from "@/components/pro-programs-section";
 import {
   Avatar,
   Card,
@@ -137,6 +138,7 @@ function ProfessionalPage() {
           </Card>
 
           <MemberPlanCard professionalId={professionalId} />
+          <ProProgramsSection professionalId={professionalId} />
 
           <Card title={t("pro.howItWorks")}>
             <dl className="space-y-3 text-sm">

@@ -8,6 +8,7 @@ import {
   HandHeart,
   Home,
   Mic,
+  ShoppingBag,
   CalendarCheck,
   CalendarClock,
   CalendarX,
@@ -162,6 +163,7 @@ function categoryOf(type: string): CategoryId {
       "diario_comentario",
       "plano_publicado",
       "pagamento",
+      "programa_vendido",
       "meta_agua",
     ].includes(type) ||
     type.startsWith("pagamento")
@@ -633,6 +635,18 @@ function describe(
         ]),
         detail: quote(data.question),
         go: { to: "/evento/$eventId", params: { eventId: n.entity_id ?? "" } },
+      };
+    case "programa_vendido":
+      return {
+        icon: ShoppingBag,
+        text: fill([
+          "{name} comprou o seu programa",
+          "{name} bought your program",
+          "{name} compró tu programa",
+          "{name} a acheté votre programme",
+        ]),
+        detail: str(data.title),
+        go: { to: "/painel/programas" },
       };
     default:
       return {

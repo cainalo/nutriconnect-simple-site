@@ -102,6 +102,12 @@ const AVISOS: Record<string, Names> = {
     "{name} respondió tu pregunta en el evento",
     "{name} a répondu à votre question",
   ],
+  programa_vendido: [
+    "{name} comprou o seu programa",
+    "{name} bought your program",
+    "{name} compró tu programa",
+    "{name} a acheté votre programme",
+  ],
   consulta_agendada: [
     "{name} agendou uma consulta",
     "{name} booked an appointment",
