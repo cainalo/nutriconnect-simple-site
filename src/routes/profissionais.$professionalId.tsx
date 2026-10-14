@@ -9,12 +9,15 @@ import {
   MessageCircle,
   Settings,
   Video,
+  BadgeCheck,
 } from "lucide-react";
 import { AuthGateLoading } from "@/components/site-chrome";
 import { VerifiedBadge } from "@/components/person-chip";
 import { SlotPicker } from "@/components/clinical/slot-picker";
 import { MemberPlanCard } from "@/components/member-plan-card";
 import { ProProgramsSection } from "@/components/pro-programs-section";
+import { useTr } from "@/components/appearance-editor";
+import { useProOnlineAllowed, useTeleconsultBadge } from "@/lib/teleconsult";
 import {
   Avatar,
   Card,
@@ -59,6 +62,13 @@ export const Route = createFileRoute("/profissionais/$professionalId")({
   component: ProfessionalPage,
 });
 
+const TELE_BADGE: [string, string, string, string] = [
+  "Teleconsulta verificada (cadastro no conselho conferido)",
+  "Verified teleconsultation (council registration checked)",
+  "Teleconsulta verificada (registro del consejo revisado)",
+  "Téléconsultation vérifiée (inscription au conseil contrôlée)",
+];
+
 function ProfessionalPage() {
   const { professionalId } = Route.useParams();
   const { comunidade } = Route.useSearch();
@@ -67,6 +77,10 @@ function ProfessionalPage() {
   const entry = useDirectoryEntry(professionalId);
   const pro = useProfessional(professionalId);
   const links = useLinks("patient", !!user);
+  // Teleconsulta (M4): com a exigência ligada, só quem foi aprovado atende online.
+  const onlineAllowed = useProOnlineAllowed(professionalId);
+  const teleBadge = useTeleconsultBadge(professionalId);
+  const tr = useTr();
 
   // Só quem está logado vê o perfil do profissional (os perfis não são públicos).
   if (!hydrated || !user) return <AuthGateLoading />;
@@ -155,9 +169,14 @@ function ProfessionalPage() {
                   {pro.data.address || t("pro.addressOnBooking")}
                 </Row>
               )}
-              {p.offers_online && (
+              {p.offers_online && onlineAllowed.data !== false && (
                 <Row icon={Video} label={t("modality.online")}>
                   {pro.data.online_instructions || t("pro.onlineDefault")}
+                  {teleBadge.data && (
+                    <span className="mt-1 flex items-center gap-1 text-xs font-semibold text-accent">
+                      <BadgeCheck className="h-3.5 w-3.5" /> {tr(TELE_BADGE)}
+                    </span>
+                  )}
                 </Row>
               )}
             </dl>
@@ -186,7 +205,7 @@ function ProfessionalPage() {
           ) : (
             <BookingCard
               professionalId={professionalId}
-              offersOnline={!!p.offers_online}
+              offersOnline={!!p.offers_online && onlineAllowed.data !== false}
               offersPresential={!!p.offers_presential}
               priceCents={p.consultation_price_cents ?? 0}
               needsPayment={!!p.mp_connected && (p.consultation_price_cents ?? 0) > 0}

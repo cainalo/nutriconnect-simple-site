@@ -30,7 +30,8 @@ Lovable e para o site).
 | `d878b9d` | N10 — Loja de programas (`/programas`, `/painel/programas`, Edge Function `program-checkout`) |
 | `fdf29d1` | Admin: botão "Pontuação máxima (nível 5)"; contorno do menu do painel clínico corrigido       |
 | `985c0c7` | R1 — Compras nos mercados parceiros (botão "Comprar" + seção "Mercados parceiros" no admin)   |
-| (este)    | S1 — Estúdio de redes sociais no admin (seção "Redes sociais")                                |
+| `b6d9697` | S1 — Estúdio de redes sociais no admin (seção "Redes sociais")                                |
+| (este)    | M4 — Habilitação para teleconsulta (CFN 760/2023)                                             |
 
 Build (`npx vite build`), tipos (`npx tsc --noEmit -p .`) e lint (`npx eslint .`, só avisos de
 fast-refresh que já existiam) passam em todos.
@@ -56,6 +57,7 @@ supabase/migrations/20261014160000_program_store.sql
 supabase/migrations/20261014170000_max_pro_score_owner.sql
 supabase/migrations/20261014180000_market_partners.sql
 supabase/migrations/20261015100000_social_studio.sql
+supabase/migrations/20261015110000_teleconsult_check.sql
 ```
 
 Por que não foram aplicadas: nesta máquina a CLI do Supabase recusa o token
@@ -65,13 +67,13 @@ Por que não foram aplicadas: nesta máquina a CLI do Supabase recusa o token
 Caminhos para aplicar (do mais fácil para o dono ao mais técnico):
 
 1. **Conector do Supabase no claude.ai**: se o dono autorizar o conector "Supabase" nas
-   configurações de conectores do claude.ai, aplique as 9 migrations por ele, na ordem.
+   configurações de conectores do claude.ai, aplique as 10 migrations por ele, na ordem.
 2. **Arquivo único já pronto**: `APLICAR-NO-SUPABASE.sql` na raiz do projeto (fora do git, listado em
-   `.git/info/exclude`). Tem as 9 migrations numa transação (`begin`/`commit`, se algo falhar nada é
+   `.git/info/exclude`). Tem as 10 migrations numa transação (`begin`/`commit`, se algo falhar nada é
    aplicado) e registra as versões em `supabase_migrations.schema_migrations` se essa tabela
    existir. Basta colar no Supabase → SQL Editor → Run. Foi testado no PGlite sobre o estado atual do
-   banco (até `20261014100000`) e os 450 testes passaram. Se o arquivo sumir, recrie concatenando as
-   9 migrations acima entre `begin;` e `commit;`.
+   banco (até `20261014100000`) e os 462 testes passaram. Se o arquivo sumir, recrie concatenando as
+   10 migrations acima entre `begin;` e `commit;`.
 3. **CLI**: com um token válido (`npx supabase login`) ou `SUPABASE_DB_PASSWORD`:
    `npx supabase link --project-ref mtwtlbbgkzexyaavcboe` e `npx supabase db push`.
    Neste Windows o `curl` precisa de `--ssl-no-revoke`.
@@ -102,7 +104,7 @@ os eventos usados pela loja de programas.
 
 `supabase/tests/run-local.mjs` aplica todas as migrations num Postgres em WebAssembly (PGlite) com
 imitações do Supabase e roda `supabase/tests/social_security.sql`. Instruções no topo do arquivo.
-Resultado atual: **61+9 migrations aplicadas, 450 testes, 0 falhas**. Sempre que criar migration,
+Resultado atual: **61+10 migrations aplicadas, 462 testes, 0 falhas**. Sempre que criar migration,
 adicione testes ao `social_security.sql` (blocos `if to_regclass(...) is not null then ... end if;`)
 e rode o harness. Atenção: no `as_user`, texto com espaço ou vírgula volta entre aspas; use valores
 sem espaço nas comparações.
@@ -123,9 +125,9 @@ comercial), métricas automáticas do Instagram (Graph API) e gerar imagens com 
 
 ## Outros pendentes do roadmap (dependem de algo externo)
 
-- **M4** — Verificação e-Nutricionista para teleconsulta (CFN 760/23): sem API pública do CFN;
-  proposta já discutida: etapa manual (número + comprovante, aprovação no admin) na verificação
-  existente (`src/routes/verificacao.tsx`); só quem passar aparece como "atende online".
+- **M4 (feito)**: card "Teleconsulta" em /painel/configuracoes; análise em Admin → Verificações, com o
+  interruptor "Exigir habilitação para atender online" (começa desligado; ao ligar, o banco recusa
+  consulta online de quem não foi aprovado). Ligue só depois que os profissionais enviarem o cadastro.
 - **A2–A5** (app Android): A2 precisa de projeto no Firebase (`google-services.json`), A3/A4 são
   código no `mobile/`, A5 precisa da conta da Google Play.
 - **Dados da empresa** em `src/lib/legal.ts` (razão social, CNPJ, endereço, nome do encarregado de

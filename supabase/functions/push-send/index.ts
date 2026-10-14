@@ -108,6 +108,18 @@ const AVISOS: Record<string, Names> = {
     "{name} compró tu programa",
     "{name} a acheté votre programme",
   ],
+  teleconsulta_aprovada: [
+    "Sua habilitação para teleconsulta foi aprovada",
+    "Your teleconsultation clearance was approved",
+    "Tu habilitación para teleconsulta fue aprobada",
+    "Votre habilitation à la téléconsultation est approuvée",
+  ],
+  teleconsulta_recusada: [
+    "Seu pedido de teleconsulta precisa de ajuste",
+    "Your teleconsultation request needs changes",
+    "Tu solicitud de teleconsulta necesita ajustes",
+    "Votre demande de téléconsultation doit être corrigée",
+  ],
   consulta_agendada: [
     "{name} agendou uma consulta",
     "{name} booked an appointment",

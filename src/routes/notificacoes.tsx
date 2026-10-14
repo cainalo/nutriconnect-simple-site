@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
+  BadgeCheck,
   Bell,
   BellRing,
   BookOpen,
@@ -647,6 +648,29 @@ function describe(
         ]),
         detail: str(data.title),
         go: { to: "/painel/programas" },
+      };
+    case "teleconsulta_aprovada":
+      return {
+        icon: BadgeCheck,
+        text: tr([
+          "Sua habilitação para teleconsulta foi aprovada",
+          "Your teleconsultation clearance was approved",
+          "Tu habilitación para teleconsulta fue aprobada",
+          "Votre habilitation à la téléconsultation est approuvée",
+        ]),
+        go: { to: "/painel/configuracoes" },
+      };
+    case "teleconsulta_recusada":
+      return {
+        icon: ShieldAlert,
+        text: tr([
+          "Seu pedido de teleconsulta precisa de ajuste",
+          "Your teleconsultation request needs changes",
+          "Tu solicitud de teleconsulta necesita ajustes",
+          "Votre demande de téléconsultation doit être corrigée",
+        ]),
+        detail: str(data.reason),
+        go: { to: "/painel/configuracoes" },
       };
     default:
       return {

@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { PaymentsCard } from "@/components/clinical/payments-card";
+import { TeleconsultCard } from "@/components/clinical/teleconsult-card";
 import { ExternalLink } from "lucide-react";
 import {
   Card,
@@ -264,6 +265,8 @@ function ProfessionalSettingsPage() {
             <p className="mt-2 text-xs text-destructive">{t("settingsPro.noModality")}</p>
           )}
         </Card>
+
+        <TeleconsultCard profession={pro.data?.profession} />
 
         <PaymentsCard professionalId={user.id} />
 

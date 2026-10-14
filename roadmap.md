@@ -34,7 +34,7 @@ Cada item ganha o próprio commit depois de testado.
 11. [x] N8 — Lancheira da semana (lanche escolar, ligada aos perfis infantis)
 12. [x] M3 — Painel do profissional: relatório de adesão, paciente sem registrar há 7 dias, modelos de plano
 13. [x] N9 — Relatório "Minha evolução" (PDF mensal)
-14. [ ] M4 — Verificação com e-Nutricionista para teleconsulta (Resolução CFN 760/23)
+14. [x] M4 — Verificação com e-Nutricionista para teleconsulta (Resolução CFN 760/23)
 15. [x] N12 — Descobrir a nutri ideal (questionário de compatibilidade)
 16. [x] M6 — Trilhas com certificado e revisão espaçada
 17. [x] N6 — Parceiro de jornada (dupla de apoio com check-in diário)

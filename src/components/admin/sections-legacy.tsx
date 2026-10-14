@@ -15,6 +15,16 @@ import {
 import { useI18n } from "@/hooks/use-i18n";
 import { formatDate, type VerificationRequest } from "@/lib/community";
 import { reviewVerification } from "@/lib/community-admin";
+import { useQuery } from "@tanstack/react-query";
+import { cardsByIds } from "@/lib/social/api";
+import {
+  REGISTRY_LABEL,
+  useAdminTeleconsultChecks,
+  useReviewTeleconsult,
+  useSetTeleconsultRequired,
+  useTeleconsultRequired,
+  type Registry,
+} from "@/lib/teleconsult";
 
 /** Pedidos de verificação profissional (aguardando e já analisados). */
 export function VerificationsSection({
@@ -32,6 +42,7 @@ export function VerificationsSection({
 
   return (
     <div className="space-y-6">
+      <TeleconsultReview />
       <section className="space-y-4">
         <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
           {t("admin.awaiting")}
@@ -318,5 +329,118 @@ function CommunityCase({ community: c }: { community: RemoteCommunity }) {
         </div>
       )}
     </article>
+  );
+}
+
+// ── Habilitação para teleconsulta (M4) ───────────────────────────────────────
+
+function TeleconsultReview() {
+  const checks = useAdminTeleconsultChecks();
+  const required = useTeleconsultRequired();
+  const setRequired = useSetTeleconsultRequired();
+  const review = useReviewTeleconsult();
+  const people = useQuery({
+    queryKey: ["teleconsult-people", ...(checks.data ?? []).map((c) => c.professional_id).sort()],
+    enabled: !!checks.data?.length,
+    queryFn: () => cardsByIds([...new Set((checks.data ?? []).map((c) => c.professional_id))]),
+  });
+  // Sem a tabela no banco (migration pendente), o painel não aparece.
+  if (checks.isError) return null;
+  const pending = (checks.data ?? []).filter((c) => c.status === "em_analise");
+  const done = (checks.data ?? []).filter((c) => c.status !== "em_analise").slice(0, 10);
+
+  return (
+    <section className="space-y-3 rounded-3xl border border-border/80 bg-card p-4 shadow-xs sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+            Teleconsulta (CFN 760/2023)
+          </h2>
+          <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
+            Confira o número no cadastro público do conselho (e-Nutricionista do CFN; e-Psi do CFP)
+            e o comprovante enviado. Com a exigência ligada, só profissionais aprovados recebem
+            consultas online.
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <input
+            type="checkbox"
+            checked={!!required.data}
+            disabled={setRequired.isPending}
+            onChange={(e) =>
+              setRequired.mutate(e.target.checked, {
+                onSuccess: () =>
+                  toast.success(e.target.checked ? "Exigência ligada." : "Exigência desligada."),
+                onError: (err) => toast.error((err as Error).message),
+              })
+            }
+          />
+          Exigir habilitação para atender online
+        </label>
+      </div>
+      {pending.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+          Nenhum pedido de teleconsulta aguardando.
+        </p>
+      ) : (
+        pending.map((c) => (
+          <article key={c.id} className="rounded-2xl border border-border/70 p-3">
+            <p className="text-sm font-semibold text-foreground">
+              {people.data?.get(c.professional_id)?.name ?? "Profissional"} ·{" "}
+              {REGISTRY_LABEL[c.registry as Registry]}{" "}
+              <span className="font-mono">{c.registry_number}</span>
+            </p>
+            <p className="text-xs text-muted-foreground">Enviado em {formatDate(c.submitted_at)}</p>
+            {c.documentUrl && (
+              <a
+                href={c.documentUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-block text-xs font-semibold text-accent hover:underline"
+              >
+                Abrir comprovante
+              </a>
+            )}
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground"
+                disabled={review.isPending}
+                onClick={() =>
+                  review.mutate(
+                    { id: c.id, approve: true },
+                    { onSuccess: () => toast.success("Habilitação aprovada.") },
+                  )
+                }
+              >
+                <Check className="h-3.5 w-3.5" /> Aprovar
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 rounded-full border border-destructive/40 px-3 py-1.5 text-xs font-semibold text-destructive"
+                disabled={review.isPending}
+                onClick={() => {
+                  const reason = window.prompt("Motivo da recusa (o profissional vê):") ?? "";
+                  if (reason.trim()) review.mutate({ id: c.id, approve: false, reason });
+                }}
+              >
+                <X className="h-3.5 w-3.5" /> Recusar
+              </button>
+            </div>
+          </article>
+        ))
+      )}
+      {done.length > 0 && (
+        <ul className="divide-y divide-border/60 text-xs text-muted-foreground">
+          {done.map((c) => (
+            <li key={c.id} className="py-1.5">
+              {people.data?.get(c.professional_id)?.name ?? "Profissional"} ·{" "}
+              {c.status === "aprovado" ? "aprovado" : "recusado"} em{" "}
+              {c.reviewed_at ? formatDate(c.reviewed_at) : "—"}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

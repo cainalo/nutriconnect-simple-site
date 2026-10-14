@@ -40,7 +40,16 @@ export function SocialStudioSection() {
   if (profiles.error && posts.error) {
     return (
       <Panel title="Redes sociais">
-        <QueryError error={profiles.error} />
+        {/schema cache|does not exist/i.test((profiles.error as Error).message) ? (
+          <p className="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-foreground">
+            O estúdio já está no site, mas o banco de dados ainda não recebeu a atualização que cria
+            as tabelas dele (junto com as outras funções novas: casa, dupla, eventos, loja e
+            mercados). Assim que as migrations pendentes forem aplicadas no Supabase, esta seção
+            funciona sozinha.
+          </p>
+        ) : (
+          <QueryError error={profiles.error} />
+        )}
       </Panel>
     );
   }

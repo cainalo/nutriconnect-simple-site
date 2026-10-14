@@ -3707,6 +3707,7 @@ export type Database = {
           profession: string
           registration: string
           specialties: string[]
+          teleconsult_approved_at: string | null
           timezone: string
           uf: string
           updated_at: string
@@ -3727,6 +3728,7 @@ export type Database = {
           profession: string
           registration: string
           specialties?: string[]
+          teleconsult_approved_at?: string | null
           timezone?: string
           uf: string
           updated_at?: string
@@ -3747,6 +3749,7 @@ export type Database = {
           profession?: string
           registration?: string
           specialties?: string[]
+          teleconsult_approved_at?: string | null
           timezone?: string
           uf?: string
           updated_at?: string
@@ -4547,6 +4550,45 @@ export type Database = {
           sample_posts?: string
           updated_at?: string
           url?: string | null
+        }
+        Relationships: []
+      }
+      teleconsult_checks: {
+        Row: {
+          document_path: string
+          id: string
+          professional_id: string
+          registry: string
+          registry_number: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+        }
+        Insert: {
+          document_path: string
+          id?: string
+          professional_id: string
+          registry: string
+          registry_number: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+        }
+        Update: {
+          document_path?: string
+          id?: string
+          professional_id?: string
+          registry?: string
+          registry_number?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
         }
         Relationships: []
       }
@@ -5964,6 +6006,34 @@ export type Database = {
       }
       social_studio_allowed: { Args: { p_user?: string }; Returns: boolean }
       social_trends: { Args: { p_days?: number }; Returns: Json }
+      admin_review_teleconsult: {
+        Args: { p_approve: boolean; p_check: string; p_reason?: string }
+        Returns: undefined
+      }
+      admin_revoke_teleconsult: { Args: { p_pro: string }; Returns: undefined }
+      pro_online_allowed: { Args: { p_pro: string }; Returns: boolean }
+      teleconsult_required: { Args: never; Returns: boolean }
+      teleconsult_submit: {
+        Args: { p_document_path: string; p_number: string; p_registry: string }
+        Returns: {
+          document_path: string
+          id: string
+          professional_id: string
+          registry: string
+          registry_number: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "teleconsult_checks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       export_my_data: { Args: never; Returns: Json }
       f_unaccent: { Args: { "": string }; Returns: string }
       friend_ids: { Args: { p_user?: string }; Returns: string[] }

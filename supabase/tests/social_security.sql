@@ -1460,6 +1460,52 @@ begin
     res := res || jsonb_build_object('teste', 'status do post só da lista', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
   end if;
 
+  -- ------------------------------------------------ HABILITAÇÃO PARA TELECONSULTA (M4)
+  -- P é profissional verificado; F e B são usuários comuns.
+  if to_regclass('public.teleconsult_checks') is not null then
+    declare
+      tc uuid;
+      ok_insert boolean;
+    begin
+      r := pg_temp.as_user(f, 'authenticated', format('select status from public.teleconsult_submit(''e-nutricionista'', ''123'', %L)', f::text || '/doc.jpg'));
+      res := res || jsonb_build_object('teste', 'quem não é profissional NÃO pede habilitação', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select status from public.teleconsult_submit(''e-nutricionista'', ''123'', %L)', b::text || '/doc.jpg'));
+      res := res || jsonb_build_object('teste', 'comprovante precisa estar na pasta do profissional', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select status from public.teleconsult_submit(''e-nutricionista'', ''CRN3-123'', %L)', p::text || '/doc.jpg'));
+      res := res || jsonb_build_object('teste', 'profissional pede habilitação para teleconsulta', 'ok', (r = 'em_analise'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select status from public.teleconsult_submit(''e-nutricionista'', ''CRN3-123'', %L)', p::text || '/doc2.jpg'));
+      res := res || jsonb_build_object('teste', 'um pedido em análise por vez', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.teleconsult_checks');
+      res := res || jsonb_build_object('teste', 'terceiro NÃO vê pedidos de habilitação', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(p, 'authenticated', 'update public.professionals set teleconsult_approved_at = now() where user_id = auth.uid()');
+      res := res || jsonb_build_object('teste', 'profissional NÃO se aprova sozinho', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.pro_online_allowed(%L)', p));
+      res := res || jsonb_build_object('teste', 'sem exigência, todos atendem online', 'ok', (r = 't'), 'obtido', r);
+      insert into public.platform_settings (key, value) values ('site_teleconsult_required', 'true'::jsonb)
+      on conflict (key) do update set value = 'true'::jsonb;
+      r := pg_temp.as_user(b, 'authenticated', format('select public.pro_online_allowed(%L)', p));
+      res := res || jsonb_build_object('teste', 'com exigência, sem aprovação NÃO atende online', 'ok', (r = 'f'), 'obtido', r);
+      begin
+        insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality)
+        values (p, b, now() + interval '30 days', now() + interval '30 days 1 hour', 'online');
+        ok_insert := true;
+      exception when others then
+        ok_insert := false;
+      end;
+      res := res || jsonb_build_object('teste', 'banco recusa consulta online sem habilitação', 'ok', not ok_insert, 'obtido', ok_insert::text);
+      select id into tc from public.teleconsult_checks where professional_id = p and status = 'em_analise';
+      r := pg_temp.as_user(b, 'authenticated', format('select public.admin_review_teleconsult(%L, true)', tc));
+      res := res || jsonb_build_object('teste', 'só a administração aprova habilitação', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', format('select public.admin_review_teleconsult(%L, true)', tc));
+      res := res || jsonb_build_object('teste', 'administração aprova e o profissional é avisado',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = p and type = 'teleconsulta_aprovada'),
+        'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.pro_online_allowed(%L)', p));
+      res := res || jsonb_build_object('teste', 'aprovado atende online com a exigência ligada', 'ok', (r = 't'), 'obtido', r);
+      delete from public.platform_settings where key = 'site_teleconsult_required';
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end
