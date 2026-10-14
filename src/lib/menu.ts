@@ -1,8 +1,10 @@
-// Cardápio da semana (N3): um cardápio por semana (segunda a domingo) na conta da pessoa.
+// Cardápio da semana (N3): um cardápio por semana (segunda a domingo) na conta da pessoa, ou um
+// só para a casa de quem mora num grupo familiar (F2).
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json, Tables } from "@/integrations/supabase/types";
 import type { Names } from "@/lib/appearance-data";
+import { useMyHousehold } from "@/lib/household";
 import type { Budget, MealKey, MenuMeal, Section } from "@/lib/menu.functions";
 
 export type WeeklyMenu = Tables<"weekly_menus">;
@@ -64,43 +66,59 @@ export const SECTION_NAMES: Record<Section, Names> = {
 
 export const menuKey = (week: string) => ["weekly-menu", week] as const;
 
+/**
+ * O cardápio da semana: o da casa, se a pessoa mora numa (os pessoais ficam guardados), ou o
+ * pessoal. Fora de uma casa o RLS já mostra só os pessoais.
+ */
 export function useWeeklyMenu(userId: string | undefined, week: string) {
+  const house = useMyHousehold(userId);
+  const houseId = house.data?.house.id ?? null;
   return useQuery({
     queryKey: menuKey(week),
-    enabled: !!userId,
+    enabled: !!userId && !house.isLoading,
     queryFn: async (): Promise<WeeklyMenu | null> => {
-      const { data, error } = await supabase
-        .from("weekly_menus")
-        .select("*")
-        .eq("week_start", week)
-        .maybeSingle();
+      let query = supabase.from("weekly_menus").select("*").eq("week_start", week);
+      if (houseId) query = query.eq("household_id", houseId);
+      const { data, error } = await query.maybeSingle();
       if (error) throw new Error(error.message);
       return data;
     },
   });
 }
 
-/** Grava o cardápio da semana inteiro (cria na primeira vez). */
+/** Grava o cardápio da semana inteiro (o da casa ou o pessoal; cria na primeira vez). */
 export function useSaveMenu(userId: string | undefined, week: string) {
   const qc = useQueryClient();
+  const house = useMyHousehold(userId);
+  const houseId = house.data?.house.id ?? null;
   return useMutation({
     mutationFn: async ({ budget, meals }: { budget: Budget; meals: MenuMeals }) => {
-      const { error } = await supabase
+      const { error } = await supabase.rpc("weekly_menu_save", {
+        p_week: week,
+        p_budget: budget,
+        p_meals: meals as unknown as Json,
+      });
+      if (!error) return;
+      // Banco ainda sem a função da casa (migration pendente): grava como antes.
+      if (error.code !== "PGRST202") throw new Error(error.message);
+      const old = await supabase
         .from("weekly_menus")
         .upsert(
           { user_id: userId!, week_start: week, budget, meals: meals as unknown as Json },
           { onConflict: "user_id,week_start" },
         );
-      if (error) throw new Error(error.message);
+      if (old.error) throw new Error(old.error.message);
     },
     onMutate: ({ budget, meals }) => {
       const old = qc.getQueryData<WeeklyMenu | null>(menuKey(week));
       const next: WeeklyMenu = {
         id: old?.id ?? "novo",
-        user_id: userId!,
+        user_id: old?.user_id ?? userId!,
+        household_id: old?.household_id ?? houseId,
         week_start: week,
         created_at: old?.created_at ?? new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        updated_by: userId ?? null,
         budget,
         meals: meals as unknown as Json,
       };

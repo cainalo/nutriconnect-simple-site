@@ -1188,6 +1188,54 @@ begin
     end;
   end if;
 
+  -- --------------------------------------------- MINHA CASA: GELADEIRA E CARDÁPIO (F2)
+  if to_regclass('public.fridge_items') is not null then
+    declare
+      hid uuid;
+      code text;
+    begin
+      perform pg_temp.as_user(c, 'authenticated', 'select public.household_create(''Cozinha'')');
+      select household_id into hid from public.household_members where user_id = c;
+      code := pg_temp.as_user(c, 'authenticated', 'select public.household_invite_code() ->> ''code''');
+      perform pg_temp.as_user(f, 'authenticated', format('select public.household_join(%L)', code));
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.fridge_items (user_id, household_id, text) values (auth.uid(), %L, ''tomate'')', hid));
+      res := res || jsonb_build_object('teste', 'põe item na geladeira da casa', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'select count(*) from public.fridge_items where household_id is not null');
+      res := res || jsonb_build_object('teste', 'outro morador vê a geladeira da casa', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', format('insert into public.fridge_items (user_id, household_id, text) values (auth.uid(), %L, ''Tomate'')', hid));
+      res := res || jsonb_build_object('teste', 'NÃO repete item na geladeira (maiúsculas não importam)', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.fridge_items where household_id is not null');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê a geladeira da casa', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.fridge_items (user_id, household_id, text) values (auth.uid(), %L, ''intruso'')', hid));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO mexe na geladeira da casa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(f, 'authenticated', 'insert into public.fridge_items (user_id, text) values (auth.uid(), ''cebola'')');
+      perform pg_temp.as_user(f, 'authenticated', 'select public.household_bring_my_items()');
+      res := res || jsonb_build_object('teste', 'leva a geladeira pessoal para a casa',
+        'ok', exists (select 1 from public.fridge_items where household_id = hid and text = 'cebola')
+              and not exists (select 1 from public.fridge_items where user_id = f and household_id is null),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(c, 'authenticated', 'select household_id is not null from public.weekly_menu_save(date_trunc(''week'', current_date)::date, ''economico'', ''{}''::jsonb)');
+      res := res || jsonb_build_object('teste', 'grava o cardápio da semana da casa', 'ok', (r = 't'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(f, 'authenticated', 'select public.weekly_menu_save(date_trunc(''week'', current_date)::date, ''moderado'', ''{}''::jsonb)');
+      res := res || jsonb_build_object('teste', 'outro morador muda o mesmo cardápio da casa',
+        'ok', (select count(*) = 1 and bool_and(budget = 'moderado' and updated_by = f)
+                 from public.weekly_menus where household_id = hid),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(f, 'authenticated', 'update public.weekly_menus set budget = ''livre'' where household_id is not null');
+      res := res || jsonb_build_object('teste', 'cardápio da casa só muda pela função', 'ok', (r = 'OK:0' or r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select household_id is null from public.weekly_menu_save(date_trunc(''week'', current_date)::date, ''livre'', ''{}''::jsonb)');
+      res := res || jsonb_build_object('teste', 'quem não mora numa casa grava o cardápio pessoal', 'ok', (r = 't'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.weekly_menus where household_id is not null');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê o cardápio da casa', 'ok', (r = '0'), 'obtido', r);
+      perform pg_temp.as_user(c, 'authenticated', 'select public.household_leave()');
+      perform pg_temp.as_user(f, 'authenticated', 'select public.household_leave()');
+      res := res || jsonb_build_object('teste', 'casa acabou: geladeira e cardápio dela também',
+        'ok', not exists (select 1 from public.fridge_items where household_id = hid)
+              and not exists (select 1 from public.weekly_menus where household_id = hid),
+        'obtido', 'verificado como superusuário');
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

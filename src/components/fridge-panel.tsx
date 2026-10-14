@@ -29,8 +29,7 @@ import { fileToDataUrl } from "@/lib/image";
 import { cn } from "@/lib/utils";
 import {
   COMMON_INGREDIENTS,
-  fridgeItemsKey,
-  readFridgeItems,
+  useFridgeItems,
   useAddShoppingItems,
   useCommunityRecipes,
   useDeleteSavedRecipe,
@@ -84,33 +83,6 @@ const ERRORS: Record<FridgeError, Names> = {
     "Nina n'a pas pu préparer les recettes. Réessayez.",
   ],
 };
-
-/** Lista de ingredientes guardada neste aparelho (comodidade: volta como estava). */
-function useIngredients(userId: string | undefined) {
-  const [items, setItems] = useState<string[]>([]);
-  useEffect(() => {
-    if (userId) setItems(readFridgeItems(userId));
-  }, [userId]);
-  const save = (next: string[]) => {
-    setItems(next);
-    if (!userId) return;
-    try {
-      window.localStorage.setItem(fridgeItemsKey(userId), JSON.stringify(next));
-    } catch {
-      /* sem armazenamento */
-    }
-  };
-  const add = (texts: string[]) => {
-    const seen = new Set(items.map((i) => i.toLowerCase()));
-    const fresh = texts
-      .map((t) => t.trim().toLowerCase().slice(0, 40))
-      .filter((t) => t && !seen.has(t) && (seen.add(t), true));
-    if (fresh.length) save([...items, ...fresh].slice(0, 30));
-    return fresh.length;
-  };
-  const remove = (t: string) => save(items.filter((i) => i !== t));
-  return { items, add, remove, clear: () => save([]) };
-}
 
 // ───────────────────────────── Receita da Nina ─────────────────────────────
 
@@ -452,7 +424,7 @@ export function FridgePanel() {
   const tr = useTr();
   const { locale } = useI18n();
   const { user } = useAuth();
-  const ingredients = useIngredients(user?.id);
+  const ingredients = useFridgeItems(user?.id);
   const [tab, setTab] = useState<"ideias" | "guardadas">("ideias");
   const [draft, setDraft] = useState("");
   const [recipes, setRecipes] = useState<FridgeRecipe[]>([]);
@@ -476,9 +448,11 @@ export function FridgePanel() {
         .filter((n) => !common.includes(n))
     : [];
 
+  const onAddError = (err: unknown) => toast.error((err as Error).message);
+
   const addTyped = (e: FormEvent) => {
     e.preventDefault();
-    ingredients.add(draft.split(/[,;\n]/));
+    void ingredients.add(draft.split(/[,;\n]/)).catch(onAddError);
     setDraft("");
   };
 
@@ -501,7 +475,7 @@ export function FridgePanel() {
           ]),
         );
       else {
-        const n = ingredients.add(res.items);
+        const n = await ingredients.add(res.items);
         toast.success(
           tr([
             `A Nina encontrou ${n} item(ns). Confira a lista antes de pedir as receitas.`,
@@ -565,6 +539,17 @@ export function FridgePanel() {
               "Qu'y a-t-il dans le frigo ?",
             ])}
           </h1>
+          {ingredients.shared && (
+            <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-foreground">
+              🏠{" "}
+              {tr([
+                "Geladeira da casa: todos que moram com você veem e mudam",
+                "Home fridge: everyone you live with sees and edits it",
+                "Nevera de la casa: todos los que viven contigo la ven y editan",
+                "Frigo de la maison : tous ceux qui vivent avec vous le voient et le modifient",
+              ])}
+            </p>
+          )}
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             {tr([
               "Conte o que você tem em casa e a Nina sugere receitas simples, aproveitando tudo: talos, cascas e sobras.",
@@ -641,7 +626,7 @@ export function FridgePanel() {
                   {i}
                   <button
                     type="button"
-                    onClick={() => ingredients.remove(i)}
+                    onClick={() => void ingredients.remove(i).catch(onAddError)}
                     aria-label={tr(["Tirar", "Remove", "Quitar", "Retirer"])}
                     className="text-muted-foreground hover:text-foreground"
                   >
@@ -652,7 +637,7 @@ export function FridgePanel() {
               {ingredients.items.length > 1 && (
                 <button
                   type="button"
-                  onClick={ingredients.clear}
+                  onClick={() => void ingredients.clear().catch(onAddError)}
                   className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
                 >
                   {tr(["Limpar", "Clear", "Limpiar", "Effacer"])}
@@ -706,7 +691,7 @@ export function FridgePanel() {
                   <button
                     key={c}
                     type="button"
-                    onClick={() => ingredients.add([c])}
+                    onClick={() => void ingredients.add([c]).catch(onAddError)}
                     className={cn(
                       chip,
                       "border-dashed border-border text-muted-foreground hover:text-foreground",
@@ -729,7 +714,7 @@ export function FridgePanel() {
                     <button
                       key={c}
                       type="button"
-                      onClick={() => ingredients.add([c])}
+                      onClick={() => void ingredients.add([c]).catch(onAddError)}
                       className={cn(
                         chip,
                         "border-dashed border-primary/40 text-muted-foreground hover:text-foreground",

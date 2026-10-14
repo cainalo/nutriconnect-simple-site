@@ -50,7 +50,7 @@ Pessoas que moram juntas compartilham, em tempo real, o que é da casa. Nada cl�
 papéis responsável e membro; convite por link/código ou entre amigos.
 
 1. [x] F1 — Casa, convites e membros + lista de compras única em tempo real (quem adicionou, quem comprou)
-2. [ ] F2 — Geladeira da casa (sai do navegador para o banco) + cardápio da semana da casa (porções = nº de pessoas)
+2. [x] F2 — Geladeira da casa (sai do navegador para o banco) + cardápio da semana da casa (porções = nº de pessoas)
 3. [ ] F3 — Lancheiras das crianças editáveis pelos adultos da casa + mural de recados
 
 ## Feito

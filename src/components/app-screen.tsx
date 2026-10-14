@@ -2,6 +2,8 @@
 // abaixo do cabeçalho. O feed e o Explorar não usam esta casca (continuam rolando a janela).
 import { useCallback, useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { SiteHeader } from "@/components/site-chrome";
+import { useAuth } from "@/hooks/use-auth";
+import { useHouseholdRealtime, useMyHousehold } from "@/lib/household";
 import { cn } from "@/lib/utils";
 
 // ───────── Encaixe da seção "Mais" das colunas laterais ─────────
@@ -63,6 +65,7 @@ export function AppScreen({
       className={cn("flex h-dvh flex-col overflow-hidden bg-background text-foreground", className)}
     >
       {header ?? <SiteHeader />}
+      <HouseholdLive />
       <main
         data-app-main={scroll ? "" : undefined}
         data-no-bottom-pad
@@ -109,4 +112,12 @@ export function FitColumn({ children, className }: { children: ReactNode; classN
       {children}
     </div>
   );
+}
+
+/** Tempo real da casa (lista de compras, geladeira, cardápio e moradores) nas telas internas. */
+function HouseholdLive() {
+  const { user } = useAuth();
+  const house = useMyHousehold(user?.id);
+  useHouseholdRealtime(house.data?.house.id);
+  return null;
 }

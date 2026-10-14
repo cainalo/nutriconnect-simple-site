@@ -1,9 +1,10 @@
 // Grupo familiar "Minha casa" (F1): sem casa, criar ou entrar com código; com casa, a lista de
 // compras da casa em tempo real (quem adicionou, quem comprou), quem mora junto, convites e sair.
 import { useEffect, useState, type FormEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
+  CalendarDays,
   CheckCircle2,
   Copy,
   Crown,
@@ -14,6 +15,7 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  Refrigerator,
   Share2,
   ShoppingBasket,
   Trash2,
@@ -94,10 +96,10 @@ export function HouseholdPanel() {
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           {tr([
-            "Quem mora junto compartilha a lista de compras, atualizada na hora para todos. Diário, metas, peso e acompanhamento continuam só de cada um.",
-            "People who live together share the shopping list, updated instantly for everyone. Diary, goals, weight and care stay private to each person.",
-            "Quienes viven juntos comparten la lista de compras, actualizada al instante para todos. Diario, metas, peso y seguimiento siguen siendo de cada uno.",
-            "Ceux qui vivent ensemble partagent la liste de courses, mise à jour instantanément pour tous. Journal, objectifs, poids et suivi restent personnels.",
+            "Quem mora junto compartilha a lista de compras, a geladeira e o cardápio da semana, atualizados na hora para todos. Diário, metas, peso e acompanhamento continuam só de cada um.",
+            "People who live together share the shopping list, fridge and weekly menu, updated instantly for everyone. Diary, goals, weight and care stay private to each person.",
+            "Quienes viven juntos comparten la lista de compras, la nevera y el menú semanal, actualizados al instante para todos. Diario, metas, peso y seguimiento siguen siendo de cada uno.",
+            "Ceux qui vivent ensemble partagent la liste de courses, le frigo et le menu de la semaine, mis à jour instantanément. Journal, objectifs, poids et suivi restent personnels.",
           ])}
         </p>
       </header>
@@ -257,10 +259,10 @@ function NoHouse() {
                 "En partant, votre liste perso revient ; ce que vous avez ajouté à la liste commune reste.",
               ],
               [
-                "Em breve: geladeira, cardápio da semana, lancheiras e mural da casa.",
-                "Coming soon: the home's fridge, weekly menu, lunchboxes and message board.",
-                "Próximamente: nevera, menú semanal, loncheras y mural de la casa.",
-                "Bientôt : frigo, menu de la semaine, boîtes à goûter et tableau de la maison.",
+                "Em breve: lancheiras das crianças e mural de recados da casa.",
+                "Coming soon: the kids' lunchboxes and the home message board.",
+                "Próximamente: loncheras de los niños y mural de mensajes de la casa.",
+                "Bientôt : boîtes à goûter des enfants et tableau de messages de la maison.",
               ],
             ] as [string, string, string, string][]
           ).map((t) => (
@@ -284,6 +286,7 @@ function HouseView({ mine }: { mine: MyHousehold }) {
       <div className="space-y-4">
         <BringItemsPrompt houseId={mine.house.id} />
         <HouseShopping people={people.data} />
+        <HouseKitchen />
       </div>
       <div className="space-y-4">
         {isOwner && <EditHouse mine={mine} />}
@@ -334,18 +337,18 @@ function BringItemsPrompt({ houseId }: { houseId: string }) {
     <div className={cn(card, "border-accent/40 bg-accent-soft/30")}>
       <p className="text-sm font-semibold text-foreground">
         {tr([
-          `Você tem ${count} ${count === 1 ? "item" : "itens"} na sua lista de compras pessoal.`,
-          `You have ${count} ${count === 1 ? "item" : "items"} on your personal shopping list.`,
-          `Tienes ${count} ${count === 1 ? "artículo" : "artículos"} en tu lista personal.`,
-          `Vous avez ${count} article${count === 1 ? "" : "s"} sur votre liste perso.`,
+          `Você tem ${count} ${count === 1 ? "item" : "itens"} na sua lista de compras e na sua geladeira.`,
+          `You have ${count} ${count === 1 ? "item" : "items"} on your own shopping list and fridge.`,
+          `Tienes ${count} ${count === 1 ? "artículo" : "artículos"} en tu lista y tu nevera.`,
+          `Vous avez ${count} article${count === 1 ? "" : "s"} dans votre liste et votre frigo.`,
         ])}
       </p>
       <p className="mt-0.5 text-xs text-muted-foreground">
         {tr([
-          "Levar para a lista da casa? Se preferir, eles ficam guardados e voltam se você sair da casa.",
-          "Bring them to the home list? Or keep them saved; they come back if you leave the home.",
-          "¿Llevarlos a la lista de la casa? Si prefieres, quedan guardados y vuelven si sales.",
-          "Les ajouter à la liste commune ? Sinon, ils restent de côté et reviennent si vous partez.",
+          "Levar para a casa? Se preferir, eles ficam guardados e voltam se você sair da casa.",
+          "Bring them to the home? Or keep them saved; they come back if you leave the home.",
+          "¿Llevarlos a la casa? Si prefieres, quedan guardados y vuelven si sales.",
+          "Les apporter à la maison ? Sinon, ils restent de côté et reviennent si vous partez.",
         ])}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -883,6 +886,54 @@ function LeaveHouse() {
         <LogOut className="h-3.5 w-3.5" />
         {tr(["Sair da casa", "Leave the home", "Salir de la casa", "Quitter la maison"])}
       </button>
+    </div>
+  );
+}
+
+/** Geladeira e cardápio, que também passam a ser da casa. */
+function HouseKitchen() {
+  const tr = useTr();
+  const links = [
+    {
+      to: "/geladeira" as const,
+      icon: Refrigerator,
+      title: tr(["Geladeira da casa", "Home fridge", "Nevera de la casa", "Frigo de la maison"]),
+      text: tr([
+        "O que tem em casa, para receitas com o que sobrou",
+        "What's at home, for recipes with what's left",
+        "Lo que hay en casa, para recetas con lo que queda",
+        "Ce qu'il y a à la maison, pour cuisiner les restes",
+      ]),
+    },
+    {
+      to: "/cardapio" as const,
+      icon: CalendarDays,
+      title: tr(["Cardápio da casa", "Home menu", "Menú de la casa", "Menu de la maison"]),
+      text: tr([
+        "Almoço e jantar da semana, com porções para todos",
+        "The week's lunch and dinner, with servings for everyone",
+        "Almuerzo y cena de la semana, con porciones para todos",
+        "Déjeuners et dîners de la semaine, avec des portions pour tous",
+      ]),
+    },
+  ];
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {links.map((l) => (
+        <Link
+          key={l.to}
+          to={l.to}
+          className={cn(card, "flex items-start gap-3 transition hover:bg-secondary/50")}
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
+            <l.icon className="h-5 w-5" />
+          </span>
+          <span>
+            <span className="block text-sm font-bold text-foreground">{l.title}</span>
+            <span className="block text-xs text-muted-foreground">{l.text}</span>
+          </span>
+        </Link>
+      ))}
     </div>
   );
 }

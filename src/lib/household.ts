@@ -110,7 +110,9 @@ function useHouseholdMutation<T, R = unknown>(fn: (arg: T) => Promise<R>) {
     mutationFn: fn,
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: householdKeys.all });
-      void qc.invalidateQueries({ queryKey: ["shopping"] });
+      for (const key of ["shopping", "fridge-items", "weekly-menu"]) {
+        void qc.invalidateQueries({ queryKey: [key] });
+      }
     },
   });
 }
@@ -180,64 +182,52 @@ export function useTransferHousehold() {
   });
 }
 
-/** Quantos itens a pessoa tem na lista pessoal (ainda não comprados). */
+/** Quantos itens a pessoa tem na lista de compras (não comprados) e na geladeira pessoais. */
 export async function countMyPersonalItems(userId: string): Promise<number> {
-  const { count, error } = await supabase
-    .from("shopping_items")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .is("household_id", null)
-    .eq("done", false);
-  fail(error);
-  return count ?? 0;
+  const [shopping, fridge] = await Promise.all([
+    supabase
+      .from("shopping_items")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .is("household_id", null)
+      .eq("done", false),
+    supabase
+      .from("fridge_items")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .is("household_id", null),
+  ]);
+  fail(shopping.error);
+  return (shopping.count ?? 0) + (fridge.count ?? 0);
 }
 
 /**
  * Tempo real da casa: a lista de compras e os membros se atualizam na tela quando alguém da casa
- * mexe. Cada tela que mostra a lista assina o seu próprio canal.
+ * mexe. Fica ligado uma vez nas telas internas (AppScreen).
  */
 export function useHouseholdRealtime(houseId: string | undefined) {
   const qc = useQueryClient();
   const id = useId();
   useEffect(() => {
     if (!houseId) return;
-    const shopping = () => void qc.invalidateQueries({ queryKey: ["shopping"] });
-    const members = () => void qc.invalidateQueries({ queryKey: householdKeys.all });
     const house = `household_id=eq.${houseId}`;
-    // Exclusões não aceitam filtro no Realtime: qualquer uma só faz a lista recarregar.
-    const channel = supabase
-      .channel(`casa-${houseId}-${id}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "shopping_items", filter: house },
-        shopping,
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "shopping_items", filter: house },
-        shopping,
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "shopping_items" },
-        shopping,
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "household_members", filter: house },
-        members,
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "household_members", filter: house },
-        members,
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "household_members" },
-        members,
-      )
-      .subscribe();
+    // O que cada tabela da casa faz recarregar.
+    const tables: [string, readonly string[]][] = [
+      ["shopping_items", ["shopping"]],
+      ["fridge_items", ["fridge-items"]],
+      ["weekly_menus", ["weekly-menu"]],
+      ["household_members", householdKeys.all],
+    ];
+    let channel = supabase.channel(`casa-${houseId}-${id}`);
+    for (const [table, queryKey] of tables) {
+      const reload = () => void qc.invalidateQueries({ queryKey });
+      channel = channel
+        .on("postgres_changes", { event: "INSERT", schema: "public", table, filter: house }, reload)
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table, filter: house }, reload)
+        // Exclusões não aceitam filtro no Realtime: qualquer uma só faz recarregar.
+        .on("postgres_changes", { event: "DELETE", schema: "public", table }, reload);
+    }
+    channel.subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };

@@ -1817,6 +1817,30 @@ export type Database = {
           },
         ]
       }
+      fridge_items: {
+        Row: {
+          created_at: string
+          household_id: string | null
+          id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          household_id?: string | null
+          id?: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          household_id?: string | null
+          id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           addressee_id: string
@@ -4614,27 +4638,33 @@ export type Database = {
         Row: {
           budget: string
           created_at: string
+          household_id: string | null
           id: string
           meals: Json
           updated_at: string
+          updated_by: string | null
           user_id: string
           week_start: string
         }
         Insert: {
           budget?: string
           created_at?: string
+          household_id?: string | null
           id?: string
           meals?: Json
           updated_at?: string
+          updated_by?: string | null
           user_id: string
           week_start: string
         }
         Update: {
           budget?: string
           created_at?: string
+          household_id?: string | null
           id?: string
           meals?: Json
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
           week_start?: string
         }
@@ -6377,6 +6407,26 @@ export type Database = {
       water_set_goal: {
         Args: { p_glass_ml?: number; p_goal: number; p_user?: string }
         Returns: undefined
+      }
+      weekly_menu_save: {
+        Args: { p_budget: string; p_meals: Json; p_week: string }
+        Returns: {
+          budget: string
+          created_at: string
+          household_id: string | null
+          id: string
+          meals: Json
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+          week_start: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "weekly_menus"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
