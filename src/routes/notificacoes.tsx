@@ -6,6 +6,7 @@ import {
   BookOpen,
   GlassWater,
   HandHeart,
+  Home,
   CalendarCheck,
   CalendarClock,
   CalendarX,
@@ -146,7 +147,8 @@ const CATEGORIES: Category[] = [
 function categoryOf(type: string): CategoryId {
   if (
     ["reacao", "comentario", "seguidor", "amizade_pedido", "amizade_aceita"].includes(type) ||
-    type.startsWith("dupla_")
+    type.startsWith("dupla_") ||
+    type.startsWith("casa_")
   )
     return "social";
   if (
@@ -581,6 +583,30 @@ function describe(
           "{name} vous encourage 💪",
         ]),
         go: { to: "/parceiro" },
+      };
+    case "casa_convite":
+      return {
+        icon: Home,
+        text: fill([
+          "{name} chamou você para a casa",
+          "{name} invited you to their home",
+          "{name} te invitó a su casa",
+          "{name} vous invite dans sa maison",
+        ]),
+        detail: str(data.house),
+        go: { to: "/casa/entrar/$code", params: { code: n.entity_id ?? "" } },
+      };
+    case "casa_novo_membro":
+      return {
+        icon: Home,
+        text: fill([
+          "{name} entrou na casa",
+          "{name} joined the home",
+          "{name} entró a la casa",
+          "{name} a rejoint la maison",
+        ]),
+        detail: str(data.house),
+        go: { to: "/casa" },
       };
     default:
       return {

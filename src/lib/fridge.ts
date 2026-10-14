@@ -1,9 +1,10 @@
 // Geladeira (N4) e lista de compras na conta: receitas guardadas, receitas da comunidade pelos
-// ingredientes e itens de compra (valem em todos os aparelhos).
+// ingredientes e itens de compra (valem em todos os aparelhos; quem mora numa casa usa a lista da casa).
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json, Tables, TablesInsert } from "@/integrations/supabase/types";
 import type { FridgeRecipe } from "@/lib/fridge.functions";
+import { useHouseholdRealtime, useMyHousehold } from "@/lib/household";
 
 export type SavedRecipe = Tables<"saved_recipes">;
 export type ShoppingItem = Tables<"shopping_items">;
@@ -143,19 +144,28 @@ export function useCommunityRecipes(terms: string[], enabled: boolean) {
 }
 
 // ---------------------------------------------------------------------------
-// Lista de compras na conta
+// Lista de compras na conta (ou da casa, para quem está num grupo familiar)
 // ---------------------------------------------------------------------------
 
+/** Chave da lista que a pessoa vê agora: a da casa ou a pessoal. */
+const shoppingKey = (houseId: string | null | undefined) =>
+  [...fridgeKeys.shopping, houseId ?? "pessoal"] as const;
+
+/**
+ * A lista de compras: a da casa, se a pessoa mora numa (os itens pessoais ficam guardados e voltam
+ * quando ela sai), ou a pessoal. A da casa se atualiza em tempo real.
+ */
 export function useShoppingItems(userId: string | undefined) {
+  const house = useMyHousehold(userId);
+  const houseId = house.data?.house.id ?? null;
+  useHouseholdRealtime(houseId ?? undefined);
   return useQuery({
-    queryKey: fridgeKeys.shopping,
-    enabled: !!userId,
+    queryKey: shoppingKey(houseId),
+    enabled: !!userId && !house.isLoading,
     queryFn: async (): Promise<ShoppingItem[]> => {
-      const { data, error } = await supabase
-        .from("shopping_items")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200);
+      let query = supabase.from("shopping_items").select("*");
+      query = houseId ? query.eq("household_id", houseId) : query.is("household_id", null);
+      const { data, error } = await query.order("created_at", { ascending: false }).limit(200);
       fail(error);
       return data ?? [];
     },
@@ -171,6 +181,7 @@ export async function addShoppingItems(
   entries: ShoppingEntry[],
   source: ShoppingItem["source"] = "manual",
   current: ShoppingItem[] = [],
+  householdId: string | null = null,
 ) {
   const open = new Set(current.filter((i) => !i.done).map((i) => i.text.trim().toLowerCase()));
   const seen = new Set<string>();
@@ -183,7 +194,13 @@ export async function addShoppingItems(
       seen.add(k);
       return true;
     })
-    .map((e) => ({ user_id: userId, text: e.text, section: e.section, source }));
+    .map((e) => ({
+      user_id: userId,
+      household_id: householdId,
+      text: e.text,
+      section: e.section,
+      source,
+    }));
   if (!rows.length) return 0;
   const { error } = await supabase.from("shopping_items").insert(rows);
   fail(error);
@@ -192,13 +209,16 @@ export async function addShoppingItems(
 
 export function useAddShoppingItems(userId: string | undefined) {
   const qc = useQueryClient();
+  const house = useMyHousehold(userId);
+  const houseId = house.data?.house.id ?? null;
   return useMutation({
     mutationFn: ({ texts, source }: { texts: ShoppingEntry[]; source?: ShoppingItem["source"] }) =>
       addShoppingItems(
         userId!,
         texts,
         source,
-        qc.getQueryData<ShoppingItem[]>(fridgeKeys.shopping) ?? [],
+        qc.getQueryData<ShoppingItem[]>(shoppingKey(houseId)) ?? [],
+        houseId,
       ),
     onSettled: () => qc.invalidateQueries({ queryKey: fridgeKeys.shopping }),
   });
@@ -212,7 +232,7 @@ export function useUpdateShoppingItem() {
       fail(error);
     },
     onMutate: ({ id, done }) =>
-      qc.setQueryData<ShoppingItem[]>(fridgeKeys.shopping, (old) =>
+      qc.setQueriesData<ShoppingItem[]>({ queryKey: fridgeKeys.shopping }, (old) =>
         old?.map((i) => (i.id === id ? { ...i, done } : i)),
       ),
     onSettled: () => qc.invalidateQueries({ queryKey: fridgeKeys.shopping }),

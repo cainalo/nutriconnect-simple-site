@@ -78,6 +78,18 @@ const AVISOS: Record<string, Names> = {
     "{name} te mandó ánimo 💪",
     "{name} vous encourage 💪",
   ],
+  casa_convite: [
+    "{name} chamou você para a casa",
+    "{name} invited you to their home",
+    "{name} te invitó a su casa",
+    "{name} vous invite dans sa maison",
+  ],
+  casa_novo_membro: [
+    "{name} entrou na casa",
+    "{name} joined the home",
+    "{name} entró a la casa",
+    "{name} a rejoint la maison",
+  ],
   consulta_agendada: [
     "{name} agendou uma consulta",
     "{name} booked an appointment",

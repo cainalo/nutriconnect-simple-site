@@ -1980,6 +1980,65 @@ export type Database = {
           },
         ]
       }
+      household_members: {
+        Row: {
+          household_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          household_id: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          household_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_members_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      households: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          emoji: string
+          id: string
+          invite_code: string | null
+          invite_expires_at: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          emoji?: string
+          id?: string
+          invite_code?: string | null
+          invite_expires_at?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          emoji?: string
+          id?: string
+          invite_code?: string | null
+          invite_expires_at?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
       journey_checkins: {
         Row: {
           created_at: string
@@ -4038,8 +4097,10 @@ export type Database = {
       }
       shopping_items: {
         Row: {
+          bought_by: string | null
           created_at: string
           done: boolean
+          household_id: string | null
           id: string
           section: string | null
           source: string
@@ -4047,8 +4108,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bought_by?: string | null
           created_at?: string
           done?: boolean
+          household_id?: string | null
           id?: string
           section?: string | null
           source?: string
@@ -4056,8 +4119,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bought_by?: string | null
           created_at?: string
           done?: boolean
+          household_id?: string | null
           id?: string
           section?: string | null
           source?: string
@@ -5662,6 +5727,67 @@ export type Database = {
         Args: { p_patient: string; p_professional?: string }
         Returns: boolean
       }
+      household_bring_my_items: { Args: never; Returns: number }
+      household_create: {
+        Args: { p_emoji?: string; p_name: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          emoji: string
+          id: string
+          invite_code: string | null
+          invite_expires_at: string | null
+          name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "households"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      household_invite_code: { Args: { p_new?: boolean }; Returns: Json }
+      household_invite_friend: { Args: { p_user: string }; Returns: undefined }
+      household_join: {
+        Args: { p_code: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          emoji: string
+          id: string
+          invite_code: string | null
+          invite_expires_at: string | null
+          name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "households"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      household_leave: { Args: never; Returns: undefined }
+      household_preview: { Args: { p_code: string }; Returns: Json }
+      household_remove_member: { Args: { p_user: string }; Returns: undefined }
+      household_transfer: { Args: { p_user: string }; Returns: undefined }
+      household_update: {
+        Args: { p_emoji: string; p_name: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          emoji: string
+          id: string
+          invite_code: string | null
+          invite_expires_at: string | null
+          name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "households"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_blocked_between: { Args: { a: string; b: string }; Returns: boolean }
       is_community_admin: {
         Args: { p_community: string; p_user?: string }
@@ -5809,6 +5935,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      my_household_id: { Args: { p_user?: string }; Returns: string }
       my_member_earnings: {
         Args: { p_days?: number }
         Returns: {

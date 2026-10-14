@@ -1094,7 +1094,7 @@ begin
     res := res || jsonb_build_object('teste', 'quem convidou é avisado do aceite',
       'ok', exists (select 1 from public.notifications where user_id = a and type = 'dupla_aceita' and actor_id = e),
       'obtido', 'verificado como superusuário');
-    r := pg_temp.as_user(a, 'authenticated', 'select mood from public.journey_checkin(current_date, ''cuidei'', ''Bom dia, dupla!'')');
+    r := pg_temp.as_user(a, 'authenticated', 'select mood from public.journey_checkin(current_date, ''cuidei'', ''BomDiaDupla'')');
     res := res || jsonb_build_object('teste', 'faz o check-in do dia', 'ok', (r = 'cuidei'), 'obtido', left(r, 90));
     r := pg_temp.as_user(a, 'authenticated', 'insert into public.journey_checkins (user_id, day, mood) values (auth.uid(), current_date - 1, ''cuidei'')');
     res := res || jsonb_build_object('teste', 'NÃO grava check-in direto na tabela (só pela função)', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
@@ -1103,7 +1103,7 @@ begin
     r := pg_temp.as_user(a, 'authenticated', format('select mood from public.journey_checkin(current_date, ''dificil'', %L)', repeat('x', 141)));
     res := res || jsonb_build_object('teste', 'NÃO aceita recado com mais de 140 caracteres', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
     r := pg_temp.as_user(e, 'authenticated', 'select public.journey_partner_status(current_date) -> ''partner_today'' ->> ''note''');
-    res := res || jsonb_build_object('teste', 'parceiro vê o check-in de hoje', 'ok', (r = 'Bom dia, dupla!'), 'obtido', left(r, 90));
+    res := res || jsonb_build_object('teste', 'parceiro vê o check-in de hoje', 'ok', (r = 'BomDiaDupla'), 'obtido', left(r, 90));
     r := pg_temp.as_user(e, 'authenticated', 'select count(*) from public.journey_checkins');
     res := res || jsonb_build_object('teste', 'parceiro NÃO lê o histórico de check-ins direto na tabela', 'ok', (r = '0'), 'obtido', r);
     r := pg_temp.as_user(f, 'authenticated', 'select public.journey_partner_status(current_date) is null');
@@ -1121,6 +1121,71 @@ begin
     res := res || jsonb_build_object('teste', 'desfazer a amizade encerra a dupla',
       'ok', not exists (select 1 from public.journey_pairs where a in (user_a, user_b)),
       'obtido', 'verificado como superusuário');
+  end if;
+
+  -- ------------------------------------------------ MINHA CASA (F1)
+  -- B e C são amigos; F não é amigo de B.
+  if to_regclass('public.households') is not null then
+    declare
+      hid uuid;
+      code text;
+    begin
+      r := pg_temp.as_user(b, 'authenticated', 'select name from public.household_create(''CasaTeste'', ''🏡'')');
+      res := res || jsonb_build_object('teste', 'cria uma casa', 'ok', (r = 'CasaTeste'), 'obtido', left(r, 90));
+      select household_id into hid from public.household_members where user_id = b;
+      r := pg_temp.as_user(b, 'authenticated', 'select name from public.household_create(''Outra'')');
+      res := res || jsonb_build_object('teste', 'NÃO cria uma segunda casa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.households');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê a casa', 'ok', (r = '0'), 'obtido', r);
+      code := pg_temp.as_user(b, 'authenticated', 'select public.household_invite_code() ->> ''code''');
+      res := res || jsonb_build_object('teste', 'gera código de convite de 6 letras', 'ok', (code ~ '^[A-Z2-9]{6}$'), 'obtido', left(code, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select public.household_preview(%L) ->> ''name''', lower(code)));
+      res := res || jsonb_build_object('teste', 'com o código, vê só o nome da casa', 'ok', (r = 'CasaTeste'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select name from public.household_join(''ZZZZZZ'')');
+      res := res || jsonb_build_object('teste', 'NÃO entra com código errado', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select name from public.household_join(%L)', code));
+      res := res || jsonb_build_object('teste', 'entra na casa com o código', 'ok', (r = 'CasaTeste'), 'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', 'quem já mora é avisado da entrada',
+        'ok', exists (select 1 from public.notifications where user_id = b and type = 'casa_novo_membro' and actor_id = f),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.shopping_items (user_id, household_id, text) values (auth.uid(), %L, ''Leite'')', hid));
+      res := res || jsonb_build_object('teste', 'adiciona item na lista da casa', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('insert into public.shopping_items (user_id, household_id, text) values (auth.uid(), %L, ''Intruso'')', hid));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO põe item na lista da casa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'select count(*) from public.shopping_items where household_id is not null');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê a lista da casa', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(f, 'authenticated', format('update public.shopping_items set done = true where household_id = %L', hid));
+      res := res || jsonb_build_object('teste', 'outro morador marca como comprado', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', '"comprado por" é quem marcou',
+        'ok', exists (select 1 from public.shopping_items where household_id = hid and bought_by = f and user_id = b),
+        'obtido', 'verificado como superusuário');
+      perform pg_temp.as_user(f, 'authenticated', format('update public.shopping_items set household_id = null, user_id = auth.uid() where household_id = %L', hid));
+      res := res || jsonb_build_object('teste', 'NÃO tira o item da casa nem troca quem adicionou',
+        'ok', exists (select 1 from public.shopping_items where household_id = hid and user_id = b),
+        'obtido', 'verificado como superusuário');
+      perform pg_temp.as_user(f, 'authenticated', 'insert into public.shopping_items (user_id, text) values (auth.uid(), ''Pão'')');
+      r := pg_temp.as_user(f, 'authenticated', 'select public.household_bring_my_items()');
+      res := res || jsonb_build_object('teste', 'leva a lista pessoal para a casa', 'ok', (r = '1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select public.household_remove_member(%L)', b));
+      res := res || jsonb_build_object('teste', 'membro comum NÃO tira ninguém da casa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.household_invite_friend(%L)', f));
+      res := res || jsonb_build_object('teste', 'NÃO chama pelo app quem não é amigo', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.household_invite_friend(%L)', c));
+      res := res || jsonb_build_object('teste', 'chama um amigo para a casa (ele recebe o aviso)',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = c and type = 'casa_convite'),
+        'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select (public.export_my_data() -> ''casa'' ->> ''nome'')');
+      res := res || jsonb_build_object('teste', 'exportação de dados inclui a casa', 'ok', (r = 'CasaTeste'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(b, 'authenticated', 'select public.household_leave()');
+      res := res || jsonb_build_object('teste', 'quando o responsável sai, quem fica assume',
+        'ok', exists (select 1 from public.household_members where user_id = f and role = 'responsavel'),
+        'obtido', 'verificado como superusuário');
+      perform pg_temp.as_user(f, 'authenticated', 'select public.household_leave()');
+      res := res || jsonb_build_object('teste', 'quando o último sai, a casa e a lista dela acabam',
+        'ok', not exists (select 1 from public.households where id = hid)
+              and not exists (select 1 from public.shopping_items where household_id = hid),
+        'obtido', 'verificado como superusuário');
+    end;
   end if;
 
   -- Relatório (o erro desfaz toda a transação).

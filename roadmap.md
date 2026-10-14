@@ -44,11 +44,12 @@ Cada item ganha o próprio commit depois de testado.
 
 ## Grupo familiar — "Minha casa" (aprovado em 13/10/2026, depois do N6 e antes do M8)
 
+
 Pessoas que moram juntas compartilham, em tempo real, o que é da casa. Nada clínico é compartilhado
 (diário, metas, peso, plano do nutricionista, check-ins). Uma casa por pessoa, até 8 adultos;
 papéis responsável e membro; convite por link/código ou entre amigos.
 
-1. [ ] F1 — Casa, convites e membros + lista de compras única em tempo real (quem adicionou, quem comprou)
+1. [x] F1 — Casa, convites e membros + lista de compras única em tempo real (quem adicionou, quem comprou)
 2. [ ] F2 — Geladeira da casa (sai do navegador para o banco) + cardápio da semana da casa (porções = nº de pessoas)
 3. [ ] F3 — Lancheiras das crianças editáveis pelos adultos da casa + mural de recados
 

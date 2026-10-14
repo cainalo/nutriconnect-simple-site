@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ApresentacaoRouteImport } from './routes/apresentacao'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as CardapioRouteImport } from './routes/cardapio'
+import { Route as CasaRouteImport } from './routes/casa'
 import { Route as ComunidadesRouteImport } from './routes/comunidades'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ConvitesRouteImport } from './routes/convites'
@@ -48,6 +49,7 @@ import { Route as AcompanhamentoMetasRouteImport } from './routes/acompanhamento
 import { Route as AcompanhamentoPlanoRouteImport } from './routes/acompanhamento.plano'
 import { Route as AcompanhamentoRotulosRouteImport } from './routes/acompanhamento.rotulos'
 import { Route as AssinarProfessionalIdRouteImport } from './routes/assinar.$professionalId'
+import { Route as CasaIndexRouteImport } from './routes/casa.index'
 import { Route as ComunidadesIndexRouteImport } from './routes/comunidades.index'
 import { Route as ComunidadesSlugRouteImport } from './routes/comunidades.$slug'
 import { Route as ConsultaAppointmentIdRouteImport } from './routes/consulta.$appointmentId'
@@ -69,6 +71,7 @@ import { Route as ProfissionaisIndexRouteImport } from './routes/profissionais.i
 import { Route as ProfissionaisProfessionalIdRouteImport } from './routes/profissionais.$professionalId'
 import { Route as ReceitasIndexRouteImport } from './routes/receitas.index'
 import { Route as ReceitasIdRouteImport } from './routes/receitas.$id'
+import { Route as CasaEntrarCodeRouteImport } from './routes/casa.entrar.$code'
 import { Route as PainelAdesaoIndexRouteImport } from './routes/painel.adesao.index'
 import { Route as PainelAdesaoPatientIdRouteImport } from './routes/painel.adesao.$patientId'
 import { Route as PainelPacientesIndexRouteImport } from './routes/painel.pacientes.index'
@@ -109,6 +112,11 @@ const CadastroRoute = CadastroRouteImport.update({
 const CardapioRoute = CardapioRouteImport.update({
   id: '/cardapio',
   path: '/cardapio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasaRoute = CasaRouteImport.update({
+  id: '/casa',
+  path: '/casa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComunidadesRoute = ComunidadesRouteImport.update({
@@ -276,6 +284,11 @@ const AssinarProfessionalIdRoute = AssinarProfessionalIdRouteImport.update({
   path: '/assinar/$professionalId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CasaIndexRoute = CasaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CasaRoute,
+} as any)
 const ComunidadesIndexRoute = ComunidadesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -382,6 +395,11 @@ const ReceitasIdRoute = ReceitasIdRouteImport.update({
   path: '/receitas/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CasaEntrarCodeRoute = CasaEntrarCodeRouteImport.update({
+  id: '/entrar/$code',
+  path: '/entrar/$code',
+  getParentRoute: () => CasaRoute,
+} as any)
 const PainelAdesaoIndexRoute = PainelAdesaoIndexRouteImport.update({
   id: '/adesao/',
   path: '/adesao/',
@@ -452,6 +470,7 @@ export interface FileRoutesByFullPath {
   '/apresentacao': typeof ApresentacaoRoute
   '/cadastro': typeof CadastroRoute
   '/cardapio': typeof CardapioRoute
+  '/casa': typeof CasaRouteWithChildren
   '/comunidades': typeof ComunidadesRouteWithChildren
   '/contato': typeof ContatoRoute
   '/convites': typeof ConvitesRoute
@@ -501,11 +520,13 @@ export interface FileRoutesByFullPath {
   '/profissionais/$professionalId': typeof ProfissionaisProfessionalIdRoute
   '/receitas/$id': typeof ReceitasIdRoute
   '/acompanhamento/': typeof AcompanhamentoIndexRoute
+  '/casa/': typeof CasaIndexRoute
   '/comunidades/': typeof ComunidadesIndexRoute
   '/desafios/': typeof DesafiosIndexRoute
   '/painel/': typeof PainelIndexRoute
   '/profissionais/': typeof ProfissionaisIndexRoute
   '/receitas/': typeof ReceitasIndexRoute
+  '/casa/entrar/$code': typeof CasaEntrarCodeRoute
   '/painel/adesao/$patientId': typeof PainelAdesaoPatientIdRoute
   '/painel/pacientes/$patientId': typeof PainelPacientesPatientIdRoute
   '/painel/planos/$planId': typeof PainelPlanosPlanIdRoute
@@ -569,11 +590,13 @@ export interface FileRoutesByTo {
   '/profissionais/$professionalId': typeof ProfissionaisProfessionalIdRoute
   '/receitas/$id': typeof ReceitasIdRoute
   '/acompanhamento': typeof AcompanhamentoIndexRoute
+  '/casa': typeof CasaIndexRoute
   '/comunidades': typeof ComunidadesIndexRoute
   '/desafios': typeof DesafiosIndexRoute
   '/painel': typeof PainelIndexRoute
   '/profissionais': typeof ProfissionaisIndexRoute
   '/receitas': typeof ReceitasIndexRoute
+  '/casa/entrar/$code': typeof CasaEntrarCodeRoute
   '/painel/adesao/$patientId': typeof PainelAdesaoPatientIdRoute
   '/painel/pacientes/$patientId': typeof PainelPacientesPatientIdRoute
   '/painel/planos/$planId': typeof PainelPlanosPlanIdRoute
@@ -594,6 +617,7 @@ export interface FileRoutesById {
   '/apresentacao': typeof ApresentacaoRoute
   '/cadastro': typeof CadastroRoute
   '/cardapio': typeof CardapioRoute
+  '/casa': typeof CasaRouteWithChildren
   '/comunidades': typeof ComunidadesRouteWithChildren
   '/contato': typeof ContatoRoute
   '/convites': typeof ConvitesRoute
@@ -643,11 +667,13 @@ export interface FileRoutesById {
   '/profissionais/$professionalId': typeof ProfissionaisProfessionalIdRoute
   '/receitas/$id': typeof ReceitasIdRoute
   '/acompanhamento/': typeof AcompanhamentoIndexRoute
+  '/casa/': typeof CasaIndexRoute
   '/comunidades/': typeof ComunidadesIndexRoute
   '/desafios/': typeof DesafiosIndexRoute
   '/painel/': typeof PainelIndexRoute
   '/profissionais/': typeof ProfissionaisIndexRoute
   '/receitas/': typeof ReceitasIndexRoute
+  '/casa/entrar/$code': typeof CasaEntrarCodeRoute
   '/painel/adesao/$patientId': typeof PainelAdesaoPatientIdRoute
   '/painel/pacientes/$patientId': typeof PainelPacientesPatientIdRoute
   '/painel/planos/$planId': typeof PainelPlanosPlanIdRoute
@@ -669,6 +695,7 @@ export interface FileRouteTypes {
     | '/apresentacao'
     | '/cadastro'
     | '/cardapio'
+    | '/casa'
     | '/comunidades'
     | '/contato'
     | '/convites'
@@ -718,11 +745,13 @@ export interface FileRouteTypes {
     | '/profissionais/$professionalId'
     | '/receitas/$id'
     | '/acompanhamento/'
+    | '/casa/'
     | '/comunidades/'
     | '/desafios/'
     | '/painel/'
     | '/profissionais/'
     | '/receitas/'
+    | '/casa/entrar/$code'
     | '/painel/adesao/$patientId'
     | '/painel/pacientes/$patientId'
     | '/painel/planos/$planId'
@@ -786,11 +815,13 @@ export interface FileRouteTypes {
     | '/profissionais/$professionalId'
     | '/receitas/$id'
     | '/acompanhamento'
+    | '/casa'
     | '/comunidades'
     | '/desafios'
     | '/painel'
     | '/profissionais'
     | '/receitas'
+    | '/casa/entrar/$code'
     | '/painel/adesao/$patientId'
     | '/painel/pacientes/$patientId'
     | '/painel/planos/$planId'
@@ -810,6 +841,7 @@ export interface FileRouteTypes {
     | '/apresentacao'
     | '/cadastro'
     | '/cardapio'
+    | '/casa'
     | '/comunidades'
     | '/contato'
     | '/convites'
@@ -859,11 +891,13 @@ export interface FileRouteTypes {
     | '/profissionais/$professionalId'
     | '/receitas/$id'
     | '/acompanhamento/'
+    | '/casa/'
     | '/comunidades/'
     | '/desafios/'
     | '/painel/'
     | '/profissionais/'
     | '/receitas/'
+    | '/casa/entrar/$code'
     | '/painel/adesao/$patientId'
     | '/painel/pacientes/$patientId'
     | '/painel/planos/$planId'
@@ -884,6 +918,7 @@ export interface RootRouteChildren {
   ApresentacaoRoute: typeof ApresentacaoRoute
   CadastroRoute: typeof CadastroRoute
   CardapioRoute: typeof CardapioRoute
+  CasaRoute: typeof CasaRouteWithChildren
   ComunidadesRoute: typeof ComunidadesRouteWithChildren
   ContatoRoute: typeof ContatoRoute
   ConvitesRoute: typeof ConvitesRoute
@@ -963,6 +998,13 @@ declare module '@tanstack/react-router' {
       path: '/cardapio'
       fullPath: '/cardapio'
       preLoaderRoute: typeof CardapioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/casa': {
+      id: '/casa'
+      path: '/casa'
+      fullPath: '/casa'
+      preLoaderRoute: typeof CasaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comunidades': {
@@ -1196,6 +1238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssinarProfessionalIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/casa/': {
+      id: '/casa/'
+      path: '/'
+      fullPath: '/casa/'
+      preLoaderRoute: typeof CasaIndexRouteImport
+      parentRoute: typeof CasaRoute
+    }
     '/comunidades/': {
       id: '/comunidades/'
       path: '/'
@@ -1343,6 +1392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReceitasIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/casa/entrar/$code': {
+      id: '/casa/entrar/$code'
+      path: '/entrar/$code'
+      fullPath: '/casa/entrar/$code'
+      preLoaderRoute: typeof CasaEntrarCodeRouteImport
+      parentRoute: typeof CasaRoute
+    }
     '/painel/adesao/': {
       id: '/painel/adesao/'
       path: '/adesao'
@@ -1451,6 +1507,18 @@ const AcompanhamentoRouteWithChildren = AcompanhamentoRoute._addFileChildren(
   AcompanhamentoRouteChildren,
 )
 
+interface CasaRouteChildren {
+  CasaIndexRoute: typeof CasaIndexRoute
+  CasaEntrarCodeRoute: typeof CasaEntrarCodeRoute
+}
+
+const CasaRouteChildren: CasaRouteChildren = {
+  CasaIndexRoute: CasaIndexRoute,
+  CasaEntrarCodeRoute: CasaEntrarCodeRoute,
+}
+
+const CasaRouteWithChildren = CasaRoute._addFileChildren(CasaRouteChildren)
+
 interface ComunidadesRouteChildren {
   ComunidadesSlugRoute: typeof ComunidadesSlugRoute
   ComunidadesIndexRoute: typeof ComunidadesIndexRoute
@@ -1538,6 +1606,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApresentacaoRoute: ApresentacaoRoute,
   CadastroRoute: CadastroRoute,
   CardapioRoute: CardapioRoute,
+  CasaRoute: CasaRouteWithChildren,
   ComunidadesRoute: ComunidadesRouteWithChildren,
   ContatoRoute: ContatoRoute,
   ConvitesRoute: ConvitesRoute,

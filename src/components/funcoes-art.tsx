@@ -16,6 +16,7 @@ import {
   Heart,
   HeartHandshake,
   HeartPulse,
+  House,
   Laugh,
   Leaf,
   Lightbulb,
@@ -61,6 +62,7 @@ export type ArtId =
   | "stetho"
   | "hearts"
   | "pair"
+  | "house"
   | "pulse"
   | "notebook"
   | "report"
@@ -446,6 +448,17 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
           </Big>
           <Big className="right-16 top-4">
             <Heart className="nc-heartbeat h-5 w-5" style={strong} />
+          </Big>
+        </>
+      );
+    case "house":
+      return (
+        <>
+          <Big className="-bottom-2 -right-1">
+            <House className="h-20 w-20" style={soft} strokeWidth={1.5} />
+          </Big>
+          <Big className="nc-floaty right-16 top-3">
+            <ShoppingBasket className="h-5 w-5" style={strong} />
           </Big>
         </>
       );
