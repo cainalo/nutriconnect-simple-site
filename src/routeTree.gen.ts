@@ -56,6 +56,7 @@ import { Route as ConsultaAppointmentIdRouteImport } from './routes/consulta.$ap
 import { Route as ConviteCodeRouteImport } from './routes/convite.$code'
 import { Route as DesafiosIndexRouteImport } from './routes/desafios.index'
 import { Route as DesafiosChallengeIdRouteImport } from './routes/desafios.$challengeId'
+import { Route as EventoEventIdRouteImport } from './routes/evento.$eventId'
 import { Route as PagamentoAppointmentIdRouteImport } from './routes/pagamento.$appointmentId'
 import { Route as PainelIndexRouteImport } from './routes/painel.index'
 import { Route as PainelAgendaRouteImport } from './routes/painel.agenda'
@@ -319,6 +320,11 @@ const DesafiosChallengeIdRoute = DesafiosChallengeIdRouteImport.update({
   path: '/$challengeId',
   getParentRoute: () => DesafiosRoute,
 } as any)
+const EventoEventIdRoute = EventoEventIdRouteImport.update({
+  id: '/evento/$eventId',
+  path: '/evento/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagamentoAppointmentIdRoute = PagamentoAppointmentIdRouteImport.update({
   id: '/pagamento/$appointmentId',
   path: '/pagamento/$appointmentId',
@@ -507,6 +513,7 @@ export interface FileRoutesByFullPath {
   '/consulta/$appointmentId': typeof ConsultaAppointmentIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/desafios/$challengeId': typeof DesafiosChallengeIdRoute
+  '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
@@ -578,6 +585,7 @@ export interface FileRoutesByTo {
   '/consulta/$appointmentId': typeof ConsultaAppointmentIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/desafios/$challengeId': typeof DesafiosChallengeIdRoute
+  '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
@@ -654,6 +662,7 @@ export interface FileRoutesById {
   '/consulta/$appointmentId': typeof ConsultaAppointmentIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/desafios/$challengeId': typeof DesafiosChallengeIdRoute
+  '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
@@ -732,6 +741,7 @@ export interface FileRouteTypes {
     | '/consulta/$appointmentId'
     | '/convite/$code'
     | '/desafios/$challengeId'
+    | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
     | '/painel/configuracoes'
@@ -803,6 +813,7 @@ export interface FileRouteTypes {
     | '/consulta/$appointmentId'
     | '/convite/$code'
     | '/desafios/$challengeId'
+    | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
     | '/painel/configuracoes'
@@ -878,6 +889,7 @@ export interface FileRouteTypes {
     | '/consulta/$appointmentId'
     | '/convite/$code'
     | '/desafios/$challengeId'
+    | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
     | '/painel/configuracoes'
@@ -945,6 +957,7 @@ export interface RootRouteChildren {
   AssinarProfessionalIdRoute: typeof AssinarProfessionalIdRoute
   ConsultaAppointmentIdRoute: typeof ConsultaAppointmentIdRoute
   ConviteCodeRoute: typeof ConviteCodeRoute
+  EventoEventIdRoute: typeof EventoEventIdRoute
   PagamentoAppointmentIdRoute: typeof PagamentoAppointmentIdRoute
   PerfilUserIdRoute: typeof PerfilUserIdRoute
   PerfilConfiguracoesRoute: typeof PerfilConfiguracoesRouteWithChildren
@@ -1286,6 +1299,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/desafios/$challengeId'
       preLoaderRoute: typeof DesafiosChallengeIdRouteImport
       parentRoute: typeof DesafiosRoute
+    }
+    '/evento/$eventId': {
+      id: '/evento/$eventId'
+      path: '/evento/$eventId'
+      fullPath: '/evento/$eventId'
+      preLoaderRoute: typeof EventoEventIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/pagamento/$appointmentId': {
       id: '/pagamento/$appointmentId'
@@ -1633,6 +1653,7 @@ const rootRouteChildren: RootRouteChildren = {
   AssinarProfessionalIdRoute: AssinarProfessionalIdRoute,
   ConsultaAppointmentIdRoute: ConsultaAppointmentIdRoute,
   ConviteCodeRoute: ConviteCodeRoute,
+  EventoEventIdRoute: EventoEventIdRoute,
   PagamentoAppointmentIdRoute: PagamentoAppointmentIdRoute,
   PerfilUserIdRoute: PerfilUserIdRoute,
   PerfilConfiguracoesRoute: PerfilConfiguracoesRouteWithChildren,

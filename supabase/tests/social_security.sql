@@ -1287,6 +1287,74 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ EVENTOS AO VIVO (M8)
+  -- Comunidade ativa administrada pelo profissional P; B, C, D e F participam; E não.
+  if to_regclass('public.community_events') is not null then
+    declare
+      ec uuid;
+      ev uuid;
+      qb uuid;
+      qb2 uuid;
+    begin
+      insert into public.communities (slug, name, category, admin_user_id, professional_id, status)
+      values ('zzqx-eventos', 'Zzqx Eventos', 'Zzqx Tema', b, p, 'ativa') returning id into ec;
+      insert into public.community_members (community_id, user_id) values (ec, b), (ec, c), (ec, d), (ec, f);
+      r := pg_temp.as_user(f, 'authenticated', format('select id from public.event_create(%L, ''Tira-dúvidas'', '''', now() + interval ''1 day'', 60)', ec));
+      res := res || jsonb_build_object('teste', 'membro NÃO marca evento na comunidade', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select title from public.event_create(%L, ''Pergunte'', ''Ao vivo'', now() - interval ''1 minute'', 60)', ec));
+      res := res || jsonb_build_object('teste', 'profissional da comunidade marca o evento', 'ok', (r = 'Pergunte'), 'obtido', left(r, 90));
+      select id into ev from public.community_events where community_id = ec;
+      res := res || jsonb_build_object('teste', 'membros são avisados do evento',
+        'ok', exists (select 1 from public.notifications where user_id = f and type = 'evento_novo'),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(e, 'authenticated', 'select count(*) from public.community_events');
+      res := res || jsonb_build_object('teste', 'quem não participa NÃO vê os eventos', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(e, 'authenticated', format('select id from public.event_ask(%L, ''Posso comer ovo todo dia?'')', ev));
+      res := res || jsonb_build_object('teste', 'quem não participa NÃO pergunta', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select body from public.event_ask(%L, ''Posso comer ovo todo dia?'')', ev));
+      res := res || jsonb_build_object('teste', 'membro manda pergunta', 'ok', r like '%ovo%', 'obtido', left(r, 90));
+      select id into qb from public.event_questions where author_id = b;
+      perform pg_temp.as_user(b, 'authenticated', format('select public.event_ask(%L, ''Segunda pergunta aqui'')', ev));
+      perform pg_temp.as_user(b, 'authenticated', format('select public.event_ask(%L, ''Terceira pergunta aqui'')', ev));
+      r := pg_temp.as_user(b, 'authenticated', format('select id from public.event_ask(%L, ''Quarta pergunta aqui'')', ev));
+      res := res || jsonb_build_object('teste', 'até 3 perguntas por pessoa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select public.event_vote(%L)', qb));
+      res := res || jsonb_build_object('teste', 'membro vota numa pergunta', 'ok', (r = 't'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.event_vote(%L)', qb));
+      res := res || jsonb_build_object('teste', 'NÃO vota na própria pergunta', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select public.event_answer(%L, ''Pode sim'')', qb));
+      res := res || jsonb_build_object('teste', 'membro NÃO responde pergunta', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select public.event_answer(%L, ''Pode sim, com variedade'')', qb));
+      res := res || jsonb_build_object('teste', 'profissional responde e fixa',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.event_questions where id = qb and pinned and answer is not null),
+        'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', 'quem perguntou é avisado da resposta',
+        'ok', exists (select 1 from public.notifications where user_id = b and type = 'evento_resposta'),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(f, 'authenticated', format('select (array_agg(pinned))[1] from public.event_questions_list(%L)', ev));
+      res := res || jsonb_build_object('teste', 'a resposta fixada vem primeiro', 'ok', (r = 't'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.event_delete_question(%L)', qb));
+      res := res || jsonb_build_object('teste', 'NÃO apaga pergunta já respondida', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      select id into qb2 from public.event_questions where author_id = b and body like 'Segunda%';
+      perform pg_temp.as_user(f, 'authenticated', format('select public.event_flag(%L)', qb2));
+      perform pg_temp.as_user(c, 'authenticated', format('select public.event_flag(%L)', qb2));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.event_questions_list(%L)', ev));
+      res := res || jsonb_build_object('teste', 'com 2 denúncias a pergunta continua', 'ok', (r = '3'), 'obtido', r);
+      perform pg_temp.as_user(d, 'authenticated', format('select public.event_flag(%L)', qb2));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.event_questions_list(%L)', ev));
+      res := res || jsonb_build_object('teste', 'com 3 denúncias a pergunta some para os membros', 'ok', (r = '2'), 'obtido', r);
+      r := pg_temp.as_user(p, 'authenticated', format('select count(*) from public.event_questions_list(%L)', ev));
+      res := res || jsonb_build_object('teste', 'o profissional ainda vê a pergunta ocultada', 'ok', (r = '3'), 'obtido', r);
+      r := pg_temp.as_user(e, 'authenticated', 'select count(*) from public.event_questions');
+      res := res || jsonb_build_object('teste', 'quem não participa NÃO lê as perguntas', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', '' ||
+        format('select public.event_delete_question((select id from public.event_questions where author_id = auth.uid() and body like %L))', 'Terceira%'));
+      res := res || jsonb_build_object('teste', 'apaga a própria pergunta antes da resposta', 'ok', (r not like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select (public.export_my_data() -> ''eventos_perguntas'') is not null');
+      res := res || jsonb_build_object('teste', 'exportação de dados inclui as perguntas dos eventos', 'ok', (r = 't'), 'obtido', left(r, 90));
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

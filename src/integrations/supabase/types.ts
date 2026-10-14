@@ -1362,6 +1362,92 @@ export type Database = {
           },
         ]
       }
+      community_events: {
+        Row: {
+          canceled: boolean
+          community_id: string
+          created_at: string
+          description: string
+          duration_min: number
+          host_id: string
+          id: string
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          canceled?: boolean
+          community_id: string
+          created_at?: string
+          description?: string
+          duration_min?: number
+          host_id: string
+          id?: string
+          starts_at: string
+          title: string
+        }
+        Update: {
+          canceled?: boolean
+          community_id?: string
+          created_at?: string
+          description?: string
+          duration_min?: number
+          host_id?: string
+          id?: string
+          starts_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_questions: {
+        Row: {
+          answer: string | null
+          answered_at: string | null
+          author_id: string
+          body: string
+          created_at: string
+          event_id: string
+          hidden: boolean
+          id: string
+          pinned: boolean
+        }
+        Insert: {
+          answer?: string | null
+          answered_at?: string | null
+          author_id: string
+          body: string
+          created_at?: string
+          event_id: string
+          hidden?: boolean
+          id?: string
+          pinned?: boolean
+        }
+        Update: {
+          answer?: string | null
+          answered_at?: string | null
+          author_id?: string
+          body?: string
+          created_at?: string
+          event_id?: string
+          hidden?: boolean
+          id?: string
+          pinned?: boolean
+        }
+        Relationships: []
+      }
+      event_question_votes: {
+        Row: { created_at: string; event_id: string; question_id: string; user_id: string }
+        Insert: { created_at?: string; event_id: string; question_id: string; user_id: string }
+        Update: { created_at?: string; event_id?: string; question_id?: string; user_id?: string }
+        Relationships: []
+      }
       community_members: {
         Row: {
           community_id: string
@@ -5459,6 +5545,79 @@ export type Database = {
         Args: { p_professional?: string }
         Returns: number
       }
+      event_answer: {
+        Args: { p_answer: string; p_pin?: boolean; p_question: string }
+        Returns: undefined
+      }
+      event_ask: {
+        Args: { p_body: string; p_event: string }
+        Returns: {
+          answer: string | null
+          answered_at: string | null
+          author_id: string
+          body: string
+          created_at: string
+          event_id: string
+          hidden: boolean
+          id: string
+          pinned: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "event_questions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      event_cancel: { Args: { p_event: string }; Returns: undefined }
+      event_create: {
+        Args: {
+          p_community: string
+          p_description: string
+          p_duration: number
+          p_starts_at: string
+          p_title: string
+        }
+        Returns: {
+          canceled: boolean
+          community_id: string
+          created_at: string
+          description: string
+          duration_min: number
+          host_id: string
+          id: string
+          starts_at: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "community_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      event_delete_question: { Args: { p_question: string }; Returns: undefined }
+      event_flag: { Args: { p_question: string }; Returns: undefined }
+      event_moderate: {
+        Args: { p_hidden?: boolean; p_pinned?: boolean; p_question: string }
+        Returns: undefined
+      }
+      event_questions_list: {
+        Args: { p_event: string }
+        Returns: {
+          answer: string | null
+          answered_at: string | null
+          author_id: string
+          body: string
+          created_at: string
+          hidden: boolean
+          id: string
+          pinned: boolean
+          voted: boolean
+          votes: number
+        }[]
+      }
+      event_vote: { Args: { p_question: string }; Returns: boolean }
       export_my_data: { Args: never; Returns: Json }
       f_unaccent: { Args: { "": string }; Returns: string }
       friend_ids: { Args: { p_user?: string }; Returns: string[] }

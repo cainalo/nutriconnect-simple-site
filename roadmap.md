@@ -38,7 +38,7 @@ Cada item ganha o próprio commit depois de testado.
 15. [x] N12 — Descobrir a nutri ideal (questionário de compatibilidade)
 16. [x] M6 — Trilhas com certificado e revisão espaçada
 17. [x] N6 — Parceiro de jornada (dupla de apoio com check-in diário)
-18. [ ] M8 — Eventos ao vivo nas comunidades ("Pergunte à nutri": perguntas antes, votação, respostas fixadas)
+18. [x] M8 — Eventos ao vivo nas comunidades ("Pergunte à nutri": perguntas antes, votação, respostas fixadas)
 19. [ ] N11 — Nina por voz (falar e ouvir as respostas)
 20. [ ] N10 — Loja de programas dos profissionais (Stripe; taxa igual à das assinaturas de membros, de 20% a 10% pelo nível)
 

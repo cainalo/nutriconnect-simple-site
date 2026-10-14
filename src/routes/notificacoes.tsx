@@ -7,6 +7,7 @@ import {
   GlassWater,
   HandHeart,
   Home,
+  Mic,
   CalendarCheck,
   CalendarClock,
   CalendarX,
@@ -148,7 +149,8 @@ function categoryOf(type: string): CategoryId {
   if (
     ["reacao", "comentario", "seguidor", "amizade_pedido", "amizade_aceita"].includes(type) ||
     type.startsWith("dupla_") ||
-    type.startsWith("casa_")
+    type.startsWith("casa_") ||
+    type.startsWith("evento_")
   )
     return "social";
   if (
@@ -607,6 +609,30 @@ function describe(
         ]),
         detail: str(data.house),
         go: { to: "/casa" },
+      };
+    case "evento_novo":
+      return {
+        icon: Mic,
+        text: fill([
+          "{name} marcou um evento ao vivo na comunidade",
+          "{name} scheduled a live event in the community",
+          "{name} programó un evento en vivo en la comunidad",
+          "{name} a programmé un événement en direct",
+        ]),
+        detail: [str(data.title), dateOf(data.starts_at, locale)].filter(Boolean).join(" · "),
+        go: { to: "/evento/$eventId", params: { eventId: n.entity_id ?? "" } },
+      };
+    case "evento_resposta":
+      return {
+        icon: Mic,
+        text: fill([
+          "{name} respondeu a sua pergunta no evento",
+          "{name} answered your question at the event",
+          "{name} respondió tu pregunta en el evento",
+          "{name} a répondu à votre question",
+        ]),
+        detail: quote(data.question),
+        go: { to: "/evento/$eventId", params: { eventId: n.entity_id ?? "" } },
       };
     default:
       return {

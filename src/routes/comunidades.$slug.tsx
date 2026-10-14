@@ -27,6 +27,7 @@ import {
   useTogglePostPin,
 } from "@/lib/social/communities-queries";
 import { PostCard } from "@/components/community-cards";
+import { CommunityEvents } from "@/components/community-events";
 import { useCreatePost, useDeletePost, useFeed, useFeedRealtime } from "@/lib/social/feed-queries";
 
 type Actor = { id: string; name: string };
@@ -233,6 +234,8 @@ function CommunityFeed() {
                 .join(t("cf.and"))}. ${t("cf.resume")}`}
         </p>
       )}
+
+      {actor && canSeePosts && <CommunityEvents communityId={community.id} isHost={isAdminPro} />}
 
       {canPost ? (
         <Composer communityId={community.id} />

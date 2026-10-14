@@ -90,6 +90,18 @@ const AVISOS: Record<string, Names> = {
     "{name} entró a la casa",
     "{name} a rejoint la maison",
   ],
+  evento_novo: [
+    "{name} marcou um evento ao vivo na comunidade",
+    "{name} scheduled a live event in the community",
+    "{name} programó un evento en vivo en la comunidad",
+    "{name} a programmé un événement en direct",
+  ],
+  evento_resposta: [
+    "{name} respondeu a sua pergunta no evento",
+    "{name} answered your question at the event",
+    "{name} respondió tu pregunta en el evento",
+    "{name} a répondu à votre question",
+  ],
   consulta_agendada: [
     "{name} agendou uma consulta",
     "{name} booked an appointment",
