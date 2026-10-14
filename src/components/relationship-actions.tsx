@@ -162,7 +162,7 @@ function JourneyButton({ userId, className }: { userId: string; className: strin
   const status = usePartnerStatus(user?.id);
   const invite = useJourneyInvite();
 
-  if (status.isLoading) return null;
+  if (status.isLoading || status.isError) return null;
   if (status.data) {
     return status.data.partnerId === userId ? (
       <Link to="/parceiro" className={className}>

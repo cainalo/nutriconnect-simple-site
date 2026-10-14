@@ -164,7 +164,8 @@ export function useShoppingItems(userId: string | undefined) {
     enabled: !!userId && !house.isLoading,
     queryFn: async (): Promise<ShoppingItem[]> => {
       let query = supabase.from("shopping_items").select("*");
-      query = houseId ? query.eq("household_id", houseId) : query.is("household_id", null);
+      // Fora de uma casa o RLS já mostra só a lista pessoal (e o filtro não depende da coluna nova).
+      if (houseId) query = query.eq("household_id", houseId);
       const { data, error } = await query.order("created_at", { ascending: false }).limit(200);
       fail(error);
       return data ?? [];
@@ -196,7 +197,7 @@ export async function addShoppingItems(
     })
     .map((e) => ({
       user_id: userId,
-      household_id: householdId,
+      ...(householdId ? { household_id: householdId } : {}),
       text: e.text,
       section: e.section,
       source,

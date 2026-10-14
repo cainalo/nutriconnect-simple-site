@@ -63,6 +63,8 @@ export function useMyHousehold(userId: string | undefined) {
     queryKey: householdKeys.mine(userId ?? ""),
     enabled: !!userId,
     staleTime: 60_000,
+    // Sem casa (ou banco sem a tabela ainda) não deve segurar a lista de compras.
+    retry: false,
     queryFn: () => getMine(userId!),
   });
 }
