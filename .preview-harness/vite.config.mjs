@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: { alias: [
     { find: "@/integrations/supabase/client", replacement: H + "/stub-supabase.ts" },
     { find: "@/lib/social-studio.functions", replacement: H + "/stub-fns.ts" },
+    { find: "@/hooks/use-auth", replacement: H + "/stub-auth.ts" },
     { find: "@/hooks/use-i18n", replacement: H + "/stub-i18n.ts" },
     { find: /^@\//, replacement: SRC + "/" },
   ] },

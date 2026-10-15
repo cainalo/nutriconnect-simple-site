@@ -1,6 +1,9 @@
 import "@/styles.css";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RouterProvider, createRootRoute, createRouter, createMemoryHistory } from "@tanstack/react-router";
+import { Landing } from "@/components/landing";
+import { SiteHeader } from "@/components/site-chrome";
 import { Composer } from "@/components/admin/social/composer";
 import { NetworkPreview } from "@/components/admin/social/previews";
 import { StudioDashboard } from "@/components/admin/social/dashboard";
@@ -60,7 +63,18 @@ function Arts() {
     </div>
   );
 }
+const design = q.get("d");
+if (design) document.documentElement.setAttribute("data-design", design);
+if (q.get("dark")) document.documentElement.classList.add("dark");
+document.documentElement.setAttribute("data-hydrated", "");
+function RouterApp({ children }: { children: any }) {
+  const root = createRootRoute({ component: () => children });
+  const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: ["/"] }) });
+  return <RouterProvider router={router} />;
+}
 function App() {
+  if (v === "landing") return <RouterApp><Landing /></RouterApp>;
+  if (v === "header") return <RouterApp><div className="min-h-[600px]"><SiteHeader /></div></RouterApp>;
   if (v === "arts") return <Arts />;
   if (v === "composer")
     return <Composer initial={q.get("t") ? draft : EMPTY_DRAFT} handle="nutriconnect" profiles={[]} onClose={() => {}} />;
