@@ -4444,6 +4444,7 @@ export type Database = {
           caption: string
           created_at: string
           cta: string
+          design: Json
           format: string
           hashtags: string[]
           hook: string
@@ -4466,6 +4467,7 @@ export type Database = {
           caption?: string
           created_at?: string
           cta?: string
+          design?: Json
           format?: string
           hashtags?: string[]
           hook?: string
@@ -4488,6 +4490,7 @@ export type Database = {
           caption?: string
           created_at?: string
           cta?: string
+          design?: Json
           format?: string
           hashtags?: string[]
           hook?: string

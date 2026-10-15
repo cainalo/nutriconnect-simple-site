@@ -93,7 +93,20 @@ infantis), a assistente de IA Nina, diário alimentar, leitor de rótulos, card�
 familiar ("Minha casa") e nutricionistas e profissionais verificados com consulta por vídeo.
 Tom da marca: acolhedor, leve, científico sem ser chato, sem culpa e sem terrorismo nutricional;
 "comida de verdade" no espírito do Guia Alimentar para a População Brasileira; inclusivo e
-brasileiro. Mascotes: a Nina e os personagens da trilha.`;
+brasileiro. Mascotes: a Nina e os personagens da trilha.
+Regra da marca: NUNCA use emojis (nem em legendas, títulos, slides ou roteiros); o NutriConnect
+usa só ícones nas artes. Use quebras de linha, listas com "•" ou "→" e perguntas para dar ritmo.`;
+
+/** Garante a regra da marca: tira emojis que a IA tenha mandado mesmo assim. */
+const noEmoji = (s: string) =>
+  s
+    .replace(
+      /\p{Extended_Pictographic}|[\u{1F1E6}-\u{1F1FF}]|[\u{1F3FB}-\u{1F3FF}]|\u{FE0F}|\u{200D}|\u{20E3}/gu,
+      "",
+    )
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/ +\n/g, "\n")
+    .trim();
 
 const ETHICS = `Regras obrigatórias (ética do Código de Ética do Nutricionista, CFN, e do CONAR):
 - Nada de fotos de "antes e depois", promessas de resultado, emagrecimento rápido ou garantias.
@@ -309,7 +322,7 @@ ${ETHICS}
 Crie ${data.count} ideias de conteúdo prontas para publicar no ${NETWORK_PT[data.network]}, com objetivo de
 ${GOAL_PT[data.goal]}. Formatos permitidos: ${data.formats.join(", ")} (varie entre eles).
 Cada ideia: título interno, gancho forte para os 2 primeiros segundos/linha, legenda completa no tom
-da marca (com quebras de linha e emojis com moderação), slides do carrossel (5 a 8, só em
+da marca (com quebras de linha, sem emojis), slides do carrossel (5 a 8, só em
 "carrossel"), roteiro com cenas e falas (só em "reels"/"video"/"story"), 5 a 12 hashtags relevantes
 em português (sem #), chamada para ação, ideia visual e pilar de conteúdo. Para engajamento, inclua
 perguntas, enquetes ou caixinhas. Use as tendências quando fizer sentido, sem forçar.
@@ -332,26 +345,29 @@ Responda em ${LANG[data.locale]}, SOMENTE com JSON:
     const list = Array.isArray(p?.ideas) ? (p.ideas as Record<string, unknown>[]) : [];
     const ideas = list
       .map((r): PostIdea | null => {
-        const title = str(r.title, 160);
+        const title = noEmoji(str(r.title, 160));
         if (!title) return null;
         const format = (FORMATS as readonly string[]).includes(String(r.format))
           ? (r.format as PostFormat)
           : data.formats[0];
         const slides = Array.isArray(r.slides)
           ? (r.slides as Record<string, unknown>[])
-              .map((s) => ({ title: str(s?.title, 120), text: str(s?.text, 400) }))
+              .map((s) => ({
+                title: noEmoji(str(s?.title, 120)),
+                text: noEmoji(str(s?.text, 400)),
+              }))
               .filter((s) => s.title || s.text)
               .slice(0, 10)
           : [];
         return {
           format,
           title,
-          hook: str(r.hook, 300),
-          caption: str(r.caption, 5000),
+          hook: noEmoji(str(r.hook, 300)),
+          caption: noEmoji(str(r.caption, 5000)),
           slides,
-          script: str(r.script, 5000),
+          script: noEmoji(str(r.script, 5000)),
           hashtags: strList(r.hashtags, 30, 40).map((h) => h.replace(/^#/, "").replace(/\s+/g, "")),
-          cta: str(r.cta, 300),
+          cta: noEmoji(str(r.cta, 300)),
           visual_idea: str(r.visual_idea, 1000),
           pillar: str(r.pillar, 80),
           best_time: str(r.best_time, 120),
@@ -440,9 +456,6 @@ com o texto final (sem aspas, sem comentários).`;
       temperature: 0.7,
     });
     if (!result.ok) return { error: studioError(result) };
-    const text = result.text
-      .replace(/^["“]|["”]$/g, "")
-      .trim()
-      .slice(0, 5000);
+    const text = noEmoji(result.text.replace(/^["“]|["”]$/g, "")).slice(0, 5000);
     return text ? { text } : { error: "failed" };
   });

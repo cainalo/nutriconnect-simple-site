@@ -1,40 +1,96 @@
-// Estúdio de redes sociais (S1) no painel do admin: perfis e diagnóstico, ideias com IA, calendário,
-// modelos e tendências. Hoje só para a administração (social_studio_allowed no banco).
+// Estúdio de redes sociais no painel do admin: início, quadro (kanban), ideias com IA, modelos,
+// calendário, tendências e perfis, com o editor de posts em tela cheia e prévia fiel de cada rede.
+// Hoje só para a administração (social_studio_allowed no banco).
 import { useState } from "react";
-import { toast } from "sonner";
-import { Badge, Empty, Panel, QueryError, btnCls } from "@/components/admin/admin-ui";
+import {
+  CalendarDays,
+  Home,
+  KanbanSquare,
+  LayoutTemplate,
+  Lightbulb,
+  Plus,
+  TrendingUp,
+  UserRound,
+  type LucideIcon,
+} from "lucide-react";
+import { Panel, QueryError } from "@/components/admin/admin-ui";
+import { StudioBoard } from "@/components/admin/social/board";
 import { CalendarTab } from "@/components/admin/social/calendar-tab";
+import { Composer } from "@/components/admin/social/composer";
+import { StudioDashboard, type StudioTab } from "@/components/admin/social/dashboard";
+import { SectionTitle } from "@/components/admin/social/kit";
+import { badgeBg } from "@/components/admin/social/kit-styles";
 import { IdeasTab } from "@/components/admin/social/ideas-tab";
-import { PostEditor } from "@/components/admin/social/post-editor";
 import { ProfilesTab } from "@/components/admin/social/profiles-tab";
+import { TemplatesGallery } from "@/components/admin/social/templates-gallery";
 import { TrendsTab } from "@/components/admin/social/trends-tab";
 import {
-  FORMAT_LABEL,
-  NETWORK_LABEL,
-  useDuplicatePost,
-  useSocialPosts,
-  useSocialProfiles,
-  type SocialPost,
-} from "@/lib/social-studio";
-import type { Network, PostFormat } from "@/lib/social-studio.functions";
+  EMPTY_DRAFT,
+  draftFromPost,
+  draftFromTemplate,
+  type Draft,
+} from "@/components/admin/social/use-art";
+import { useSocialPosts, useSocialProfiles, type SocialPost } from "@/lib/social-studio";
+import type { SocialTemplate } from "@/lib/social-templates";
+import { cn } from "@/lib/utils";
 
-type Tab = "ideias" | "perfis" | "calendario" | "modelos" | "tendencias";
-const TABS: [Tab, string][] = [
-  ["ideias", "Ideias e posts"],
-  ["perfis", "Perfis"],
-  ["calendario", "Calendário"],
-  ["modelos", "Modelos"],
-  ["tendencias", "Tendências"],
+type Tab = StudioTab;
+const TABS: { id: Tab; label: string; title: string; icon: LucideIcon; color: string }[] = [
+  { id: "inicio", label: "Início", title: "Início", icon: Home, color: "#b4532a" },
+  {
+    id: "quadro",
+    label: "Quadro",
+    title: "Quadro de produção",
+    icon: KanbanSquare,
+    color: "#3b7bbf",
+  },
+  {
+    id: "ideias",
+    label: "Ideias com IA",
+    title: "Ideias com IA",
+    icon: Lightbulb,
+    color: "#7a5cc4",
+  },
+  {
+    id: "modelos",
+    label: "Modelos",
+    title: "Modelos de post",
+    icon: LayoutTemplate,
+    color: "#c58a12",
+  },
+  {
+    id: "calendario",
+    label: "Calendário",
+    title: "Calendário editorial",
+    icon: CalendarDays,
+    color: "#d6456b",
+  },
+  {
+    id: "tendencias",
+    label: "Tendências",
+    title: "Tendências do momento",
+    icon: TrendingUp,
+    color: "#2f8a5b",
+  },
+  { id: "perfis", label: "Perfis", title: "Perfis das redes", icon: UserRound, color: "#555f36" },
 ];
 
 export function SocialStudioSection() {
-  const [tab, setTab] = useState<Tab>("ideias");
-  const [editing, setEditing] = useState<SocialPost | null>(null);
+  const [tab, setTab] = useState<Tab>("inicio");
+  const [composer, setComposer] = useState<Draft | null>(null);
   const [prefill, setPrefill] = useState<string | undefined>();
   const profiles = useSocialProfiles();
   const posts = useSocialPosts();
   const handle =
-    profiles.data?.find((p) => p.network === "instagram")?.handle ?? profiles.data?.[0]?.handle;
+    profiles.data?.find((p) => p.network === "instagram")?.handle ??
+    profiles.data?.[0]?.handle ??
+    "nutriconnect";
+  const all = posts.data ?? [];
+  const current = TABS.find((t) => t.id === tab) ?? TABS[0];
+
+  const openNew = (date?: string) => setComposer({ ...EMPTY_DRAFT, scheduled_for: date ?? null });
+  const openPost = (p: SocialPost) => setComposer(draftFromPost(p));
+  const openTemplate = (t: SocialTemplate) => setComposer(draftFromTemplate(t));
 
   // Sem as tabelas no banco (migration pendente), mostra o aviso em vez das abas.
   if (profiles.error && posts.error) {
@@ -43,9 +99,7 @@ export function SocialStudioSection() {
         {/schema cache|does not exist/i.test((profiles.error as Error).message) ? (
           <p className="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-foreground">
             O estúdio já está no site, mas o banco de dados ainda não recebeu a atualização que cria
-            as tabelas dele (junto com as outras funções novas: casa, dupla, eventos, loja e
-            mercados). Assim que as migrations pendentes forem aplicadas no Supabase, esta seção
-            funciona sozinha.
+            as tabelas dele.
           </p>
         ) : (
           <QueryError error={profiles.error} />
@@ -55,87 +109,103 @@ export function SocialStudioSection() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="no-scrollbar flex max-w-full gap-1.5 overflow-x-auto p-1">
-        {TABS.map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            aria-pressed={tab === id}
-            onClick={() => setTab(id)}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
-              tab === id
-                ? "border-accent bg-accent-soft text-foreground"
-                : "border-border bg-card text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+    <div className="st-root min-w-0 space-y-5">
+      <nav className="st-glass sticky top-0 z-20 flex min-w-0 items-center gap-2 rounded-full border border-border/60 p-1.5 shadow-sm">
+        <div className="no-scrollbar flex min-w-0 flex-1 gap-1 overflow-x-auto">
+          {TABS.map((t) => {
+            const on = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id)}
+                className={cn(
+                  "group inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-all duration-300",
+                  on
+                    ? "text-white shadow-md"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                )}
+                style={on ? { background: badgeBg(t.color) } : undefined}
+              >
+                <t.icon
+                  className="h-3.5 w-3.5 transition group-hover:scale-110"
+                  style={on ? undefined : { color: t.color }}
+                />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          onClick={() => openNew()}
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-accent px-4 text-xs font-bold text-accent-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Criar post</span>
+        </button>
+      </nav>
+
+      {tab !== "inicio" && (
+        <SectionTitle icon={current.icon} color={current.color}>
+          {current.title}
+        </SectionTitle>
+      )}
+
+      <div key={tab} className="min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        {tab === "inicio" && (
+          <StudioDashboard
+            posts={all}
+            onNew={openNew}
+            onTemplate={openTemplate}
+            onOpen={openPost}
+            go={(t) => setTab(t)}
+          />
+        )}
+        {tab === "quadro" && <StudioBoard posts={all} onOpen={openPost} onNew={() => openNew()} />}
+        {tab === "ideias" && (
+          <IdeasTab
+            key={prefill ?? ""}
+            prefill={prefill}
+            onOpen={openPost}
+            onEditIdea={(draft) => setComposer(draft)}
+          />
+        )}
+        {tab === "modelos" && (
+          <TemplatesGallery
+            posts={all}
+            onUseTemplate={openTemplate}
+            onUseTeam={(p) =>
+              setComposer({
+                ...draftFromPost(p),
+                id: undefined,
+                is_template: false,
+                status: "rascunho",
+              })
+            }
+            onEditTeam={openPost}
+          />
+        )}
+        {tab === "calendario" && <CalendarTab onOpen={openPost} onNew={openNew} />}
+        {tab === "tendencias" && (
+          <TrendsTab
+            onCreate={(theme) => {
+              setPrefill(theme);
+              setTab("ideias");
+            }}
+          />
+        )}
+        {tab === "perfis" && <ProfilesTab />}
       </div>
 
-      {tab === "ideias" && <IdeasTab key={prefill ?? ""} onOpen={setEditing} prefill={prefill} />}
-      {tab === "perfis" && <ProfilesTab />}
-      {tab === "calendario" && <CalendarTab onOpen={setEditing} />}
-      {tab === "modelos" && <TemplatesTab onOpen={setEditing} />}
-      {tab === "tendencias" && (
-        <TrendsTab
-          onCreate={(theme) => {
-            setPrefill(theme);
-            setTab("ideias");
-          }}
+      {composer && (
+        <Composer
+          key={composer.id ?? "novo"}
+          initial={composer}
+          handle={handle}
+          profiles={profiles.data ?? []}
+          onClose={() => setComposer(null)}
         />
       )}
-
-      <PostEditor post={editing} handle={handle} onClose={() => setEditing(null)} />
     </div>
-  );
-}
-
-function TemplatesTab({ onOpen }: { onOpen: (p: SocialPost) => void }) {
-  const posts = useSocialPosts();
-  const duplicate = useDuplicatePost();
-  const templates = (posts.data ?? []).filter((p) => p.is_template);
-  return (
-    <Panel
-      title="Modelos de postagem"
-      hint="Abra qualquer post e use “Salvar como modelo”. Aqui, “Usar” cria um rascunho novo a partir do modelo."
-    >
-      {templates.length === 0 ? (
-        <Empty>Nenhum modelo ainda.</Empty>
-      ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
-          {templates.map((t) => (
-            <li key={t.id} className="rounded-2xl border border-border/70 p-3">
-              <p className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-foreground">
-                <Badge tone="info">{FORMAT_LABEL[t.format as PostFormat]}</Badge>
-                <Badge>{NETWORK_LABEL[t.network as Network]}</Badge>
-                {t.title}
-              </p>
-              <p className="mt-1 line-clamp-3 whitespace-pre-line text-xs text-muted-foreground">
-                {t.caption || t.hook}
-              </p>
-              <div className="mt-2 flex gap-2">
-                <button
-                  type="button"
-                  className={btnCls}
-                  onClick={() =>
-                    duplicate.mutate(
-                      { post: t, asTemplate: false },
-                      { onSuccess: () => toast.success("Rascunho criado em Ideias e posts.") },
-                    )
-                  }
-                >
-                  Usar
-                </button>
-                <button type="button" className={btnCls} onClick={() => onOpen(t)}>
-                  Editar modelo
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Panel>
   );
 }

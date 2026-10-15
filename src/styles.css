@@ -1967,3 +1967,177 @@ html[data-rails="on"]
 .nc-enemy-prop {
   animation: nc-enemy-prop 2s ease-in-out infinite;
 }
+
+/* ── Estúdio de redes sociais (admin) ──────────────────────────────────── */
+@keyframes st-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  60% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes st-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes st-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08) translateY(-1%);
+  }
+}
+@keyframes st-marquee {
+  0%,
+  15% {
+    text-indent: 0;
+  }
+  100% {
+    text-indent: -120%;
+  }
+}
+@keyframes st-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes st-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes st-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes st-shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+@keyframes st-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.st-pop {
+  animation: st-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.st-progress {
+  animation: st-progress 5s linear forwards;
+}
+.st-kenburns {
+  animation: st-kenburns 12s ease-in-out infinite alternate;
+}
+.st-marquee {
+  animation: st-marquee 7s linear infinite;
+}
+.st-spin {
+  animation: st-spin 4s linear infinite;
+}
+.st-float {
+  animation: st-float 5s ease-in-out infinite;
+}
+.st-rise {
+  animation: st-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.st-gradient {
+  background-size: 220% 220%;
+  animation: st-gradient 14s ease infinite;
+}
+.st-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--card) 60%, white),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: st-shimmer 1.6s linear infinite;
+}
+.st-card {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s,
+    border-color 0.35s;
+}
+.st-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px -18px color-mix(in oklab, var(--primary) 45%, transparent);
+}
+.st-glass {
+  background: color-mix(in oklab, var(--card) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.st-scroll {
+  scrollbar-width: none;
+}
+.st-scroll::-webkit-scrollbar {
+  display: none;
+}
+/* Área que rola dentro do celular da prévia: esmaece embaixo para mostrar que continua. */
+.st-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+.st-thin {
+  scrollbar-width: thin;
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-pop,
+  .st-kenburns,
+  .st-marquee,
+  .st-spin,
+  .st-float,
+  .st-gradient,
+  .st-shimmer,
+  .st-rise {
+    animation: none;
+  }
+  .st-progress {
+    animation: none;
+    width: 100%;
+  }
+  .st-card:hover {
+    transform: none;
+  }
+}
+
+/* Estúdio de redes sociais: cards pequenos e textos curtos; justificar abriria buracos entre as
+   palavras (sobrescreve a regra de texto justificado do layer base). */
+.st-root :is(p, li, dd) {
+  text-align: start;
+  hyphens: manual;
+}

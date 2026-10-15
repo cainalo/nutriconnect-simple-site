@@ -12,6 +12,7 @@ import {
   btnPrimary,
   inputCls,
 } from "@/components/admin/admin-ui";
+import { EMPTY_DRAFT, type Draft } from "@/components/admin/social/use-art";
 import { useI18n } from "@/hooks/use-i18n";
 import {
   FORMAT_LABEL,
@@ -47,19 +48,28 @@ const GOAL_LABEL: Record<Goal, string> = {
 export function IdeasTab({
   onOpen,
   prefill,
+  onEditIdea,
 }: {
   onOpen: (p: SocialPost) => void;
   prefill?: string;
+  /** Abre a ideia no editor (com a prévia de cada rede). */
+  onEditIdea?: (draft: Draft) => void;
 }) {
   return (
     <div className="space-y-4">
-      <Generator prefill={prefill} />
+      <Generator prefill={prefill} onEditIdea={onEditIdea} />
       <PostsList onOpen={onOpen} />
     </div>
   );
 }
 
-function Generator({ prefill }: { prefill?: string }) {
+function Generator({
+  prefill,
+  onEditIdea,
+}: {
+  prefill?: string;
+  onEditIdea?: (draft: Draft) => void;
+}) {
   const { locale } = useI18n();
   const profiles = useSocialProfiles();
   const insert = useInsertPosts();
@@ -263,6 +273,34 @@ function Generator({ prefill }: { prefill?: string }) {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {idea.hashtags.map((h) => `#${h}`).join(" ")}
                     </p>
+                  )}
+                  {onEditIdea && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onEditIdea({
+                          ...EMPTY_DRAFT,
+                          title: idea.title,
+                          network,
+                          format: idea.format,
+                          hook: idea.hook,
+                          caption: idea.caption,
+                          slides: idea.slides,
+                          script: idea.script,
+                          hashtags: idea.hashtags,
+                          cta: idea.cta,
+                          pillar: idea.pillar,
+                          visual_idea: String(ideaToPost(idea, network, null).visual_idea ?? ""),
+                          status: "ideia",
+                          profile_id: profileId || null,
+                          design: { ...EMPTY_DRAFT.design, kicker: idea.pillar.slice(0, 30) },
+                        });
+                      }}
+                      className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-[11px] font-bold text-accent-foreground transition hover:-translate-y-0.5"
+                    >
+                      Editar e ver prévia →
+                    </button>
                   )}
                 </div>
               </div>

@@ -240,3 +240,21 @@ export function fullCaption(p: Pick<SocialPost, "caption" | "cta" | "hashtags">)
     .filter(Boolean)
     .join("\n\n");
 }
+
+/** Cria ou atualiza um post e devolve o id (o editor continua no mesmo post depois de salvar). */
+export function useSavePost() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, row }: { id?: string; row: TablesInsert<"social_posts"> }) => {
+      if (id) {
+        const { error } = await supabase.from("social_posts").update(row).eq("id", id);
+        fail(error);
+        return id;
+      }
+      const { data, error } = await supabase.from("social_posts").insert(row).select("id").single();
+      fail(error);
+      return data!.id as string;
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: studioKeys.all }),
+  });
+}

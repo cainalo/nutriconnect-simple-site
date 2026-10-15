@@ -32,7 +32,8 @@ Lovable e para o site).
 | `985c0c7` | R1 — Compras nos mercados parceiros (botão "Comprar" + seção "Mercados parceiros" no admin)   |
 | `b6d9697` | S1 — Estúdio de redes sociais no admin (seção "Redes sociais")                                |
 | `289789d` | M4 — Habilitação para teleconsulta (CFN 760/2023)                                             |
-| (este)    | Migrations e Edge Functions aplicadas em produção; higiene do relatório de segurança          |
+| `69fbefd` | Migrations e Edge Functions aplicadas em produção; higiene do relatório de segurança          |
+| (último)  | S2 — Estúdio de redes sociais reformulado (ver seção S2 abaixo; trabalho ainda em andamento)  |
 
 Build (`npx vite build`), tipos (`npx tsc --noEmit -p .`) e lint (`npx eslint .`, só avisos de
 fast-refresh que já existiam) passam em todos.
@@ -41,7 +42,8 @@ fast-refresh que já existiam) passam em todos.
 
 Todas as migrations do repositório estão aplicadas no Supabase de produção (`mtwtlbbgkzexyaavcboe`),
 com as versões do registro (`supabase_migrations.schema_migrations`) iguais aos nomes dos arquivos,
-até `20261015120000_advisor_hygiene`. As Edge Functions `ai-chat`, `program-checkout`,
+até `20261015140000_social_media_bank` (bucket `social-media` do banco de imagens, aplicado em
+14/10 pelo conector). As Edge Functions `ai-chat`, `program-checkout`,
 `stripe-webhook` e `push-send` foram publicadas com o código atual.
 
 Como mexer no banco a partir daqui: o conector "Supabase" do claude.ai está autorizado (leitura e
@@ -76,6 +78,68 @@ profissionais no futuro, mas não agora** (pedido do dono): para liberar, troque
 Ideias para depois: publicar direto pela API da Meta (exige app aprovado pela Meta e conta
 comercial), métricas automáticas do Instagram (Graph API) e gerar imagens com IA.
 
+## S2 — Estúdio reformulado (em andamento; CONTINUE POR AQUI)
+
+Pedidos do dono (14/10), todos valem: estúdio muito mais interativo, moderno, limpo, em cards e
+animado, **inspirado na página de Funções** (`src/routes/funcoes.tsx`: tiles em degradê que inclinam
+com o mouse, Nina animada, ícones flutuando, títulos de seção com traço); criar post a partir de
+ideias e modelos com **prévia exata de cada rede**; **sem emojis em lugar nenhum** (regra do site: só
+ícones); modelos mais variados; **banco de imagens**; tudo alinhado, nada saindo dos espaços,
+elegante e sem imperfeições.
+
+Feito (compila, lint e build passam; conferido em prints):
+
+- `src/lib/post-art.ts`: 11 layouts (clássico, centralizado, editorial, moldura, dado, lista, troca
+  "em vez de → prefira", enquete, citação, mito × verdade, receita), 11 temas, **ícone em selo no
+  lugar de emoji** (emojis digitados são removidos da arte), foto do banco ou URL, "zona segura" no
+  vertical 9:16 (margens maiores e conteúdo longe da faixa que a interface do Reels/TikTok cobre),
+  títulos nunca passam da largura.
+- `src/lib/art-icons.ts`: 90 ícones do Lucide gerados do pacote (script estava em
+  `%TEMP%/gen-icons.mjs`; para acrescentar ícones, copie `__iconNode` de
+  `node_modules/lucide-react/dist/esm/icons/<nome>.js`).
+- `src/lib/social-templates.ts`: 29 modelos sem emojis, com ícones, alguns com foto, usando todos os
+  layouts; categorias com ícone e cor (`CATEGORY_STYLE`). Dados citados são reais (Guia Alimentar,
+  OMS 400 g, Dia Mundial da Alimentação 16/10).
+- Banco de imagens: 38 fotos curadas em `public/images/social/` (+ miniaturas em `thumbs/`, créditos
+  em `CREDITS.md`, licença Unsplash) + fotos já existentes do site; biblioteca da equipe no bucket
+  `social-media` (`src/lib/social-media.ts`, `src/components/admin/social/image-bank.tsx`).
+- Kit visual: `src/components/admin/social/kit.tsx` (StudioCard, Tile, SectionTitle, IconBadge,
+  ArtIcon, Floaters, EmptyState) e `kit-styles.ts` (campos, botões, cor/ícone de rede, formato e
+  status). A classe `.st-root` (em `styles.css`) desliga o texto justificado do site dentro do estúdio.
+- Editor (`composer.tsx`) refeito: etapas em tiles com barra de progresso e botões Voltar/Próximo;
+  seções em cards; rede e formato como cards com ícone; reescrita por IA em cards; aviso e botão
+  "Remover emojis"; Visual com **miniatura real do post em cada layout**, paletas, seletor de ícones,
+  banco de imagens e "texto da capa" (`design.body`, vazio = automático por `coverBody()` em
+  `use-art.ts`); Publicar com nota, checklist (inclui "sem emojis") e ações em tiles.
+- Início (`dashboard.tsx`) no estilo de Funções (Nina, atalhos em tiles, funil com contagem animada,
+  modelos em destaque, recentes, próximos 7 dias, datas). Quadro (`board.tsx`) e Modelos
+  (`templates-gallery.tsx`) refeitos. Navegação do estúdio (`studio.tsx`) com cor por aba.
+- IA (`social-studio.functions.ts`): prompt proíbe emojis e o servidor remove os que vierem.
+- Prévias (`previews.tsx`): emojis e símbolos trocados por ícones; adesivo do Stories removido (cobria
+  a arte); linha de reações do Facebook sem encavalar.
+
+Próximos passos, nesta ordem:
+
+1. **Conferir em print** o que foi mexido por último e ainda não foi visto: prévias (Stories, TikTok,
+   Facebook, LinkedIn), quadro com colunas flexíveis, galeria sem justificado, artes verticais com a
+   nova margem direita e o editorial vertical (`split` 0.46), moldura no paisagem.
+2. **Refazer no mesmo estilo as abas que ainda estão no visual antigo**: `ideas-tab.tsx` (Ideias com
+   IA), `calendar-tab.tsx`, `trends-tab.tsx`, `profiles-tab.tsx`. Usar `StudioCard`, `Tile`,
+   `SectionTitle`, `EmptyState` e as cores de `kit-styles.ts`; nada de emoji (trocar por ícones).
+3. Conferir o editor na largura de celular (375 px) e no **modo escuro**.
+4. Testar em produção o envio de foto para a biblioteca da equipe e o download da arte com essa foto
+   (o canvas precisa de CORS do Storage; `loadImage` já usa `crossOrigin`).
+5. Registrar S2 no `roadmap.md` e commitar.
+
+Como conferir visualmente (sem login): `.preview-harness/` monta as telas do estúdio isoladas, com
+Supabase e IA simulados. `npx vite build --config .preview-harness/vite.config.mjs` e depois
+`npx vite preview --config .preview-harness/vite.config.mjs --port 4179`; abra
+`http://localhost:4179/?v=...` com `v=dash`, `board`, `gallery`, `grid&t=<id do modelo>` (prévias
+das 8 redes), `arts&size=feed|story|paisagem` (todas as artes) ou `composer&t=<id>&click=Visual`.
+Print pelo Edge headless: `"/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" --headless
+--disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=12000
+--screenshot=<arquivo.png> <url>` (o arquivo demora alguns segundos para aparecer).
+
 ## Outros pendentes do roadmap (dependem de algo externo)
 
 - **M4 (feito)**: card "Teleconsulta" em /painel/configuracoes; análise em Admin → Verificações, com o
@@ -103,6 +167,7 @@ comercial), métricas automáticas do Instagram (Graph API) e gerar imagens com 
 - Mercados: `src/lib/markets.ts`, `src/components/buy-at-market.tsx`,
   `src/components/admin/sections-markets.tsx`.
 - Estúdio de redes sociais: `src/components/admin/social/`, `src/lib/social-studio.ts`,
-  `src/lib/social-studio.functions.ts`, `src/lib/post-art.ts`, `src/lib/social-calendar.ts`.
+  `src/lib/social-studio.functions.ts`, `src/lib/post-art.ts`, `src/lib/art-icons.ts`,
+  `src/lib/social-templates.ts`, `src/lib/social-media.ts`, `src/lib/social-calendar.ts`.
 - Tipos do Supabase (`src/integrations/supabase/types.ts`) foram editados à mão para as tabelas
   novas. **Nunca rode o prettier nesse arquivo** (ele reformata o arquivo inteiro).

@@ -23,7 +23,14 @@ const STATUS_DOT: Record<PostStatus, string> = {
   publicado: "bg-emerald-500",
 };
 
-export function CalendarTab({ onOpen }: { onOpen: (p: SocialPost) => void }) {
+export function CalendarTab({
+  onOpen,
+  onNew,
+}: {
+  onOpen: (p: SocialPost) => void;
+  /** Novo post já com a data do dia. */
+  onNew?: (date: string) => void;
+}) {
   const posts = useSocialPosts();
   const [cursor, setCursor] = useState(() => {
     const d = new Date();
@@ -94,13 +101,25 @@ export function CalendarTab({ onOpen }: { onOpen: (p: SocialPost) => void }) {
             return (
               <div
                 key={i}
-                className={`min-h-24 rounded-xl border p-1.5 text-left ${
+                className={`group min-h-24 rounded-xl border p-1.5 text-left transition hover:border-accent/50 ${
                   inMonth ? "border-border/70 bg-card" : "border-transparent"
                 } ${isToday(d) ? "ring-2 ring-accent/60" : ""}`}
               >
                 {inMonth && (
                   <>
-                    <p className="text-[11px] font-bold text-muted-foreground">{pad(d)}</p>
+                    <p className="flex items-center justify-between text-[11px] font-bold text-muted-foreground">
+                      {pad(d)}
+                      {onNew && (
+                        <button
+                          type="button"
+                          onClick={() => onNew(`${cursor.y}-${pad(cursor.m + 1)}-${pad(d)}`)}
+                          className="grid h-5 w-5 place-items-center rounded-full bg-accent text-[12px] leading-none text-accent-foreground opacity-0 transition group-hover:opacity-100"
+                          aria-label="Novo post neste dia"
+                        >
+                          +
+                        </button>
+                      )}
+                    </p>
                     {special.map((s) => (
                       <p
                         key={s.title}
