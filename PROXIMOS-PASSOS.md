@@ -1,4 +1,16 @@
-# Próximos passos (passagem de sessão — 14/10/2026)
+# Próximos passos (passagem de sessão — 15/10/2026)
+
+**Atualização de 15/10 (leia primeiro):** o rumo do projeto mudou; veja a seção "Rumo definido em
+15/10/2026" do `roadmap.md`. Feitos: D1 (seletor "Design do site" no admin, `src/lib/site-design.ts`),
+D2 (navegação própria por design em `src/components/site-chrome-designs.tsx`), D3 (landing por design
+em `landing-designs.tsx`, abertura do Espaço em `espaco-intro.tsx`, colunas laterais via
+`[data-rail-col]` no `styles.css`). Os 4 designs (Natural, Vibrante, Editorial, Aurora) devem ser
+sites distintos, não só cores. Falta o D4 (Funções, Perfil, Comunidades, Desafios, Acompanhamento e
+painel clínico por design) e o D5 (revisão em prints). O dono quer o **mínimo de IA possível** em
+funções novas. Para ver as telas sem login: `.preview-harness` (`v=landing&d=<design>`,
+`v=header&d=<design>`, `v=rails&d=<design>`; `stub-auth.ts` simula uma pessoa logada).
+O texto abaixo é da sessão anterior (14/10).
+
 
 Leia este arquivo inteiro antes de mexer no projeto. Ele diz o que foi feito, o que está pendente e
 em que ordem continuar. O roadmap oficial é o `roadmap.md`; o `AGENTS.md` tem as regras do Lovable

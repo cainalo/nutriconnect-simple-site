@@ -111,5 +111,12 @@ do admin (Design do site) escolhe qual está no ar.
 15. [ ] X5 — Receitas da comunidade (coleções salvas; tabela nutricional de base fixa, TACO)
 16. [ ] X6 — Modo família e cuidador (acompanha hábitos de criança/idoso sem ver dados clínicos)
 17. [ ] X7 — Acessibilidade: leitura em voz alta das trilhas, contraste máximo, Libras
-18. [ ] E1 — Modo escola (escolas e professores usam a plataforma; escopo a definir)
-19. [ ] C1 — Plano comercial: marketing, precificação, metas (documento em docs/comercial.md)
+18. [ ] E1 — Modo escola: turmas e professores, cardápio e lancheira da cantina, painel da coordenação (PNAE/BNCC), licença anual por nº de alunos
+19. [ ] C1 — Monetização com recursos reais (decidido em 15/10; painéis de preço e métricas no admin):
+    - C1a Anúncios pagos: marcas compram espaço nas colunas laterais, no feed (post patrocinado) e em
+      comunidades; painel de campanha, relatório de cliques, aviso "Anúncio" (CONAR/CDC)
+    - C1b Personagem personalizado: o usuário paga para criar e customizar o próprio personagem
+    - C1c Plano premium do usuário: assinatura com relatórios avançados, designs exclusivos, sem anúncios
+    - C1d Ferramentas pagas para profissionais: estúdio de redes sociais, destaque no marketplace,
+      agenda avançada, modelos de plano
+    - C1e Licença anual do Modo escola, por faixa de nº de alunos
