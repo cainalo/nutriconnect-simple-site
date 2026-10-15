@@ -674,9 +674,7 @@ export function LandingAurora() {
         <div className="mt-4 flex justify-center">
           <AndroidDownloadButton />
         </div>
-        <p className="mt-4 !text-center text-xs text-muted-foreground">
-          {tr(COPY.freeNote)}
-        </p>
+        <p className="mt-4 !text-center text-xs text-muted-foreground">{tr(COPY.freeNote)}</p>
 
         <div className="relative mx-auto mt-14 grid max-w-3xl grid-cols-3 gap-3">
           {["market", "cooking-together", "meeting"].map((img, i) => (
