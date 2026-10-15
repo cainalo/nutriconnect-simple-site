@@ -8,6 +8,7 @@ import { useAppearance } from "@/hooks/use-appearance";
 import { loadAppearance } from "@/lib/appearance";
 import { PostCard } from "@/components/community-cards";
 import { ShareModal } from "@/components/share-modal";
+import { EspacoIntro } from "@/components/espaco-intro";
 import { PushInviteCard } from "@/components/push-settings";
 import { EspacoLeftColumn, EspacoRightColumn } from "@/components/espaco-side-columns";
 import { themeText } from "@/lib/social/feed";
@@ -236,6 +237,7 @@ function EspacoDeHojePage() {
       content: (
         <div ref={listRef}>
           {hasNew && <NewPostsButton onClick={showNewPosts} />}
+          <EspacoIntro themeTitle={text?.title} />
           <PushInviteCard />
           <PostList feed={geral} emptyMessage={t(EMPTY_FILTER_KEYS[filter])} />
         </div>
