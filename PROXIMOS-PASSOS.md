@@ -33,7 +33,7 @@ Lovable e para o site).
 | `b6d9697` | S1 — Estúdio de redes sociais no admin (seção "Redes sociais")                                |
 | `289789d` | M4 — Habilitação para teleconsulta (CFN 760/2023)                                             |
 | `69fbefd` | Migrations e Edge Functions aplicadas em produção; higiene do relatório de segurança          |
-| (último)  | S2 — Estúdio de redes sociais reformulado (ver seção S2 abaixo; trabalho ainda em andamento)  |
+| `109a59b` | S2 — Estúdio de redes sociais reformulado (ver seção S2 abaixo; trabalho ainda em andamento)  |
 
 Build (`npx vite build`), tipos (`npx tsc --noEmit -p .`) e lint (`npx eslint .`, só avisos de
 fast-refresh que já existiam) passam em todos.
