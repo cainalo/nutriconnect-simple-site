@@ -23,6 +23,7 @@ import { usePushSync } from "../hooks/use-push-sync";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { APPEARANCE_INIT_SCRIPT, initAppearance } from "../lib/appearance";
+import { DESIGN_INIT_SCRIPT, useSiteDesign } from "../lib/site-design";
 import { LANG_INIT_SCRIPT, initI18n } from "../lib/i18n";
 
 function NotFoundComponent() {
@@ -126,7 +127,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],
     // Aplica o tema e o idioma salvos antes da primeira pintura, para não piscar o padrão.
-    scripts: [{ children: APPEARANCE_INIT_SCRIPT }, { children: LANG_INIT_SCRIPT }],
+    scripts: [
+      { children: DESIGN_INIT_SCRIPT },
+      { children: APPEARANCE_INIT_SCRIPT },
+      { children: LANG_INIT_SCRIPT },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -149,6 +154,12 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Aplica o design do site escolhido pelo admin; precisa ficar dentro do QueryClientProvider. */
+function SiteDesignSync() {
+  useSiteDesign();
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -160,6 +171,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SiteDesignSync />
       <FeatureGate>
         <Outlet />
       </FeatureGate>

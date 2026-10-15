@@ -14,6 +14,7 @@ import {
   useAiRejectionsSummary,
 } from "@/components/admin/sections-ai-rejections";
 import { ClinicalDemoPanel, SiteFeaturesSection } from "@/components/admin/sections-site-features";
+import { SiteDesignSection } from "@/components/admin/sections-site-design";
 import { SiteNinaSection } from "@/components/admin/sections-site-nina";
 import { SiteRailsSection } from "@/components/admin/sections-site-rails";
 import { PresentationSection } from "@/components/admin/sections-presentation";
@@ -183,6 +184,7 @@ function AdminPage() {
             </div>
           )}
           {section === "site_nina" && <SiteNinaSection />}
+          {section === "site_design" && <SiteDesignSection />}
           {section === "financeiro" && <FinanceSection />}
           {section === "mercados" && <MarketsSection />}
           {section === "ia" && <AiSection />}
