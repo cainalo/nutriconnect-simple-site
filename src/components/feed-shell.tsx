@@ -16,6 +16,7 @@ import {
   type ReactNode,
   type UIEvent,
 } from "react";
+import { DesignPageHead } from "@/components/design-page-head";
 import { AuthGateLoading, CHROME_HIDE_EVENT, SiteHeader } from "@/components/site-chrome";
 import { useRequireAuth } from "@/hooks/use-auth";
 import {
@@ -54,7 +55,10 @@ function PagesNav({
     });
   }, [active]);
   return (
-    <div className="no-scrollbar flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-full border border-border/60 bg-card/90 p-1 shadow-soft backdrop-blur">
+    <div
+      data-pagesnav
+      className="no-scrollbar flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-full border border-border/60 bg-card/90 p-1 shadow-soft backdrop-blur"
+    >
       {pages.map((page, index) => (
         <button
           key={page.id}
@@ -62,6 +66,7 @@ function PagesNav({
             refs.current[index] = el;
           }}
           type="button"
+          data-active={active === index}
           onClick={() => onSelect(index)}
           className={cn(
             "shrink-0 cursor-pointer whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-medium transition",
@@ -344,6 +349,7 @@ export function FeedShell({
                           </div>
                         </div>
                       )}
+                      {index === 0 && <DesignPageHead />}
                       {page.content}
                     </div>
                   </CarouselItem>

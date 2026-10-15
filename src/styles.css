@@ -2546,3 +2546,214 @@ html[data-design="aurora"] [data-rail-col] section h2 {
   font-size: 0.8rem;
   letter-spacing: 0.12em;
 }
+
+/* ---- Estilo de post próprio de cada design (a estrutura interna do post não muda) --------- */
+/* O cartão recebe cor, borda e fundo por estilo inline (post-type.ts); aqui os designs
+   sobrescrevem com !important só o que precisam. --pt é a cor do tipo do post. */
+
+/* Vibrante: cartão grande e alegre, barra grossa na cor do tipo, rótulo em pílula. */
+html[data-design="vibrante"] .post-card {
+  border-width: 0 !important;
+  border-left: 9px solid var(--pt, var(--accent)) !important;
+  border-radius: 2rem !important;
+  background-color: var(--card) !important;
+  background-image: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--pt, var(--accent)) 12%, transparent),
+    transparent 42%
+  );
+  box-shadow: 0 20px 38px -26px color-mix(in srgb, var(--pt, var(--accent)) 80%, transparent) !important;
+  --post-fade: var(--card) !important;
+}
+html[data-design="vibrante"] .post-card [style*="--pt"] {
+  display: inline-flex;
+  width: fit-content;
+  background: color-mix(in srgb, var(--pt) 16%, transparent);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-weight: 900;
+}
+html[data-design="vibrante"] .post-card :is(h2, h3) {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+html[data-design="vibrante"] .post-card :is(button, a)[class*="rounded-full"] {
+  font-weight: 800;
+}
+
+/* Aurora: vidro com brilho na cor do tipo e rótulo em degradê. */
+html[data-design="aurora"] .post-card {
+  border: 1px solid color-mix(in srgb, var(--pt, var(--accent)) 45%, transparent) !important;
+  border-radius: 1.9rem !important;
+  background-color: color-mix(in srgb, var(--card) 62%, transparent) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--foreground) 5%, transparent),
+    0 22px 46px -28px color-mix(in srgb, var(--pt, var(--accent)) 85%, transparent) !important;
+  --post-fade: color-mix(in srgb, var(--card) 85%, var(--background)) !important;
+}
+html[data-design="aurora"] .post-card [style*="--pt"] {
+  background: linear-gradient(90deg, var(--pt), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  letter-spacing: 0.14em;
+}
+html[data-design="aurora"] .post-card [style*="--pt"] svg {
+  color: var(--pt);
+}
+html[data-design="aurora"] .post-card :is(h2, h3) {
+  font-weight: 600;
+}
+
+/* Editorial: reforço do jornal sobre o estilo inline (papel liso, sem tinta de tipo). */
+html[data-design="editorial"] .post-card {
+  background-color: transparent !important;
+  background-image: none !important;
+  border-width: 0 !important;
+  border-top: 4px solid var(--foreground) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 50%, transparent) !important;
+  box-shadow: none !important;
+  --post-fade: var(--background) !important;
+}
+html[data-design="editorial"] .post-card::before {
+  z-index: 1;
+}
+
+/* Celular: nada passa da largura da tela (o conteúdo nunca fica cortado à direita). */
+@media (max-width: 1023px) {
+  html[data-design] body {
+    overflow-x: clip;
+  }
+  html[data-design] :is(main, [data-app-main]) {
+    max-width: 100vw;
+    overflow-x: clip;
+  }
+  html[data-design] .post-card,
+  html[data-design] main :is(section, article) {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+/* ---- Páginas internas por design: abas do feed e página Funções ---------------------------- */
+/* Vibrante */
+html[data-design="vibrante"] [data-pagesnav] {
+  border: 0;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--primary) 60%, transparent);
+}
+html[data-design="vibrante"] [data-pagesnav] button {
+  font-weight: 800;
+}
+html[data-design="vibrante"] [data-pagesnav] button[data-active="true"] {
+  background: linear-gradient(120deg, var(--primary), var(--accent));
+  color: var(--primary-foreground);
+}
+html[data-design="vibrante"] [data-funcoes-hero] {
+  border: 0;
+  border-radius: 2.5rem;
+}
+html[data-design="vibrante"] .nc-tile {
+  border: 0 !important;
+  border-radius: 2rem !important;
+  background: linear-gradient(
+    150deg,
+    var(--tile),
+    color-mix(in srgb, var(--tile) 62%, #000)
+  ) !important;
+  color: #fff;
+}
+html[data-design="vibrante"] .nc-tile span:not([class*="grid"]) {
+  color: #fff !important;
+}
+html[data-design="vibrante"] .nc-tile span[class*="text-foreground"] {
+  opacity: 0.92;
+}
+
+/* Editorial: abas em texto sublinhado; Funções como página de classificados. */
+html[data-design="editorial"] [data-pagesnav] {
+  border: 0;
+  border-top: 2px solid var(--foreground);
+  border-bottom: 2px solid var(--foreground);
+  background: var(--background);
+  box-shadow: none;
+  gap: 1.25rem;
+  padding: 0.25rem 1rem;
+}
+html[data-design="editorial"] [data-pagesnav] button {
+  background: transparent !important;
+  box-shadow: none;
+  padding: 0.25rem 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+html[data-design="editorial"] [data-pagesnav] button[data-active="true"] {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+html[data-design="editorial"] [data-funcoes-hero] {
+  background: transparent !important;
+  border: 0;
+  border-top: 4px solid var(--foreground);
+  border-bottom: 1px solid var(--foreground);
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+html[data-design="editorial"] [data-funcoes-hero] .nc-floaty {
+  display: none;
+}
+html[data-design="editorial"] [data-funcoes-grid] {
+  gap: 0;
+  border-left: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent);
+}
+html[data-design="editorial"] .nc-tile {
+  background: transparent !important;
+  border: 0 !important;
+  border-right: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: grayscale(0.9) sepia(0.35);
+}
+html[data-design="editorial"] .nc-tile:hover {
+  background: color-mix(in srgb, var(--foreground) 7%, transparent) !important;
+}
+html[data-design="editorial"] .nc-tile span[style*="color-mix"] {
+  color: var(--foreground) !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* Aurora: abas e tiles em vidro. */
+html[data-design="aurora"] [data-pagesnav] {
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--card) 60%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+html[data-design="aurora"] [data-pagesnav] button[data-active="true"] {
+  background: linear-gradient(120deg, var(--primary), var(--accent));
+  color: var(--primary-foreground);
+}
+html[data-design="aurora"] [data-funcoes-hero] {
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--card) 55%, transparent) !important;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+html[data-design="aurora"] .nc-tile {
+  border: 1px solid color-mix(in srgb, var(--tile) 40%, transparent) !important;
+  border-radius: 1.9rem !important;
+  background: color-mix(in srgb, var(--tile) 14%, color-mix(in srgb, var(--card) 55%, transparent)) !important;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}

@@ -1,6 +1,7 @@
 // Casca das telas internas: a página tem a altura da tela (não rola) e o conteúdo rola por dentro,
 // abaixo do cabeçalho. O feed e o Explorar não usam esta casca (continuam rolando a janela).
 import { useCallback, useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { DesignPageHead } from "@/components/design-page-head";
 import { SiteHeader } from "@/components/site-chrome";
 import { useAuth } from "@/hooks/use-auth";
 import { useHouseholdRealtime, useMyHousehold } from "@/lib/household";
@@ -77,6 +78,7 @@ export function AppScreen({
           mainClassName,
         )}
       >
+        {scroll && <DesignPageHead />}
         {children}
         {scroll && <RailsMoreSlot />}
       </main>

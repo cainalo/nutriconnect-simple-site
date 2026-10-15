@@ -85,7 +85,41 @@ function RailDemo() {
   );
   return <div className="flex justify-between gap-6 p-6">{col("left")}<div className="flex-1 rounded-3xl border bg-card p-6">Conteúdo da página</div>{col("right")}</div>;
 }
+import { FeedShell } from "@/components/feed-shell";
+import { EspacoIntro } from "@/components/espaco-intro";
+import { PostCardFrame } from "@/components/post-card-frame";
+function FeedDemo() {
+  const post = (
+    <PostCardFrame type="receita" className="rounded-3xl border bg-card" footer={<div className="flex gap-2"><button className="rounded-full border px-3 py-1 text-xs">Apoiar</button></div>}>
+      <div className="mb-4 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--pt)" }}>Receita comunitária</div>
+      <h3 className="mb-2 text-lg font-bold font-display">Cozinha de verdade: menos rótulos, mais frescor</h3>
+      <p className="text-sm leading-relaxed text-justify">Uma receita simples para o dia a dia, com ingredientes frescos e pouca complicação, pensada para quem tem pouco tempo e quer comer bem.</p>
+    </PostCardFrame>
+  );
+  const pages = [{ id: "geral", label: "Geral", content: <div><EspacoIntro themeTitle="Cozinha de Verdade: Menos Rótulos, Mais Frescor" />{post}</div> }, { id: "tema", label: "Tema", content: <div>{post}</div> }];
+  return <RouterApp><FeedShell pages={pages as any} wings={q.get("wings") ? { left: <div>L</div>, right: <div>R</div> } : undefined} /></RouterApp>;
+}
+function FormDemo() {
+  return (
+    <RouterApp>
+      <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
+        <SiteHeader />
+        <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col px-4 pt-6">
+          <form className="flex items-end gap-2">
+            <button type="button" className="grid h-12 w-12 shrink-0 place-items-center rounded-full border">M</button>
+            <textarea rows={2} placeholder="Pergunte algo sobre alimentação..." className="min-h-[3rem] flex-1 resize-none rounded-2xl border bg-background px-4 py-2.5 text-sm" />
+            <button type="submit" className="grid h-12 w-12 place-items-center rounded-full bg-accent text-accent-foreground">S</button>
+          </form>
+          <p className="mt-3 text-xs text-muted-foreground">1/20 perguntas hoje A Nina é uma IA educativa e não substitui um(a) profissional de saúde.</p>
+        </main>
+      </div>
+    </RouterApp>
+  );
+}
 function App() {
+  if (v === "form") return <FormDemo />;
+  if (v === "frame") return <iframe src={"?" + (q.get("src") ?? "")} style={{ width: Number(q.get("w") ?? 360), height: 760, border: "1px solid #888" }} />;
+  if (v === "feed") return <FeedDemo />;
   if (v === "rails") return <RailDemo />;
   if (v === "landing") return <RouterApp><Landing /></RouterApp>;
   if (v === "header") return <RouterApp><div className="min-h-[600px]"><SiteHeader /></div></RouterApp>;
@@ -108,3 +142,13 @@ if (click) setTimeout(() => {
   const b = [...document.querySelectorAll("button")].find((x) => x.textContent?.trim() === click);
   b?.click();
 }, 1200);
+if (q.get("dbg")) setTimeout(() => {
+  const w = innerWidth; const out: string[] = ["vw=" + w + " docW=" + document.documentElement.scrollWidth];
+  document.querySelectorAll("body *").forEach((el) => {
+    const r = (el as HTMLElement).getBoundingClientRect();
+    const p = el.parentElement ? el.parentElement.getBoundingClientRect() : r;
+    if (r.right > w + 2 && p.right <= r.right - 2 === false) return;
+    if (r.right > w + 2 && r.width > 0 && p.right < r.right - 2) out.push(el.tagName + "." + String((el as HTMLElement).className).slice(0, 80) + " w=" + Math.round(r.width) + " r=" + Math.round(r.right));
+  });
+  document.body.insertAdjacentHTML("afterbegin", "<pre id=dbg>" + out.slice(0, 14).join("\n") + "</pre>");
+}, 2500);

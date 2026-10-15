@@ -799,7 +799,7 @@ function FuncoesPage() {
                   }}
                 />
               </h2>
-              <ul className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7">
+              <ul data-funcoes-grid className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7">
                 {tiles.map((tile) => (
                   <li
                     key={tile.id}
@@ -895,6 +895,7 @@ function Hero({
   ];
   return (
     <section
+      data-funcoes-hero
       className="nc-tile-in nc-gradient-pan relative mb-7 overflow-hidden rounded-[2rem] border border-border/60 p-4 shadow-soft sm:p-6"
       style={{
         background:
