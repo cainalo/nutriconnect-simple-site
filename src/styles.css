@@ -2287,11 +2287,6 @@ html[data-design="editorial"] :is(article, [class*="bg-card"]):not(footer, [data
 html[data-design="editorial"] [class*="shadow"]:not([data-no-design]) {
   box-shadow: none;
 }
-html[data-design="editorial"] [data-site-header] {
-  border-bottom: 2px solid var(--foreground);
-  background-color: var(--background);
-  backdrop-filter: none;
-}
 
 /* ---- Aurora: vidro e luz ---------------------------------------------------------------- */
 html[data-design="aurora"] {
@@ -2367,4 +2362,17 @@ html[data-design="aurora"] :is(article, [class*="bg-card"]):not(footer, [data-no
 /* Movimento reduzido: sem elevação animada nos designs. */
 html[data-motion="reduce"][data-design] :is(a, button, article)[class*="bg-card"]:hover {
   transform: none;
+}
+
+/* ---- Estrutura própria de cada design (menus e cabeçalhos em site-chrome-designs.tsx) ------ */
+/* Vibrante: a barra lateral fixa abre espaço à esquerda no computador. */
+@media (min-width: 1024px) {
+  body:has([data-site-sidebar]) {
+    padding-left: 248px;
+  }
+}
+/* Antes da hidratação o React ainda desenha o menu do design padrão; escondê-lo evita o piscar
+   quando o design salvo é outro. */
+html[data-design]:not([data-hydrated]) :is([data-site-header], [data-site-bottom-nav]) {
+  visibility: hidden;
 }

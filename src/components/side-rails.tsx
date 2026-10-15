@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 import { useRailsMoreSlot } from "@/components/app-screen";
 import { railsFor, readRailOverrides } from "@/components/rails-pages";
 import { useSiteConfig } from "@/lib/site-config";
+import { useDesignId } from "@/lib/site-design";
 import { useFeatures } from "@/lib/features";
 import { useAppearance } from "@/hooks/use-appearance";
 import { useAuth } from "@/hooks/use-auth";
@@ -73,10 +74,13 @@ export function SideRails() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pathname, railConfig, featureKey],
   );
+  const design = useDesignId();
   const enabled = !!user && appearance.sidePanels && !!rails;
   // Telas internas (a página não rola): a seção "Mais" vai para o fim da área de conteúdo.
   const moreSlot = useRailsMoreSlot();
-  const [layout, setLayout] = useState<(Metrics & { top: number; height: number }) | null>(null);
+  const [layout, setLayout] = useState<
+    (Metrics & { top: number; height: number; inset: number }) | null
+  >(null);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -90,8 +94,12 @@ export function SideRails() {
     }
 
     const measure = () => {
-      const m = metricsFor(window.innerWidth);
+      // Design com barra lateral: as colunas começam depois dela.
+      const sidebar = document.querySelector<HTMLElement>("[data-site-sidebar]");
+      const inset = sidebar && sidebar.offsetWidth > 0 ? sidebar.offsetWidth : 0;
+      const m = metricsFor(window.innerWidth - inset);
       if (!m) return off();
+      root.style.setProperty("--rail-inset", `${inset}px`);
       root.style.setProperty("--rail-w", `${m.width}px`);
       root.style.setProperty("--rail-edge", `${m.edge}px`);
       root.style.setProperty("--rail-gap", `${m.gap}px`);
@@ -101,13 +109,14 @@ export function SideRails() {
       const height = Math.max(240, window.innerHeight - top - 20);
       setLayout((prev) =>
         prev &&
+        prev.inset === inset &&
         prev.width === m.width &&
         prev.edge === m.edge &&
         prev.gap === m.gap &&
         prev.top === top &&
         prev.height === height
           ? prev
-          : { ...m, top, height },
+          : { ...m, top, height, inset },
       );
     };
 
@@ -120,7 +129,7 @@ export function SideRails() {
       window.removeEventListener("resize", measure);
       off();
     };
-  }, [enabled, pathname]);
+  }, [enabled, pathname, design]);
 
   const left = useMemo(() => (rails ? cardsOf(rails.left) : []), [rails]);
   const right = useMemo(() => (rails ? cardsOf(rails.right) : []), [rails]);
@@ -189,7 +198,7 @@ export function SideRails() {
       <aside
         aria-label="Atalhos e perfil"
         className="fixed z-30 overflow-hidden text-left"
-        style={{ ...common, left: layout.edge }}
+        style={{ ...common, left: layout.edge + layout.inset }}
       >
         {column(active.left)}
       </aside>

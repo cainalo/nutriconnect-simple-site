@@ -92,7 +92,7 @@ funcionalidades, mas navegação, menus, posição das coisas e estilo de págin
 do admin (Design do site) escolhe qual está no ar.
 
 1. [x] D1 — Seletor no admin + tema visual (cores, cantos, fontes) dos 4 designs (base técnica)
-2. [ ] D2 — Casca por design: cabeçalho, menu e estrutura das telas diferentes em cada um
+2. [x] D2 — Casca por design: Vibrante (barra lateral + dock), Editorial (capa de revista, sem barra inferior), Aurora (cápsula flutuante + dock de vidro + paleta Ctrl+K); falta conferir em prints
 3. [ ] D3 — Página inicial/landing e Espaço (feed) com layout próprio por design
 4. [ ] D4 — Funções, Perfil, Comunidades, Desafios, Acompanhamento, Painel clínico por design
 5. [ ] D5 — Revisão final em prints (celular, escuro), mantendo modelos de post e regras de rolagem

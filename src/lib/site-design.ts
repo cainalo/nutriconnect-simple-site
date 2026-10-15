@@ -4,7 +4,7 @@
 // escreve nada. A personalização de cada pessoa (appearance.ts) escreve estilos inline no <html>,
 // então continua valendo por cima do design do site. Modelos de post, regras de rolagem e
 // layouts não dependem do design.
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useSiteConfigs } from "@/lib/site-config";
 
 export type SiteDesignId = "natural" | "vibrante" | "editorial" | "aurora";
@@ -139,3 +139,23 @@ export function useSiteDesign() {
 
 /** Roda antes da primeira pintura: usa o design da última visita para não piscar o padrão. */
 export const DESIGN_INIT_SCRIPT = `(function(){try{var v=localStorage.getItem("${DESIGN_STORAGE_KEY}");if(v&&/^[a-z]{2,20}$/.test(v))document.documentElement.setAttribute("data-design",v);}catch(e){}})();`;
+
+/**
+ * Design ativo, lido do atributo data-design do <html> (o script de abertura e applySiteDesign o
+ * escrevem). No servidor e na hidratação vale o padrão; logo depois o cliente troca pelo salvo.
+ */
+export function useDesignId(): SiteDesignId {
+  const attr = useSyncExternalStore(
+    (cb) => {
+      const observer = new MutationObserver(cb);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-design"],
+      });
+      return () => observer.disconnect();
+    },
+    () => document.documentElement.getAttribute("data-design"),
+    () => null,
+  );
+  return readSiteDesign(attr);
+}

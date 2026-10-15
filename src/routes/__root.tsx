@@ -157,6 +157,9 @@ function RootShell({ children }: { children: ReactNode }) {
 /** Aplica o design do site escolhido pelo admin; precisa ficar dentro do QueryClientProvider. */
 function SiteDesignSync() {
   useSiteDesign();
+  useEffect(() => {
+    document.documentElement.setAttribute("data-hydrated", "");
+  }, []);
   return null;
 }
 
