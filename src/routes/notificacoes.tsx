@@ -900,7 +900,7 @@ function NotificacoesPage() {
 
   return (
     <AppScreen>
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-[120rem] px-4 py-6 sm:px-6 lg:px-10">
         <h1 className="sr-only">{t("notif.title")}</h1>
 
         {/* Resumo */}

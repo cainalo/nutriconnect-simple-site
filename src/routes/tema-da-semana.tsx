@@ -64,7 +64,7 @@ function TemaDaSemanaPage() {
 
   return (
     <AppScreen>
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8">
+      <div className="mx-auto w-full max-w-[120rem] px-4 sm:px-6 lg:px-10 py-8">
         {themeQuery.isLoading ? (
           <div className="py-12 text-center text-sm text-muted-foreground">
             {t("theme.loading")}

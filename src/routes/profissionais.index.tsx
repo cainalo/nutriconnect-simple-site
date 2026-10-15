@@ -131,7 +131,7 @@ function DirectoryPage() {
 
   return (
     <AppScreen className={plainText}>
-      <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
+      <div className="mx-auto w-full max-w-[120rem] px-4 pt-6 sm:px-6 lg:px-10">
         <h1 className="sr-only">{t("directory.title")}</h1>
 
         <div className="flex flex-col gap-3 rounded-3xl border border-accent/25 bg-gradient-to-r from-accent-soft/70 via-card to-primary-soft/50 p-4 sm:flex-row sm:items-center">
@@ -291,7 +291,7 @@ function DirectoryPage() {
               text={t("directory.emptyText")}
             />
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {filtered.map((p) => (
                 <Link
                   key={p.id}

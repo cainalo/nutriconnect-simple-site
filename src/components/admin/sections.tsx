@@ -12,7 +12,6 @@ import {
   LayoutDashboard,
   Megaphone,
   Palette,
-  PanelsLeftRight,
   ToggleRight,
   Presentation,
   Settings,
@@ -37,7 +36,6 @@ export type SectionId =
   | "apresentacao"
   | "anuncios"
   | "redes"
-  | "site_cards"
   | "site_features"
   | "site_nina"
   | "site_design"
@@ -67,7 +65,6 @@ export const SECTIONS: SectionDef[] = [
   { id: "apresentacao", label: "Apresentação", icon: Presentation, group: "Conteúdo" },
   { id: "anuncios", label: "Anúncios", icon: Megaphone, group: "Conteúdo" },
   { id: "redes", label: "Redes sociais", icon: Share2, group: "Conteúdo" },
-  { id: "site_cards", label: "Cards das laterais", icon: PanelsLeftRight, group: "Site" },
   { id: "site_features", label: "Funcionalidades", icon: ToggleRight, group: "Site" },
   { id: "site_nina", label: "Nina", icon: Smile, group: "Site" },
   { id: "site_design", label: "Design do site", icon: Palette, group: "Site" },

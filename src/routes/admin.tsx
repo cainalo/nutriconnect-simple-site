@@ -16,7 +16,6 @@ import {
 import { ClinicalDemoPanel, SiteFeaturesSection } from "@/components/admin/sections-site-features";
 import { SiteDesignSection } from "@/components/admin/sections-site-design";
 import { SiteNinaSection } from "@/components/admin/sections-site-nina";
-import { SiteRailsSection } from "@/components/admin/sections-site-rails";
 import { PresentationSection } from "@/components/admin/sections-presentation";
 import { MarketsSection } from "@/components/admin/sections-markets";
 import { SocialStudioSection } from "@/components/admin/social/studio";
@@ -176,7 +175,6 @@ function AdminPage() {
           {section === "apresentacao" && <PresentationSection />}
           {section === "anuncios" && <AnnouncementsSection />}
           {section === "redes" && <SocialStudioSection />}
-          {section === "site_cards" && <SiteRailsSection />}
           {section === "site_features" && (
             <div className="space-y-4">
               <SiteFeaturesSection />

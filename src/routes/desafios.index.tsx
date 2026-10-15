@@ -1,4 +1,5 @@
 import { td } from "@/lib/i18n/data";
+import { ProfileCard } from "@/components/rail-cards";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Award, BookOpen, Flame, Sparkles, Users } from "lucide-react";
@@ -194,7 +195,7 @@ function DesafiosIndexPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8">
+      <div className="mx-auto w-full max-w-[120rem] px-4 sm:px-6 lg:px-10 py-8">
         <h1 className="sr-only">{t("dz.title")}</h1>
 
         {/* Barra de XP, nível, ofensiva e meta do dia (com o seletor de perfil embutido) */}
@@ -258,6 +259,13 @@ function DesafiosIndexPage() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Card de nível (o mesmo do perfil), só aqui e em Funções. */}
+        {active.kind === "adult" && (
+          <section className="mb-8 max-w-md">
+            <ProfileCard />
+          </section>
         )}
 
         {/* Navegação por Abas (perfis infantis não têm rede social: sem desafios ou comunidades) */}

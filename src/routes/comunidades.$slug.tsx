@@ -119,7 +119,7 @@ function CommunityFeed() {
   const coverImage = communityCover(community);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto w-full max-w-[120rem] px-4 py-8 sm:px-6 lg:px-10">
       <Link
         to="/comunidades"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground mb-4"
@@ -238,7 +238,9 @@ function CommunityFeed() {
       {actor && canSeePosts && <CommunityEvents communityId={community.id} isHost={isAdminPro} />}
 
       {canPost ? (
-        <Composer communityId={community.id} />
+        <div className="mx-auto w-full max-w-3xl">
+          <Composer communityId={community.id} />
+        </div>
       ) : actor && !canSeePosts && community.status === "ativa" ? null : (
         <p className="mt-6 rounded-2xl border bg-card p-5 text-sm text-muted-foreground shadow-card">
           {!actor ? (
@@ -261,7 +263,7 @@ function CommunityFeed() {
           {t("cf.privatePosts")}
         </p>
       ) : (
-        <section className="mt-6 space-y-5">
+        <section className="mt-6 grid items-start gap-6 md:grid-cols-2 2xl:grid-cols-3">
           {feed.map((post) => (
             <div key={post.id}>
               {(isModerator || post.pinned) && (

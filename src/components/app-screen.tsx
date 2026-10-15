@@ -1,45 +1,11 @@
 // Casca das telas internas: a página tem a altura da tela (não rola) e o conteúdo rola por dentro,
 // abaixo do cabeçalho. O feed e o Explorar não usam esta casca (continuam rolando a janela).
-import { useCallback, useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { DesignPageHead } from "@/components/design-page-head";
 import { SiteHeader } from "@/components/site-chrome";
 import { useAuth } from "@/hooks/use-auth";
 import { useHouseholdRealtime, useMyHousehold } from "@/lib/household";
 import { cn } from "@/lib/utils";
-
-// ───────── Encaixe da seção "Mais" das colunas laterais ─────────
-// Quando a página não rola, os cards das colunas que não couberam aparecem no fim da área que rola.
-
-let slot: HTMLElement | null = null;
-const listeners = new Set<() => void>();
-const notify = () => listeners.forEach((l) => l());
-
-export function useRailsMoreSlot() {
-  return useSyncExternalStore(
-    (cb) => {
-      listeners.add(cb);
-      return () => listeners.delete(cb);
-    },
-    () => slot,
-    () => null,
-  );
-}
-
-function RailsMoreSlot() {
-  const mine = useRef<HTMLElement | null>(null);
-  const ref = useCallback((el: HTMLDivElement | null) => {
-    if (el) {
-      mine.current = el;
-      slot = el;
-      notify();
-    } else if (slot === mine.current) {
-      // Só limpa se ainda for o nosso (a página nova pode já ter se registrado).
-      slot = null;
-      notify();
-    }
-  }, []);
-  return <div ref={ref} />;
-}
 
 /**
  * Tela interna com a altura da tela.
@@ -80,7 +46,6 @@ export function AppScreen({
       >
         {scroll && <DesignPageHead />}
         {children}
-        {scroll && <RailsMoreSlot />}
       </main>
     </div>
   );

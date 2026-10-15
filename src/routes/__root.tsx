@@ -14,7 +14,6 @@ import { ConsentGate } from "../components/consent-gate";
 import { HeroCinematic } from "../components/hero-cinematic";
 import { useAppSounds } from "../hooks/use-app-sounds";
 import { AccessibilityTools } from "../components/accessibility-tools";
-import { SideRails } from "../components/side-rails";
 import { FeatureGate } from "../components/feature-gate";
 import { AnnouncementBar } from "../components/announcement-bar";
 import { useAppearanceSync } from "../hooks/use-appearance-sync";
@@ -181,7 +180,6 @@ function RootComponent() {
       <ConsentGate />
       <HeroCinematic />
       <AccessibilityTools />
-      <SideRails />
       <AnnouncementBar />
       <Toaster position="top-right" richColors />
     </QueryClientProvider>

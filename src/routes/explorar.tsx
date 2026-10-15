@@ -217,7 +217,7 @@ function ExplorarPage() {
     return (
       <>
         {loading && posts.length === 0 ? (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3" aria-hidden="true">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" aria-hidden="true">
             {Array.from({ length: 9 }, (_, i) => (
               <div
                 key={i}
@@ -236,7 +236,7 @@ function ExplorarPage() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {posts.map((post) => (
               <PostTile key={post.id} post={post} onOpen={setOpenPost} />
             ))}
@@ -413,7 +413,7 @@ function ExplorarPage() {
         pages={pages}
         initialPage={initialPage}
         onPageChange={onPageChange}
-        columnClass="max-w-4xl"
+        columnClass="max-w-[120rem]"
         sharedToolbar={toolbar}
       />
       <PostModal post={modalPost} onClose={closeModal} />

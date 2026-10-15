@@ -95,6 +95,7 @@ do admin (Design do site) escolhe qual está no ar.
 2. [x] D2 — Casca por design: Vibrante (barra lateral + dock), Editorial (capa de revista, sem barra inferior), Aurora (cápsula flutuante + dock de vidro + paleta Ctrl+K); falta conferir em prints
 3. [x] D3 — Página inicial (landing) e abertura do Espaço com composição própria por design (feed e posts intactos); colunas laterais redesenhadas em cada design (cards coloridos, colunas de jornal, vidro)
 4. [~] D4 — Estilo de post próprio por design (feito); cabeçalho de página por design em todas as páginas internas e Funções por design (feito); falta Perfil e painel clínico por dentro
+5a. [x] Colunas laterais removidas do site; cards delas ficam só em Funções ("Meus cards") e o card de nível em Desafios; páginas usam a largura toda
 5. [ ] D5 — Revisão final em prints (celular, escuro), mantendo modelos de post e regras de rolagem
 
 ### Funções e expansão

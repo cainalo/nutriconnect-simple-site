@@ -20,6 +20,7 @@ import { useRequireAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { NINA_DAILY_LIMIT, askNutriAssistant } from "@/lib/nutri-assistant.functions";
+import { NINA_TOPICS } from "@/components/rail-cards";
 import { useTr } from "@/components/settings-ui";
 import { useLinks } from "@/lib/clinical/queries";
 import {
@@ -258,7 +259,7 @@ function NinaPage() {
     // Altura da tela: a página não rola; só a conversa rola por dentro.
     <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
       <SiteHeader />
-      <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col px-4 pb-24 pt-6 sm:px-6 lg:pb-6">
+      <main className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 pb-24 pt-6 sm:px-6 lg:pb-6">
         <div className="mb-4 flex shrink-0 items-center gap-4">
           <Mascot id="nina" mood={sending || speaking ? "talk" : "idle"} size={72} />
           <div className="min-w-0 flex-1">
@@ -310,6 +311,22 @@ function NinaPage() {
               <Trash2 className="h-3.5 w-3.5" /> {t("nina.clear")}
             </button>
           )}
+        </div>
+
+        {/* Só desta página: perguntas para começar a conversa (tocar envia para a Nina). */}
+        <div className="no-scrollbar mb-3 flex shrink-0 gap-2 overflow-x-auto pb-1">
+          {NINA_TOPICS.map((q, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("nina:prompt", { detail: tr(q) }))
+              }
+              className="shrink-0 cursor-pointer rounded-full border border-border bg-card px-4 py-2 text-xs font-medium text-foreground transition hover:bg-secondary"
+            >
+              {tr(q)}
+            </button>
+          ))}
         </div>
 
         {activeLink && careAllowed.data === false && !promptHidden && (

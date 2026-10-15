@@ -51,7 +51,19 @@ import { AppScreen } from "@/components/app-screen";
 import { AuthGateLoading } from "@/components/site-chrome";
 import { TileArt, type ArtData, type ArtId } from "@/components/funcoes-art";
 import { NinaLive } from "@/components/nina-live";
-import { useAdultTrailProgress } from "@/components/rail-cards";
+import {
+  FriendsCard,
+  MyChallengesCard,
+  MyCommunitiesCard,
+  ProfessionalsCard,
+  ProfileCard,
+  SuggestedCommunitiesCard,
+  TopRecipesCard,
+  TrailCard,
+  UpcomingAppointmentsCard,
+  WeeklyThemeCard,
+  useAdultTrailProgress,
+} from "@/components/rail-cards";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   CommunityRouletteCard,
@@ -774,6 +786,28 @@ function FuncoesPage() {
       <div className="@container mx-auto w-full max-w-[120rem] px-4 pb-10 pt-5 sm:px-6 lg:px-10">
         <Hero name={user.name} today={today} />
 
+        {/* Os cards que antes ficavam nas colunas laterais das páginas moram aqui. */}
+        <section
+          className="mb-8"
+          aria-label={tr(["Meus cards", "My cards", "Mis tarjetas", "Mes cartes"])}
+        >
+          <h2 className="mb-3 font-display text-lg font-bold text-foreground">
+            {tr(["Meus cards", "My cards", "Mis tarjetas", "Mes cartes"])}
+          </h2>
+          <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
+            <ProfileCard />
+            <TrailCard />
+            <MyChallengesCard />
+            <WeeklyThemeCard />
+            <MyCommunitiesCard />
+            <FriendsCard />
+            <SuggestedCommunitiesCard limit={3} />
+            <TopRecipesCard />
+            <ProfessionalsCard limit={3} />
+            <UpcomingAppointmentsCard />
+          </div>
+        </section>
+
         {SECTIONS.map((section) => {
           const tiles = section.tiles.filter(visible);
           if (tiles.length === 0) return null;
@@ -799,7 +833,10 @@ function FuncoesPage() {
                   }}
                 />
               </h2>
-              <ul data-funcoes-grid className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7">
+              <ul
+                data-funcoes-grid
+                className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7"
+              >
                 {tiles.map((tile) => (
                   <li
                     key={tile.id}

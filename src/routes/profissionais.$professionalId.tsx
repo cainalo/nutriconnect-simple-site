@@ -223,7 +223,7 @@ function ProfessionalPage() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <AppScreen className={plainText}>
-      <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">{children}</div>
+      <div className="mx-auto w-full max-w-[120rem] px-4 pt-6 sm:px-6 lg:px-10">{children}</div>
     </AppScreen>
   );
 }

@@ -86,7 +86,6 @@ export function FeedShell({
   pages,
   initialPage = 0,
   onPageChange,
-  wings,
   columnClass = "max-w-3xl",
   sharedToolbar,
 }: {
@@ -98,8 +97,6 @@ export function FeedShell({
   sharedToolbar?: ReactNode;
   initialPage?: number;
   onPageChange?: (index: number) => void;
-  /** Colunas laterais próprias da página (as de sempre, sem rolagem). */
-  wings?: { left: ReactNode; right: ReactNode };
   /** Largura máxima da coluna do feed. */
   columnClass?: string;
 }) {
@@ -255,7 +252,6 @@ export function FeedShell({
   if (!ready) return <AuthGateLoading />;
 
   const goToPage = (index: number) => carouselApi?.scrollTo(index);
-  const panels = !!wings;
 
   return (
     // Altura fixa da tela: a janela não rola. Só o conteúdo de cada página rola.
@@ -268,25 +264,10 @@ export function FeedShell({
         data-no-bottom-pad
         className="flex min-h-0 w-full flex-1 px-4 max-lg:fixed max-lg:inset-0 sm:px-6 xl:px-8 2xl:px-14"
       >
-        <div
-          className={cn(
-            "grid h-full min-h-0 w-full gap-8",
-            panels
-              ? "lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(240px,1fr)_minmax(0,48rem)_minmax(240px,1fr)]"
-              : "mx-auto",
-            !panels && columnClass,
-          )}
-        >
-          {wings && (
-            <div className="hidden h-full min-h-0 overflow-hidden py-6 xl:block">{wings.left}</div>
-          )}
-
+        <div className={cn("mx-auto grid h-full min-h-0 w-full gap-8", columnClass)}>
           <div
             ref={pagesRef}
-            className={cn(
-              "relative mx-auto h-full min-h-0 w-full min-w-0 overflow-x-clip",
-              panels ? "max-w-3xl" : "max-w-none",
-            )}
+            className="relative mx-auto h-full min-h-0 w-full min-w-0 max-w-none overflow-x-clip"
           >
             <div
               ref={navRef}
@@ -357,10 +338,6 @@ export function FeedShell({
               </CarouselContent>
             </Carousel>
           </div>
-
-          {wings && (
-            <div className="hidden h-full min-h-0 overflow-hidden py-6 lg:block">{wings.right}</div>
-          )}
         </div>
       </main>
     </div>

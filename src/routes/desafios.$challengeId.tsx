@@ -153,7 +153,7 @@ function ChallengeDetailPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
+    <div className="mx-auto w-full max-w-[120rem] px-4 sm:px-6 lg:px-10 py-8">
       <Link
         to="/desafios"
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition mb-6"
