@@ -85,11 +85,31 @@ profissionais (não agora).
 Decisões do dono: visual primeiro; **mínimo de IA possível** em novas ideias (preferir recursos
 determinísticos); um commit por item, autônomo.
 
-1. [x] D1 — Design do site: 4 designs completos escolhidos no admin (Natural, Vibrante, Editorial, Aurora)
-2. [ ] D2 — Conferir os designs em prints (celular, modo escuro) e ajustar páginas principais
-3. [ ] S2 — Terminar abas Ideias, Calendário, Tendências e Perfis do estúdio no novo estilo
-4. [ ] T1 — Turbinar as funções existentes, uma por commit, já no visual novo
-5. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
-6. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
-7. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
-8. [ ] Novas ideias sem IA: a definir com o dono
+### Designs do site (reformulado em 15/10)
+
+Os designs **não** são só cores: cada um é um "site recriado por outro designer", com as mesmas
+funcionalidades, mas navegação, menus, posição das coisas e estilo de página próprios. O seletor
+do admin (Design do site) escolhe qual está no ar.
+
+1. [x] D1 — Seletor no admin + tema visual (cores, cantos, fontes) dos 4 designs (base técnica)
+2. [ ] D2 — Casca por design: cabeçalho, menu e estrutura das telas diferentes em cada um
+3. [ ] D3 — Página inicial/landing e Espaço (feed) com layout próprio por design
+4. [ ] D4 — Funções, Perfil, Comunidades, Desafios, Acompanhamento, Painel clínico por design
+5. [ ] D5 — Revisão final em prints (celular, escuro), mantendo modelos de post e regras de rolagem
+
+### Funções e expansão
+
+6. [ ] S2 — Terminar abas Ideias, Calendário, Tendências e Perfis do estúdio no novo estilo
+7. [ ] T1 — Turbinar as funções existentes, uma por commit, já no visual novo
+8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
+9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
+10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
+11. [ ] X1 — Diário de sintomas e alimentação com correlações (para levar à consulta)
+12. [ ] X2 — Lembretes de consulta e de exames (e-mail e push, confirmação de presença)
+13. [ ] X3 — Desafios entre amigos e ligas semanais (ranking gentil, sem culpa)
+14. [ ] X4 — Pontos e recompensas (desconto na Loja de programas, brindes de parceiros)
+15. [ ] X5 — Receitas da comunidade (coleções salvas; tabela nutricional de base fixa, TACO)
+16. [ ] X6 — Modo família e cuidador (acompanha hábitos de criança/idoso sem ver dados clínicos)
+17. [ ] X7 — Acessibilidade: leitura em voz alta das trilhas, contraste máximo, Libras
+18. [ ] E1 — Modo escola (escolas e professores usam a plataforma; escopo a definir)
+19. [ ] C1 — Plano comercial: marketing, precificação, metas (documento em docs/comercial.md)
