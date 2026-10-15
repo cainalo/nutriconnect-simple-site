@@ -72,7 +72,21 @@ function RouterApp({ children }: { children: any }) {
   const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: ["/"] }) });
   return <RouterProvider router={router} />;
 }
+import { Panel } from "@/components/rail-cards";
+function RailDemo() {
+  const col = (side: string) => (
+    <aside data-rail-col={side} className="w-[300px] overflow-hidden text-left">
+      <div className="flex flex-col gap-5">
+        {["Minhas comunidades", "Desafios ativos", "Atalhos", "Dicas"].map((t) => (
+          <div key={t}><Panel title={t}><p className="text-sm">Conteúdo de exemplo do card lateral com duas linhas de texto para ver o ritmo.</p><a className="mt-2 block text-sm font-semibold text-accent">Ver mais</a></Panel></div>
+        ))}
+      </div>
+    </aside>
+  );
+  return <div className="flex justify-between gap-6 p-6">{col("left")}<div className="flex-1 rounded-3xl border bg-card p-6">Conteúdo da página</div>{col("right")}</div>;
+}
 function App() {
+  if (v === "rails") return <RailDemo />;
   if (v === "landing") return <RouterApp><Landing /></RouterApp>;
   if (v === "header") return <RouterApp><div className="min-h-[600px]"><SiteHeader /></div></RouterApp>;
   if (v === "arts") return <Arts />;

@@ -197,6 +197,7 @@ export function SideRails() {
 
       <aside
         aria-label="Atalhos e perfil"
+        data-rail-col="left"
         className="fixed z-30 overflow-hidden text-left"
         style={{ ...common, left: layout.edge + layout.inset }}
       >
@@ -204,6 +205,7 @@ export function SideRails() {
       </aside>
       <aside
         aria-label="Sugestões"
+        data-rail-col="right"
         className="fixed z-30 overflow-hidden text-left"
         style={{ ...common, right: layout.edge }}
       >

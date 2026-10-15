@@ -64,7 +64,7 @@ export function Wing({ children }: { children: ReactNode }) {
   }, [compute, items.length]);
 
   return (
-    <div ref={outerRef} className="relative h-full min-h-0 overflow-hidden text-left">
+    <div ref={outerRef} data-rail-col="wing" className="relative h-full min-h-0 overflow-hidden text-left">
       {/* Cópia invisível só para medir a altura de cada card. */}
       <div
         ref={probeRef}
