@@ -79,3 +79,17 @@ profissionais (não agora).
 - [x] Gerar nova LOVABLE_API_KEY e salvar no Supabase (rotacionada + sincronizada; gateway respondeu 200)
 - [x] IA (Nina, resumo clínico e moderação) via Edge Functions `ai-chat` e `moderate-content`
 - [x] Adequação à LGPD, Marco Civil e ECA Digital (docs/conformidade-legal.md)
+
+## Rumo definido em 15/10/2026 (conversa de planejamento)
+
+Decisões do dono: visual primeiro; **mínimo de IA possível** em novas ideias (preferir recursos
+determinísticos); um commit por item, autônomo.
+
+1. [x] D1 — Design do site: 4 designs completos escolhidos no admin (Natural, Vibrante, Editorial, Aurora)
+2. [ ] D2 — Conferir os designs em prints (celular, modo escuro) e ajustar páginas principais
+3. [ ] S2 — Terminar abas Ideias, Calendário, Tendências e Perfis do estúdio no novo estilo
+4. [ ] T1 — Turbinar as funções existentes, uma por commit, já no visual novo
+5. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
+6. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
+7. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
+8. [ ] Novas ideias sem IA: a definir com o dono
