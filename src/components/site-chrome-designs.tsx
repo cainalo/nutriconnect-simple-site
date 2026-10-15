@@ -361,6 +361,17 @@ export function MastheadChrome() {
   );
   const textBtn =
     "cursor-pointer text-[11px] font-bold uppercase tracking-[0.18em] transition hover:text-accent";
+  const edition = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 864e5,
+  );
+  const hour = new Date().getHours();
+  const editionName = tr(
+    hour < 12
+      ? ["Edição da manhã", "Morning edition", "Edición de la mañana", "Édition du matin"]
+      : hour < 18
+        ? ["Edição da tarde", "Afternoon edition", "Edición de la tarde", "Édition de l'après-midi"]
+        : ["Edição da noite", "Evening edition", "Edición de la noche", "Édition du soir"],
+  );
 
   const write = user ? (
     <ShareModal
@@ -394,29 +405,46 @@ export function MastheadChrome() {
         data-hidden={hidden}
         className="sticky top-0 z-40 w-full bg-background transition-transform duration-300 data-[hidden=true]:-translate-y-full"
       >
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          {/* Faixa superior: data e ações (computador e tablet). */}
-          <div className="hidden items-center justify-between border-b border-foreground/20 py-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground sm:flex">
-            <span>{today}</span>
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          {/* Faixa superior: edição, data e ações (computador e tablet). */}
+          <div className="hidden items-center justify-between border-b border-foreground/40 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground sm:flex">
+            <span>
+              {tr(["Ano I", "Year I", "Año I", "An I"])} · Nº {edition} ·{" "}
+              {tr(["Preço: grátis", "Price: free", "Precio: gratis", "Prix : gratuit"])}
+            </span>
+            <span className="hidden text-foreground md:inline">{today}</span>
             <span className="flex items-center gap-5 text-foreground">
               {write}
               {account}
             </span>
           </div>
 
-          {/* Título da publicação entre filetes. */}
-          <div className="flex items-center gap-4 py-2 sm:py-3.5">
-            <span className="h-px flex-1 bg-foreground/30" aria-hidden="true" />
-            <Link to="/" aria-label={t("nav.homeAria")} className="text-center">
-              <Wordmark className="text-[1.75rem] sm:text-[2.6rem]" />
+          {/* Título da publicação, com "orelhas" nas laterais como nos jornais antigos. */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-2 sm:py-3">
+            <div className="hidden border-y-2 border-double border-foreground/70 py-1.5 text-center text-[10px] font-bold uppercase leading-snug tracking-[0.15em] md:block">
+              {tr([
+                "Saúde e alimentação para todos",
+                "Health and food for everyone",
+                "Salud y alimentación para todos",
+                "Santé et alimentation pour tous",
+              ])}
+            </div>
+            <Link
+              to="/"
+              aria-label={t("nav.homeAria")}
+              className="font-blackletter col-span-3 text-center md:col-span-1 md:col-start-2 text-[2.4rem] leading-none md:col-start-2 sm:text-[3.4rem] lg:text-[4.2rem]"
+            >
+              Nutri<span className="text-accent">Connect</span>
             </Link>
-            <span className="h-px flex-1 bg-foreground/30" aria-hidden="true" />
+            <div className="hidden border-y-2 border-double border-foreground/70 py-1.5 text-center text-[10px] font-bold uppercase leading-snug tracking-[0.15em] md:block">
+              {editionName}
+            </div>
           </div>
 
           {/* Seções: só texto, filete duplo. */}
           <nav
             aria-label={t("nav.mainAria")}
-            className="flex items-center gap-x-6 overflow-x-auto whitespace-nowrap border-y-2 border-foreground py-2 sm:justify-center"
+            className="flex items-center gap-x-6 overflow-x-auto whitespace-nowrap border-y-[5px] border-double border-foreground py-1.5 sm:justify-center"
           >
             {defs.map((def) => (
               <NavItem key={def.key} def={def}>

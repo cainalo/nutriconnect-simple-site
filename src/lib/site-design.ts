@@ -68,20 +68,20 @@ export const SITE_DESIGNS: SiteDesign[] = [
   {
     id: "editorial",
     name: "Editorial",
-    tagline: "Revista de saúde",
+    tagline: "Jornal antigo",
     description:
-      "Papel off-white, tinta escura, cantos quase retos, linhas finas no lugar de sombras e títulos em serifa grande. Sóbrio e de leitura confortável.",
+      "Jornal antigo: papel envelhecido, título em letra gótica, orelhas, filetes duplos, gravuras em preto e branco, capitulares e texto justificado. Os posts viram matérias de jornal, com a mesma estrutura.",
     swatch: {
-      bg: "#f6f2e9",
-      card: "#fbf9f3",
-      primary: "#1f3a2e",
-      accent: "#c2410c",
-      ink: "#1a1915",
+      bg: "#e9e0c9",
+      card: "#f1e9d3",
+      primary: "#2a261d",
+      accent: "#8b1a1a",
+      ink: "#1b1710",
       darkBg: "#16150f",
       darkCard: "#1d1c15",
     },
     radius: 6,
-    headingFont: "Playfair Display, serif",
+    headingFont: "Old Standard TT, serif",
   },
   {
     id: "aurora",

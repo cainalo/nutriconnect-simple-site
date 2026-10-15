@@ -2224,68 +2224,164 @@ html[data-design="vibrante"] a:is(article, [class*="bg-card"]):hover {
   box-shadow: 0 18px 32px -18px color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
-/* ---- Editorial: revista de saúde -------------------------------------------------------- */
+/* ---- Editorial: jornal antigo ----------------------------------------------------------- */
+/* Papel-jornal envelhecido, tinta preta e vermelho de tipografia; títulos em fonte de jornal,
+   cantos retos, filetes duplos, imagens em preto e branco com tom sépia e texto em colunas
+   justificadas. Os posts mudam só de aparência: a estrutura interna é a de sempre. */
 html[data-design="editorial"] {
-  --radius: 0.375rem;
-  --font-display: "Playfair Display", ui-serif, Georgia, serif;
-  --background: #f6f2e9;
-  --foreground: #1a1915;
-  --card: #fbf9f3;
-  --card-foreground: #1a1915;
-  --popover: #fbf9f3;
-  --primary: #1f3a2e;
-  --primary-foreground: #f6f2e9;
-  --primary-hover: #162b22;
-  --primary-soft: #e0e6d8;
-  --secondary: #ece6d8;
-  --muted: #ece6d8;
-  --muted-foreground: #5b5648;
-  --accent: #c2410c;
-  --accent-foreground: #fff7f0;
-  --accent-hover: #9a3412;
-  --accent-soft: #f7e3d6;
-  --border: #cfc7b3;
-  --input: #cfc7b3;
-  --ring: #c2410c;
-  --sidebar: #efe9db;
-  --sidebar-accent: #e3dcc8;
-  --sidebar-border: #cfc7b3;
+  --radius: 0;
+  --font-sans: "Old Standard TT", "Libre Baskerville", ui-serif, Georgia, serif;
+  --font-display: "Old Standard TT", "Libre Baskerville", ui-serif, Georgia, serif;
+  --background: #e9e0c9;
+  --foreground: #1b1710;
+  --card: #f1e9d3;
+  --card-foreground: #1b1710;
+  --popover: #f1e9d3;
+  --primary: #2a261d;
+  --primary-foreground: #f1e9d3;
+  --primary-hover: #15120c;
+  --primary-soft: #ddd3b8;
+  --secondary: #e0d6bb;
+  --muted: #e0d6bb;
+  --muted-foreground: #5c5342;
+  --accent: #8b1a1a;
+  --accent-foreground: #f6eedb;
+  --accent-hover: #6d1212;
+  --accent-soft: #e8d3c0;
+  --border: #b9ad8f;
+  --input: #b9ad8f;
+  --ring: #8b1a1a;
+  --sidebar: #e3d9bf;
+  --sidebar-accent: #d6cbad;
+  --sidebar-border: #b9ad8f;
 }
 html[data-design="editorial"].dark {
-  --background: #16150f;
-  --foreground: #f1ecdf;
-  --card: #1d1c15;
-  --card-foreground: #f1ecdf;
-  --popover: #1d1c15;
-  --primary: #a9c4b3;
-  --primary-foreground: #0f1c15;
-  --primary-hover: #bdd3c6;
-  --primary-soft: #26332b;
-  --secondary: #26241b;
-  --muted: #26241b;
-  --muted-foreground: #b2aa97;
-  --accent: #ea7a45;
-  --accent-foreground: #240e04;
-  --accent-hover: #f08f61;
-  --accent-soft: #432212;
-  --border: #3a372b;
-  --input: #3a372b;
-  --ring: #ea7a45;
-  --sidebar: #1a1912;
-  --sidebar-accent: #2a281e;
-  --sidebar-border: #3a372b;
+  --background: #1c1912;
+  --foreground: #e8dfc7;
+  --card: #25211a;
+  --card-foreground: #e8dfc7;
+  --popover: #25211a;
+  --primary: #d9cfb3;
+  --primary-foreground: #1c1912;
+  --primary-hover: #eadfc3;
+  --primary-soft: #35301f;
+  --secondary: #2c281d;
+  --muted: #2c281d;
+  --muted-foreground: #aba083;
+  --accent: #d96a5a;
+  --accent-foreground: #230a07;
+  --accent-hover: #e58577;
+  --accent-soft: #3f1f1a;
+  --border: #4a4331;
+  --input: #4a4331;
+  --ring: #d96a5a;
+  --sidebar: #211e16;
+  --sidebar-accent: #2e2a1e;
+  --sidebar-border: #4a4331;
+}
+/* Papel com fibras e bordas escurecidas */
+html[data-design="editorial"] body {
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .15 0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(120% 90% at 50% 0%, transparent 55%, rgba(90, 65, 20, 0.16));
+  background-attachment: fixed;
+}
+html[data-design="editorial"].dark body {
+  background-image: none;
 }
 html[data-design="editorial"] h1,
-html[data-design="editorial"] h2 {
+html[data-design="editorial"] h2,
+html[data-design="editorial"] h3 {
   font-weight: 700;
   letter-spacing: -0.01em;
 }
+/* Sem cantos arredondados: só os interruptores e os desenhos mantêm a forma. */
+html[data-design="editorial"] [class*="rounded"]:not([role="switch"], [role="switch"] *, svg, svg *, canvas) {
+  border-radius: 0 !important;
+}
+html[data-design="editorial"] :is(input, textarea, select, button):not([role="switch"]) {
+  border-radius: 0;
+}
 html[data-design="editorial"] :is(article, [class*="bg-card"]):not(footer, [data-no-design]) {
   box-shadow: none;
-  border-color: color-mix(in srgb, var(--foreground) 22%, transparent);
+  border-color: color-mix(in srgb, var(--foreground) 45%, transparent);
 }
 html[data-design="editorial"] [class*="shadow"]:not([data-no-design]) {
   box-shadow: none;
+}
+/* Gravuras: imagens em preto e branco com tom de tinta antiga */
+html[data-design="editorial"] :is(.post-card, [data-rail-col], main) img:not([data-no-engrave]) {
+  filter: grayscale(1) sepia(0.4) contrast(1.08);
+  mix-blend-mode: multiply;
+}
+html[data-design="editorial"].dark :is(.post-card, [data-rail-col], main) img:not([data-no-engrave]) {
+  mix-blend-mode: normal;
+  filter: grayscale(1) sepia(0.25) contrast(1.05) brightness(0.9);
+}
+html[data-design="editorial"] hr {
+  border-top: 3px double var(--foreground);
+}
+
+/* Posts: matéria de jornal. Filete grosso no topo, kicker em versalete, título de manchete,
+   primeira letra capitular e texto justificado em fonte de jornal. */
+html[data-design="editorial"] .post-card {
+  background: transparent;
+  border: 0;
+  border-top: 4px solid var(--foreground);
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 50%, transparent);
+  border-radius: 0;
+  padding-top: 0.15rem;
+  position: relative;
+}
+html[data-design="editorial"] .post-card::before {
+  content: "";
+  position: absolute;
+  inset: 3px 0 auto 0;
+  border-top: 1px solid var(--foreground);
+  pointer-events: none;
+}
+html[data-design="editorial"] .post-card [style*="--pt"] {
+  color: var(--accent) !important;
+  letter-spacing: 0.22em;
+  font-size: 0.68rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 35%, transparent);
+  padding-bottom: 0.4rem;
+}
+html[data-design="editorial"] .post-card h2,
+html[data-design="editorial"] .post-card h3 {
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+html[data-design="editorial"] .post-card :is(h2, h3) + p::first-letter {
+  float: left;
+  font-family: "UnifrakturCook", var(--font-display);
+  font-size: 3.4em;
+  line-height: 0.82;
+  padding: 0.06em 0.1em 0 0;
+  color: var(--accent);
+}
+html[data-design="editorial"] .post-card p {
+  text-align: justify;
+  hyphens: auto;
+  line-height: 1.55;
+}
+html[data-design="editorial"] .post-card :is(button, a) {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+html[data-design="editorial"] .post-card [class*="bg-secondary"],
+html[data-design="editorial"] .post-card [class*="bg-muted"] {
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground) 25%, transparent);
+}
+/* Faixa de rolagem do cabeçalho */
+html[data-design="editorial"] .font-blackletter {
+  font-family: "UnifrakturCook", "Old English Text MT", var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 /* ---- Aurora: vidro e luz ---------------------------------------------------------------- */
