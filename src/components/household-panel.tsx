@@ -27,6 +27,7 @@ import {
   X,
 } from "lucide-react";
 import { BuyAtMarket } from "@/components/buy-at-market";
+import { EmojiIcon } from "@/components/emoji-icon";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -39,6 +40,7 @@ import {
 } from "@/lib/fridge";
 import {
   HOUSE_EMOJIS,
+  HOUSE_EMOJI_NAMES,
   MAX_MEMBERS,
   NOTE_MAX,
   countMyPersonalItems,
@@ -98,10 +100,18 @@ export function HouseholdPanel() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-extrabold font-display text-foreground">
-          {mine.data
-            ? `${mine.data.house.emoji} ${mine.data.house.name}`
-            : tr(["Minha casa", "My home", "Mi casa", "Ma maison"])}
+        <h1
+          data-page-head={mine.data ? undefined : ""}
+          className="text-2xl font-extrabold font-display text-foreground"
+        >
+          {mine.data ? (
+            <span className="inline-flex items-center gap-2">
+              <EmojiIcon emoji={mine.data.house.emoji} fallback={Home} tinted className="h-6 w-6" />
+              {mine.data.house.name}
+            </span>
+          ) : (
+            tr(["Minha casa", "My home", "Mi casa", "Ma maison"])
+          )}
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           {tr([
@@ -143,9 +153,7 @@ function NoHouse() {
       { name: name.trim(), emoji },
       {
         onSuccess: () =>
-          toast.success(
-            tr(["Casa criada! 🏠", "Home created! 🏠", "¡Casa creada! 🏠", "Maison créée ! 🏠"]),
-          ),
+          toast.success(tr(["Casa criada!", "Home created!", "¡Casa creada!", "Maison créée !"])),
         onError,
       },
     );
@@ -185,13 +193,14 @@ function NoHouse() {
               type="button"
               role="radio"
               aria-checked={emoji === e}
+              aria-label={HOUSE_EMOJI_NAMES[e] ? tr(HOUSE_EMOJI_NAMES[e]) : undefined}
               onClick={() => setEmoji(e)}
               className={cn(
-                "grid h-9 w-9 place-items-center rounded-xl border text-lg transition",
+                "grid h-9 w-9 place-items-center rounded-xl border transition",
                 emoji === e ? "border-accent bg-accent-soft" : "border-border hover:bg-secondary",
               )}
             >
-              {e}
+              <EmojiIcon emoji={e} fallback={Home} tinted className="h-5 w-5" />
             </button>
           ))}
         </div>
@@ -600,13 +609,14 @@ function EditHouse({ mine }: { mine: MyHousehold }) {
             key={e}
             type="button"
             aria-pressed={emoji === e}
+            aria-label={HOUSE_EMOJI_NAMES[e] ? tr(HOUSE_EMOJI_NAMES[e]) : undefined}
             onClick={() => setEmoji(e)}
             className={cn(
-              "grid h-8 w-8 place-items-center rounded-xl border text-base transition",
+              "grid h-8 w-8 place-items-center rounded-xl border transition",
               emoji === e ? "border-accent bg-accent-soft" : "border-border hover:bg-secondary",
             )}
           >
-            {e}
+            <EmojiIcon emoji={e} fallback={Home} tinted className="h-4 w-4" />
           </button>
         ))}
       </div>

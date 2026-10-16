@@ -41,7 +41,10 @@ function ProgramStore() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold font-display text-foreground">
+        <h1
+          data-page-head
+          className="flex items-center gap-2 text-2xl font-extrabold font-display text-foreground"
+        >
           <ShoppingBag className="h-6 w-6 text-accent" />
           {tr(["Programas", "Programs", "Programas", "Programmes"])}
         </h1>

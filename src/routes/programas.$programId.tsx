@@ -18,6 +18,7 @@ import {
 } from "@/lib/programs";
 import { cardsByIds } from "@/lib/social/api";
 import { cn } from "@/lib/utils";
+import { EmojiIcon } from "@/components/emoji-icon";
 
 export const Route = createFileRoute("/programas/$programId")({
   validateSearch: (search: Record<string, unknown>): { compra?: string } => ({
@@ -101,8 +102,8 @@ function ProgramPage() {
       </Link>
 
       <header className={card}>
-        <span className="text-5xl" aria-hidden>
-          {p.emoji}
+        <span className="grid h-16 w-16 place-items-center rounded-3xl bg-accent-soft">
+          <EmojiIcon emoji={p.emoji} tinted className="h-9 w-9" />
         </span>
         <h1 className="mt-3 text-2xl font-extrabold font-display text-foreground">{p.title}</h1>
         {proCard && (

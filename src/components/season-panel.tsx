@@ -23,6 +23,7 @@ import {
   type SeasonFood,
   type SeasonPhase,
 } from "@/lib/season-data";
+import { EmojiIcon } from "@/components/emoji-icon";
 
 const card = "rounded-3xl border border-border/70 bg-card p-5 shadow-xs";
 const btnSoft =
@@ -115,8 +116,8 @@ function FoodCard({
         aria-expanded={open}
         className="flex items-start gap-3 text-left"
       >
-        <span className="text-3xl leading-none" aria-hidden>
-          {food.emoji}
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft">
+          <EmojiIcon emoji={food.emoji} tinted className="h-6 w-6" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold text-foreground">{tr(food.name)}</span>
@@ -209,7 +210,7 @@ export function SeasonPanel() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold font-display text-foreground">
+          <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
             {tr([
               "Calendário da feira",
               "Market calendar",
@@ -372,7 +373,7 @@ export function SeasonCard() {
         <ul className="space-y-1.5">
           {top.map(({ food, phase }) => (
             <li key={food.id} className="flex items-center gap-2 text-xs text-foreground">
-              <span aria-hidden>{food.emoji}</span>
+              <EmojiIcon emoji={food.emoji} tinted className="h-4 w-4 shrink-0" />
               <span className="min-w-0 flex-1 truncate">{tr(food.name)}</span>
               <span className="text-[10px] text-muted-foreground">{tr(PHASE_NAMES[phase])}</span>
             </li>

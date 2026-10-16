@@ -494,8 +494,8 @@ function NinaPage() {
 
         <p className="mt-3 shrink-0 text-xs text-muted-foreground">
           {used !== null && (
-            <span className="mr-2 font-semibold">
-              {used}/{NINA_DAILY_LIMIT} {t("nina.usage")}
+            <span className="mr-1.5 font-semibold">
+              {used}/{NINA_DAILY_LIMIT} {t("nina.usage")} ·
             </span>
           )}
           {t("nina.disclaimer")}

@@ -151,19 +151,20 @@ export function ProScoreCard({ professionalId }: { professionalId: string }) {
         </p>
       ) : (
         <ul className="mt-2 divide-y divide-border/60">
-          {(events.data ?? []).map((e) => {
+          {groupEvents(events.data ?? []).map(({ e, n, points }) => {
             const name = PRO_EVENT_NAMES[e.kind];
             return (
               <li key={e.id} className="flex items-center justify-between gap-3 py-1.5 text-xs">
                 <span className="min-w-0 truncate text-foreground">
                   {name ? pickName(name, locale) : e.kind}
+                  {n > 1 && <b className="ml-1 text-muted-foreground">×{n}</b>}
                   {e.note ? ` — ${e.note}` : ""}
                   <span className="ml-2 text-muted-foreground">{formatDate(e.createdAt)}</span>
                 </span>
                 <span
-                  className={`shrink-0 font-bold ${e.points >= 0 ? "text-accent" : "text-destructive"}`}
+                  className={`shrink-0 font-bold ${points >= 0 ? "text-accent" : "text-destructive"}`}
                 >
-                  {e.points > 0 ? `+${e.points}` : e.points}
+                  {points > 0 ? `+${points}` : points}
                 </span>
               </li>
             );
@@ -218,4 +219,24 @@ export function ProScoreCard({ professionalId }: { professionalId: string }) {
       )}
     </section>
   );
+}
+
+/** Junta pontos seguidos do mesmo tipo no mesmo dia ("Apoio recebido ×9 … +9"). */
+function groupEvents<
+  E extends { kind: string; note?: string | null; createdAt: string; points: number },
+>(list: E[]) {
+  const out: { e: E; n: number; points: number }[] = [];
+  for (const e of list) {
+    const last = out[out.length - 1];
+    if (
+      last &&
+      last.e.kind === e.kind &&
+      (last.e.note ?? "") === (e.note ?? "") &&
+      last.e.createdAt.slice(0, 10) === e.createdAt.slice(0, 10)
+    ) {
+      last.n += 1;
+      last.points += e.points;
+    } else out.push({ e, n: 1, points: e.points });
+  }
+  return out;
 }

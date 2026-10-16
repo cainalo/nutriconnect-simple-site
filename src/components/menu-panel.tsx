@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Home,
   Leaf,
   Loader2,
   Pencil,
@@ -22,6 +23,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { EmojiIcon } from "@/components/emoji-icon";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -666,12 +668,12 @@ export function MenuPanel() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold font-display text-foreground">
+          <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
             {tr(["Cardápio da semana", "Weekly menu", "Menú semanal", "Menu de la semaine"])}
           </h1>
           {house.data && (
             <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-foreground">
-              {house.data.house.emoji}{" "}
+              <EmojiIcon emoji={house.data.house.emoji} fallback={Home} className="h-3.5 w-3.5" />
               {tr([
                 `Cardápio da casa: ${people} ${people === 1 ? "porção" : "porções"} por receita, para todos verem e mudarem`,
                 `Home menu: ${people} serving${people === 1 ? "" : "s"} per recipe, shared with everyone`,

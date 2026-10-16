@@ -12,7 +12,20 @@ export type HouseholdMember = Tables<"household_members">;
 export type HouseholdRole = "responsavel" | "membro";
 
 export const MAX_MEMBERS = 8;
-export const HOUSE_EMOJIS = ["🏠", "🏡", "🏢", "🌻", "🍲", "🥑", "🐱", "🐶", "💛", "🌿"];
+export const HOUSE_EMOJIS = ["🏠", "🌳", "🏢", "🌻", "🍲", "🥑", "🐱", "🐶", "💛", "🌿"];
+/** Nome de cada símbolo da casa (leitores de tela; na tela aparece o ícone, nunca o emoji). */
+export const HOUSE_EMOJI_NAMES: Record<string, [string, string, string, string]> = {
+  "🏠": ["Casa", "House", "Casa", "Maison"],
+  "🌳": ["Árvore", "Tree", "Árbol", "Arbre"],
+  "🏢": ["Prédio", "Building", "Edificio", "Immeuble"],
+  "🌻": ["Flor", "Flower", "Flor", "Fleur"],
+  "🍲": ["Panela", "Pot", "Olla", "Marmite"],
+  "🥑": ["Salada", "Salad", "Ensalada", "Salade"],
+  "🐱": ["Gato", "Cat", "Gato", "Chat"],
+  "🐶": ["Cachorro", "Dog", "Perro", "Chien"],
+  "💛": ["Coração", "Heart", "Corazón", "Cœur"],
+  "🌿": ["Folhas", "Leaves", "Hojas", "Feuilles"],
+};
 
 export interface MyHousehold {
   house: Household;

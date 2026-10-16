@@ -126,7 +126,9 @@ export function ClinicalLayout({
               );
             })}
           </nav>
-          <DesignPageHead />
+          <div className="[&>div]:px-0 [&>div]:pt-0 [&>div]:pb-4">
+            <DesignPageHead />
+          </div>
           <ClinicalDemoBanner />
           {children}
         </main>

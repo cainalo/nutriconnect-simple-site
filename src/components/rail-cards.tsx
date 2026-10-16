@@ -160,7 +160,7 @@ export function ProfileCard() {
         </div>
         <div className="mt-1.5 flex items-center justify-between text-[11px] text-muted-foreground">
           <span>
-            {lvl.xpInLevel}/{lvl.xpForNext} XP
+            {xp} XP · {t("tc.missingXp").replace("{n}", String(lvl.xpForNext - lvl.xpInLevel))}
           </span>
           <span className="inline-flex items-center gap-1 font-semibold text-accent">
             <Flame className="h-3.5 w-3.5" /> {streak} {t("hub.streakDays")}

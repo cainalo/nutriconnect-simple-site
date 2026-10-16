@@ -554,7 +554,7 @@ export function QuizCard() {
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {score >= 4
-              ? tr(["Mandou bem! 🌟", "Great job! 🌟", "¡Muy bien! 🌟", "Bravo ! 🌟"])
+              ? tr(["Mandou bem!", "Great job!", "¡Muy bien!", "Bravo !"])
               : score >= 2
                 ? tr([
                     "Quase lá! Tente de novo.",
@@ -689,10 +689,10 @@ export function PlateBuilderCard() {
       ]);
     if (counts.veg * 2 >= plate.length)
       return tr([
-        "Prato colorido e equilibrado! 🌈",
-        "A colorful, balanced plate! 🌈",
-        "¡Plato colorido y equilibrado! 🌈",
-        "Une assiette colorée et équilibrée ! 🌈",
+        "Prato colorido e equilibrado!",
+        "A colorful, balanced plate!",
+        "¡Plato colorido y equilibrado!",
+        "Une assiette colorée et équilibrée !",
       ]);
     return tr([
       "Quase! Tente deixar metade do prato com legumes e verduras.",
@@ -971,12 +971,7 @@ export function CookingTimerCard() {
       </div>
       {left === 0 && !running && (
         <p className="nc-pop-in mt-2 text-center text-xs font-bold text-accent">
-          {tr([
-            "Tempo! Pode tirar do fogo 🍳",
-            "Time's up! 🍳",
-            "¡Tiempo! 🍳",
-            "Temps écoulé ! 🍳",
-          ])}
+          {tr(["Tempo! Pode tirar do fogo", "Time's up!", "¡Tiempo!", "Temps écoulé !"])}
         </p>
       )}
     </Panel>
@@ -1327,10 +1322,10 @@ export function HabitCheckinCard() {
       </div>
       <p className={note}>
         {tr([
-          "Marque 3 ou mais por dia para manter a sequência 🔥",
-          "Check 3 or more a day to keep your streak 🔥",
-          "Marca 3 o más al día para mantener la racha 🔥",
-          "Cochez 3 ou plus par jour pour garder votre série 🔥",
+          "Marque 3 ou mais por dia para manter a sequência",
+          "Check 3 or more a day to keep your streak",
+          "Marca 3 o más al día para mantener la racha",
+          "Cochez 3 ou plus par jour pour garder votre série",
         ])}
       </p>
     </Panel>

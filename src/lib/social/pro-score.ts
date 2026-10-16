@@ -43,6 +43,12 @@ export const PRO_FEATURE_NAMES: Record<string, Names> = {
     "Destacado en las búsquedas",
     "Mis en avant dans les recherches",
   ],
+  loja_programas: [
+    "Vender programas na loja",
+    "Sell programs in the store",
+    "Vender programas en la tienda",
+    "Vendre des programmes dans la boutique",
+  ],
   selo_excelencia: [
     "Selo de excelência no perfil",
     "Excellence badge on profile",

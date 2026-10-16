@@ -7,6 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  Backpack,
   ChevronLeft,
   ChevronRight,
   Lightbulb,
@@ -20,6 +21,7 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react";
+import { EmojiIcon } from "@/components/emoji-icon";
 import { Mascot } from "@/components/mascots";
 import { ShoppingSection } from "@/components/menu-panel";
 import { useTr } from "@/components/settings-ui";
@@ -322,7 +324,14 @@ function SnackCard({
             aria-expanded={open}
             className="mt-1 text-left text-sm font-semibold text-foreground hover:underline"
           >
-            {snack.emojis && <span className="mr-1">{snack.emojis}</span>}
+            {snack.emojis && (
+              <EmojiIcon
+                emoji={snack.emojis}
+                tinted
+                fallback={null}
+                className="mr-1 inline h-4 w-4 align-[-3px]"
+              />
+            )}
             {snack.title}
           </button>
           {snack.rating && (
@@ -397,7 +406,7 @@ function SnackCard({
           </option>
           {ideas.map((i) => (
             <option key={i.id} value={i.id}>
-              {i.emojis} {tr(i.title)}
+              {tr(i.title)}
             </option>
           ))}
         </select>
@@ -748,7 +757,7 @@ export function LunchboxPanel() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-extrabold font-display text-foreground">
+        <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
           {tr([
             "Lancheira da semana",
             "Weekly lunchbox",
@@ -818,8 +827,8 @@ export function LunchboxLink() {
       to="/lancheira"
       className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card p-4 text-sm shadow-xs transition hover:shadow-card"
     >
-      <span className="text-2xl" aria-hidden>
-        🎒
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft">
+        <Backpack className="h-5 w-5 text-accent" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-bold text-foreground">
@@ -883,8 +892,8 @@ export function KidLunchboxToday({ profileId }: { profileId: string }) {
       <ul className="mt-3 space-y-3">
         {todays.map(({ slot, key, snack }) => (
           <li key={key} className="flex flex-wrap items-center gap-3">
-            <span className="text-4xl leading-none" aria-hidden>
-              {snack!.emojis || "🍎"}
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent-soft">
+              <EmojiIcon emoji={snack!.emojis || "🍎"} tinted className="h-7 w-7" />
             </span>
             <div className="min-w-0 flex-1">
               {slots.length > 1 && (

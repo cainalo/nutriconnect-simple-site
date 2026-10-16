@@ -330,7 +330,12 @@ export function FeedShell({
                           </div>
                         </div>
                       )}
-                      {index === 0 && <DesignPageHead />}
+                      {index === 0 && (
+                        // A página já tem margem lateral: a faixa alinha com os cards e respira embaixo.
+                        <div className="pb-4 empty:hidden [&>div]:px-0 [&>div]:pt-0">
+                          <DesignPageHead />
+                        </div>
+                      )}
                       {page.content}
                     </div>
                   </CarouselItem>

@@ -13,6 +13,7 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
+import { EmojiIcon } from "@/components/emoji-icon";
 import { SupportCard } from "@/components/no-numbers";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
@@ -85,7 +86,7 @@ export function JourneyPanel() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-extrabold font-display text-foreground">
+        <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
           {tr([
             "Parceiro de jornada",
             "Journey buddy",
@@ -160,10 +161,10 @@ function IncomingInvite({ pairId, from }: { pairId: string; from?: PersonCard })
                 onSuccess: () =>
                   toast.success(
                     tr([
-                      "Dupla formada! 💚",
-                      "You're a pair now! 💚",
-                      "¡Pareja formada! 💚",
-                      "Binôme formé ! 💚",
+                      "Dupla formada!",
+                      "You're a pair now!",
+                      "¡Pareja formada!",
+                      "Binôme formé !",
                     ]),
                   ),
                 onError,
@@ -430,8 +431,8 @@ function ActivePair({
         </h2>
         {partnerMood ? (
           <div className="mt-2 flex items-start gap-3">
-            <span className="text-3xl" aria-hidden>
-              {partnerMood.emoji}
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent-soft">
+              <EmojiIcon emoji={partnerMood.emoji} tinted className="h-6 w-6" />
             </span>
             <div>
               <p className="text-sm font-semibold text-foreground">{tr(partnerMood.name)}</p>
@@ -451,8 +452,8 @@ function ActivePair({
           </p>
         )}
         {status.cheerReceived && (
-          <p className="mt-3 rounded-2xl bg-accent-soft/50 px-3 py-2 text-xs font-semibold text-foreground">
-            💪{" "}
+          <p className="mt-3 flex items-center gap-1.5 rounded-2xl bg-accent-soft/50 px-3 py-2 text-xs font-semibold text-foreground">
+            <HandHeart className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
             {tr([
               `${firstName} mandou força para você hoje.`,
               `${firstName} sent you encouragement today.`,
@@ -470,10 +471,10 @@ function ActivePair({
               onSuccess: () =>
                 toast.success(
                   tr([
-                    "Força enviada! 💪",
-                    "Encouragement sent! 💪",
-                    "¡Ánimo enviado! 💪",
-                    "Encouragement envoyé ! 💪",
+                    "Força enviada!",
+                    "Encouragement sent!",
+                    "¡Ánimo enviado!",
+                    "Encouragement envoyé !",
                   ]),
                 ),
               onError,
@@ -530,12 +531,7 @@ function MyCheckin({ mood: savedMood, note: savedNote }: { mood?: JourneyMood; n
       {
         onSuccess: () =>
           toast.success(
-            tr([
-              "Check-in feito! 💚",
-              "Checked in! 💚",
-              "¡Registro hecho! 💚",
-              "Point enregistré ! 💚",
-            ]),
+            tr(["Check-in feito!", "Checked in!", "¡Registro hecho!", "Point enregistré !"]),
           ),
         onError,
       },
@@ -568,9 +564,7 @@ function MyCheckin({ mood: savedMood, note: savedNote }: { mood?: JourneyMood; n
                 : "border-border text-muted-foreground hover:text-foreground",
             )}
           >
-            <span className="text-2xl" aria-hidden>
-              {m.emoji}
-            </span>
+            <EmojiIcon emoji={m.emoji} tinted className="h-7 w-7" />
             {tr(m.name)}
           </button>
         ))}

@@ -1175,7 +1175,9 @@ export function LessonModal({
     setReward(r);
     if (r.reviewed && r.nextReview) {
       const days = Math.max(1, daysUntil(r.nextReview));
-      toast.success(t("lm.reviewDone").replace("{n}", String(days)));
+      toast.success(
+        days === 1 ? t("lm.reviewDoneOne") : t("lm.reviewDone").replace("{n}", String(days)),
+      );
     }
     const before = getUserLevel(xpBefore);
     const after = getUserLevel(xpBefore + r.totalGained);

@@ -10,6 +10,7 @@ import {
   Camera,
   ChefHat,
   Clock,
+  Home,
   Leaf,
   Loader2,
   Plus,
@@ -533,7 +534,7 @@ export function FridgePanel() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold font-display text-foreground">
+          <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
             {tr([
               "O que tem na geladeira?",
               "What's in the fridge?",
@@ -543,7 +544,7 @@ export function FridgePanel() {
           </h1>
           {ingredients.shared && (
             <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-foreground">
-              🏠{" "}
+              <Home className="h-3.5 w-3.5" aria-hidden="true" />
               {tr([
                 "Geladeira da casa: todos que moram com você veem e mudam",
                 "Home fridge: everyone you live with sees and edits it",
@@ -658,7 +659,7 @@ export function FridgePanel() {
                   "Ej.: calabaza, espinaca, arroz sobrante",
                   "Ex. : potiron, épinards, reste de riz",
                 ])}
-                className="min-w-0 flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                className="min-w-0 flex-1 basis-full rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground sm:basis-48"
               />
               <button type="submit" className={btnSoft} disabled={!draft.trim()}>
                 <Plus className="h-4 w-4" /> {tr(["Adicionar", "Add", "Agregar", "Ajouter"])}

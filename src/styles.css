@@ -2476,6 +2476,16 @@ html[data-motion="reduce"][data-design] :is(a, button, article)[class*="bg-card"
 }
 /* Antes da hidratação o React ainda desenha o menu do design padrão; escondê-lo evita o piscar
    quando o design salvo é outro. */
+/* Com um design ativo, a faixa do topo (DesignPageHead) já mostra o título da página: o título
+   próprio marcado com data-page-head fica só para leitores de tela. */
+html[data-design] [data-page-head] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 html[data-design]:not([data-hydrated]) :is([data-site-header], [data-site-bottom-nav]) {
   visibility: hidden;
 }

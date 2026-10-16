@@ -69,9 +69,9 @@ function AdherenceReport() {
       level: (d) => Math.min(1, d.diary / 3),
       title: (d) =>
         tr([
-          `${d.diary} refeição(ões)`,
-          `${d.diary} meal(s)`,
-          `${d.diary} comida(s)`,
+          d.diary === 1 ? "1 refeição" : `${d.diary} refeições`,
+          d.diary === 1 ? "1 meal" : `${d.diary} meals`,
+          d.diary === 1 ? "1 comida" : `${d.diary} comidas`,
           `${d.diary} repas`,
         ]),
     },

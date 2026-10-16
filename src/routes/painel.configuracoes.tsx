@@ -26,16 +26,17 @@ export const Route = createFileRoute("/painel/configuracoes")({
   component: ProfessionalSettingsPage,
 });
 
-const TIMEZONES = [
-  "America/Sao_Paulo",
-  "America/Manaus",
-  "America/Cuiaba",
-  "America/Belem",
-  "America/Fortaleza",
-  "America/Recife",
-  "America/Porto_Velho",
-  "America/Rio_Branco",
-  "America/Noronha",
+/** Fusos do Brasil, com o nome da cidade e a diferença para o UTC. */
+const TIMEZONES: { id: string; label: string }[] = [
+  { id: "America/Sao_Paulo", label: "Brasília / São Paulo (UTC−3)" },
+  { id: "America/Fortaleza", label: "Fortaleza (UTC−3)" },
+  { id: "America/Recife", label: "Recife (UTC−3)" },
+  { id: "America/Belem", label: "Belém (UTC−3)" },
+  { id: "America/Manaus", label: "Manaus (UTC−4)" },
+  { id: "America/Cuiaba", label: "Cuiabá (UTC−4)" },
+  { id: "America/Porto_Velho", label: "Porto Velho (UTC−4)" },
+  { id: "America/Rio_Branco", label: "Rio Branco (UTC−5)" },
+  { id: "America/Noronha", label: "Fernando de Noronha (UTC−2)" },
 ];
 
 function ProfessionalSettingsPage() {
@@ -210,8 +211,8 @@ function ProfessionalSettingsPage() {
                 onChange={(e) => set("timezone", e.target.value)}
               >
                 {TIMEZONES.map((tz) => (
-                  <option key={tz} value={tz}>
-                    {tz.replace("America/", "").replace("_", " ")}
+                  <option key={tz.id} value={tz.id}>
+                    {tz.label}
                   </option>
                 ))}
               </select>

@@ -192,10 +192,10 @@ export function WaterTracker({
       <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
         {count >= goal
           ? tr([
-              "Meta do dia batida! 💧",
-              "Daily goal reached! 💧",
-              "¡Meta del día lograda! 💧",
-              "Objectif du jour atteint ! 💧",
+              "Meta do dia batida!",
+              "Daily goal reached!",
+              "¡Meta del día lograda!",
+              "Objectif du jour atteint !",
             ])
           : count === 0
             ? tr([

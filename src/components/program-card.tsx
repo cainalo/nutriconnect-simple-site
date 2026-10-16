@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useTr } from "@/components/settings-ui";
 import { useI18n } from "@/hooks/use-i18n";
 import type { Program } from "@/lib/programs";
+import { EmojiIcon } from "@/components/emoji-icon";
 
 export function ProgramCard({
   program,
@@ -24,8 +25,8 @@ export function ProgramCard({
       params={{ programId: program.id }}
       className="flex h-full flex-col rounded-3xl border border-border/70 bg-card p-5 shadow-xs transition hover:-translate-y-0.5 hover:shadow-card"
     >
-      <span className="text-4xl" aria-hidden>
-        {program.emoji}
+      <span className="grid h-14 w-14 place-items-center rounded-2xl bg-accent-soft">
+        <EmojiIcon emoji={program.emoji} tinted className="h-8 w-8" />
       </span>
       <p className="mt-3 font-display text-lg font-bold leading-tight text-foreground">
         {program.title}
