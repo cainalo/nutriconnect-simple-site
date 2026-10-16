@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowUp, Compass, Sparkles } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-auth";
@@ -8,6 +8,7 @@ import { useAppearance } from "@/hooks/use-appearance";
 import { loadAppearance } from "@/lib/appearance";
 import { PostCard } from "@/components/community-cards";
 import { ShareModal } from "@/components/share-modal";
+import { PostMasonry } from "@/components/post-masonry";
 import { EspacoIntro } from "@/components/espaco-intro";
 import { MyChallengesCard, ProfileCard, TrailCard, WeeklyThemeCard } from "@/components/rail-cards";
 import { PushInviteCard } from "@/components/push-settings";
@@ -123,7 +124,7 @@ function NewspaperGrid({ posts }: { posts: InfiniteFeed["posts"] }) {
             key={post.id}
             data-news-rank={rank}
             data-news-span={wide ? "all" : undefined}
-            className={cn("mb-8 break-inside-avoid", wide && "mx-auto max-w-5xl [column-span:all]")}
+            className={cn("mb-8", wide && "mx-auto max-w-5xl [column-span:all]")}
           >
             <PostCard post={post} />
           </div>
@@ -137,6 +138,10 @@ function PostList({ feed, emptyMessage }: { feed: InfiniteFeed; emptyMessage: st
   const { t } = useI18n();
   const design = useDesignId();
   const { query, posts } = feed;
+  const items = useMemo(
+    () => posts.map((post) => ({ id: post.id, node: <PostCard post={post} /> })),
+    [posts],
+  );
   if (query.isLoading && posts.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">{t("espaco.loading")}</div>
@@ -150,15 +155,7 @@ function PostList({ feed, emptyMessage }: { feed: InfiniteFeed; emptyMessage: st
   };
   return (
     <>
-      {design === "editorial" ? (
-        <NewspaperGrid posts={posts} />
-      ) : (
-        <div className="grid items-start gap-6 md:grid-cols-2 2xl:grid-cols-3">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
-      )}
+      {design === "editorial" ? <NewspaperGrid posts={posts} /> : <PostMasonry items={items} />}
       {query.hasNextPage && (
         <LoadMoreTrigger onReach={loadMore} pageCount={query.data?.pages.length ?? 0} />
       )}

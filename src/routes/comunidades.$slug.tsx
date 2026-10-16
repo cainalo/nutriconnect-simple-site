@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { PostMasonry } from "@/components/post-masonry";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { useProfessionalMap } from "@/lib/social/professionals-queries";
@@ -263,15 +264,24 @@ function CommunityFeed() {
           {t("cf.privatePosts")}
         </p>
       ) : (
-        <section className="mt-6 grid items-start gap-6 md:grid-cols-2 2xl:grid-cols-3">
-          {feed.map((post) => (
-            <div key={post.id}>
-              {(isModerator || post.pinned) && (
-                <ModeratorBar postId={post.id} pinned={!!post.pinned} canModerate={isModerator} />
-              )}
-              <PostCard post={post} />
-            </div>
-          ))}
+        <section className="mt-6">
+          <PostMasonry
+            items={feed.map((post) => ({
+              id: post.id,
+              node: (
+                <div>
+                  {(isModerator || post.pinned) && (
+                    <ModeratorBar
+                      postId={post.id}
+                      pinned={!!post.pinned}
+                      canModerate={isModerator}
+                    />
+                  )}
+                  <PostCard post={post} />
+                </div>
+              ),
+            }))}
+          />
           {feed.length === 0 && (
             <p className="rounded-2xl border bg-card p-5 text-sm text-muted-foreground shadow-card">
               {t("cf.noPosts")}

@@ -1,4 +1,5 @@
 import { FitColumn } from "@/components/app-screen";
+import { DesignPageHead } from "@/components/design-page-head";
 import { ClinicalDemoBanner } from "@/components/clinical/demo-banner";
 import type { ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
@@ -125,6 +126,7 @@ export function ClinicalLayout({
               );
             })}
           </nav>
+          <DesignPageHead />
           <ClinicalDemoBanner />
           {children}
         </main>

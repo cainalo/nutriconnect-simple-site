@@ -376,15 +376,22 @@ export function LandingEditorial() {
     [locale],
   );
   const kicker = "text-[11px] font-bold uppercase tracking-[0.2em] text-accent";
+  const edition = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 864e5,
+  );
   return (
-    <div className="min-h-screen bg-background text-foreground [&_p]:text-left">
-      <header className="border-b-2 border-foreground">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="flex items-center justify-between border-b border-foreground/20 py-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            <span className="hidden sm:inline">{today}</span>
-            <span className="flex items-center gap-4">
+    <div data-landing className="min-h-screen bg-background text-foreground [&_p]:text-left">
+      <header className="border-b-4 border-double border-foreground">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between border-b border-foreground/40 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="hidden sm:inline">
+              {tr(["Ano I", "Year I", "Año I", "An I"])} · Nº {edition} ·{" "}
+              {tr(["Preço: grátis", "Price: free", "Precio: gratis", "Prix : gratuit"])}
+            </span>
+            <span className="hidden md:inline">{today}</span>
+            <span className="ml-auto flex items-center gap-4 text-foreground sm:ml-0">
               <LangSelect />
-              <Link to="/login" className="font-bold text-foreground hover:text-accent">
+              <Link to="/login" className="font-bold hover:text-accent">
                 {tr(COPY.login)}
               </Link>
               <Link to="/cadastro" className="font-bold text-accent hover:underline">
@@ -392,13 +399,24 @@ export function LandingEditorial() {
               </Link>
             </span>
           </div>
-          <div className="py-4 text-center sm:py-6">
-            <Wordmark className="text-5xl sm:text-7xl" />
-            <p className="mt-2 !text-center text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          {/* Título em letra gótica com "orelhas" nas laterais, como nos jornais antigos. */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-3 sm:py-5">
+            <div className="hidden border-y-2 border-double border-foreground/70 py-1.5 text-center text-[10px] font-bold uppercase leading-snug tracking-[0.15em] md:block">
               {tr(COPY.badge)}
+            </div>
+            <p className="font-blackletter col-span-3 !text-center text-[3rem] leading-none sm:text-[5rem] md:col-span-1 md:col-start-2 lg:text-[6.5rem]">
+              Nutri<span className="text-accent">Connect</span>
             </p>
+            <div className="hidden border-y-2 border-double border-foreground/70 py-1.5 text-center text-[10px] font-bold uppercase leading-snug tracking-[0.15em] md:block">
+              {tr([
+                "Extra! Entrada gratuita",
+                "Extra! Free entry",
+                "¡Extra! Entrada libre",
+                "Extra ! Entrée libre",
+              ])}
+            </div>
           </div>
-          <nav className="flex justify-center gap-8 border-t border-foreground/30 py-2 text-[11px] font-bold uppercase tracking-[0.16em]">
+          <nav className="flex justify-center gap-8 border-y-[5px] border-double border-foreground py-1.5 text-[11px] font-bold uppercase tracking-[0.16em]">
             <a href="#recursos" className="hover:text-accent">
               {tr(COPY.navFeatures)}
             </a>
@@ -416,7 +434,7 @@ export function LandingEditorial() {
       <section className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[2fr_1px_1fr]">
         <div>
           <p className={kicker}>{tr(["Manchete", "Front page", "Portada", "À la une"])}</p>
-          <h1 className="mt-3 font-display text-5xl font-bold leading-[1.02] tracking-tight sm:text-7xl">
+          <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[1.02] tracking-tight sm:text-7xl">
             {tr(COPY.h1a)} <em className="text-accent">{tr(COPY.h1b)}</em>
           </h1>
           <p className="mt-6 max-w-2xl border-l-4 border-accent pl-4 text-lg leading-relaxed text-muted-foreground">

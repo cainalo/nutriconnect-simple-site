@@ -167,6 +167,33 @@ const HEADS: Record<string, HeadDef> = {
       "Fruits et légumes de saison dans votre région.",
     ],
   },
+  "/convites": {
+    icon: Users,
+    color: "#3b7bbf",
+    title: ["Convites", "Invitations", "Invitaciones", "Invitations"],
+    text: [
+      "Convites para administrar comunidades e participar delas.",
+      "Invitations to run and join communities.",
+      "Invitaciones para administrar comunidades y participar en ellas.",
+      "Invitations pour administrer des communautés et y participer.",
+    ],
+  },
+  "/verificacao": {
+    icon: Stethoscope,
+    color: "#2f7d6d",
+    title: [
+      "Verificação profissional",
+      "Professional verification",
+      "Verificación profesional",
+      "Vérification professionnelle",
+    ],
+    text: [
+      "Envie o seu registro para receber o selo de verificado.",
+      "Submit your registration to get the verified badge.",
+      "Envía tu registro para recibir el sello de verificado.",
+      "Envoyez votre inscription pour obtenir le badge vérifié.",
+    ],
+  },
   "/casa": {
     icon: House,
     color: "#2f7d6d",

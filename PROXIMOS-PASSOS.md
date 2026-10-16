@@ -11,6 +11,20 @@ funções novas. Para ver as telas sem login: `.preview-harness` (`v=landing&d=<
 `v=header&d=<design>`, `v=rails&d=<design>`; `stub-auth.ts` simula uma pessoa logada).
 O texto abaixo é da sessão anterior (14/10).
 
+**Fechamento da etapa de designs (15/10):** colunas laterais removidas do site (cards delas só em
+Funções, "Meus cards", e o card de nível em Desafios); páginas em largura total; posts em colunas
+independentes (`src/components/post-masonry.tsx`, 3 colunas, cada uma medida sozinha); Editorial como
+jornal antigo (textura, letra gótica, cor por tipo em tinta velha, matérias inteiras em colunas
+contínuas, "Ver mais" só no celular). 56 posts de exemplo gravados no banco (migrations
+`20261015160000_demo_posts_exemplo` e `..160100_demo_posts_interacoes`; autores = perfis de exemplo
+`00000000-0000-4000-a000-*`, exceto Helena Souza, que está suspensa). Para apagar:
+`delete from public.posts where id::text like '00000000-0000-4000-b000-%';`.
+Pendente: D5 (revisar tudo em print no site logado, celular e modo escuro) e o corte à direita que o
+dono viu no Editorial pelo celular (não reproduzido na bancada; há uma trava de largura em
+`styles.css` para telas < 1024 px). Próximas etapas combinadas: S2, turbinar funções (T1), app (A3/A4),
+marketplace (P1), X1–X7, modo escola (E1) e monetização (C1).
+
+
 
 Leia este arquivo inteiro antes de mexer no projeto. Ele diz o que foi feito, o que está pendente e
 em que ordem continuar. O roadmap oficial é o `roadmap.md`; o `AGENTS.md` tem as regras do Lovable

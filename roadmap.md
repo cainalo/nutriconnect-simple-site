@@ -94,9 +94,9 @@ do admin (Design do site) escolhe qual está no ar.
 1. [x] D1 — Seletor no admin + tema visual (cores, cantos, fontes) dos 4 designs (base técnica)
 2. [x] D2 — Casca por design: Vibrante (barra lateral + dock), Editorial (capa de revista, sem barra inferior), Aurora (cápsula flutuante + dock de vidro + paleta Ctrl+K); falta conferir em prints
 3. [x] D3 — Página inicial (landing) e abertura do Espaço com composição própria por design (feed e posts intactos); colunas laterais redesenhadas em cada design (cards coloridos, colunas de jornal, vidro)
-4. [~] D4 — Estilo de post próprio por design (feito); cabeçalho de página por design em todas as páginas internas e Funções por design (feito); falta Perfil e painel clínico por dentro
+4. [x] D4 — Estilo de post por design; cabeçalho de página por design (Comunidades, Desafios, Explorar, Notificações, Profissionais, Acompanhamento, Painel clínico, Programas, Receitas, Cardápio, Geladeira, Feira, Casa, Convites, Verificação); Funções e abas por design. O Perfil de cada pessoa segue livre (montado por ela)
 5a. [x] Colunas laterais removidas do site; cards delas ficam só em Funções ("Meus cards") e o card de nível em Desafios; páginas usam a largura toda
-5. [ ] D5 — Revisão final em prints (celular, escuro), mantendo modelos de post e regras de rolagem
+5. [ ] D5 — Revisão final em prints no site logado (celular, escuro), mantendo modelos de post e regras de rolagem
 
 ### Funções e expansão
 

@@ -2317,11 +2317,11 @@ html[data-design="editorial"] [class*="shadow"]:not([data-no-design]) {
   box-shadow: none;
 }
 /* Gravuras: imagens em preto e branco com tom de tinta antiga */
-html[data-design="editorial"] :is(.post-card, main) img:not([data-no-engrave]) {
+html[data-design="editorial"] :is(.post-card, main, [data-landing]) img:not([data-no-engrave]) {
   filter: grayscale(1) sepia(0.4) contrast(1.08);
   mix-blend-mode: multiply;
 }
-html[data-design="editorial"].dark :is(.post-card, main) img:not([data-no-engrave]) {
+html[data-design="editorial"].dark :is(.post-card, main, [data-landing]) img:not([data-no-engrave]) {
   mix-blend-mode: normal;
   filter: grayscale(1) sepia(0.25) contrast(1.05) brightness(0.9);
 }
@@ -2348,7 +2348,7 @@ html[data-design="editorial"] .post-card::before {
   pointer-events: none;
 }
 html[data-design="editorial"] .post-card [style*="--pt"] {
-  color: var(--accent) !important;
+  color: var(--pt) !important;
   letter-spacing: 0.22em;
   font-size: 0.68rem;
   border-bottom: 1px solid color-mix(in srgb, var(--foreground) 35%, transparent);
@@ -2368,7 +2368,7 @@ html[data-design="editorial"] .post-card :is(h2, h3) + p::first-letter {
   font-size: 3.4em;
   line-height: 0.82;
   padding: 0.06em 0.1em 0 0;
-  color: var(--accent);
+  color: var(--pt, var(--accent));
 }
 html[data-design="editorial"] .post-card p {
   text-align: justify;
@@ -2773,4 +2773,52 @@ html[data-design="editorial"] main[data-no-bottom-pad] {
 html[data-design="editorial"] main[data-no-bottom-pad] > div,
 html[data-design="editorial"] main[data-no-bottom-pad] [class*="px-2"] {
   max-width: none;
+}
+
+/* Editorial: a cor de cada tipo de post continua, em tons de tinta de impressão velha (ferrugem,
+   verde-musgo, azul-da-prússia e berinjela), com um leve lavado de cor no papel e o filete fino
+   na cor do tipo. */
+html[data-design="editorial"] .post-card[data-post-type="receita"] {
+  --pt: #a2421c !important;
+}
+html[data-design="editorial"] .post-card[data-post-type="experiencia"] {
+  --pt: #4d6a34 !important;
+}
+html[data-design="editorial"] .post-card[data-post-type="pergunta"] {
+  --pt: #2f4e70 !important;
+}
+html[data-design="editorial"] .post-card[data-post-type="geral"] {
+  --pt: #6c3b5c !important;
+}
+html[data-design="editorial"].dark .post-card[data-post-type="receita"] {
+  --pt: #d58a62 !important;
+}
+html[data-design="editorial"].dark .post-card[data-post-type="experiencia"] {
+  --pt: #9bb582 !important;
+}
+html[data-design="editorial"].dark .post-card[data-post-type="pergunta"] {
+  --pt: #8fb0d3 !important;
+}
+html[data-design="editorial"].dark .post-card[data-post-type="geral"] {
+  --pt: #c493b5 !important;
+}
+html[data-design="editorial"] .post-card[data-post-type] {
+  background-color: color-mix(in srgb, var(--pt) 7%, transparent) !important;
+}
+html[data-design="editorial"] .post-card[data-post-type]::before {
+  border-top-color: var(--pt);
+}
+html[data-design="editorial"] .post-card[data-post-type] :is(h2, h3) {
+  border-bottom-color: color-mix(in srgb, var(--pt) 60%, var(--foreground));
+}
+
+/* Editorial: as matérias continuam de uma coluna na outra, como num jornal, e as colunas ficam
+   sempre cheias (sem espaços vazios no pé de cada coluna). */
+html[data-design="editorial"] [data-news-rank] {
+  break-inside: auto;
+}
+html[data-design="editorial"] .post-card {
+  break-inside: auto;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
