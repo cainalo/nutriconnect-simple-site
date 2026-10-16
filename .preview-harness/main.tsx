@@ -116,7 +116,34 @@ function FormDemo() {
     </RouterApp>
   );
 }
+function NewsDemo() {
+  const lorem = "Uma receita simples para o dia a dia, com ingredientes frescos e pouca complicação, pensada para quem tem pouco tempo e quer comer bem. ";
+  const items = Array.from({ length: 11 }, (_, i) => ({ id: i, title: ["Cozinha de verdade: menos rótulos, mais frescor", "Como montar o prato do dia", "Dúvida sobre fibras", "Feira de outubro", "Água ao longo do dia"][i % 5], text: lorem.repeat(1 + ((i * 3) % 6)), img: i % 3 === 0 }));
+  return (
+    <RouterApp>
+      <div className="p-6">
+        <div className="columns-1 gap-x-12 md:columns-2 lg:columns-3 2xl:columns-4 [column-rule:1px_solid_color-mix(in_srgb,var(--foreground)_30%,transparent)]">
+          {items.map((it, i) => {
+            const wide = i === 0 || i % 7 === 0;
+            const rank = i === 0 ? "lead" : wide ? "major" : i <= 3 ? "major" : "minor";
+            return (
+              <div key={it.id} data-news-rank={rank} data-news-span={wide ? "all" : undefined} className={"mb-8 break-inside-avoid " + (wide ? "[column-span:all]" : "")}>
+                <PostCardFrame type={["receita", "experiencia", "pergunta"][i % 3]} className="border bg-card" footer={<div className="flex gap-2"><button className="rounded-full border px-3 py-1 text-xs">Apoiar</button></div>}>
+                  <div className="mb-4 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--pt)" }}>Receita comunitária</div>
+                  {it.img && <img src="/images/presentation/market.jpg" alt="" className="mb-4 w-full rounded-2xl" />}
+                  <h3 className="mb-2 text-lg font-bold font-display">{it.title}</h3>
+                  <p className="text-sm leading-relaxed text-justify">{it.text}</p>
+                </PostCardFrame>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </RouterApp>
+  );
+}
 function App() {
+  if (v === "news") return <NewsDemo />;
   if (v === "form") return <FormDemo />;
   if (v === "frame") return <iframe src={"?" + (q.get("src") ?? "")} style={{ width: Number(q.get("w") ?? 360), height: 760, border: "1px solid #888" }} />;
   if (v === "feed") return <FeedDemo />;

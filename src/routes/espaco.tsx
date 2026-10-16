@@ -122,6 +122,7 @@ function NewspaperGrid({ posts }: { posts: InfiniteFeed["posts"] }) {
           <div
             key={post.id}
             data-news-rank={rank}
+            data-news-span={wide ? "all" : undefined}
             className={cn("mb-8 break-inside-avoid", wide && "mx-auto max-w-5xl [column-span:all]")}
           >
             <PostCard post={post} />

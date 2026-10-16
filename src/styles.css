@@ -2708,3 +2708,69 @@ html[data-design="editorial"] [data-news-rank="minor"] .post-card :is(h2, h3) {
 html[data-design="editorial"] [data-news-rank="minor"] .post-card p {
   font-size: 0.92rem;
 }
+
+/* Editorial: diagramação de jornal antigo (referências: manchete em fonte pesada, texto em colunas
+   justificadas com filete, fotos recortadas em gravura, título com filete embaixo). A matéria de
+   abertura e as aberturas de seção atravessam a página e põem o texto em colunas internas. */
+html[data-design="editorial"] .post-card :is(h2, h3) {
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 55%, transparent);
+  margin-bottom: 0.6rem;
+}
+html[data-design="editorial"] [data-news-rank="lead"] .post-card :is(h2, h3) {
+  font-family: "Playfair Display", var(--font-display);
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  border-bottom: 3px double var(--foreground);
+  padding-bottom: 0.6rem;
+}
+html[data-design="editorial"] [data-news-rank="lead"] .post-card img,
+html[data-design="editorial"] [data-news-rank="major"] .post-card img {
+  max-height: 26rem;
+  width: 100%;
+  object-fit: cover;
+}
+html[data-design="editorial"] [data-news-rank="lead"] .post-card img {
+  max-height: 32rem;
+}
+@media (min-width: 1024px) {
+  html[data-design="editorial"] [data-news-rank="lead"] .post-card p {
+    column-count: 3;
+    column-gap: 2.25rem;
+    column-rule: 1px solid color-mix(in srgb, var(--foreground) 30%, transparent);
+  }
+  html[data-design="editorial"] [data-news-span="all"][data-news-rank="major"] .post-card p {
+    column-count: 2;
+    column-gap: 2.25rem;
+    column-rule: 1px solid color-mix(in srgb, var(--foreground) 30%, transparent);
+  }
+}
+/* Ornamento entre matérias: filete fino com respiro, como nos jornais de coluna. */
+html[data-design="editorial"] [data-news-rank] {
+  padding-bottom: 0.5rem;
+}
+
+/* Editorial: sem sobras nas laterais. O texto vai de filete a filete (o respiro entre colunas é do
+   espaçamento da própria coluna), as fotos usam a largura inteira da coluna e as margens da página
+   são mínimas. */
+html[data-design="editorial"] .post-card {
+  --post-px: 0px;
+  --post-px-sm: 0px;
+}
+html[data-design="editorial"] .post-card .post-image {
+  max-width: 100% !important;
+  margin-inline: 0;
+}
+html[data-design="editorial"] .post-card .post-image img {
+  max-height: 22rem;
+  object-fit: cover;
+}
+html[data-design="editorial"] main[data-no-bottom-pad] {
+  padding-inline: 0.75rem !important;
+}
+html[data-design="editorial"] main[data-no-bottom-pad] > div,
+html[data-design="editorial"] main[data-no-bottom-pad] [class*="px-2"] {
+  max-width: none;
+}

@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { useAppearance } from "@/hooks/use-appearance";
 import { usePostTypeStyle } from "@/lib/post-type";
+import { useDesignId } from "@/lib/site-design";
 
 const PADDING = {
   md: {
@@ -102,7 +103,9 @@ export function PostCardFrame({
   }, [userId]);
 
   const { appearance } = useAppearance();
-  const isExpanded = expanded || appearance.expandPosts;
+  // Editorial: como num jornal, a matéria sai inteira, sem corte e sem "Ver mais".
+  const fullStories = useDesignId() === "editorial";
+  const isExpanded = expanded || appearance.expandPosts || fullStories;
   const clamped = !isExpanded && overflowing;
   const pad = PADDING[size];
   const typeStyle = usePostTypeStyle(type);
@@ -131,7 +134,7 @@ export function PostCardFrame({
         )}
       </div>
 
-      {overflowing && (
+      {overflowing && !fullStories && (
         <div ref={toggleRef} className={`shrink-0 ${pad.toggle}`}>
           <button
             type="button"
