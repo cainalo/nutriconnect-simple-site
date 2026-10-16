@@ -217,7 +217,10 @@ function ExplorarPage() {
     return (
       <>
         {loading && posts.length === 0 ? (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" aria-hidden="true">
+          <div
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+            aria-hidden="true"
+          >
             {Array.from({ length: 9 }, (_, i) => (
               <div
                 key={i}
