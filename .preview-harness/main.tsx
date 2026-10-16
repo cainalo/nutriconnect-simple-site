@@ -158,7 +158,32 @@ function MasonryDemo() {
   }));
   return <RouterApp><div className="p-6"><PostMasonry items={items} /></div></RouterApp>;
 }
+import { IdeasTab } from "@/components/admin/social/ideas-tab";
+import { CalendarTab } from "@/components/admin/social/calendar-tab";
+import { TrendsTab } from "@/components/admin/social/trends-tab";
+import { ProfilesTab } from "@/components/admin/social/profiles-tab";
+const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
+if (!q.get("empty")) {
+  qc.setQueryData(["social-studio", "posts"], fakePosts);
+  qc.setQueryData(["social-studio", "profiles"], [
+    { id: "pr1", network: "instagram", handle: "@nutriconnect", url: "https://instagram.com/nutriconnect", notes: "", sample_posts: "", created_at: now, analyzed_at: now,
+      metrics: { followers: 12840, posts_per_week: 4, avg_likes: 310, avg_comments: 22, avg_reach: 5400 },
+      analysis: { resumo: "Perfil com boa base de seguidores e conteúdo educativo consistente; falta conversa nos comentários e chamadas para o app.", tom_atual: "Didático e acolhedor, às vezes técnico demais.", publico: "Mulheres de 25 a 45 anos que cozinham para a família.", pilares: ["Comida de verdade", "Rótulos sem medo", "Rotina possível"], pontos_fortes: ["Artes consistentes", "Fontes confiáveis"], melhorar: ["Responder comentários em até 24 h", "Ganchos mais curtos"], formatos_recomendados: ["Carrossel com checklist", "Reels de 20 s"], frequencia: "4 posts por semana + stories diários", melhores_horarios: "Seg, qua e sex às 12h e 19h", acoes_engajamento: ["Enquete nos stories", "Caixinha de perguntas"], bio_sugerida: "Nutrição sem culpa, com comida de verdade.\nBaixe o app e fale com a Nina.", metas_30_dias: ["+800 seguidores", "Taxa de salvamento 3%"] } },
+    { id: "pr2", network: "tiktok", handle: "@nutri.connect", url: null, notes: "", sample_posts: "", created_at: now, analyzed_at: null, metrics: {}, analysis: null },
+  ]);
+  qc.setQueryData(["social-studio", "trends"], {
+    top_posts: [{ type: "receita", title: "Bolo de banana sem açúcar", tags: [], reactions: 48, comments: 12 }, { type: "pergunta", title: "Quanto de água por dia?", tags: [], reactions: 31, comments: 20 }, { type: "experiencia", title: "Minha primeira feira orgânica", tags: [], reactions: 22, comments: 5 }, { type: "geral", title: "Lancheira da semana", tags: [], reactions: 15, comments: 3 }],
+    top_tags: [{ tag: "receitas", n: 18 }, { tag: "lancheira", n: 11 }, { tag: "agua", n: 7 }, { tag: "feira", n: 4 }],
+    post_types: {}, theme: { title: "Cozinha de verdade: menos rótulos, mais frescor", subtitle: null },
+    challenges: [{ title: "21 dias de água", people: 54 }, { title: "Mais verduras", people: 23 }],
+  });
+}
+const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
 function App() {
+  if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);
+  if (v === "calendar") return wrap(<CalendarTab onOpen={() => {}} onNew={() => {}} />);
+  if (v === "trends") return wrap(<TrendsTab onCreate={() => {}} />);
+  if (v === "profiles") return wrap(<ProfilesTab />);
   if (v === "masonry") return <MasonryDemo />;
   if (v === "news") return <NewsDemo />;
   if (v === "form") return <FormDemo />;
@@ -179,7 +204,7 @@ function App() {
   return <div className="flex flex-wrap gap-6 p-6">{modes.map((m) => <Cell key={m} mode={m} />)}</div>;
 }
 createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={new QueryClient()}><App /></QueryClientProvider>,
+  <QueryClientProvider client={qc}><App /></QueryClientProvider>,
 );
 const click = q.get("click");
 if (click) setTimeout(() => {

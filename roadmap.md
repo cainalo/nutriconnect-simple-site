@@ -100,7 +100,7 @@ do admin (Design do site) escolhe qual está no ar.
 
 ### Funções e expansão
 
-6. [ ] S2 — Terminar abas Ideias, Calendário, Tendências e Perfis do estúdio no novo estilo
+6. [x] S2 — Terminar abas Ideias, Calendário, Tendências e Perfis do estúdio no novo estilo
 7. [ ] T1 — Turbinar as funções existentes, uma por commit, já no visual novo
 8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
