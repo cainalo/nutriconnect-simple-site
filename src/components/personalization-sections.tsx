@@ -9,7 +9,6 @@ import {
   CONTENT_MAX_RANGE,
   CORNER_RANGE,
   DEFAULT_APPEARANCE,
-  FEED_PAGE_SIZES,
   HEADING_SCALE_RANGE,
   ICON_STROKE_RANGE,
   LETTER_SPACING_RANGE,
@@ -1331,28 +1330,6 @@ export function LayoutSection() {
         ])}
         hint=""
       />
-
-      <Group
-        title={tr([
-          "Publicações por carregamento",
-          "Posts per load",
-          "Publicaciones por carga",
-          "Publications par chargement",
-        ])}
-        hint={tr([
-          "Quantos posts o Espaço traz de uma vez.",
-          "How many posts Space brings at once.",
-          "Cuántas publicaciones trae el Espacio de una vez.",
-          "Combien de publications l'Espace charge d'un coup.",
-        ])}
-      >
-        <Segmented
-          columns="grid-cols-5"
-          options={FEED_PAGE_SIZES.map((n) => ({ id: n, label: String(n) }))}
-          value={a.feedPageSize}
-          onChange={(feedPageSize) => update({ feedPageSize })}
-        />
-      </Group>
     </Section>
   );
 }

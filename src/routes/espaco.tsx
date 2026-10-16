@@ -5,11 +5,11 @@ import { ArrowUp, Compass, Sparkles } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { FeedShell, type FeedShellPage } from "@/components/feed-shell";
 import { useAppearance } from "@/hooks/use-appearance";
-import { loadAppearance } from "@/lib/appearance";
 import { PostCard } from "@/components/community-cards";
 import { ShareModal } from "@/components/share-modal";
 import { PostMasonry } from "@/components/post-masonry";
 import { EspacoIntro } from "@/components/espaco-intro";
+import { LoadMoreTrigger, scrollParent } from "@/components/load-more-trigger";
 import { MyChallengesCard, ProfileCard, TrailCard, WeeklyThemeCard } from "@/components/rail-cards";
 import { PushInviteCard } from "@/components/push-settings";
 import { themeText } from "@/lib/social/feed";
@@ -34,7 +34,8 @@ const EMPTY_FILTER_KEYS: Record<Filter, DictKey> = {
   seguindo: "espaco.empty.profissionais",
 };
 
-const DEFAULT_PAGE_SIZE = 20;
+/** Posts por leva da rolagem infinita. */
+const PAGE_SIZE = 20;
 
 export const Route = createFileRoute("/espaco")({
   head: () => ({
@@ -71,40 +72,6 @@ function EmptyState({ message }: { message: string }) {
       />
     </div>
   );
-}
-
-/** Contêiner que rola a página do feed (cada página do FeedShell rola por dentro). */
-function scrollParent(el: HTMLElement | null): HTMLElement | null {
-  for (let node = el?.parentElement; node; node = node.parentElement) {
-    const { overflowY } = getComputedStyle(node);
-    if (overflowY === "auto" || overflowY === "scroll") return node;
-  }
-  return null;
-}
-
-/**
- * Pede a próxima página quando o fim da lista chega perto (antes de a pessoa alcançá-lo).
- * O observador é refeito a cada página carregada: se o fim continuar à vista, pede outra.
- */
-function LoadMoreTrigger({ onReach, pageCount }: { onReach: () => void; pageCount: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const onReachRef = useRef(onReach);
-  useEffect(() => {
-    onReachRef.current = onReach;
-  }, [onReach]);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) onReachRef.current();
-      },
-      { root: scrollParent(el), rootMargin: "0px 0px 1200px 0px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [pageCount]);
-  return <div ref={ref} className="h-px" aria-hidden="true" />;
 }
 
 type InfiniteFeed = ReturnType<typeof useInfiniteFeed>;
@@ -201,7 +168,7 @@ function EspacoDeHojePage() {
   const { user } = useRequireAuth();
   const { t, locale } = useI18n();
   const [filter, setFilter] = useState<Filter>("todos");
-  const [pageSize] = useState(() => loadAppearance().feedPageSize || DEFAULT_PAGE_SIZE);
+  const pageSize = PAGE_SIZE;
   const { appearance } = useAppearance();
   const enabled = !!user;
   const [hasNew, setHasNew] = useState(false);
