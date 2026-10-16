@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import type { Names } from "@/lib/appearance-data";
 import { addWeeks, dayDate, DAY_NAMES, mondayOf } from "@/lib/menu";
 import { useSeasonNow } from "@/lib/season";
+import { useHouseholdKids, useMyHousehold } from "@/lib/household";
 import { useTrailProfiles } from "@/lib/trail-profiles";
 import type { TrailProfile } from "@/lib/trail-types";
 import {
@@ -729,7 +730,18 @@ export function LunchboxPanel() {
   const tr = useTr();
   const { user } = useAuth();
   const { profiles } = useTrailProfiles(user?.id ?? "guest", "");
-  const kids = profiles.filter((p) => p.kind === "kid");
+  const house = useMyHousehold(user?.id);
+  const houseKids = useHouseholdKids(house.data?.house.id);
+  // As próprias crianças e, para quem mora numa casa, as dos outros adultos da casa.
+  const kids: TrailProfile[] = [
+    ...profiles.filter((p) => p.kind === "kid"),
+    ...(houseKids.data ?? []).map((k) => ({
+      id: k.id,
+      name: k.name,
+      kind: "kid" as const,
+      avatar: (k.avatar ?? "nina") as TrailProfile["avatar"],
+    })),
+  ];
   const [kidId, setKidId] = useState<string | null>(null);
   const kid = kids.find((k) => k.id === kidId) ?? kids[0];
 

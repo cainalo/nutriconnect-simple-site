@@ -15,6 +15,7 @@ import { DEFAULT_MODEL, type NinaModel } from "./nina-config";
 import { buildTito } from "./tito";
 import type { Framing, Rig } from "./parts";
 import { ONE_SHOT, POSE_KEYS, clamp01, ease, poseFor, type CharacterAction } from "./poses";
+import { inSpotlight } from "./spotlight";
 
 export type { CharacterAction, Framing };
 
@@ -193,7 +194,7 @@ function loop(now: number) {
   const dt = Math.max(0, Math.min(0.05, (now - e.last) / 1000));
   e.last = now;
   for (const inst of e.instances) {
-    if (!inst.visible) continue;
+    if (!inst.visible || !inSpotlight(inst.container)) continue;
     inst.update(now, dt);
     draw(e, inst);
   }

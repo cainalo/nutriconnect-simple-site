@@ -37,19 +37,3 @@ export function useCommunityFilters(): CommunityFilters {
     () => DEFAULTS,
   );
 }
-
-/** As colunas laterais estão visíveis agora? (O SideRails marca isso no <html>.) */
-export function useRailsOn(): boolean {
-  return useSyncExternalStore(
-    (fn) => {
-      const observer = new MutationObserver(fn);
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["data-rails"],
-      });
-      return () => observer.disconnect();
-    },
-    () => document.documentElement.getAttribute("data-rails") === "on",
-    () => false,
-  );
-}

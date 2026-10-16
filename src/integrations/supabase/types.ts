@@ -1362,6 +1362,92 @@ export type Database = {
           },
         ]
       }
+      community_events: {
+        Row: {
+          canceled: boolean
+          community_id: string
+          created_at: string
+          description: string
+          duration_min: number
+          host_id: string
+          id: string
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          canceled?: boolean
+          community_id: string
+          created_at?: string
+          description?: string
+          duration_min?: number
+          host_id: string
+          id?: string
+          starts_at: string
+          title: string
+        }
+        Update: {
+          canceled?: boolean
+          community_id?: string
+          created_at?: string
+          description?: string
+          duration_min?: number
+          host_id?: string
+          id?: string
+          starts_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_questions: {
+        Row: {
+          answer: string | null
+          answered_at: string | null
+          author_id: string
+          body: string
+          created_at: string
+          event_id: string
+          hidden: boolean
+          id: string
+          pinned: boolean
+        }
+        Insert: {
+          answer?: string | null
+          answered_at?: string | null
+          author_id: string
+          body: string
+          created_at?: string
+          event_id: string
+          hidden?: boolean
+          id?: string
+          pinned?: boolean
+        }
+        Update: {
+          answer?: string | null
+          answered_at?: string | null
+          author_id?: string
+          body?: string
+          created_at?: string
+          event_id?: string
+          hidden?: boolean
+          id?: string
+          pinned?: boolean
+        }
+        Relationships: []
+      }
+      event_question_votes: {
+        Row: { created_at: string; event_id: string; question_id: string; user_id: string }
+        Insert: { created_at?: string; event_id: string; question_id: string; user_id: string }
+        Update: { created_at?: string; event_id?: string; question_id?: string; user_id?: string }
+        Relationships: []
+      }
       community_members: {
         Row: {
           community_id: string
@@ -1545,6 +1631,54 @@ export type Database = {
           },
           {
             foreignKeyName: "content_approvals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_checkins: {
+        Row: {
+          day: string
+          habits: string[]
+          mindful_meals: number
+          mood: number | null
+          pledge: boolean
+          quiz_best: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          day: string
+          habits?: string[]
+          mindful_meals?: number
+          mood?: number | null
+          pledge?: boolean
+          quiz_best?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          day?: string
+          habits?: string[]
+          mindful_meals?: number
+          mood?: number | null
+          pledge?: boolean
+          quiz_best?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_checkins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_checkins_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -1769,6 +1903,30 @@ export type Database = {
           },
         ]
       }
+      fridge_items: {
+        Row: {
+          created_at: string
+          household_id: string | null
+          id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          household_id?: string | null
+          id?: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          household_id?: string | null
+          id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           addressee_id: string
@@ -1931,6 +2089,179 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      household_members: {
+        Row: {
+          household_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          household_id: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          household_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_members_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household_notes: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          household_id: string
+          id: string
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          created_at?: string
+          household_id: string
+          id?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          household_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      households: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          emoji: string
+          id: string
+          invite_code: string | null
+          invite_expires_at: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          emoji?: string
+          id?: string
+          invite_code?: string | null
+          invite_expires_at?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          emoji?: string
+          id?: string
+          invite_code?: string | null
+          invite_expires_at?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      journey_checkins: {
+        Row: {
+          created_at: string
+          day: string
+          mood: string
+          note: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          mood: string
+          note?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          mood?: string
+          note?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_checkins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "professional_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journey_checkins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journey_cheers: {
+        Row: {
+          created_at: string
+          day: string
+          from_id: string
+          to_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          from_id: string
+          to_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          from_id?: string
+          to_id?: string
+        }
+        Relationships: []
+      }
+      journey_pairs: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          status: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
       }
       label_scans: {
         Row: {
@@ -2162,6 +2493,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      market_partners: {
+        Row: {
+          active: boolean
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          position: number
+          search_url: string
+          states: string[]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          position?: number
+          search_url: string
+          states?: string[]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          position?: number
+          search_url?: string
+          states?: string[]
+          updated_at?: string
+        }
+        Relationships: []
       }
       meal_plan_templates: {
         Row: {
@@ -3059,6 +3426,126 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_programs: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string
+          duration_weeks: number
+          emoji: string
+          id: string
+          price_cents: number
+          professional_id: string
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          duration_weeks?: number
+          emoji?: string
+          id?: string
+          price_cents: number
+          professional_id: string
+          summary?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          duration_weeks?: number
+          emoji?: string
+          id?: string
+          price_cents?: number
+          professional_id?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      program_modules: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          position: number
+          program_id: string
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          position?: number
+          program_id: string
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          position?: number
+          program_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      program_progress: {
+        Row: { done_at: string; module_id: string; user_id: string }
+        Insert: { done_at?: string; module_id: string; user_id: string }
+        Update: { done_at?: string; module_id?: string; user_id?: string }
+        Relationships: []
+      }
+      program_purchases: {
+        Row: {
+          amount_cents: number
+          buyer_id: string
+          fee_percent: number
+          id: string
+          paid_at: string
+          platform_fee_cents: number
+          professional_id: string
+          program_id: string
+          refunded_at: string | null
+          status: string
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          buyer_id: string
+          fee_percent: number
+          id?: string
+          paid_at?: string
+          platform_fee_cents: number
+          professional_id: string
+          program_id: string
+          refunded_at?: string | null
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          buyer_id?: string
+          fee_percent?: number
+          id?: string
+          paid_at?: string
+          platform_fee_cents?: number
+          professional_id?: string
+          program_id?: string
+          refunded_at?: string | null
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+        }
+        Relationships: []
+      }
       pro_score_events: {
         Row: {
           created_at: string
@@ -3220,6 +3707,7 @@ export type Database = {
           profession: string
           registration: string
           specialties: string[]
+          teleconsult_approved_at: string | null
           timezone: string
           uf: string
           updated_at: string
@@ -3240,6 +3728,7 @@ export type Database = {
           profession: string
           registration: string
           specialties?: string[]
+          teleconsult_approved_at?: string | null
           timezone?: string
           uf: string
           updated_at?: string
@@ -3260,6 +3749,7 @@ export type Database = {
           profession?: string
           registration?: string
           specialties?: string[]
+          teleconsult_approved_at?: string | null
           timezone?: string
           uf?: string
           updated_at?: string
@@ -3900,8 +4390,10 @@ export type Database = {
       }
       shopping_items: {
         Row: {
+          bought_by: string | null
           created_at: string
           done: boolean
+          household_id: string | null
           id: string
           section: string | null
           source: string
@@ -3909,8 +4401,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bought_by?: string | null
           created_at?: string
           done?: boolean
+          household_id?: string | null
           id?: string
           section?: string | null
           source?: string
@@ -3918,8 +4412,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bought_by?: string | null
           created_at?: string
           done?: boolean
+          household_id?: string | null
           id?: string
           section?: string | null
           source?: string
@@ -3942,6 +4438,162 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_posts: {
+        Row: {
+          caption: string
+          created_at: string
+          cta: string
+          design: Json
+          format: string
+          hashtags: string[]
+          hook: string
+          id: string
+          is_template: boolean
+          network: string
+          owner_id: string
+          pillar: string
+          profile_id: string | null
+          scheduled_for: string | null
+          script: string
+          slides: Json
+          source: string
+          status: string
+          title: string
+          updated_at: string
+          visual_idea: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          cta?: string
+          design?: Json
+          format?: string
+          hashtags?: string[]
+          hook?: string
+          id?: string
+          is_template?: boolean
+          network?: string
+          owner_id?: string
+          pillar?: string
+          profile_id?: string | null
+          scheduled_for?: string | null
+          script?: string
+          slides?: Json
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+          visual_idea?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          cta?: string
+          design?: Json
+          format?: string
+          hashtags?: string[]
+          hook?: string
+          id?: string
+          is_template?: boolean
+          network?: string
+          owner_id?: string
+          pillar?: string
+          profile_id?: string | null
+          scheduled_for?: string | null
+          script?: string
+          slides?: Json
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          visual_idea?: string
+        }
+        Relationships: []
+      }
+      social_profiles: {
+        Row: {
+          analysis: Json | null
+          analyzed_at: string | null
+          created_at: string
+          handle: string
+          id: string
+          metrics: Json
+          network: string
+          notes: string
+          owner_id: string
+          sample_posts: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          analysis?: Json | null
+          analyzed_at?: string | null
+          created_at?: string
+          handle: string
+          id?: string
+          metrics?: Json
+          network: string
+          notes?: string
+          owner_id?: string
+          sample_posts?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          analysis?: Json | null
+          analyzed_at?: string | null
+          created_at?: string
+          handle?: string
+          id?: string
+          metrics?: Json
+          network?: string
+          notes?: string
+          owner_id?: string
+          sample_posts?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      teleconsult_checks: {
+        Row: {
+          document_path: string
+          id: string
+          professional_id: string
+          registry: string
+          registry_number: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+        }
+        Insert: {
+          document_path: string
+          id?: string
+          professional_id: string
+          registry: string
+          registry_number: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+        }
+        Update: {
+          document_path?: string
+          id?: string
+          professional_id?: string
+          registry?: string
+          registry_number?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+        }
+        Relationships: []
       }
       theme_poll_options: {
         Row: {
@@ -4411,27 +5063,33 @@ export type Database = {
         Row: {
           budget: string
           created_at: string
+          household_id: string | null
           id: string
           meals: Json
           updated_at: string
+          updated_by: string | null
           user_id: string
           week_start: string
         }
         Insert: {
           budget?: string
           created_at?: string
+          household_id?: string | null
           id?: string
           meals?: Json
           updated_at?: string
+          updated_by?: string | null
           user_id: string
           week_start: string
         }
         Update: {
           budget?: string
           created_at?: string
+          household_id?: string | null
           id?: string
           meals?: Json
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
           week_start?: string
         }
@@ -5202,6 +5860,183 @@ export type Database = {
         Args: { p_professional?: string }
         Returns: number
       }
+      event_answer: {
+        Args: { p_answer: string; p_pin?: boolean; p_question: string }
+        Returns: undefined
+      }
+      event_ask: {
+        Args: { p_body: string; p_event: string }
+        Returns: {
+          answer: string | null
+          answered_at: string | null
+          author_id: string
+          body: string
+          created_at: string
+          event_id: string
+          hidden: boolean
+          id: string
+          pinned: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "event_questions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      event_cancel: { Args: { p_event: string }; Returns: undefined }
+      event_create: {
+        Args: {
+          p_community: string
+          p_description: string
+          p_duration: number
+          p_starts_at: string
+          p_title: string
+        }
+        Returns: {
+          canceled: boolean
+          community_id: string
+          created_at: string
+          description: string
+          duration_min: number
+          host_id: string
+          id: string
+          starts_at: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "community_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      event_delete_question: { Args: { p_question: string }; Returns: undefined }
+      event_flag: { Args: { p_question: string }; Returns: undefined }
+      event_moderate: {
+        Args: { p_hidden?: boolean; p_pinned?: boolean; p_question: string }
+        Returns: undefined
+      }
+      event_questions_list: {
+        Args: { p_event: string }
+        Returns: {
+          answer: string | null
+          answered_at: string | null
+          author_id: string
+          body: string
+          created_at: string
+          hidden: boolean
+          id: string
+          pinned: boolean
+          voted: boolean
+          votes: number
+        }[]
+      }
+      event_vote: { Args: { p_question: string }; Returns: boolean }
+      delete_program_module: { Args: { p_module: string }; Returns: undefined }
+      has_program: { Args: { p_program: string; p_user?: string }; Returns: boolean }
+      my_program_sales: {
+        Args: { p_days?: number }
+        Returns: { fee_cents: number; gross_cents: number; net_cents: number; sales: number }[]
+      }
+      save_program: {
+        Args: {
+          p_active: boolean
+          p_description: string
+          p_emoji: string
+          p_id: string | null
+          p_price_cents: number
+          p_summary: string
+          p_title: string
+          p_weeks: number
+        }
+        Returns: {
+          active: boolean
+          created_at: string
+          description: string
+          duration_weeks: number
+          emoji: string
+          id: string
+          price_cents: number
+          professional_id: string
+          summary: string
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pro_programs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_program_module: {
+        Args: {
+          p_body: string
+          p_id: string | null
+          p_position: number | null
+          p_program: string
+          p_title: string
+        }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          position: number
+          program_id: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "program_modules"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_market_stats: {
+        Args: { p_days?: number }
+        Returns: {
+          clicks: number
+          name: string
+          partner_id: string
+          people: number
+          top_queries: string[] | null
+        }[]
+      }
+      market_click: {
+        Args: { p_partner: string; p_query: string; p_source: string }
+        Returns: string
+      }
+      social_studio_allowed: { Args: { p_user?: string }; Returns: boolean }
+      social_trends: { Args: { p_days?: number }; Returns: Json }
+      admin_review_teleconsult: {
+        Args: { p_approve: boolean; p_check: string; p_reason?: string }
+        Returns: undefined
+      }
+      admin_revoke_teleconsult: { Args: { p_pro: string }; Returns: undefined }
+      pro_online_allowed: { Args: { p_pro: string }; Returns: boolean }
+      teleconsult_required: { Args: never; Returns: boolean }
+      teleconsult_submit: {
+        Args: { p_document_path: string; p_number: string; p_registry: string }
+        Returns: {
+          document_path: string
+          id: string
+          professional_id: string
+          registry: string
+          registry_number: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "teleconsult_checks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       export_my_data: { Args: never; Returns: Json }
       f_unaccent: { Args: { "": string }; Returns: string }
       friend_ids: { Args: { p_user?: string }; Returns: string[] }
@@ -5524,6 +6359,76 @@ export type Database = {
         Args: { p_patient: string; p_professional?: string }
         Returns: boolean
       }
+      household_kids: {
+        Args: never
+        Returns: {
+          avatar: string
+          id: string
+          name: string
+          owner_id: string
+        }[]
+      }
+      household_bring_my_items: { Args: never; Returns: number }
+      household_create: {
+        Args: { p_emoji?: string; p_name: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          emoji: string
+          id: string
+          invite_code: string | null
+          invite_expires_at: string | null
+          name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "households"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      household_invite_code: { Args: { p_new?: boolean }; Returns: Json }
+      household_invite_friend: { Args: { p_user: string }; Returns: undefined }
+      household_join: {
+        Args: { p_code: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          emoji: string
+          id: string
+          invite_code: string | null
+          invite_expires_at: string | null
+          name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "households"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      household_leave: { Args: never; Returns: undefined }
+      household_preview: { Args: { p_code: string }; Returns: Json }
+      household_remove_member: { Args: { p_user: string }; Returns: undefined }
+      household_transfer: { Args: { p_user: string }; Returns: undefined }
+      household_update: {
+        Args: { p_emoji: string; p_name: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          emoji: string
+          id: string
+          invite_code: string | null
+          invite_expires_at: string | null
+          name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "households"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_blocked_between: { Args: { a: string; b: string }; Returns: boolean }
       is_community_admin: {
         Args: { p_community: string; p_user?: string }
@@ -5537,7 +6442,62 @@ export type Database = {
       is_platform_admin: { Args: { uid?: string }; Returns: boolean }
       is_suspended: { Args: { uid: string }; Returns: boolean }
       is_verified_professional: { Args: { uid?: string }; Returns: boolean }
+      kid_lunch_access: { Args: { p_profile: string }; Returns: boolean }
       join_consultation: { Args: { p_appointment: string }; Returns: Json }
+      journey_checkin: {
+        Args: { p_day: string; p_mood: string; p_note?: string }
+        Returns: {
+          created_at: string
+          day: string
+          mood: string
+          note: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "journey_checkins"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      journey_cheer: { Args: { p_day: string }; Returns: undefined }
+      journey_invite: {
+        Args: { p_user: string }
+        Returns: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          status: string
+          user_a: string
+          user_b: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "journey_pairs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      journey_leave: { Args: { p_pair?: string }; Returns: undefined }
+      journey_partner_status: { Args: { p_day: string }; Returns: Json }
+      journey_respond: {
+        Args: { p_accept: boolean; p_pair: string }
+        Returns: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          status: string
+          user_a: string
+          user_b: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "journey_pairs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       leave_community_admin: {
         Args: { p_community: string }
         Returns: {
@@ -5617,6 +6577,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      my_household_id: { Args: { p_user?: string }; Returns: string }
       my_member_earnings: {
         Args: { p_days?: number }
         Returns: {
@@ -6058,6 +7019,26 @@ export type Database = {
       water_set_goal: {
         Args: { p_glass_ml?: number; p_goal: number; p_user?: string }
         Returns: undefined
+      }
+      weekly_menu_save: {
+        Args: { p_budget: string; p_meals: Json; p_week: string }
+        Returns: {
+          budget: string
+          created_at: string
+          household_id: string | null
+          id: string
+          meals: Json
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+          week_start: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "weekly_menus"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {

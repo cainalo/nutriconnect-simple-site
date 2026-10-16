@@ -164,6 +164,7 @@ const PRO_ROW: Professional = {
   profession: "nutricionista",
   registration: "DEMO-0000",
   specialties: ["Nutrição esportiva", "Comportamento alimentar"],
+  teleconsult_approved_at: iso(at(-30, 10)),
   timezone: "America/Sao_Paulo",
   uf: "SP",
   updated_at: iso(at(-30, 10)),

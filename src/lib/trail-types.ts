@@ -274,4 +274,13 @@ export interface TrailProgress {
   /** Níveis concluídos sem erros (3 estrelas). */
   perfectLevels: number;
   bestCombo: number;
+  /** Revisão espaçada das paradas douradas: quando revisar e em que passo do intervalo está. */
+  reviews?: Record<string, ReviewState>;
+}
+
+export interface ReviewState {
+  /** Dia (AAAA-MM-DD) a partir do qual a revisão fica pendente. */
+  due: string;
+  /** Posição em REVIEW_INTERVALS. */
+  step: number;
 }

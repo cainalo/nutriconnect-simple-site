@@ -5,7 +5,12 @@ import { AppScreen } from "@/components/app-screen";
 import { ClinicalLayout } from "@/components/clinical/layout";
 import { CharacterLive, type CharacterAction } from "@/components/character-live";
 import { SiteNinaSection } from "@/components/admin/sections-site-nina";
-import { DEFAULT_LOOK, DEFAULT_LOOK_V1, type NinaLook, type NinaModel } from "@/lib/characters/nina-config";
+import {
+  DEFAULT_LOOK,
+  DEFAULT_LOOK_V1,
+  type NinaLook,
+  type NinaModel,
+} from "@/lib/characters/nina-config";
 import type { CharacterId } from "@/lib/trail-types";
 
 export const Route = createFileRoute("/personagens-lab")({
@@ -27,16 +32,87 @@ const IDS: CharacterId[] = ["nina", "lipe", "tito", "mila", "cadu"];
 
 const LOOKS: NinaModel[] = [
   { version: "v1", look: DEFAULT_LOOK_V1 },
-  { version: "v1", look: { ...DEFAULT_LOOK_V1, hairStyle: "coque", outfit: "moletom", outfitColor: "#e86a92", hair: "#1f1410", accessory: "laco", accessoryColor: "#3b82c4", glasses: "redondo", bangs: false, tablet: false } },
-  { version: "v1", look: { ...DEFAULT_LOOK_V1, hairStyle: "marias", outfit: "vestido", outfitColor: "#cfe8f7", shirt: "#3b82c4", hair: "#d9a55b", eyes: "#3d6fa8", accessory: "flor", earrings: true } },
+  {
+    version: "v1",
+    look: {
+      ...DEFAULT_LOOK_V1,
+      hairStyle: "coque",
+      outfit: "moletom",
+      outfitColor: "#e86a92",
+      hair: "#1f1410",
+      accessory: "laco",
+      accessoryColor: "#3b82c4",
+      glasses: "redondo",
+      bangs: false,
+      tablet: false,
+    },
+  },
+  {
+    version: "v1",
+    look: {
+      ...DEFAULT_LOOK_V1,
+      hairStyle: "marias",
+      outfit: "vestido",
+      outfitColor: "#cfe8f7",
+      shirt: "#3b82c4",
+      hair: "#d9a55b",
+      eyes: "#3d6fa8",
+      accessory: "flor",
+      earrings: true,
+    },
+  },
   { version: "v2", look: DEFAULT_LOOK },
   ...(
     [
-      { hairStyle: "marias", outfit: "vestido", outfitColor: "#f5d6e0", shirt: "#e86a92", hair: "#d9a55b", accessory: "laco", accessoryColor: "#e86a92", eyes: "#3d6fa8", glasses: "redondo", tablet: false },
-      { hairStyle: "rabo", outfit: "moletom", outfitColor: "#3b4a6b", hair: "#1f1410", skin: "#8d5a34", accessory: "nenhum", bangs: true, badge: false },
-      { hairStyle: "coque", outfit: "camiseta", shirt: "#f4c95d", hair: "#c0392b", accessory: "flor", accessoryColor: "#ffffff", glasses: "quadrado", freckles: false },
-      { hairStyle: "solto", outfit: "jaleco", hair: "#3b2416", skin: "#d49a6a", accessory: "tiara", accessoryColor: "#8e6cc2", eyes: "#2f6f4f" },
-      { hairStyle: "curto", outfit: "camiseta", shirt: "#3b82c4", hair: "#7b5ea7", accessory: "folha", tablet: false },
+      {
+        hairStyle: "marias",
+        outfit: "vestido",
+        outfitColor: "#f5d6e0",
+        shirt: "#e86a92",
+        hair: "#d9a55b",
+        accessory: "laco",
+        accessoryColor: "#e86a92",
+        eyes: "#3d6fa8",
+        glasses: "redondo",
+        tablet: false,
+      },
+      {
+        hairStyle: "rabo",
+        outfit: "moletom",
+        outfitColor: "#3b4a6b",
+        hair: "#1f1410",
+        skin: "#8d5a34",
+        accessory: "nenhum",
+        bangs: true,
+        badge: false,
+      },
+      {
+        hairStyle: "coque",
+        outfit: "camiseta",
+        shirt: "#f4c95d",
+        hair: "#c0392b",
+        accessory: "flor",
+        accessoryColor: "#ffffff",
+        glasses: "quadrado",
+        freckles: false,
+      },
+      {
+        hairStyle: "solto",
+        outfit: "jaleco",
+        hair: "#3b2416",
+        skin: "#d49a6a",
+        accessory: "tiara",
+        accessoryColor: "#8e6cc2",
+        eyes: "#2f6f4f",
+      },
+      {
+        hairStyle: "curto",
+        outfit: "camiseta",
+        shirt: "#3b82c4",
+        hair: "#7b5ea7",
+        accessory: "folha",
+        tablet: false,
+      },
     ] as Partial<NinaLook>[]
   ).map((p) => ({ version: "v2" as const, look: { ...DEFAULT_LOOK, ...p } })),
 ];

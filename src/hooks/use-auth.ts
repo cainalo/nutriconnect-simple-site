@@ -1,20 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AUTH_EVENT, getUser, initAuth, isAuthReady, type AuthUser } from "@/lib/auth";
 
+function subscribe(onChange: () => void) {
+  window.addEventListener(AUTH_EVENT, onChange);
+  return () => window.removeEventListener(AUTH_EVENT, onChange);
+}
+
+// Durante a hidratação o React usa o valor do servidor (sem sessão, ainda carregando), então o
+// HTML confere mesmo que a sessão já tenha sido lida antes de o trecho da página chegar.
+const serverUser = (): AuthUser | null => null;
+const serverReady = () => false;
+
 export function useAuth() {
-  const [user, setUserState] = useState<AuthUser | null>(getUser);
-  const [hydrated, setHydrated] = useState<boolean>(isAuthReady);
+  const user = useSyncExternalStore(subscribe, getUser, serverUser);
+  const hydrated = useSyncExternalStore(subscribe, isAuthReady, serverReady);
 
   useEffect(() => {
-    const sync = () => {
-      setUserState(getUser());
-      setHydrated(isAuthReady());
-    };
-    sync();
-    window.addEventListener(AUTH_EVENT, sync);
-    void initAuth().then(sync);
-    return () => window.removeEventListener(AUTH_EVENT, sync);
+    void initAuth();
   }, []);
 
   return { user, hydrated };

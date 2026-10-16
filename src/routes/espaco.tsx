@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowUp, Compass, Sparkles } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-auth";
@@ -8,12 +8,15 @@ import { useAppearance } from "@/hooks/use-appearance";
 import { loadAppearance } from "@/lib/appearance";
 import { PostCard } from "@/components/community-cards";
 import { ShareModal } from "@/components/share-modal";
+import { PostMasonry } from "@/components/post-masonry";
+import { EspacoIntro } from "@/components/espaco-intro";
+import { MyChallengesCard, ProfileCard, TrailCard, WeeklyThemeCard } from "@/components/rail-cards";
 import { PushInviteCard } from "@/components/push-settings";
-import { EspacoLeftColumn, EspacoRightColumn } from "@/components/espaco-side-columns";
 import { themeText } from "@/lib/social/feed";
 import { useActiveTheme, useFeedRealtime, useInfiniteFeed } from "@/lib/social/feed-queries";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
+import { useDesignId } from "@/lib/site-design";
 import type { DictKey } from "@/lib/i18n";
 
 // Filtros da página Geral: tudo, amigos, ou profissionais que a pessoa segue.
@@ -106,9 +109,39 @@ function LoadMoreTrigger({ onReach, pageCount }: { onReach: () => void; pageCoun
 
 type InfiniteFeed = ReturnType<typeof useInfiniteFeed>;
 
+// Editorial: página de jornal em colunas contínuas. As matérias fluem de cima para baixo, sem
+// buracos entre elas. A ordem do algoritmo de relevância define o destaque: a primeira é a
+// manchete (atravessa a página), as próximas três são destaques de título maior, e a cada sete uma
+// matéria de abertura de seção atravessa as colunas de novo. As demais são notas em coluna.
+function NewspaperGrid({ posts }: { posts: InfiniteFeed["posts"] }) {
+  return (
+    <div className="columns-1 gap-x-12 md:columns-2 lg:columns-3 2xl:columns-4 [column-rule:1px_solid_color-mix(in_srgb,var(--foreground)_30%,transparent)]">
+      {posts.map((post, i) => {
+        const wide = i === 0 || i % 7 === 0;
+        const rank = i === 0 ? "lead" : wide ? "major" : i <= 3 ? "major" : "minor";
+        return (
+          <div
+            key={post.id}
+            data-news-rank={rank}
+            data-news-span={wide ? "all" : undefined}
+            className={cn("mb-8", wide && "mx-auto max-w-5xl [column-span:all]")}
+          >
+            <PostCard post={post} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function PostList({ feed, emptyMessage }: { feed: InfiniteFeed; emptyMessage: string }) {
   const { t } = useI18n();
+  const design = useDesignId();
   const { query, posts } = feed;
+  const items = useMemo(
+    () => posts.map((post) => ({ id: post.id, node: <PostCard post={post} /> })),
+    [posts],
+  );
   if (query.isLoading && posts.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">{t("espaco.loading")}</div>
@@ -122,11 +155,7 @@ function PostList({ feed, emptyMessage }: { feed: InfiniteFeed; emptyMessage: st
   };
   return (
     <>
-      <div className="space-y-8">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
-      </div>
+      {design === "editorial" ? <NewspaperGrid posts={posts} /> : <PostMasonry items={items} />}
       {query.hasNextPage && (
         <LoadMoreTrigger onReach={loadMore} pageCount={query.data?.pages.length ?? 0} />
       )}
@@ -236,6 +265,7 @@ function EspacoDeHojePage() {
       content: (
         <div ref={listRef}>
           {hasNew && <NewPostsButton onClick={showNewPosts} />}
+          <EspacoIntro themeTitle={text?.title} />
           <PushInviteCard />
           <PostList feed={geral} emptyMessage={t(EMPTY_FILTER_KEYS[filter])} />
         </div>
@@ -282,14 +312,5 @@ function EspacoDeHojePage() {
     },
   ];
 
-  return (
-    <FeedShell
-      pages={pages}
-      wings={
-        appearance.sidePanels
-          ? { left: <EspacoLeftColumn />, right: <EspacoRightColumn /> }
-          : undefined
-      }
-    />
-  );
+  return <FeedShell pages={pages} columnClass="max-w-[120rem]" />;
 }

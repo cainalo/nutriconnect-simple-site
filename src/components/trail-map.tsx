@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import {
   Apple,
+  Award,
   Beef,
   Brain,
   Check,
@@ -44,6 +45,10 @@ import {
   type Unit,
 } from "@/lib/learning-trail";
 import { EmojiIcon } from "@/components/emoji-icon";
+import { ChapterScenes, StopEnemyCard } from "@/components/story-panels";
+import { useTr } from "@/components/settings-ui";
+import { useAuth } from "@/hooks/use-auth";
+import { enemyOfStop } from "@/lib/trail-story";
 
 /** Ícones (lucide) das paradas do perfil adulto. */
 const STOP_ICONS: Record<string, LucideIcon> = {
@@ -131,6 +136,9 @@ function StopNode({
   const locked = status === "locked";
   const gold = status === "gold";
   const [shake, setShake] = useState(false);
+  const enemy = enemyOfStop(stop.id);
+  const tr = useTr();
+  const enemyName = enemy ? tr(enemy.name) : "";
 
   const face = gold
     ? "linear-gradient(160deg, #fef08a 0%, #facc15 45%, #f59e0b 100%)"
@@ -201,6 +209,15 @@ function StopNode({
         {gold && (
           <span className="nc-pop absolute -right-1.5 -top-3 z-20 grid h-9 w-9 rotate-12 place-items-center rounded-full border-2 border-white bg-gradient-to-b from-yellow-300 to-amber-500 shadow-md">
             <Crown className="h-5 w-5 fill-white text-white" />
+          </span>
+        )}
+        {!gold && !locked && enemy && (
+          <span
+            title={enemyName}
+            className="nc-bob absolute -left-2 -top-2 z-20 grid h-8 w-8 place-items-center rounded-full border-2 border-white shadow-md"
+            style={{ background: enemy.color }}
+          >
+            <enemy.prop className="h-4 w-4 text-white" strokeWidth={2.4} />
           </span>
         )}
         {!gold && p.done > 0 && (
@@ -379,6 +396,7 @@ function UnitBanner({
           <p className="mt-1 line-clamp-2 text-xs font-semibold leading-snug opacity-90 sm:text-sm">
             {unit.description}
           </p>
+          <ChapterScenes unit={unit} kind={variant} first={index === 0} gold={gold} />
           <div className="mt-3 flex items-center gap-3">
             <div className="relative h-3 flex-1 overflow-hidden rounded-full border border-white/20 bg-black/20">
               <div
@@ -411,6 +429,8 @@ interface LearningTrailMapProps {
   /** Enquanto uma lição está aberta, o mascote espera para caminhar só quando ela fechar. */
   frozen: boolean;
   onOpenStop: (stop: Stop, unit: Unit) => void;
+  /** Nome que vai no certificado da trilha. */
+  learnerName: string;
 }
 
 export function LearningTrailMap({
@@ -419,6 +439,7 @@ export function LearningTrailMap({
   currentStopId,
   frozen,
   onOpenStop,
+  learnerName,
 }: LearningTrailMapProps) {
   const units = trail.units;
   const [shownStopId, setShownStopId] = useState(currentStopId);
@@ -451,7 +472,7 @@ export function LearningTrailMap({
         />
       ))}
 
-      <TrailFinale units={units} progress={progress} variant={trail.kind} />
+      <TrailFinale trail={trail} progress={progress} learnerName={learnerName} />
     </div>
   );
 }
@@ -617,15 +638,20 @@ function UnitSection({
 }
 
 function TrailFinale({
-  units,
+  trail,
   progress,
-  variant,
+  learnerName,
 }: {
-  units: Unit[];
+  trail: Trail;
   progress: TrailProgress;
-  variant: ProfileKind;
+  learnerName: string;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const tr = useTr();
+  const { user } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const units = trail.units;
+  const variant = trail.kind;
   const allGold = units.every((u) => isUnitGold(progress, u));
   const adult = variant === "adult";
   return (
@@ -649,6 +675,36 @@ function TrailFinale({
       <p className="relative z-10 mt-1.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
         {allGold ? (adult ? t("tm.finaleAdultDone") : t("tm.finaleKidDone")) : t("tm.finaleTodo")}
       </p>
+      {allGold && (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              const { exportTrailCertificate } = await import("@/lib/trail-certificate");
+              await exportTrailCertificate({
+                trail,
+                progress,
+                name: learnerName,
+                userId: user?.id ?? "guest",
+                locale,
+              });
+            } finally {
+              setBusy(false);
+            }
+          }}
+          className="relative z-10 mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full bg-amber-500 px-5 py-2.5 text-sm font-black text-white shadow-[0_4px_0_0_#b45309] transition hover:brightness-105 active:translate-y-0.5 active:shadow-none disabled:opacity-70"
+        >
+          <Award className="h-4 w-4" />
+          {tr([
+            "Baixar certificado",
+            "Download certificate",
+            "Descargar certificado",
+            "Télécharger le certificat",
+          ])}
+        </button>
+      )}
     </div>
   );
 }
@@ -734,6 +790,7 @@ export function StopSheet({
             </div>
 
             <div className="space-y-3 bg-card p-5">
+              {unit && <StopEnemyCard stop={stop} unit={unit} kind={trail.kind} done={p.done} />}
               {([1, 2, 3] as LevelNumber[]).map((n) => {
                 const meta = LEVEL_META[n];
                 const done = p.done >= n;

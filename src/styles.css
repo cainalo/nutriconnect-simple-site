@@ -538,12 +538,6 @@ html[data-cardaccent] .post-card {
   border-left: 4px solid var(--accent) !important;
 }
 
-/* Cards laterais: o conteúdo cede o espaço das colunas e usa o resto da tela. */
-html[data-rails="on"] main {
-  max-width: none !important;
-  padding-left: calc(var(--rail-edge) + var(--rail-w) + var(--rail-gap)) !important;
-  padding-right: calc(var(--rail-edge) + var(--rail-w) + var(--rail-gap)) !important;
-}
 
 /* O logo mantém a fonte original: a personalização de fontes não o afeta (só a cor, via tema). */
 .font-logo-serif {
@@ -1340,18 +1334,6 @@ html[data-rails="on"] main {
   animation: nc-breathe 8s ease-in-out infinite;
 }
 
-/* Com as colunas laterais ligadas, o miolo da página usa o espaço que sobrou: contêineres de largura
-   fixa se soltam e as grades de cartões ganham quantas colunas couberem. */
-html[data-rails="on"]
-  main
-  :is([class*="max-w-7xl"], [class*="max-w-6xl"], [class*="max-w-5xl"], [class*="max-w-4xl"]) {
-  max-width: none;
-}
-html[data-rails="on"]
-  main
-  :is(.sm\:grid-cols-3, .md\:grid-cols-3, .lg\:grid-cols-3, .xl\:grid-cols-3) {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
-}
 
 /* Transições entre slides personalizados (escolhidas por slide no editor) */
 @keyframes nc-tr-fade {
@@ -1377,4 +1359,1466 @@ html[data-rails="on"]
 }
 .nc-tr-zoom {
   animation: nc-tr-zoom 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─── Página Funções (/funcoes) ───────────────────────────────────────────────
+   Cada card tem cor e desenho próprios; entram em cascata e reagem ao toque e ao mouse. */
+@keyframes nc-tile-in {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94) rotate(-1.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.nc-tile-in {
+  animation: nc-tile-in 0.6s cubic-bezier(0.22, 1.25, 0.36, 1) both;
+}
+.nc-tile {
+  transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+    translateY(var(--lift, 0px));
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.nc-tile:hover {
+  --lift: -4px;
+  box-shadow: 0 18px 34px -18px color-mix(in srgb, var(--tile) 70%, transparent);
+}
+.nc-tile:active {
+  --lift: 1px;
+}
+@keyframes nc-scan {
+  0%,
+  100% {
+    transform: translateY(-14px);
+  }
+  50% {
+    transform: translateY(14px);
+  }
+}
+.nc-scan {
+  animation: nc-scan 1.8s ease-in-out infinite;
+}
+@keyframes nc-heartbeat {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.18);
+  }
+  25% {
+    transform: scale(0.96);
+  }
+}
+.nc-heartbeat {
+  animation: nc-heartbeat 1.6s ease-in-out infinite;
+}
+@keyframes nc-steam {
+  0% {
+    transform: translateY(6px) scaleX(0.8);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-22px) scaleX(1.2);
+    opacity: 0;
+  }
+}
+.nc-steam {
+  animation: nc-steam 2.4s ease-out infinite;
+}
+@keyframes nc-drift-x {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(10px, -8px) rotate(8deg);
+  }
+  66% {
+    transform: translate(-8px, 6px) rotate(-6deg);
+  }
+}
+.nc-drift-x {
+  animation: nc-drift-x 9s ease-in-out infinite;
+}
+@keyframes nc-gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+.nc-gradient-pan {
+  background-size: 220% 220%;
+  animation: nc-gradient-pan 14s ease-in-out infinite;
+}
+
+@keyframes nc-water {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.nc-water {
+  animation: nc-water 4s linear infinite;
+}
+
+/* ─── Cenas de conquista (hero-cinematic.tsx) ───────────────────────────────── */
+@keyframes nc-cine-bar-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes nc-cine-bar-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+.nc-cine-bar-top {
+  animation: nc-cine-bar-top 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.nc-cine-bar-bottom {
+  animation: nc-cine-bar-bottom 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes nc-cine-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.nc-cine-fade {
+  animation: nc-cine-fade 0.6s ease both;
+}
+@keyframes nc-cine-rays {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+.nc-cine-rays {
+  animation: nc-cine-rays 24s linear infinite;
+}
+@keyframes nc-cine-flash {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.nc-cine-flash {
+  animation: nc-cine-flash 0.9s ease-out both;
+}
+@keyframes nc-cine-emblem {
+  0% {
+    opacity: 0;
+    transform: scale(3.2) rotate(-25deg);
+    filter: blur(8px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.92) rotate(4deg);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.nc-cine-emblem {
+  animation: nc-cine-emblem 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes nc-cine-title {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.45em;
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0;
+    filter: blur(0);
+  }
+}
+.nc-cine-title {
+  animation: nc-cine-title 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes nc-cine-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.nc-cine-up {
+  animation: nc-cine-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes nc-cine-enter-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-60vw) translateY(10px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(4vw) translateY(-18px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes nc-cine-enter-right {
+  0% {
+    opacity: 0;
+    transform: translateX(60vw) translateY(10px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-4vw) translateY(-18px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes nc-cine-rise-hero {
+  0% {
+    opacity: 0;
+    transform: translateY(40vh) scale(0.8);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-3vh) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.nc-cine-enter-left {
+  animation: nc-cine-enter-left 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.nc-cine-enter-right {
+  animation: nc-cine-enter-right 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.nc-cine-rise-hero {
+  animation: nc-cine-rise-hero 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes nc-cine-ember {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-110vh) scale(1.1);
+    opacity: 0;
+  }
+}
+.nc-cine-ember {
+  animation: nc-cine-ember linear infinite;
+}
+.nc-cine-shine {
+  background-image: linear-gradient(
+    110deg,
+    currentColor 35%,
+    rgb(255 255 255 / 0.95) 50%,
+    currentColor 65%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: nc-shine 3s ease-in-out 1.2s infinite;
+}
+
+/* ─── Cenas da história (hero-cinematic, cutscene-backdrop, story-enemy) ───────── */
+@keyframes nc-cine-drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(8vw, 110vh) rotate(260deg);
+    opacity: 0;
+  }
+}
+.nc-cine-drift {
+  animation: nc-cine-drift linear infinite;
+}
+@keyframes nc-cine-fog {
+  0%,
+  100% {
+    transform: translateX(-8%);
+  }
+  50% {
+    transform: translateX(8%);
+  }
+}
+.nc-cine-fog {
+  animation: nc-cine-fog 30s ease-in-out infinite;
+}
+@keyframes nc-cine-flicker {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  30% {
+    opacity: 0.82;
+    transform: scaleY(1.06);
+  }
+  60% {
+    opacity: 0.95;
+    transform: scaleY(0.96);
+  }
+}
+.nc-cine-flicker {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: nc-cine-flicker 0.9s ease-in-out infinite;
+}
+@keyframes nc-cine-shimmer {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleX(0.7);
+    opacity: 0.2;
+  }
+}
+.nc-cine-shimmer {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nc-cine-shimmer 3.2s ease-in-out infinite;
+}
+@keyframes nc-cine-windows {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+.nc-cine-windows {
+  animation: nc-cine-windows 3s ease-in-out infinite;
+}
+@keyframes nc-cine-slash {
+  0% {
+    transform: rotate(-28deg) scaleX(0);
+    opacity: 1;
+  }
+  45% {
+    transform: rotate(-28deg) scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-28deg) scaleX(1) translateX(30%);
+    opacity: 0;
+  }
+}
+.nc-cine-slash {
+  animation: nc-cine-slash 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+@keyframes nc-cine-impact {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.35);
+  }
+}
+.nc-cine-impact {
+  animation: nc-cine-impact 0.7s ease-out 0.15s both;
+}
+
+/* Inimigos */
+@keyframes nc-enemy-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(14%) scale(0.3);
+    filter: blur(14px) brightness(0.2);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4%) scale(1.08);
+    filter: blur(0) brightness(1.4);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.nc-enemy-appear {
+  animation: nc-enemy-appear 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes nc-enemy-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4%);
+  }
+}
+.nc-enemy-idle {
+  animation: nc-enemy-idle 2.6s ease-in-out infinite;
+}
+@keyframes nc-enemy-taunt {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  25% {
+    transform: translateY(-6%) scale(0.96, 1.05);
+  }
+  50% {
+    transform: translateY(0) scale(1.05, 0.95);
+  }
+  75% {
+    transform: translateY(-3%) rotate(-3deg);
+  }
+}
+.nc-enemy-taunt {
+  animation: nc-enemy-taunt 0.9s ease-in-out infinite;
+}
+@keyframes nc-enemy-hurt {
+  0%,
+  100% {
+    transform: translateX(0);
+    filter: none;
+  }
+  10% {
+    transform: translateX(6%) rotate(6deg);
+    filter: brightness(3) saturate(0);
+  }
+  30% {
+    transform: translateX(-5%) rotate(-5deg);
+    filter: brightness(1.6);
+  }
+  50% {
+    transform: translateX(4%) rotate(3deg);
+    filter: brightness(2.4) saturate(0);
+  }
+  70% {
+    transform: translateX(-2%);
+    filter: none;
+  }
+}
+.nc-enemy-hurt {
+  animation: nc-enemy-hurt 0.75s ease-out 2;
+}
+@keyframes nc-enemy-defeated {
+  0% {
+    opacity: 1;
+    transform: none;
+    filter: brightness(2.2);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(-6%) rotate(-10deg) scale(1.05);
+    filter: brightness(1.6) saturate(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10%) rotate(200deg) scale(0.05);
+    filter: brightness(3) saturate(0);
+  }
+}
+.nc-enemy-defeated {
+  animation: nc-enemy-defeated 1.8s cubic-bezier(0.55, 0, 0.75, 0.3) 0.4s both;
+}
+@keyframes nc-enemy-flee {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  30% {
+    transform: translateY(-10%) scale(1.05, 0.95);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(70vw, -30vh) scale(0.4) rotate(25deg);
+    opacity: 0;
+  }
+}
+.nc-enemy-flee {
+  animation: nc-enemy-flee 1.6s cubic-bezier(0.55, 0, 0.8, 0.4) 2.2s both;
+}
+@keyframes nc-enemy-wave {
+  0%,
+  100% {
+    transform: skewX(0deg);
+  }
+  50% {
+    transform: skewX(-3deg);
+  }
+}
+.nc-enemy-wave {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: nc-enemy-wave 2.2s ease-in-out infinite;
+}
+@keyframes nc-enemy-tongue {
+  0%,
+  60%,
+  100% {
+    transform: scaleX(0);
+  }
+  70%,
+  90% {
+    transform: scaleX(1);
+  }
+}
+.nc-enemy-tongue {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: nc-enemy-tongue 1.8s ease-in-out infinite;
+}
+@keyframes nc-enemy-lid {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+.nc-enemy-lid {
+  animation: nc-enemy-lid 1.4s ease-in-out infinite;
+}
+@keyframes nc-enemy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.nc-enemy-spin {
+  animation: nc-enemy-spin 2.4s linear infinite;
+}
+.nc-enemy-spin-slow {
+  animation: nc-enemy-spin 14s linear infinite;
+}
+@keyframes nc-enemy-prop {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateY(-14%) rotate(8deg);
+  }
+}
+.nc-enemy-prop {
+  animation: nc-enemy-prop 2s ease-in-out infinite;
+}
+
+/* ── Estúdio de redes sociais (admin) ──────────────────────────────────── */
+@keyframes st-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  60% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes st-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes st-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08) translateY(-1%);
+  }
+}
+@keyframes st-marquee {
+  0%,
+  15% {
+    text-indent: 0;
+  }
+  100% {
+    text-indent: -120%;
+  }
+}
+@keyframes st-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes st-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes st-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes st-shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+@keyframes st-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.st-pop {
+  animation: st-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.st-progress {
+  animation: st-progress 5s linear forwards;
+}
+.st-kenburns {
+  animation: st-kenburns 12s ease-in-out infinite alternate;
+}
+.st-marquee {
+  animation: st-marquee 7s linear infinite;
+}
+.st-spin {
+  animation: st-spin 4s linear infinite;
+}
+.st-float {
+  animation: st-float 5s ease-in-out infinite;
+}
+.st-rise {
+  animation: st-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.st-gradient {
+  background-size: 220% 220%;
+  animation: st-gradient 14s ease infinite;
+}
+.st-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--card) 60%, white),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: st-shimmer 1.6s linear infinite;
+}
+.st-card {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s,
+    border-color 0.35s;
+}
+.st-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px -18px color-mix(in oklab, var(--primary) 45%, transparent);
+}
+.st-glass {
+  background: color-mix(in oklab, var(--card) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.st-scroll {
+  scrollbar-width: none;
+}
+.st-scroll::-webkit-scrollbar {
+  display: none;
+}
+/* Área que rola dentro do celular da prévia: esmaece embaixo para mostrar que continua. */
+.st-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+.st-thin {
+  scrollbar-width: thin;
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-pop,
+  .st-kenburns,
+  .st-marquee,
+  .st-spin,
+  .st-float,
+  .st-gradient,
+  .st-shimmer,
+  .st-rise {
+    animation: none;
+  }
+  .st-progress {
+    animation: none;
+    width: 100%;
+  }
+  .st-card:hover {
+    transform: none;
+  }
+}
+
+/* Estúdio de redes sociais: cards pequenos e textos curtos; justificar abriria buracos entre as
+   palavras (sobrescreve a regra de texto justificado do layer base). */
+.st-root :is(p, li, dd) {
+  text-align: start;
+  hyphens: manual;
+}
+
+/* ==========================================================================
+   Designs completos do site (admin → Design do site). O padrão "natural" não escreve nada.
+   Cada design troca as variáveis de cor/raio/fonte e ajusta as superfícies (cards, cabeçalho,
+   fundo). Fica depois de tudo para vencer :root e .dark; a personalização de cada pessoa usa
+   estilos inline no <html> e continua mandando por cima. Não mexe em modelos de post, regras
+   de rolagem nem layouts.
+   ========================================================================== */
+
+/* ---- Vibrante: o estilo de Funções/Estúdio ---------------------------------------------- */
+html[data-design="vibrante"] {
+  --radius: 1.5rem;
+  --font-display: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --background: #f2faf4;
+  --foreground: #14281c;
+  --card: #ffffff;
+  --card-foreground: #14281c;
+  --popover: #ffffff;
+  --primary: #15803d;
+  --primary-foreground: #f3fff7;
+  --primary-hover: #116b32;
+  --primary-soft: #d6f3df;
+  --secondary: #e4f3e8;
+  --muted: #e4f3e8;
+  --muted-foreground: #4c6556;
+  --accent: #ea580c;
+  --accent-foreground: #fff8f3;
+  --accent-hover: #c2410c;
+  --accent-soft: #ffe9d9;
+  --border: #d3e8da;
+  --input: #d3e8da;
+  --ring: #ea580c;
+  --sidebar: #e9f6ed;
+  --sidebar-accent: #d6f3df;
+  --sidebar-border: #cfe5d6;
+}
+html[data-design="vibrante"].dark {
+  --background: #0f1a14;
+  --foreground: #e9f7ee;
+  --card: #16241b;
+  --card-foreground: #e9f7ee;
+  --popover: #16241b;
+  --primary: #4ade80;
+  --primary-foreground: #06200f;
+  --primary-hover: #6ee79a;
+  --primary-soft: #1c3a28;
+  --secondary: #1b2d21;
+  --muted: #1b2d21;
+  --muted-foreground: #9fbaaa;
+  --accent: #fb923c;
+  --accent-foreground: #2a1204;
+  --accent-hover: #fdab68;
+  --accent-soft: #4a2610;
+  --border: #25382b;
+  --input: #25382b;
+  --ring: #fb923c;
+  --sidebar: #121f17;
+  --sidebar-accent: #1c3a28;
+  --sidebar-border: #25382b;
+}
+html[data-design="vibrante"] body {
+  background-image:
+    radial-gradient(70rem 36rem at 100% -8%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+    radial-gradient(60rem 34rem at -10% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%);
+  background-attachment: fixed;
+}
+html[data-design="vibrante"] h1,
+html[data-design="vibrante"] h2,
+html[data-design="vibrante"] h3 {
+  font-weight: 800;
+}
+html[data-design="vibrante"] :is(article, [class*="bg-card"]):not(footer, [data-no-design]) {
+  box-shadow: 0 10px 26px -20px color-mix(in srgb, var(--primary) 55%, transparent);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1.25, 0.36, 1),
+    box-shadow 0.25s ease;
+}
+html[data-design="vibrante"] :is(a, button, [role="button"])[class*="bg-card"]:hover,
+html[data-design="vibrante"] a:is(article, [class*="bg-card"]):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 32px -18px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* ---- Editorial: jornal antigo ----------------------------------------------------------- */
+/* Papel-jornal envelhecido, tinta preta e vermelho de tipografia; títulos em fonte de jornal,
+   cantos retos, filetes duplos, imagens em preto e branco com tom sépia e texto em colunas
+   justificadas. Os posts mudam só de aparência: a estrutura interna é a de sempre. */
+html[data-design="editorial"] {
+  --radius: 0;
+  --font-sans: "Old Standard TT", "Libre Baskerville", ui-serif, Georgia, serif;
+  --font-display: "Old Standard TT", "Libre Baskerville", ui-serif, Georgia, serif;
+  --background: #e9e0c9;
+  --foreground: #1b1710;
+  --card: #f1e9d3;
+  --card-foreground: #1b1710;
+  --popover: #f1e9d3;
+  --primary: #2a261d;
+  --primary-foreground: #f1e9d3;
+  --primary-hover: #15120c;
+  --primary-soft: #ddd3b8;
+  --secondary: #e0d6bb;
+  --muted: #e0d6bb;
+  --muted-foreground: #5c5342;
+  --accent: #8b1a1a;
+  --accent-foreground: #f6eedb;
+  --accent-hover: #6d1212;
+  --accent-soft: #e8d3c0;
+  --border: #b9ad8f;
+  --input: #b9ad8f;
+  --ring: #8b1a1a;
+  --sidebar: #e3d9bf;
+  --sidebar-accent: #d6cbad;
+  --sidebar-border: #b9ad8f;
+}
+html[data-design="editorial"].dark {
+  --background: #1c1912;
+  --foreground: #e8dfc7;
+  --card: #25211a;
+  --card-foreground: #e8dfc7;
+  --popover: #25211a;
+  --primary: #d9cfb3;
+  --primary-foreground: #1c1912;
+  --primary-hover: #eadfc3;
+  --primary-soft: #35301f;
+  --secondary: #2c281d;
+  --muted: #2c281d;
+  --muted-foreground: #aba083;
+  --accent: #d96a5a;
+  --accent-foreground: #230a07;
+  --accent-hover: #e58577;
+  --accent-soft: #3f1f1a;
+  --border: #4a4331;
+  --input: #4a4331;
+  --ring: #d96a5a;
+  --sidebar: #211e16;
+  --sidebar-accent: #2e2a1e;
+  --sidebar-border: #4a4331;
+}
+/* Textura de jornal: base de papel envelhecido com manchas de tempo e, por cima de tudo (inclusive
+   das fotos), granulado, fibras horizontais, retícula de impressão e leve sombra nas bordas. */
+html[data-design="editorial"] body {
+  background-image:
+    radial-gradient(34rem 22rem at 8% 12%, rgba(150, 105, 40, 0.1), transparent 70%),
+    radial-gradient(40rem 26rem at 92% 70%, rgba(130, 90, 30, 0.1), transparent 70%),
+    radial-gradient(28rem 18rem at 50% 105%, rgba(120, 80, 25, 0.12), transparent 70%),
+    radial-gradient(120% 90% at 50% 0%, transparent 55%, rgba(90, 65, 20, 0.2));
+  background-attachment: fixed;
+}
+html[data-design="editorial"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .32 0 0 0 0 .25 0 0 0 0 .14 0 0 0 .16 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .15 0 0 0 .13 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>"),
+    radial-gradient(circle at 1px 1px, rgba(70, 48, 14, 0.07) 0.7px, transparent 0.8px);
+  background-size:
+    240px 240px,
+    400px 300px,
+    4px 4px;
+}
+html[data-design="editorial"].dark body::after {
+  mix-blend-mode: soft-light;
+  opacity: 0.5;
+}
+/* Tinta que "pega" no papel: borda levemente borrada nos textos (só no tema claro). */
+html[data-design="editorial"]:not(.dark) :is(p, h1, h2, h3, h4, li, span, a, button, label, td) {
+  text-shadow: 0 0 0.7px color-mix(in srgb, var(--foreground) 40%, transparent);
+}
+html[data-design="editorial"] h1,
+html[data-design="editorial"] h2,
+html[data-design="editorial"] h3 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+/* Sem cantos arredondados: só os interruptores e os desenhos mantêm a forma. */
+html[data-design="editorial"] [class*="rounded"]:not([role="switch"], [role="switch"] *, svg, svg *, canvas) {
+  border-radius: 0 !important;
+}
+html[data-design="editorial"] :is(input, textarea, select, button):not([role="switch"]) {
+  border-radius: 0;
+}
+html[data-design="editorial"] :is(article, [class*="bg-card"]):not(footer, [data-no-design]) {
+  box-shadow: none;
+  border-color: color-mix(in srgb, var(--foreground) 45%, transparent);
+}
+html[data-design="editorial"] [class*="shadow"]:not([data-no-design]) {
+  box-shadow: none;
+}
+/* Gravuras: imagens em preto e branco com tom de tinta antiga */
+html[data-design="editorial"] :is(.post-card, main, [data-landing]) img:not([data-no-engrave]) {
+  filter: grayscale(1) sepia(0.4) contrast(1.08);
+  mix-blend-mode: multiply;
+}
+html[data-design="editorial"].dark :is(.post-card, main, [data-landing]) img:not([data-no-engrave]) {
+  mix-blend-mode: normal;
+  filter: grayscale(1) sepia(0.25) contrast(1.05) brightness(0.9);
+}
+html[data-design="editorial"] hr {
+  border-top: 3px double var(--foreground);
+}
+
+/* Posts: matéria de jornal. Filete grosso no topo, kicker em versalete, título de manchete,
+   primeira letra capitular e texto justificado em fonte de jornal. */
+html[data-design="editorial"] .post-card {
+  background: transparent;
+  border: 0;
+  border-top: 4px solid var(--foreground);
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 50%, transparent);
+  border-radius: 0;
+  padding-top: 0.15rem;
+  position: relative;
+}
+html[data-design="editorial"] .post-card::before {
+  content: "";
+  position: absolute;
+  inset: 3px 0 auto 0;
+  border-top: 1px solid var(--foreground);
+  pointer-events: none;
+}
+html[data-design="editorial"] .post-card [style*="--pt"] {
+  color: var(--pt) !important;
+  letter-spacing: 0.22em;
+  font-size: 0.68rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 35%, transparent);
+  padding-bottom: 0.4rem;
+}
+html[data-design="editorial"] .post-card h2,
+html[data-design="editorial"] .post-card h3 {
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+html[data-design="editorial"] .post-card :is(h2, h3) + p::first-letter {
+  float: left;
+  font-family: "UnifrakturCook", var(--font-display);
+  font-size: 3.4em;
+  line-height: 0.82;
+  padding: 0.06em 0.1em 0 0;
+  color: var(--pt, var(--accent));
+}
+html[data-design="editorial"] .post-card p {
+  text-align: justify;
+  hyphens: auto;
+  line-height: 1.55;
+}
+html[data-design="editorial"] .post-card :is(button, a) {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+html[data-design="editorial"] .post-card [class*="bg-secondary"],
+html[data-design="editorial"] .post-card [class*="bg-muted"] {
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground) 25%, transparent);
+}
+/* Faixa de rolagem do cabeçalho */
+html[data-design="editorial"] .font-blackletter {
+  font-family: "UnifrakturCook", "Old English Text MT", var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* ---- Aurora: vidro e luz ---------------------------------------------------------------- */
+html[data-design="aurora"] {
+  --radius: 1.75rem;
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --background: #eef3fb;
+  --foreground: #14213d;
+  --card: #ffffff;
+  --card-foreground: #14213d;
+  --popover: #ffffff;
+  --primary: #0f766e;
+  --primary-foreground: #effffd;
+  --primary-hover: #0b5e57;
+  --primary-soft: #d5f1ee;
+  --secondary: #e3eaf7;
+  --muted: #e3eaf7;
+  --muted-foreground: #53607c;
+  --accent: #7c3aed;
+  --accent-foreground: #faf6ff;
+  --accent-hover: #6527d6;
+  --accent-soft: #eadffd;
+  --border: #d4ddef;
+  --input: #d4ddef;
+  --ring: #7c3aed;
+  --sidebar: #e6edf9;
+  --sidebar-accent: #d5f1ee;
+  --sidebar-border: #d0daed;
+}
+html[data-design="aurora"].dark {
+  --background: #0b1220;
+  --foreground: #e8eefc;
+  --card: #131c2e;
+  --card-foreground: #e8eefc;
+  --popover: #131c2e;
+  --primary: #2dd4bf;
+  --primary-foreground: #042a26;
+  --primary-hover: #5eead4;
+  --primary-soft: #12373a;
+  --secondary: #18233a;
+  --muted: #18233a;
+  --muted-foreground: #9aa8c6;
+  --accent: #a78bfa;
+  --accent-foreground: #1a0d3d;
+  --accent-hover: #bda8fb;
+  --accent-soft: #2c1f55;
+  --border: #25324d;
+  --input: #25324d;
+  --ring: #a78bfa;
+  --sidebar: #0e1626;
+  --sidebar-accent: #12373a;
+  --sidebar-border: #25324d;
+}
+html[data-design="aurora"] body {
+  background-image:
+    radial-gradient(46rem 30rem at 8% -6%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 62%),
+    radial-gradient(44rem 30rem at 96% 8%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%),
+    radial-gradient(40rem 28rem at 50% 108%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%);
+  background-attachment: fixed;
+}
+html[data-design="aurora"] h1,
+html[data-design="aurora"] h2,
+html[data-design="aurora"] h3 {
+  font-weight: 600;
+}
+html[data-design="aurora"] :is(article, [class*="bg-card"]):not(footer, [data-no-design]) {
+  background-color: color-mix(in srgb, var(--card) 72%, transparent);
+  border-color: color-mix(in srgb, var(--foreground) 12%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  box-shadow: 0 14px 34px -24px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* Movimento reduzido: sem elevação animada nos designs. */
+html[data-motion="reduce"][data-design] :is(a, button, article)[class*="bg-card"]:hover {
+  transform: none;
+}
+
+/* ---- Estrutura própria de cada design (menus e cabeçalhos em site-chrome-designs.tsx) ------ */
+/* Vibrante: a barra lateral fixa abre espaço à esquerda no computador. */
+@media (min-width: 1024px) {
+  body:has([data-site-sidebar]) {
+    padding-left: 248px;
+  }
+}
+/* Antes da hidratação o React ainda desenha o menu do design padrão; escondê-lo evita o piscar
+   quando o design salvo é outro. */
+html[data-design]:not([data-hydrated]) :is([data-site-header], [data-site-bottom-nav]) {
+  visibility: hidden;
+}
+
+/* ---- Estilo de post próprio de cada design (a estrutura interna do post não muda) --------- */
+/* O cartão recebe cor, borda e fundo por estilo inline (post-type.ts); aqui os designs
+   sobrescrevem com !important só o que precisam. --pt é a cor do tipo do post. */
+
+/* Vibrante: cartão grande e alegre, barra grossa na cor do tipo, rótulo em pílula. */
+html[data-design="vibrante"] .post-card {
+  border-width: 0 !important;
+  border-left: 9px solid var(--pt, var(--accent)) !important;
+  border-radius: 2rem !important;
+  background-color: var(--card) !important;
+  background-image: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--pt, var(--accent)) 12%, transparent),
+    transparent 42%
+  );
+  box-shadow: 0 20px 38px -26px color-mix(in srgb, var(--pt, var(--accent)) 80%, transparent) !important;
+  --post-fade: var(--card) !important;
+}
+html[data-design="vibrante"] .post-card [style*="--pt"] {
+  display: inline-flex;
+  width: fit-content;
+  background: color-mix(in srgb, var(--pt) 16%, transparent);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-weight: 900;
+}
+html[data-design="vibrante"] .post-card :is(h2, h3) {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+html[data-design="vibrante"] .post-card :is(button, a)[class*="rounded-full"] {
+  font-weight: 800;
+}
+
+/* Aurora: vidro com brilho na cor do tipo e rótulo em degradê. */
+html[data-design="aurora"] .post-card {
+  border: 1px solid color-mix(in srgb, var(--pt, var(--accent)) 45%, transparent) !important;
+  border-radius: 1.9rem !important;
+  background-color: color-mix(in srgb, var(--card) 62%, transparent) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--foreground) 5%, transparent),
+    0 22px 46px -28px color-mix(in srgb, var(--pt, var(--accent)) 85%, transparent) !important;
+  --post-fade: color-mix(in srgb, var(--card) 85%, var(--background)) !important;
+}
+html[data-design="aurora"] .post-card [style*="--pt"] {
+  background: linear-gradient(90deg, var(--pt), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  letter-spacing: 0.14em;
+}
+html[data-design="aurora"] .post-card [style*="--pt"] svg {
+  color: var(--pt);
+}
+html[data-design="aurora"] .post-card :is(h2, h3) {
+  font-weight: 600;
+}
+
+/* Editorial: reforço do jornal sobre o estilo inline (papel liso, sem tinta de tipo). */
+html[data-design="editorial"] .post-card {
+  background-color: transparent !important;
+  background-image: none !important;
+  border-width: 0 !important;
+  border-top: 4px solid var(--foreground) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 50%, transparent) !important;
+  box-shadow: none !important;
+  --post-fade: var(--background) !important;
+}
+html[data-design="editorial"] .post-card::before {
+  z-index: 1;
+}
+
+/* Celular: nada passa da largura da tela (o conteúdo nunca fica cortado à direita). */
+@media (max-width: 1023px) {
+  html[data-design] body {
+    overflow-x: clip;
+  }
+  html[data-design] :is(main, [data-app-main]) {
+    max-width: 100vw;
+    overflow-x: clip;
+  }
+  html[data-design] .post-card,
+  html[data-design] main :is(section, article) {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+/* ---- Páginas internas por design: abas do feed e página Funções ---------------------------- */
+/* Vibrante */
+html[data-design="vibrante"] [data-pagesnav] {
+  border: 0;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--primary) 60%, transparent);
+}
+html[data-design="vibrante"] [data-pagesnav] button {
+  font-weight: 800;
+}
+html[data-design="vibrante"] [data-pagesnav] button[data-active="true"] {
+  background: linear-gradient(120deg, var(--primary), var(--accent));
+  color: var(--primary-foreground);
+}
+html[data-design="vibrante"] [data-funcoes-hero] {
+  border: 0;
+  border-radius: 2.5rem;
+}
+html[data-design="vibrante"] .nc-tile {
+  border: 0 !important;
+  border-radius: 2rem !important;
+  background: linear-gradient(
+    150deg,
+    var(--tile),
+    color-mix(in srgb, var(--tile) 62%, #000)
+  ) !important;
+  color: #fff;
+}
+html[data-design="vibrante"] .nc-tile span:not([class*="grid"]) {
+  color: #fff !important;
+}
+html[data-design="vibrante"] .nc-tile span[class*="text-foreground"] {
+  opacity: 0.92;
+}
+
+/* Editorial: abas em texto sublinhado; Funções como página de classificados. */
+html[data-design="editorial"] [data-pagesnav] {
+  border: 0;
+  border-top: 2px solid var(--foreground);
+  border-bottom: 2px solid var(--foreground);
+  background: var(--background);
+  box-shadow: none;
+  gap: 1.25rem;
+  padding: 0.25rem 1rem;
+}
+html[data-design="editorial"] [data-pagesnav] button {
+  background: transparent !important;
+  box-shadow: none;
+  padding: 0.25rem 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+html[data-design="editorial"] [data-pagesnav] button[data-active="true"] {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+html[data-design="editorial"] [data-funcoes-hero] {
+  background: transparent !important;
+  border: 0;
+  border-top: 4px solid var(--foreground);
+  border-bottom: 1px solid var(--foreground);
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+html[data-design="editorial"] [data-funcoes-hero] .nc-floaty {
+  display: none;
+}
+html[data-design="editorial"] [data-funcoes-grid] {
+  gap: 0;
+  border-left: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent);
+}
+html[data-design="editorial"] .nc-tile {
+  background: transparent !important;
+  border: 0 !important;
+  border-right: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: grayscale(0.9) sepia(0.35);
+}
+html[data-design="editorial"] .nc-tile:hover {
+  background: color-mix(in srgb, var(--foreground) 7%, transparent) !important;
+}
+html[data-design="editorial"] .nc-tile span[style*="color-mix"] {
+  color: var(--foreground) !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* Aurora: abas e tiles em vidro. */
+html[data-design="aurora"] [data-pagesnav] {
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--card) 60%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+html[data-design="aurora"] [data-pagesnav] button[data-active="true"] {
+  background: linear-gradient(120deg, var(--primary), var(--accent));
+  color: var(--primary-foreground);
+}
+html[data-design="aurora"] [data-funcoes-hero] {
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--card) 55%, transparent) !important;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+html[data-design="aurora"] .nc-tile {
+  border: 1px solid color-mix(in srgb, var(--tile) 40%, transparent) !important;
+  border-radius: 1.9rem !important;
+  background: color-mix(in srgb, var(--tile) 14%, color-mix(in srgb, var(--card) 55%, transparent)) !important;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+/* Editorial, Espaço de hoje: o tamanho da matéria segue a relevância (manchete, destaque, nota). */
+html[data-design="editorial"] [data-news-rank="lead"] .post-card :is(h2, h3) {
+  font-size: clamp(2rem, 3.6vw, 3.4rem);
+  line-height: 1.02;
+}
+html[data-design="editorial"] [data-news-rank="lead"] .post-card p {
+  font-size: 1.05rem;
+}
+html[data-design="editorial"] [data-news-rank="major"] .post-card :is(h2, h3) {
+  font-size: clamp(1.6rem, 2.6vw, 2.3rem);
+}
+html[data-design="editorial"] [data-news-rank="minor"] .post-card :is(h2, h3) {
+  font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+}
+html[data-design="editorial"] [data-news-rank="minor"] .post-card p {
+  font-size: 0.92rem;
+}
+
+/* Editorial: diagramação de jornal antigo (referências: manchete em fonte pesada, texto em colunas
+   justificadas com filete, fotos recortadas em gravura, título com filete embaixo). A matéria de
+   abertura e as aberturas de seção atravessam a página e põem o texto em colunas internas. */
+html[data-design="editorial"] .post-card :is(h2, h3) {
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 55%, transparent);
+  margin-bottom: 0.6rem;
+}
+html[data-design="editorial"] [data-news-rank="lead"] .post-card :is(h2, h3) {
+  font-family: "Playfair Display", var(--font-display);
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  border-bottom: 3px double var(--foreground);
+  padding-bottom: 0.6rem;
+}
+html[data-design="editorial"] [data-news-rank="lead"] .post-card img,
+html[data-design="editorial"] [data-news-rank="major"] .post-card img {
+  max-height: 26rem;
+  width: 100%;
+  object-fit: cover;
+}
+html[data-design="editorial"] [data-news-rank="lead"] .post-card img {
+  max-height: 32rem;
+}
+@media (min-width: 1024px) {
+  html[data-design="editorial"] [data-news-rank="lead"] .post-card p {
+    column-count: 3;
+    column-gap: 2.25rem;
+    column-rule: 1px solid color-mix(in srgb, var(--foreground) 30%, transparent);
+  }
+  html[data-design="editorial"] [data-news-span="all"][data-news-rank="major"] .post-card p {
+    column-count: 2;
+    column-gap: 2.25rem;
+    column-rule: 1px solid color-mix(in srgb, var(--foreground) 30%, transparent);
+  }
+}
+/* Ornamento entre matérias: filete fino com respiro, como nos jornais de coluna. */
+html[data-design="editorial"] [data-news-rank] {
+  padding-bottom: 0.5rem;
+}
+
+/* Editorial: sem sobras nas laterais. O texto vai de filete a filete (o respiro entre colunas é do
+   espaçamento da própria coluna), as fotos usam a largura inteira da coluna e as margens da página
+   são mínimas. */
+html[data-design="editorial"] .post-card {
+  --post-px: 0px;
+  --post-px-sm: 0px;
+}
+html[data-design="editorial"] .post-card .post-image {
+  max-width: 100% !important;
+  margin-inline: 0;
+}
+html[data-design="editorial"] .post-card .post-image img {
+  max-height: 22rem;
+  object-fit: cover;
+}
+html[data-design="editorial"] main[data-no-bottom-pad] {
+  padding-inline: 0.75rem !important;
+}
+html[data-design="editorial"] main[data-no-bottom-pad] > div,
+html[data-design="editorial"] main[data-no-bottom-pad] [class*="px-2"] {
+  max-width: none;
+}
+
+/* Editorial: a cor de cada tipo de post continua, em tons de tinta de impressão velha (ferrugem,
+   verde-musgo, azul-da-prússia e berinjela), com um leve lavado de cor no papel e o filete fino
+   na cor do tipo. */
+html[data-design="editorial"] .post-card[data-post-type="receita"] {
+  --pt: #a2421c !important;
+}
+html[data-design="editorial"] .post-card[data-post-type="experiencia"] {
+  --pt: #4d6a34 !important;
+}
+html[data-design="editorial"] .post-card[data-post-type="pergunta"] {
+  --pt: #2f4e70 !important;
+}
+html[data-design="editorial"] .post-card[data-post-type="geral"] {
+  --pt: #6c3b5c !important;
+}
+html[data-design="editorial"].dark .post-card[data-post-type="receita"] {
+  --pt: #d58a62 !important;
+}
+html[data-design="editorial"].dark .post-card[data-post-type="experiencia"] {
+  --pt: #9bb582 !important;
+}
+html[data-design="editorial"].dark .post-card[data-post-type="pergunta"] {
+  --pt: #8fb0d3 !important;
+}
+html[data-design="editorial"].dark .post-card[data-post-type="geral"] {
+  --pt: #c493b5 !important;
+}
+html[data-design="editorial"] .post-card[data-post-type] {
+  background-color: color-mix(in srgb, var(--pt) 7%, transparent) !important;
+}
+html[data-design="editorial"] .post-card[data-post-type]::before {
+  border-top-color: var(--pt);
+}
+html[data-design="editorial"] .post-card[data-post-type] :is(h2, h3) {
+  border-bottom-color: color-mix(in srgb, var(--pt) 60%, var(--foreground));
+}
+
+/* Editorial: as matérias continuam de uma coluna na outra, como num jornal, e as colunas ficam
+   sempre cheias (sem espaços vazios no pé de cada coluna). */
+html[data-design="editorial"] [data-news-rank] {
+  break-inside: auto;
+}
+html[data-design="editorial"] .post-card {
+  break-inside: auto;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }

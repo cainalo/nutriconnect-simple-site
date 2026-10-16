@@ -54,6 +54,72 @@ const AVISOS: Record<string, Names> = {
     "{name} aceptó tu solicitud de amistad",
     "{name} a accepté votre demande d'ami",
   ],
+  dupla_convite: [
+    "{name} convidou você para ser parceiro(a) de jornada",
+    "{name} invited you to be journey buddies",
+    "{name} te invitó a ser compañeros de camino",
+    "{name} vous invite à devenir binôme de parcours",
+  ],
+  dupla_aceita: [
+    "{name} aceitou ser seu parceiro(a) de jornada",
+    "{name} is now your journey buddy",
+    "{name} aceptó ser tu compañero(a) de camino",
+    "{name} est désormais votre binôme de parcours",
+  ],
+  dupla_checkin: [
+    "{name} fez o check-in de hoje",
+    "{name} checked in today",
+    "{name} hizo el registro de hoy",
+    "{name} a fait son point du jour",
+  ],
+  dupla_forca: [
+    "{name} mandou força para você 💪",
+    "{name} sent you encouragement 💪",
+    "{name} te mandó ánimo 💪",
+    "{name} vous encourage 💪",
+  ],
+  casa_convite: [
+    "{name} chamou você para a casa",
+    "{name} invited you to their home",
+    "{name} te invitó a su casa",
+    "{name} vous invite dans sa maison",
+  ],
+  casa_novo_membro: [
+    "{name} entrou na casa",
+    "{name} joined the home",
+    "{name} entró a la casa",
+    "{name} a rejoint la maison",
+  ],
+  evento_novo: [
+    "{name} marcou um evento ao vivo na comunidade",
+    "{name} scheduled a live event in the community",
+    "{name} programó un evento en vivo en la comunidad",
+    "{name} a programmé un événement en direct",
+  ],
+  evento_resposta: [
+    "{name} respondeu a sua pergunta no evento",
+    "{name} answered your question at the event",
+    "{name} respondió tu pregunta en el evento",
+    "{name} a répondu à votre question",
+  ],
+  programa_vendido: [
+    "{name} comprou o seu programa",
+    "{name} bought your program",
+    "{name} compró tu programa",
+    "{name} a acheté votre programme",
+  ],
+  teleconsulta_aprovada: [
+    "Sua habilitação para teleconsulta foi aprovada",
+    "Your teleconsultation clearance was approved",
+    "Tu habilitación para teleconsulta fue aprobada",
+    "Votre habilitation à la téléconsultation est approuvée",
+  ],
+  teleconsulta_recusada: [
+    "Seu pedido de teleconsulta precisa de ajuste",
+    "Your teleconsultation request needs changes",
+    "Tu solicitud de teleconsulta necesita ajustes",
+    "Votre demande de téléconsultation doit être corrigée",
+  ],
   consulta_agendada: [
     "{name} agendou uma consulta",
     "{name} booked an appointment",
@@ -324,7 +390,7 @@ async function deliver(items: Item[]) {
 serve(async (req) => {
   if (req.method !== "POST") throw new HttpError(405, "Método não permitido.");
   webpush.setVapidDetails(
-    Deno.env.get("VAPID_SUBJECT") ?? "mailto:suporte@nutriconnect.com.br",
+    Deno.env.get("VAPID_SUBJECT") ?? "mailto:nutriconnect.caina@gmail.com",
     env("VAPID_PUBLIC_KEY"),
     env("VAPID_PRIVATE_KEY"),
   );

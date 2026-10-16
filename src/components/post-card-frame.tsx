@@ -1,9 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { useAppearance } from "@/hooks/use-appearance";
 import { usePostTypeStyle } from "@/lib/post-type";
+import { useDesignId } from "@/lib/site-design";
+
+/** Tela com mais de uma coluna no Editorial (a partir de md); no celular há uma coluna só. */
+function useWideScreen(): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia("(min-width: 768px)");
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => window.matchMedia("(min-width: 768px)").matches,
+    () => false,
+  );
+}
 
 const PADDING = {
   md: {
@@ -102,7 +116,11 @@ export function PostCardFrame({
   }, [userId]);
 
   const { appearance } = useAppearance();
-  const isExpanded = expanded || appearance.expandPosts;
+  // Editorial: como num jornal, a matéria sai inteira, sem corte e sem "Ver mais". No celular, com
+  // uma coluna só, vale a regra de sempre (Ver mais).
+  const wide = useWideScreen();
+  const fullStories = useDesignId() === "editorial" && wide;
+  const isExpanded = expanded || appearance.expandPosts || fullStories;
   const clamped = !isExpanded && overflowing;
   const pad = PADDING[size];
   const typeStyle = usePostTypeStyle(type);
@@ -131,7 +149,7 @@ export function PostCardFrame({
         )}
       </div>
 
-      {overflowing && (
+      {overflowing && !fullStories && (
         <div ref={toggleRef} className={`shrink-0 ${pad.toggle}`}>
           <button
             type="button"

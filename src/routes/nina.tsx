@@ -1,7 +1,18 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { HeartHandshake, Loader2, MessageCircle, Refrigerator, Send, Trash2 } from "lucide-react";
+import {
+  HeartHandshake,
+  Loader2,
+  MessageCircle,
+  Mic,
+  Refrigerator,
+  Send,
+  Square,
+  Trash2,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AuthGateLoading, SiteHeader } from "@/components/site-chrome";
 import { Mascot } from "@/components/mascots";
@@ -9,6 +20,7 @@ import { useRequireAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { NINA_DAILY_LIMIT, askNutriAssistant } from "@/lib/nutri-assistant.functions";
+import { NINA_TOPICS } from "@/components/rail-cards";
 import { useTr } from "@/components/settings-ui";
 import { useLinks } from "@/lib/clinical/queries";
 import {
@@ -17,6 +29,15 @@ import {
   useNinaCareAllowed,
   useSetNinaCare,
 } from "@/lib/nina-care";
+import {
+  canListen,
+  canSpeak,
+  speak,
+  stopSpeaking,
+  useAutoSpeak,
+  useSpeechInput,
+  type ListenError,
+} from "@/lib/voice";
 
 export const Route = createFileRoute("/nina")({
   head: () => ({
@@ -39,7 +60,7 @@ interface ChatMessage {
 
 function NinaPage() {
   const { user, hydrated } = useRequireAuth();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const queryClient = useQueryClient();
   const historyKey = ["nina-history", user?.id];
   const [draft, setDraft] = useState("");
@@ -56,6 +77,41 @@ function NinaPage() {
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const tr = useTr();
+  // Nina por voz (N11): só aparece onde o navegador sabe ouvir/falar.
+  const [voice, setVoice] = useState({ listen: false, speak: false });
+  useEffect(() => setVoice({ listen: canListen(), speak: canSpeak() }), []);
+  const [autoSpeak, setAutoSpeak] = useAutoSpeak();
+  const [speaking, setSpeaking] = useState(false);
+  const sendRef = useRef<(text: string) => void>(() => {});
+  const listenErrors: Record<ListenError, [string, string, string, string]> = {
+    negado: [
+      "Libere o microfone para o site nas configurações do navegador.",
+      "Allow the microphone for this site in your browser settings.",
+      "Permite el micrófono para este sitio en la configuración del navegador.",
+      "Autorisez le micro pour ce site dans les réglages du navigateur.",
+    ],
+    "sem-fala": [
+      "Não ouvi nada. Toque no microfone e fale de novo.",
+      "I didn't hear anything. Tap the mic and speak again.",
+      "No escuché nada. Toca el micrófono y habla de nuevo.",
+      "Je n'ai rien entendu. Touchez le micro et reparlez.",
+    ],
+    falhou: [
+      "Não consegui ouvir agora. Tente de novo ou escreva.",
+      "I couldn't listen right now. Try again or type.",
+      "No pude escuchar ahora. Inténtalo de nuevo o escribe.",
+      "Je n'ai pas pu écouter. Réessayez ou écrivez.",
+    ],
+  };
+  const mic = useSpeechInput(
+    locale,
+    (text) => sendRef.current(text),
+    (err) => toast.error(tr(listenErrors[err])),
+  );
+  const say = (text: string) => {
+    setSpeaking(true);
+    speak(text, locale, () => setSpeaking(false));
+  };
   // Acompanhamento ativo: a Nina pode usar o plano e as metas, se a pessoa autorizar (M2).
   const links = useLinks("patient");
   const activeLink = (links.data ?? [])
@@ -96,9 +152,12 @@ function NinaPage() {
 
   if (!hydrated || !user) return <AuthGateLoading />;
 
-  const send = async (e: FormEvent) => {
+  const send = (e: FormEvent) => {
     e.preventDefault();
-    const text = draft.trim();
+    void sendText(draft.trim());
+  };
+
+  const sendText = async (text: string) => {
     if (!text || sending) return;
     setDraft("");
     setError(null);
@@ -112,6 +171,7 @@ function NinaPage() {
         setDraft(text);
       } else {
         await queryClient.invalidateQueries({ queryKey: historyKey });
+        if (autoSpeak && voice.speak) say(res.answer);
       }
     } catch (err) {
       console.error("nina", err);
@@ -124,6 +184,8 @@ function NinaPage() {
       setSending(false);
     }
   };
+
+  sendRef.current = (text) => void sendText(text);
 
   const clear = async () => {
     if (!window.confirm(t("nina.clearConfirm"))) return;
@@ -179,6 +241,16 @@ function NinaPage() {
       >
         {m.content}
       </p>
+      {m.role === "assistant" && voice.speak && (
+        <button
+          type="button"
+          onClick={() => say(m.content)}
+          className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+        >
+          <Volume2 className="h-3.5 w-3.5" />
+          {tr(["Ouvir", "Listen", "Escuchar", "Écouter"])}
+        </button>
+      )}
       {m.role === "assistant" && question && takeToNutri(question)}
     </div>
   );
@@ -187,9 +259,9 @@ function NinaPage() {
     // Altura da tela: a página não rola; só a conversa rola por dentro.
     <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
       <SiteHeader />
-      <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col px-4 pb-24 pt-6 sm:px-6 lg:pb-6">
+      <main className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 pb-24 pt-6 sm:px-6 lg:pb-6">
         <div className="mb-4 flex shrink-0 items-center gap-4">
-          <Mascot id="nina" mood={sending ? "talk" : "idle"} size={72} />
+          <Mascot id="nina" mood={sending || speaking ? "talk" : "idle"} size={72} />
           <div className="min-w-0 flex-1">
             <h1 className="sr-only">{t("nina.title")}</h1>
             <Link
@@ -205,6 +277,31 @@ function NinaPage() {
               ])}
             </Link>
           </div>
+          {voice.speak && (
+            <button
+              type="button"
+              onClick={() => setAutoSpeak(!autoSpeak)}
+              aria-pressed={autoSpeak}
+              title={tr([
+                "A Nina lê as respostas em voz alta",
+                "Nina reads her answers aloud",
+                "Nina lee las respuestas en voz alta",
+                "Nina lit ses réponses à voix haute",
+              ])}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                autoSpeak
+                  ? "border-accent bg-accent-soft text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+              }`}
+            >
+              {autoSpeak ? (
+                <Volume2 className="h-3.5 w-3.5" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5" />
+              )}
+              {tr(["Voz", "Voice", "Voz", "Voix"])}
+            </button>
+          )}
           {messages.length > 0 && (
             <button
               type="button"
@@ -214,6 +311,22 @@ function NinaPage() {
               <Trash2 className="h-3.5 w-3.5" /> {t("nina.clear")}
             </button>
           )}
+        </div>
+
+        {/* Só desta página: perguntas para começar a conversa (tocar envia para a Nina). */}
+        <div className="no-scrollbar mb-3 flex shrink-0 gap-2 overflow-x-auto pb-1">
+          {NINA_TOPICS.map((q, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("nina:prompt", { detail: tr(q) }))
+              }
+              className="shrink-0 cursor-pointer rounded-full border border-border bg-card px-4 py-2 text-xs font-medium text-foreground transition hover:bg-secondary"
+            >
+              {tr(q)}
+            </button>
+          ))}
         </div>
 
         {activeLink && careAllowed.data === false && !promptHidden && (
@@ -320,8 +433,34 @@ function NinaPage() {
         )}
 
         <form onSubmit={send} className="mt-3 flex shrink-0 items-end gap-2">
+          {voice.listen && (
+            <button
+              type="button"
+              onClick={() => (mic.listening ? mic.stop() : mic.start())}
+              disabled={sending}
+              aria-pressed={mic.listening}
+              aria-label={
+                mic.listening
+                  ? tr([
+                      "Parar de ouvir",
+                      "Stop listening",
+                      "Dejar de escuchar",
+                      "Arrêter l'écoute",
+                    ])
+                  : tr(["Falar com a Nina", "Talk to Nina", "Hablar con Nina", "Parler à Nina"])
+              }
+              className={`grid h-12 w-12 shrink-0 place-items-center rounded-full border transition disabled:opacity-50 ${
+                mic.listening
+                  ? "animate-pulse border-destructive bg-destructive text-white"
+                  : "border-border bg-card text-foreground hover:bg-secondary"
+              }`}
+            >
+              {mic.listening ? <Square className="h-4 w-4" /> : <Mic className="h-5 w-5" />}
+            </button>
+          )}
           <textarea
-            value={draft}
+            value={mic.listening ? mic.interim : draft}
+            readOnly={mic.listening}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -331,7 +470,16 @@ function NinaPage() {
             }}
             rows={2}
             maxLength={2000}
-            placeholder={t("nina.placeholder")}
+            placeholder={
+              mic.listening
+                ? tr([
+                    "Pode falar…",
+                    "Go ahead, I'm listening…",
+                    "Habla, te escucho…",
+                    "Parlez, j'écoute…",
+                  ])
+                : t("nina.placeholder")
+            }
             className="min-h-[3rem] flex-1 resize-none rounded-2xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
           />
           <button

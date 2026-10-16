@@ -11,10 +11,12 @@ import {
   Inbox,
   LayoutDashboard,
   Megaphone,
-  PanelsLeftRight,
+  Palette,
   ToggleRight,
   Presentation,
   Settings,
+  Share2,
+  ShoppingCart,
   Smile,
   Users,
   UsersRound,
@@ -33,10 +35,12 @@ export type SectionId =
   | "temas"
   | "apresentacao"
   | "anuncios"
-  | "site_cards"
+  | "redes"
   | "site_features"
   | "site_nina"
+  | "site_design"
   | "financeiro"
+  | "mercados"
   | "ia"
   | "config"
   | "auditoria";
@@ -60,10 +64,12 @@ export const SECTIONS: SectionDef[] = [
   { id: "temas", label: "Temas da semana", icon: CalendarDays, group: "Conteúdo" },
   { id: "apresentacao", label: "Apresentação", icon: Presentation, group: "Conteúdo" },
   { id: "anuncios", label: "Anúncios", icon: Megaphone, group: "Conteúdo" },
-  { id: "site_cards", label: "Cards das laterais", icon: PanelsLeftRight, group: "Site" },
+  { id: "redes", label: "Redes sociais", icon: Share2, group: "Conteúdo" },
   { id: "site_features", label: "Funcionalidades", icon: ToggleRight, group: "Site" },
   { id: "site_nina", label: "Nina", icon: Smile, group: "Site" },
+  { id: "site_design", label: "Design do site", icon: Palette, group: "Site" },
   { id: "financeiro", label: "Financeiro", icon: Banknote, group: "Negócio" },
+  { id: "mercados", label: "Mercados parceiros", icon: ShoppingCart, group: "Negócio" },
   { id: "ia", label: "Inteligência artificial", icon: Brain, group: "Sistema" },
   { id: "config", label: "Configurações", icon: Settings, group: "Sistema" },
   { id: "auditoria", label: "Auditoria", icon: History, group: "Sistema" },

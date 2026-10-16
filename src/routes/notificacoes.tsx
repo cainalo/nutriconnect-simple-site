@@ -1,10 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
+  BadgeCheck,
   Bell,
   BellRing,
   BookOpen,
   GlassWater,
+  HandHeart,
+  Home,
+  Mic,
+  ShoppingBag,
   CalendarCheck,
   CalendarClock,
   CalendarX,
@@ -143,7 +148,12 @@ const CATEGORIES: Category[] = [
 ];
 
 function categoryOf(type: string): CategoryId {
-  if (["reacao", "comentario", "seguidor", "amizade_pedido", "amizade_aceita"].includes(type))
+  if (
+    ["reacao", "comentario", "seguidor", "amizade_pedido", "amizade_aceita"].includes(type) ||
+    type.startsWith("dupla_") ||
+    type.startsWith("casa_") ||
+    type.startsWith("evento_")
+  )
     return "social";
   if (
     type.startsWith("consulta_") ||
@@ -154,6 +164,7 @@ function categoryOf(type: string): CategoryId {
       "diario_comentario",
       "plano_publicado",
       "pagamento",
+      "programa_vendido",
       "meta_agua",
     ].includes(type) ||
     type.startsWith("pagamento")
@@ -534,6 +545,133 @@ function describe(
         detail: str(data.description) || undefined,
         go: { to: "/desafios" },
       };
+    case "dupla_convite":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} convidou você para ser parceiro(a) de jornada",
+          "{name} invited you to be journey buddies",
+          "{name} te invitó a ser compañeros de camino",
+          "{name} vous invite à devenir binôme de parcours",
+        ]),
+        go: { to: "/parceiro" },
+      };
+    case "dupla_aceita":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} aceitou ser seu parceiro(a) de jornada",
+          "{name} is now your journey buddy",
+          "{name} aceptó ser tu compañero(a) de camino",
+          "{name} est désormais votre binôme de parcours",
+        ]),
+        go: { to: "/parceiro" },
+      };
+    case "dupla_checkin":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} fez o check-in de hoje",
+          "{name} checked in today",
+          "{name} hizo el registro de hoy",
+          "{name} a fait son point du jour",
+        ]),
+        go: { to: "/parceiro" },
+      };
+    case "dupla_forca":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} mandou força para você 💪",
+          "{name} sent you encouragement 💪",
+          "{name} te mandó ánimo 💪",
+          "{name} vous encourage 💪",
+        ]),
+        go: { to: "/parceiro" },
+      };
+    case "casa_convite":
+      return {
+        icon: Home,
+        text: fill([
+          "{name} chamou você para a casa",
+          "{name} invited you to their home",
+          "{name} te invitó a su casa",
+          "{name} vous invite dans sa maison",
+        ]),
+        detail: str(data.house),
+        go: { to: "/casa/entrar/$code", params: { code: n.entity_id ?? "" } },
+      };
+    case "casa_novo_membro":
+      return {
+        icon: Home,
+        text: fill([
+          "{name} entrou na casa",
+          "{name} joined the home",
+          "{name} entró a la casa",
+          "{name} a rejoint la maison",
+        ]),
+        detail: str(data.house),
+        go: { to: "/casa" },
+      };
+    case "evento_novo":
+      return {
+        icon: Mic,
+        text: fill([
+          "{name} marcou um evento ao vivo na comunidade",
+          "{name} scheduled a live event in the community",
+          "{name} programó un evento en vivo en la comunidad",
+          "{name} a programmé un événement en direct",
+        ]),
+        detail: [str(data.title), dateOf(data.starts_at, locale)].filter(Boolean).join(" · "),
+        go: { to: "/evento/$eventId", params: { eventId: n.entity_id ?? "" } },
+      };
+    case "evento_resposta":
+      return {
+        icon: Mic,
+        text: fill([
+          "{name} respondeu a sua pergunta no evento",
+          "{name} answered your question at the event",
+          "{name} respondió tu pregunta en el evento",
+          "{name} a répondu à votre question",
+        ]),
+        detail: quote(data.question),
+        go: { to: "/evento/$eventId", params: { eventId: n.entity_id ?? "" } },
+      };
+    case "programa_vendido":
+      return {
+        icon: ShoppingBag,
+        text: fill([
+          "{name} comprou o seu programa",
+          "{name} bought your program",
+          "{name} compró tu programa",
+          "{name} a acheté votre programme",
+        ]),
+        detail: str(data.title),
+        go: { to: "/painel/programas" },
+      };
+    case "teleconsulta_aprovada":
+      return {
+        icon: BadgeCheck,
+        text: tr([
+          "Sua habilitação para teleconsulta foi aprovada",
+          "Your teleconsultation clearance was approved",
+          "Tu habilitación para teleconsulta fue aprobada",
+          "Votre habilitation à la téléconsultation est approuvée",
+        ]),
+        go: { to: "/painel/configuracoes" },
+      };
+    case "teleconsulta_recusada":
+      return {
+        icon: ShieldAlert,
+        text: tr([
+          "Seu pedido de teleconsulta precisa de ajuste",
+          "Your teleconsultation request needs changes",
+          "Tu solicitud de teleconsulta necesita ajustes",
+          "Votre demande de téléconsultation doit être corrigée",
+        ]),
+        detail: str(data.reason),
+        go: { to: "/painel/configuracoes" },
+      };
     default:
       return {
         icon: Bell,
@@ -762,7 +900,7 @@ function NotificacoesPage() {
 
   return (
     <AppScreen>
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-[120rem] px-4 py-6 sm:px-6 lg:px-10">
         <h1 className="sr-only">{t("notif.title")}</h1>
 
         {/* Resumo */}

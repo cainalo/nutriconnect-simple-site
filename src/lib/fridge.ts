@@ -1,9 +1,11 @@
 // Geladeira (N4) e lista de compras na conta: receitas guardadas, receitas da comunidade pelos
-// ingredientes e itens de compra (valem em todos os aparelhos).
+// ingredientes e itens de compra (valem em todos os aparelhos; quem mora numa casa usa a lista da casa).
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json, Tables, TablesInsert } from "@/integrations/supabase/types";
 import type { FridgeRecipe } from "@/lib/fridge.functions";
+import { useMyHousehold } from "@/lib/household";
 
 export type SavedRecipe = Tables<"saved_recipes">;
 export type ShoppingItem = Tables<"shopping_items">;
@@ -26,11 +28,10 @@ export const fridgeKeys = {
   community: (terms: string[]) => ["fridge", "community", terms] as const,
 };
 
-/** Ingredientes que a pessoa marcou na Geladeira (guardados neste aparelho). */
-export const fridgeItemsKey = (userId: string) => `nc_fridge_items_${userId}`;
+/** Ingredientes que a pessoa marcou na Geladeira antes de irem para a conta (neste aparelho). */
+const fridgeItemsKey = (userId: string) => `nc_fridge_items_${userId}`;
 
-export function readFridgeItems(userId: string | undefined): string[] {
-  if (!userId) return [];
+function readLocalFridge(userId: string): string[] {
   try {
     const raw = window.localStorage.getItem(fridgeItemsKey(userId));
     const list = raw ? (JSON.parse(raw) as unknown[]) : [];
@@ -38,6 +39,124 @@ export function readFridgeItems(userId: string | undefined): string[] {
   } catch {
     return [];
   }
+}
+
+function writeLocalFridge(userId: string, items: string[] | null) {
+  try {
+    if (items) window.localStorage.setItem(fridgeItemsKey(userId), JSON.stringify(items));
+    else window.localStorage.removeItem(fridgeItemsKey(userId));
+  } catch {
+    /* sem armazenamento */
+  }
+}
+
+export const FRIDGE_MAX = 30;
+
+/**
+ * Ingredientes da Geladeira: na conta (a da casa, para quem mora numa, em tempo real) e, se o banco
+ * ainda não tiver a tabela, neste aparelho como antes. O que estava só no aparelho sobe uma vez.
+ */
+export function useFridgeItems(userId: string | undefined) {
+  const qc = useQueryClient();
+  const house = useMyHousehold(userId);
+  const houseId = house.data?.house.id ?? null;
+  const key = ["fridge-items", houseId ?? "pessoal"] as const;
+
+  const query = useQuery({
+    queryKey: key,
+    enabled: !!userId && !house.isLoading,
+    retry: false,
+    queryFn: async (): Promise<{ id: string; text: string }[]> => {
+      let q = supabase.from("fridge_items").select("id, text");
+      q = houseId ? q.eq("household_id", houseId) : q.is("household_id", null);
+      const { data, error } = await q.order("created_at", { ascending: true });
+      fail(error);
+      const rows = data ?? [];
+      // Primeira vez com a geladeira na conta: sobe o que estava neste aparelho.
+      const local = readLocalFridge(userId!);
+      if (local.length) {
+        const have = new Set(rows.map((r) => r.text.toLowerCase()));
+        const fresh = local.filter((t) => !have.has(t.toLowerCase())).slice(0, FRIDGE_MAX);
+        if (fresh.length) {
+          const { data: added } = await supabase
+            .from("fridge_items")
+            .insert(
+              fresh.map((text) => ({
+                user_id: userId!,
+                text,
+                ...(houseId ? { household_id: houseId } : {}),
+              })),
+            )
+            .select("id, text");
+          rows.push(...(added ?? []));
+        }
+        writeLocalFridge(userId!, null);
+      }
+      return rows;
+    },
+  });
+
+  // Sem a tabela no banco: segue no aparelho.
+  const offline = query.isError;
+  const [localItems, setLocalItems] = useState<string[]>([]);
+  useEffect(() => {
+    if (offline && userId) setLocalItems(readLocalFridge(userId));
+  }, [offline, userId]);
+
+  const rows = query.data ?? [];
+  const items = offline ? localItems : rows.map((r) => r.text);
+  const refresh = () => qc.invalidateQueries({ queryKey: ["fridge-items"] });
+
+  const add = async (texts: string[]) => {
+    const seen = new Set(items.map((i) => i.toLowerCase()));
+    const fresh = texts
+      .map((t) => t.trim().toLowerCase().slice(0, 40))
+      .filter((t) => t && !seen.has(t) && (seen.add(t), true))
+      .slice(0, Math.max(0, FRIDGE_MAX - items.length));
+    if (!fresh.length || !userId) return 0;
+    if (offline) {
+      const next = [...items, ...fresh];
+      setLocalItems(next);
+      writeLocalFridge(userId, next);
+      return fresh.length;
+    }
+    const { error } = await supabase.from("fridge_items").insert(
+      fresh.map((text) => ({
+        user_id: userId,
+        text,
+        ...(houseId ? { household_id: houseId } : {}),
+      })),
+    );
+    await refresh();
+    fail(error);
+    return fresh.length;
+  };
+
+  const removeMany = async (texts: string[]) => {
+    if (!userId) return;
+    if (offline) {
+      const next = items.filter((i) => !texts.includes(i));
+      setLocalItems(next);
+      writeLocalFridge(userId, next);
+      return;
+    }
+    const ids = rows.filter((r) => texts.includes(r.text)).map((r) => r.id);
+    qc.setQueryData<typeof rows>(key, (old) => old?.filter((r) => !ids.includes(r.id)));
+    if (ids.length) {
+      const { error } = await supabase.from("fridge_items").delete().in("id", ids);
+      await refresh();
+      fail(error);
+    }
+  };
+
+  return {
+    items,
+    loading: query.isLoading,
+    shared: !!houseId && !offline,
+    add,
+    remove: (text: string) => removeMany([text]),
+    clear: () => removeMany(items),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -143,19 +262,28 @@ export function useCommunityRecipes(terms: string[], enabled: boolean) {
 }
 
 // ---------------------------------------------------------------------------
-// Lista de compras na conta
+// Lista de compras na conta (ou da casa, para quem está num grupo familiar)
 // ---------------------------------------------------------------------------
 
+/** Chave da lista que a pessoa vê agora: a da casa ou a pessoal. */
+const shoppingKey = (houseId: string | null | undefined) =>
+  [...fridgeKeys.shopping, houseId ?? "pessoal"] as const;
+
+/**
+ * A lista de compras: a da casa, se a pessoa mora numa (os itens pessoais ficam guardados e voltam
+ * quando ela sai), ou a pessoal. A da casa se atualiza em tempo real.
+ */
 export function useShoppingItems(userId: string | undefined) {
+  const house = useMyHousehold(userId);
+  const houseId = house.data?.house.id ?? null;
   return useQuery({
-    queryKey: fridgeKeys.shopping,
-    enabled: !!userId,
+    queryKey: shoppingKey(houseId),
+    enabled: !!userId && !house.isLoading,
     queryFn: async (): Promise<ShoppingItem[]> => {
-      const { data, error } = await supabase
-        .from("shopping_items")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200);
+      let query = supabase.from("shopping_items").select("*");
+      // Fora de uma casa o RLS já mostra só a lista pessoal (e o filtro não depende da coluna nova).
+      if (houseId) query = query.eq("household_id", houseId);
+      const { data, error } = await query.order("created_at", { ascending: false }).limit(200);
       fail(error);
       return data ?? [];
     },
@@ -171,6 +299,7 @@ export async function addShoppingItems(
   entries: ShoppingEntry[],
   source: ShoppingItem["source"] = "manual",
   current: ShoppingItem[] = [],
+  householdId: string | null = null,
 ) {
   const open = new Set(current.filter((i) => !i.done).map((i) => i.text.trim().toLowerCase()));
   const seen = new Set<string>();
@@ -183,7 +312,13 @@ export async function addShoppingItems(
       seen.add(k);
       return true;
     })
-    .map((e) => ({ user_id: userId, text: e.text, section: e.section, source }));
+    .map((e) => ({
+      user_id: userId,
+      ...(householdId ? { household_id: householdId } : {}),
+      text: e.text,
+      section: e.section,
+      source,
+    }));
   if (!rows.length) return 0;
   const { error } = await supabase.from("shopping_items").insert(rows);
   fail(error);
@@ -192,13 +327,16 @@ export async function addShoppingItems(
 
 export function useAddShoppingItems(userId: string | undefined) {
   const qc = useQueryClient();
+  const house = useMyHousehold(userId);
+  const houseId = house.data?.house.id ?? null;
   return useMutation({
     mutationFn: ({ texts, source }: { texts: ShoppingEntry[]; source?: ShoppingItem["source"] }) =>
       addShoppingItems(
         userId!,
         texts,
         source,
-        qc.getQueryData<ShoppingItem[]>(fridgeKeys.shopping) ?? [],
+        qc.getQueryData<ShoppingItem[]>(shoppingKey(houseId)) ?? [],
+        houseId,
       ),
     onSettled: () => qc.invalidateQueries({ queryKey: fridgeKeys.shopping }),
   });
@@ -212,7 +350,7 @@ export function useUpdateShoppingItem() {
       fail(error);
     },
     onMutate: ({ id, done }) =>
-      qc.setQueryData<ShoppingItem[]>(fridgeKeys.shopping, (old) =>
+      qc.setQueriesData<ShoppingItem[]>({ queryKey: fridgeKeys.shopping }, (old) =>
         old?.map((i) => (i.id === id ? { ...i, done } : i)),
       ),
     onSettled: () => qc.invalidateQueries({ queryKey: fridgeKeys.shopping }),

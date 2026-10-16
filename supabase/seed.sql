@@ -22,10 +22,10 @@
 -- Contas
 -- ---------------------------------------------------------------------------
 with demo (id, email, name, meta) as (values
-  ('00000000-0000-4000-a000-000000000900'::uuid, 'admin@nutriconnect.com.br', 'Equipe NutriConnect', '{}'::jsonb),
-  ('00000000-0000-4000-a000-000000000001'::uuid, 'maria.lorena@demo.nutriconnect.com.br', 'Maria Lorena', '{}'::jsonb),
-  ('00000000-0000-4000-a000-000000000002'::uuid, 'pedro.costa@demo.nutriconnect.com.br', 'Pedro Costa', '{}'::jsonb),
-  ('00000000-0000-4000-a000-000000000003'::uuid, 'helena.souza@demo.nutriconnect.com.br', 'Helena Souza', '{}'::jsonb),
+  ('00000000-0000-4000-a000-000000000900'::uuid, 'admin@nutriconnect.com.br', 'Equipe NutriConnect', '{"birth_date": "1990-01-01"}'::jsonb),
+  ('00000000-0000-4000-a000-000000000001'::uuid, 'maria.lorena@demo.nutriconnect.com.br', 'Maria Lorena', '{"birth_date": "1988-06-15"}'::jsonb),
+  ('00000000-0000-4000-a000-000000000002'::uuid, 'pedro.costa@demo.nutriconnect.com.br', 'Pedro Costa', '{"birth_date": "1985-11-02"}'::jsonb),
+  ('00000000-0000-4000-a000-000000000003'::uuid, 'helena.souza@demo.nutriconnect.com.br', 'Helena Souza', '{"birth_date": "1983-03-28"}'::jsonb),
   ('00000000-0000-4000-a000-000000000101'::uuid, 'ana.prado@demo.nutriconnect.com.br', 'Ana Prado',
     '{"goal": "Emagrecimento consciente", "phone": "(11) 98888-1234", "birth_date": "1996-04-12"}'::jsonb),
   ('00000000-0000-4000-a000-000000000102'::uuid, 'carlos.eduardo@demo.nutriconnect.com.br', 'Carlos Eduardo',

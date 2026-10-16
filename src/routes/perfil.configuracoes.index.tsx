@@ -157,7 +157,7 @@ function ConfiguracoesPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 py-8">
+    <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-8">
       <Link
         to="/perfil/$userId"
         params={{ userId: user.id }}
@@ -187,21 +187,23 @@ function ConfiguracoesPage() {
           />
         </label>
 
-        {cards
-          .filter((c) => {
-            const q = query.trim().toLowerCase();
-            return !q || `${c.title} ${c.hint} ${c.keywords}`.toLowerCase().includes(q);
-          })
-          .map((c) => (
-            <LinkCard
-              key={c.to}
-              to={c.to}
-              icon={c.icon}
-              tone={c.tone}
-              title={c.title}
-              hint={c.hint}
-            />
-          ))}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {cards
+            .filter((c) => {
+              const q = query.trim().toLowerCase();
+              return !q || `${c.title} ${c.hint} ${c.keywords}`.toLowerCase().includes(q);
+            })
+            .map((c) => (
+              <LinkCard
+                key={c.to}
+                to={c.to}
+                icon={c.icon}
+                tone={c.tone}
+                title={c.title}
+                hint={c.hint}
+              />
+            ))}
+        </div>
 
         <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6 shadow-xs">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

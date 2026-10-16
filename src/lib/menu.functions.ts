@@ -65,6 +65,8 @@ const menuSchema = z.object({
   keep: shortList(14),
   /** Frutas, legumes e verduras da estação na região (Calendário da feira). */
   season: shortList(40),
+  /** Cardápio da casa: número de moradores (cada receita rende uma porção por pessoa). */
+  people: z.number().int().min(1).max(8).optional(),
   locale,
 });
 
@@ -78,7 +80,10 @@ export const suggestMenu = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<MenuReply> => {
     const { aiChat } = await import("./ai-gateway.server");
     const { buildMenuContext } = await import("./nina-care-context.server");
-    const care = await buildMenuContext(context.supabase, context.userId).catch(() => null);
+    // No cardápio da casa o plano de quem pediu não entra: o cardápio é visto por todos os moradores.
+    const care = data.people
+      ? null
+      : await buildMenuContext(context.supabase, context.userId).catch(() => null);
 
     const slots = data.slots.map((s) => `${DAYS_PT[s.day]} ${MEAL_PT[s.meal]}`);
     const system = `Você é a Nina, assistente de educação alimentar do NutriConnect.
@@ -105,6 +110,9 @@ No máximo 10 ingredientes e 6 passos curtos por refeição.`;
       data.keep.length ? `Já estão na semana (não repita): ${data.keep.join("; ")}.` : "",
       data.season.length
         ? `Da estação na minha região (prefira, são mais baratos e saborosos): ${data.season.join(", ")}.`
+        : "",
+      data.people
+        ? `É o cardápio de uma casa com ${data.people} ${data.people === 1 ? "pessoa" : "pessoas"}: cada receita rende ${data.people} ${data.people === 1 ? "porção" : "porções"} (ajuste as quantidades).`
         : "",
       data.wish ? `Meu pedido: ${data.wish}` : "",
       care ? `\n${care}` : "",

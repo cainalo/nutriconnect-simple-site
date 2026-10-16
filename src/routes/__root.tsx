@@ -11,9 +11,9 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
 import { ConsentGate } from "../components/consent-gate";
+import { HeroCinematic } from "../components/hero-cinematic";
 import { useAppSounds } from "../hooks/use-app-sounds";
 import { AccessibilityTools } from "../components/accessibility-tools";
-import { SideRails } from "../components/side-rails";
 import { FeatureGate } from "../components/feature-gate";
 import { AnnouncementBar } from "../components/announcement-bar";
 import { useAppearanceSync } from "../hooks/use-appearance-sync";
@@ -22,6 +22,7 @@ import { usePushSync } from "../hooks/use-push-sync";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { APPEARANCE_INIT_SCRIPT, initAppearance } from "../lib/appearance";
+import { DESIGN_INIT_SCRIPT, useSiteDesign } from "../lib/site-design";
 import { LANG_INIT_SCRIPT, initI18n } from "../lib/i18n";
 
 function NotFoundComponent() {
@@ -117,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;700;900&family=Nunito:wght@400;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&family=UnifrakturCook:wght@700&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap",
       },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
@@ -125,7 +126,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],
     // Aplica o tema e o idioma salvos antes da primeira pintura, para não piscar o padrão.
-    scripts: [{ children: APPEARANCE_INIT_SCRIPT }, { children: LANG_INIT_SCRIPT }],
+    scripts: [
+      { children: DESIGN_INIT_SCRIPT },
+      { children: APPEARANCE_INIT_SCRIPT },
+      { children: LANG_INIT_SCRIPT },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -148,6 +153,15 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Aplica o design do site escolhido pelo admin; precisa ficar dentro do QueryClientProvider. */
+function SiteDesignSync() {
+  useSiteDesign();
+  useEffect(() => {
+    document.documentElement.setAttribute("data-hydrated", "");
+  }, []);
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -159,12 +173,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SiteDesignSync />
       <FeatureGate>
         <Outlet />
       </FeatureGate>
       <ConsentGate />
+      <HeroCinematic />
       <AccessibilityTools />
-      <SideRails />
       <AnnouncementBar />
       <Toaster position="top-right" richColors />
     </QueryClientProvider>

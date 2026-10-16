@@ -1,4 +1,5 @@
 import { td } from "@/lib/i18n/data";
+import { ProfileCard } from "@/components/rail-cards";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Award, BookOpen, Flame, Sparkles, Users } from "lucide-react";
@@ -15,6 +16,7 @@ import {
 import { ProfileSwitcher } from "@/components/trail-profile-switcher";
 import { LearningTrailMap, StopSheet } from "@/components/trail-map";
 import { LessonModal } from "@/components/lesson-modal";
+import { ReviewPanel } from "@/components/trail-review";
 import { getUserLevel } from "@/lib/community";
 import {
   challengeStreak,
@@ -33,6 +35,7 @@ import {
   getTrails,
   getTrailTotals,
   loadTrailProgress,
+  reviewStop,
   setTrailScope,
   type LevelNumber,
   type Stop,
@@ -127,6 +130,8 @@ function DesafiosIndexPage() {
     unit: Unit;
     level: LevelNumber;
     xpBefore: number;
+    /** Revisão espaçada (perguntas sorteadas da parada). */
+    review?: boolean;
   } | null>(null);
 
   // ── XP combinado (trilha + desafios); desafios sociais só contam no perfil do responsável ──
@@ -173,12 +178,13 @@ function DesafiosIndexPage() {
       .filter((g) => g.challenges.length > 0);
   }, [communities, challenges]);
 
-  const startLevel = (stop: Stop, unit: Unit, level: LevelNumber) => {
+  const startLevel = (stop: Stop, unit: Unit, level: LevelNumber, review = false) => {
     setSheet(null);
     setActiveLesson({
       stop,
       unit,
       level,
+      review,
       // XP atual, lido do armazenamento para valer também ao encadear níveis
       xpBefore: loadTrailProgress().totalXP + challengeXP,
     });
@@ -189,7 +195,7 @@ function DesafiosIndexPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8">
+      <div className="mx-auto w-full max-w-[120rem] px-4 sm:px-6 lg:px-10 py-8">
         <h1 className="sr-only">{t("dz.title")}</h1>
 
         {/* Barra de XP, nível, ofensiva e meta do dia (com o seletor de perfil embutido) */}
@@ -255,6 +261,13 @@ function DesafiosIndexPage() {
           </div>
         )}
 
+        {/* Card de nível (o mesmo do perfil), só aqui e em Funções. */}
+        {active.kind === "adult" && (
+          <section className="mb-8 max-w-md">
+            <ProfileCard />
+          </section>
+        )}
+
         {/* Navegação por Abas (perfis infantis não têm rede social: sem desafios ou comunidades) */}
         <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1 mb-8 overflow-x-auto no-scrollbar">
           {(active.kind === "adult" ? TABS : TABS.filter((tb) => tb.key === "trilha")).map((tb) => (
@@ -308,12 +321,21 @@ function DesafiosIndexPage() {
                   variant={active.kind}
                 />
 
+                <ReviewPanel
+                  trails={availableTrails}
+                  progress={trailProgress}
+                  onReview={(stop, unit, t) => {
+                    setTrailId(t.id);
+                    startLevel(reviewStop(stop), unit, 3, true);
+                  }}
+                />
                 <LearningTrailMap
                   trail={trail}
                   progress={trailProgress}
                   currentStopId={currentStopId}
                   frozen={!!activeLesson}
                   onOpenStop={(stop, unit) => setSheet({ stop, unit })}
+                  learnerName={displayName}
                 />
 
                 {active.kind === "adult" && (
@@ -431,6 +453,7 @@ function DesafiosIndexPage() {
           variant={trail.kind}
           guide={trail.guide}
           xpBefore={activeLesson.xpBefore}
+          review={activeLesson.review}
           onClose={() => setActiveLesson(null)}
           onNextLevel={(level) => startLevel(activeLesson.stop, activeLesson.unit, level)}
         />

@@ -1056,6 +1056,456 @@ begin
     end if;
   end;
 
+  -- ------------------------------------------------------- FUNÇÕES (registros do dia)
+  if to_regclass('public.daily_checkins') is not null then
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.daily_checkins (user_id, day, habits, mood) values (auth.uid(), current_date, array[''water'', ''veg''], 1)');
+    res := res || jsonb_build_object('teste', 'registra os próprios hábitos e humor do dia', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'update public.daily_checkins set pledge = true where day = current_date');
+    res := res || jsonb_build_object('teste', 'marca o compromisso da semana no próprio registro', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.daily_checkins');
+    res := res || jsonb_build_object('teste', 'NÃO vê os registros do dia de outra pessoa', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(b, 'authenticated', format('insert into public.daily_checkins (user_id, day) values (%L, current_date - 1)', a));
+    res := res || jsonb_build_object('teste', 'NÃO cria registro do dia em nome de outra pessoa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(b, 'authenticated', 'update public.daily_checkins set mood = 3');
+    res := res || jsonb_build_object('teste', 'NÃO altera registro do dia de outra pessoa', 'ok', (r = 'OK:0'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.daily_checkins (user_id, day, habits) values (auth.uid(), current_date - 1, array[''cerveja''])');
+    res := res || jsonb_build_object('teste', 'NÃO aceita hábito fora da lista', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.daily_checkins (user_id, day, mood) values (auth.uid(), current_date - 30, 1)');
+    res := res || jsonb_build_object('teste', 'NÃO reescreve registro de semanas atrás', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'select (public.export_my_data() -> ''registros_do_dia'') is not null');
+    res := res || jsonb_build_object('teste', 'exportação de dados inclui os registros do dia', 'ok', (r = 't'), 'obtido', left(r, 90));
+  end if;
+
+  -- ------------------------------------------------ PARCEIRO DE JORNADA (N6)
+  -- Aqui A e E são amigos (pedido aceito acima); F é estranho; B bloqueou A.
+  if to_regclass('public.journey_pairs') is not null then
+    r := pg_temp.as_user(f, 'authenticated', format('select status from public.journey_invite(%L)', a));
+    res := res || jsonb_build_object('teste', 'estranho NÃO convida para a dupla', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', format('select status from public.journey_invite(%L)', b));
+    res := res || jsonb_build_object('teste', 'NÃO convida quem bloqueou (ou desfez a amizade)', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', format('select status from public.journey_invite(%L)', e));
+    res := res || jsonb_build_object('teste', 'convida um amigo para a dupla (fica pendente)', 'ok', (r = 'pendente'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.journey_pairs');
+    res := res || jsonb_build_object('teste', 'terceiro NÃO vê a dupla dos outros', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(a, 'authenticated', 'select status from public.journey_respond((select id from public.journey_pairs limit 1), true)');
+    res := res || jsonb_build_object('teste', 'quem convidou NÃO aceita o próprio convite', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(e, 'authenticated', 'select status from public.journey_respond((select id from public.journey_pairs limit 1), true)');
+    res := res || jsonb_build_object('teste', 'convidado aceita e a dupla fica ativa', 'ok', (r = 'ativa'), 'obtido', left(r, 90));
+    res := res || jsonb_build_object('teste', 'quem convidou é avisado do aceite',
+      'ok', exists (select 1 from public.notifications where user_id = a and type = 'dupla_aceita' and actor_id = e),
+      'obtido', 'verificado como superusuário');
+    r := pg_temp.as_user(a, 'authenticated', 'select mood from public.journey_checkin(current_date, ''cuidei'', ''BomDiaDupla'')');
+    res := res || jsonb_build_object('teste', 'faz o check-in do dia', 'ok', (r = 'cuidei'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.journey_checkins (user_id, day, mood) values (auth.uid(), current_date - 1, ''cuidei'')');
+    res := res || jsonb_build_object('teste', 'NÃO grava check-in direto na tabela (só pela função)', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', 'select mood from public.journey_checkin(current_date - 5, ''cuidei'')');
+    res := res || jsonb_build_object('teste', 'NÃO faz check-in de dias atrás', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', format('select mood from public.journey_checkin(current_date, ''dificil'', %L)', repeat('x', 141)));
+    res := res || jsonb_build_object('teste', 'NÃO aceita recado com mais de 140 caracteres', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(e, 'authenticated', 'select public.journey_partner_status(current_date) -> ''partner_today'' ->> ''note''');
+    res := res || jsonb_build_object('teste', 'parceiro vê o check-in de hoje', 'ok', (r = 'BomDiaDupla'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(e, 'authenticated', 'select count(*) from public.journey_checkins');
+    res := res || jsonb_build_object('teste', 'parceiro NÃO lê o histórico de check-ins direto na tabela', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(f, 'authenticated', 'select public.journey_partner_status(current_date) is null');
+    res := res || jsonb_build_object('teste', 'quem não tem dupla não vê nada', 'ok', (r = 't'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(f, 'authenticated', format('select public.journey_partner_id(%L)', a));
+    res := res || jsonb_build_object('teste', 'NÃO descobre com quem outra pessoa faz dupla', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    perform pg_temp.as_user(e, 'authenticated', 'select public.journey_cheer(current_date)');
+    perform pg_temp.as_user(e, 'authenticated', 'select public.journey_cheer(current_date)');
+    res := res || jsonb_build_object('teste', 'mandar força avisa só uma vez por dia',
+      'ok', (select count(*) = 1 from public.notifications where user_id = a and type = 'dupla_forca'),
+      'obtido', (select count(*)::text from public.notifications where user_id = a and type = 'dupla_forca'));
+    r := pg_temp.as_user(a, 'authenticated', 'select (public.export_my_data() -> ''jornada_checkins'') is not null');
+    res := res || jsonb_build_object('teste', 'exportação de dados inclui a jornada', 'ok', (r = 't'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(a, 'authenticated', format('select public.remove_friendship(%L)', e));
+    res := res || jsonb_build_object('teste', 'desfazer a amizade encerra a dupla',
+      'ok', not exists (select 1 from public.journey_pairs where a in (user_a, user_b)),
+      'obtido', 'verificado como superusuário');
+  end if;
+
+  -- ------------------------------------------------ MINHA CASA (F1)
+  -- B e C são amigos; F não é amigo de B.
+  if to_regclass('public.households') is not null then
+    declare
+      hid uuid;
+      code text;
+    begin
+      r := pg_temp.as_user(b, 'authenticated', 'select name from public.household_create(''CasaTeste'', ''🏡'')');
+      res := res || jsonb_build_object('teste', 'cria uma casa', 'ok', (r = 'CasaTeste'), 'obtido', left(r, 90));
+      select household_id into hid from public.household_members where user_id = b;
+      r := pg_temp.as_user(b, 'authenticated', 'select name from public.household_create(''Outra'')');
+      res := res || jsonb_build_object('teste', 'NÃO cria uma segunda casa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.households');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê a casa', 'ok', (r = '0'), 'obtido', r);
+      code := pg_temp.as_user(b, 'authenticated', 'select public.household_invite_code() ->> ''code''');
+      res := res || jsonb_build_object('teste', 'gera código de convite de 6 letras', 'ok', (code ~ '^[A-Z2-9]{6}$'), 'obtido', left(code, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select public.household_preview(%L) ->> ''name''', lower(code)));
+      res := res || jsonb_build_object('teste', 'com o código, vê só o nome da casa', 'ok', (r = 'CasaTeste'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select name from public.household_join(''ZZZZZZ'')');
+      res := res || jsonb_build_object('teste', 'NÃO entra com código errado', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select name from public.household_join(%L)', code));
+      res := res || jsonb_build_object('teste', 'entra na casa com o código', 'ok', (r = 'CasaTeste'), 'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', 'quem já mora é avisado da entrada',
+        'ok', exists (select 1 from public.notifications where user_id = b and type = 'casa_novo_membro' and actor_id = f),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.shopping_items (user_id, household_id, text) values (auth.uid(), %L, ''Leite'')', hid));
+      res := res || jsonb_build_object('teste', 'adiciona item na lista da casa', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('insert into public.shopping_items (user_id, household_id, text) values (auth.uid(), %L, ''Intruso'')', hid));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO põe item na lista da casa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'select count(*) from public.shopping_items where household_id is not null');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê a lista da casa', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(f, 'authenticated', format('update public.shopping_items set done = true where household_id = %L', hid));
+      res := res || jsonb_build_object('teste', 'outro morador marca como comprado', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', '"comprado por" é quem marcou',
+        'ok', exists (select 1 from public.shopping_items where household_id = hid and bought_by = f and user_id = b),
+        'obtido', 'verificado como superusuário');
+      perform pg_temp.as_user(f, 'authenticated', format('update public.shopping_items set household_id = null, user_id = auth.uid() where household_id = %L', hid));
+      res := res || jsonb_build_object('teste', 'NÃO tira o item da casa nem troca quem adicionou',
+        'ok', exists (select 1 from public.shopping_items where household_id = hid and user_id = b),
+        'obtido', 'verificado como superusuário');
+      perform pg_temp.as_user(f, 'authenticated', 'insert into public.shopping_items (user_id, text) values (auth.uid(), ''Pão'')');
+      r := pg_temp.as_user(f, 'authenticated', 'select public.household_bring_my_items()');
+      res := res || jsonb_build_object('teste', 'leva a lista pessoal para a casa', 'ok', (r = '1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select public.household_remove_member(%L)', b));
+      res := res || jsonb_build_object('teste', 'membro comum NÃO tira ninguém da casa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.household_invite_friend(%L)', f));
+      res := res || jsonb_build_object('teste', 'NÃO chama pelo app quem não é amigo', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.household_invite_friend(%L)', c));
+      res := res || jsonb_build_object('teste', 'chama um amigo para a casa (ele recebe o aviso)',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = c and type = 'casa_convite'),
+        'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select (public.export_my_data() -> ''casa'' ->> ''nome'')');
+      res := res || jsonb_build_object('teste', 'exportação de dados inclui a casa', 'ok', (r = 'CasaTeste'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(b, 'authenticated', 'select public.household_leave()');
+      res := res || jsonb_build_object('teste', 'quando o responsável sai, quem fica assume',
+        'ok', exists (select 1 from public.household_members where user_id = f and role = 'responsavel'),
+        'obtido', 'verificado como superusuário');
+      perform pg_temp.as_user(f, 'authenticated', 'select public.household_leave()');
+      res := res || jsonb_build_object('teste', 'quando o último sai, a casa e a lista dela acabam',
+        'ok', not exists (select 1 from public.households where id = hid)
+              and not exists (select 1 from public.shopping_items where household_id = hid),
+        'obtido', 'verificado como superusuário');
+    end;
+  end if;
+
+  -- --------------------------------------------- MINHA CASA: GELADEIRA E CARDÁPIO (F2)
+  if to_regclass('public.fridge_items') is not null then
+    declare
+      hid uuid;
+      code text;
+    begin
+      perform pg_temp.as_user(c, 'authenticated', 'select public.household_create(''Cozinha'')');
+      select household_id into hid from public.household_members where user_id = c;
+      code := pg_temp.as_user(c, 'authenticated', 'select public.household_invite_code() ->> ''code''');
+      perform pg_temp.as_user(f, 'authenticated', format('select public.household_join(%L)', code));
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.fridge_items (user_id, household_id, text) values (auth.uid(), %L, ''tomate'')', hid));
+      res := res || jsonb_build_object('teste', 'põe item na geladeira da casa', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'select count(*) from public.fridge_items where household_id is not null');
+      res := res || jsonb_build_object('teste', 'outro morador vê a geladeira da casa', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', format('insert into public.fridge_items (user_id, household_id, text) values (auth.uid(), %L, ''Tomate'')', hid));
+      res := res || jsonb_build_object('teste', 'NÃO repete item na geladeira (maiúsculas não importam)', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.fridge_items where household_id is not null');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê a geladeira da casa', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.fridge_items (user_id, household_id, text) values (auth.uid(), %L, ''intruso'')', hid));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO mexe na geladeira da casa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(f, 'authenticated', 'insert into public.fridge_items (user_id, text) values (auth.uid(), ''cebola'')');
+      perform pg_temp.as_user(f, 'authenticated', 'select public.household_bring_my_items()');
+      res := res || jsonb_build_object('teste', 'leva a geladeira pessoal para a casa',
+        'ok', exists (select 1 from public.fridge_items where household_id = hid and text = 'cebola')
+              and not exists (select 1 from public.fridge_items where user_id = f and household_id is null),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(c, 'authenticated', 'select household_id is not null from public.weekly_menu_save(date_trunc(''week'', current_date)::date, ''economico'', ''{}''::jsonb)');
+      res := res || jsonb_build_object('teste', 'grava o cardápio da semana da casa', 'ok', (r = 't'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(f, 'authenticated', 'select public.weekly_menu_save(date_trunc(''week'', current_date)::date, ''moderado'', ''{}''::jsonb)');
+      res := res || jsonb_build_object('teste', 'outro morador muda o mesmo cardápio da casa',
+        'ok', (select count(*) = 1 and bool_and(budget = 'moderado' and updated_by = f)
+                 from public.weekly_menus where household_id = hid),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(f, 'authenticated', 'update public.weekly_menus set budget = ''livre'' where household_id is not null');
+      res := res || jsonb_build_object('teste', 'cardápio da casa só muda pela função', 'ok', (r = 'OK:0' or r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select household_id is null from public.weekly_menu_save(date_trunc(''week'', current_date)::date, ''livre'', ''{}''::jsonb)');
+      res := res || jsonb_build_object('teste', 'quem não mora numa casa grava o cardápio pessoal', 'ok', (r = 't'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.weekly_menus where household_id is not null');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê o cardápio da casa', 'ok', (r = '0'), 'obtido', r);
+      perform pg_temp.as_user(c, 'authenticated', 'select public.household_leave()');
+      perform pg_temp.as_user(f, 'authenticated', 'select public.household_leave()');
+      res := res || jsonb_build_object('teste', 'casa acabou: geladeira e cardápio dela também',
+        'ok', not exists (select 1 from public.fridge_items where household_id = hid)
+              and not exists (select 1 from public.weekly_menus where household_id = hid),
+        'obtido', 'verificado como superusuário');
+    end;
+  end if;
+
+  -- ------------------------------------------------ MINHA CASA: LANCHEIRAS E MURAL (F3)
+  if to_regclass('public.household_notes') is not null then
+    declare
+      hid uuid;
+      code text;
+      k3 uuid := 'ffffffff-0000-4000-a000-0000000000c3';
+      note_c uuid;
+    begin
+      perform pg_temp.as_user(c, 'authenticated', 'select public.household_create(''Lanches'')');
+      select household_id into hid from public.household_members where user_id = c;
+      code := pg_temp.as_user(c, 'authenticated', 'select public.household_invite_code() ->> ''code''');
+      perform pg_temp.as_user(f, 'authenticated', format('select public.household_join(%L)', code));
+      insert into public.trail_profiles (id, owner_id, kind, name, avatar) values (k3, c, 'kid', 'Bia', 'nina');
+      r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.household_kids()');
+      res := res || jsonb_build_object('teste', 'vê as crianças dos outros moradores', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.lunchboxes (profile_id, week_start) values (%L, date_trunc(''week'', current_date)::date)', k3));
+      res := res || jsonb_build_object('teste', 'adulto da casa monta a lancheira da criança de outro morador', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', 'a lancheira continua de quem criou o perfil da criança',
+        'ok', exists (select 1 from public.lunchboxes where profile_id = k3 and owner_id = c),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.lunchbox_profiles (profile_id, allergies) values (%L, ''amendoim'')', k3));
+      res := res || jsonb_build_object('teste', 'adulto da casa conta as alergias da criança', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select count(*) from public.lunchboxes where profile_id = %L', k3));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê a lancheira da criança', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.lunchboxes (profile_id, week_start) values (%L, date_trunc(''week'', current_date)::date + 7)', k3));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO monta a lancheira da criança', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.household_kids()');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO vê as crianças da casa', 'ok', (r = '0'), 'obtido', r);
+
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.household_notes (household_id, body) values (%L, ''sobrou arroz'')', hid));
+      res := res || jsonb_build_object('teste', 'escreve no mural da casa', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'select count(*) from public.household_notes');
+      res := res || jsonb_build_object('teste', 'outro morador lê o mural', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.household_notes');
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO lê o mural', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.household_notes (household_id, body) values (%L, ''intruso'')', hid));
+      res := res || jsonb_build_object('teste', 'quem não mora NÃO escreve no mural', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(c, 'authenticated', format('insert into public.household_notes (household_id, body) values (%L, ''janto fora'')', hid));
+      select id into note_c from public.household_notes where author_id = c;
+      r := pg_temp.as_user(f, 'authenticated', format('delete from public.household_notes where id = %L', note_c));
+      res := res || jsonb_build_object('teste', 'membro NÃO apaga recado de outra pessoa', 'ok', (r = 'OK:0'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'delete from public.household_notes where body = ''sobrou arroz''');
+      res := res || jsonb_build_object('teste', 'responsável apaga qualquer recado', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+
+      perform pg_temp.as_user(f, 'authenticated', 'select public.household_leave()');
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.lunchboxes where profile_id = %L', k3));
+      res := res || jsonb_build_object('teste', 'quem sai da casa deixa de ver as lancheiras das crianças', 'ok', (r = '0'), 'obtido', r);
+      perform pg_temp.as_user(c, 'authenticated', 'select public.household_leave()');
+    end;
+  end if;
+
+  -- ------------------------------------------------ EVENTOS AO VIVO (M8)
+  -- Comunidade ativa administrada pelo profissional P; B, C, D e F participam; E não.
+  if to_regclass('public.community_events') is not null then
+    declare
+      ec uuid;
+      ev uuid;
+      qb uuid;
+      qb2 uuid;
+    begin
+      insert into public.communities (slug, name, category, admin_user_id, professional_id, status)
+      values ('zzqx-eventos', 'Zzqx Eventos', 'Zzqx Tema', b, p, 'ativa') returning id into ec;
+      insert into public.community_members (community_id, user_id) values (ec, b), (ec, c), (ec, d), (ec, f);
+      r := pg_temp.as_user(f, 'authenticated', format('select id from public.event_create(%L, ''Tira-dúvidas'', '''', now() + interval ''1 day'', 60)', ec));
+      res := res || jsonb_build_object('teste', 'membro NÃO marca evento na comunidade', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select title from public.event_create(%L, ''Pergunte'', ''Ao vivo'', now() - interval ''1 minute'', 60)', ec));
+      res := res || jsonb_build_object('teste', 'profissional da comunidade marca o evento', 'ok', (r = 'Pergunte'), 'obtido', left(r, 90));
+      select id into ev from public.community_events where community_id = ec;
+      res := res || jsonb_build_object('teste', 'membros são avisados do evento',
+        'ok', exists (select 1 from public.notifications where user_id = f and type = 'evento_novo'),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(e, 'authenticated', 'select count(*) from public.community_events');
+      res := res || jsonb_build_object('teste', 'quem não participa NÃO vê os eventos', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(e, 'authenticated', format('select id from public.event_ask(%L, ''Posso comer ovo todo dia?'')', ev));
+      res := res || jsonb_build_object('teste', 'quem não participa NÃO pergunta', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select body from public.event_ask(%L, ''Posso comer ovo todo dia?'')', ev));
+      res := res || jsonb_build_object('teste', 'membro manda pergunta', 'ok', r like '%ovo%', 'obtido', left(r, 90));
+      select id into qb from public.event_questions where author_id = b;
+      perform pg_temp.as_user(b, 'authenticated', format('select public.event_ask(%L, ''Segunda pergunta aqui'')', ev));
+      perform pg_temp.as_user(b, 'authenticated', format('select public.event_ask(%L, ''Terceira pergunta aqui'')', ev));
+      r := pg_temp.as_user(b, 'authenticated', format('select id from public.event_ask(%L, ''Quarta pergunta aqui'')', ev));
+      res := res || jsonb_build_object('teste', 'até 3 perguntas por pessoa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select public.event_vote(%L)', qb));
+      res := res || jsonb_build_object('teste', 'membro vota numa pergunta', 'ok', (r = 't'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.event_vote(%L)', qb));
+      res := res || jsonb_build_object('teste', 'NÃO vota na própria pergunta', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select public.event_answer(%L, ''Pode sim'')', qb));
+      res := res || jsonb_build_object('teste', 'membro NÃO responde pergunta', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select public.event_answer(%L, ''Pode sim, com variedade'')', qb));
+      res := res || jsonb_build_object('teste', 'profissional responde e fixa',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.event_questions where id = qb and pinned and answer is not null),
+        'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', 'quem perguntou é avisado da resposta',
+        'ok', exists (select 1 from public.notifications where user_id = b and type = 'evento_resposta'),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(f, 'authenticated', format('select (array_agg(pinned))[1] from public.event_questions_list(%L)', ev));
+      res := res || jsonb_build_object('teste', 'a resposta fixada vem primeiro', 'ok', (r = 't'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.event_delete_question(%L)', qb));
+      res := res || jsonb_build_object('teste', 'NÃO apaga pergunta já respondida', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      select id into qb2 from public.event_questions where author_id = b and body like 'Segunda%';
+      perform pg_temp.as_user(f, 'authenticated', format('select public.event_flag(%L)', qb2));
+      perform pg_temp.as_user(c, 'authenticated', format('select public.event_flag(%L)', qb2));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.event_questions_list(%L)', ev));
+      res := res || jsonb_build_object('teste', 'com 2 denúncias a pergunta continua', 'ok', (r = '3'), 'obtido', r);
+      perform pg_temp.as_user(d, 'authenticated', format('select public.event_flag(%L)', qb2));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.event_questions_list(%L)', ev));
+      res := res || jsonb_build_object('teste', 'com 3 denúncias a pergunta some para os membros', 'ok', (r = '2'), 'obtido', r);
+      r := pg_temp.as_user(p, 'authenticated', format('select count(*) from public.event_questions_list(%L)', ev));
+      res := res || jsonb_build_object('teste', 'o profissional ainda vê a pergunta ocultada', 'ok', (r = '3'), 'obtido', r);
+      r := pg_temp.as_user(e, 'authenticated', 'select count(*) from public.event_questions');
+      res := res || jsonb_build_object('teste', 'quem não participa NÃO lê as perguntas', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', '' ||
+        format('select public.event_delete_question((select id from public.event_questions where author_id = auth.uid() and body like %L))', 'Terceira%'));
+      res := res || jsonb_build_object('teste', 'apaga a própria pergunta antes da resposta', 'ok', (r not like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select (public.export_my_data() -> ''eventos_perguntas'') is not null');
+      res := res || jsonb_build_object('teste', 'exportação de dados inclui as perguntas dos eventos', 'ok', (r = 't'), 'obtido', left(r, 90));
+    end;
+  end if;
+
+  -- ------------------------------------------------ LOJA DE PROGRAMAS (N10)
+  if to_regclass('public.pro_programs') is not null then
+    declare
+      prog uuid;
+      modu uuid;
+    begin
+      update public.pro_scores set level = 1 where professional_id = p;
+      r := pg_temp.as_user(p, 'authenticated', 'select id from public.save_program(null, ''Lanches de verdade'', ''4 semanas'', '''', 5000, 4, ''🥕'', false)');
+      res := res || jsonb_build_object('teste', 'loja de programas só a partir do nível 3', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      insert into public.pro_scores (professional_id, score, level) values (p, 200, 3)
+      on conflict (professional_id) do update set level = 3;
+      r := pg_temp.as_user(f, 'authenticated', 'select id from public.save_program(null, ''Meu programa'', '''', '''', 5000, 4, ''🥕'', false)');
+      res := res || jsonb_build_object('teste', 'usuário comum NÃO cria programa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', 'select title from public.save_program(null, ''Lanches de verdade'', ''4 semanas'', '''', 5000, 4, ''🥕'', false)');
+      res := res || jsonb_build_object('teste', 'profissional nível 3 cria programa', 'ok', (r like '%Lanches%'), 'obtido', left(r, 90));
+      select id into prog from public.pro_programs where professional_id = p;
+      r := pg_temp.as_user(p, 'authenticated', format('select active from public.save_program(%L, ''Lanches de verdade'', ''4 semanas'', '''', 5000, 4, ''🥕'', true)', prog));
+      res := res || jsonb_build_object('teste', 'NÃO põe na loja programa sem módulos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      perform pg_temp.as_user(p, 'authenticated', format('select public.save_program_module(%L, null, ''Semana 1'', ''Frutas no lanche'', null)', prog));
+      select id into modu from public.program_modules where program_id = prog;
+      r := pg_temp.as_user(p, 'authenticated', format('select active from public.save_program(%L, ''Lanches de verdade'', ''4 semanas'', '''', 5000, 4, ''🥕'', true)', prog));
+      res := res || jsonb_build_object('teste', 'com módulo, o programa entra na loja', 'ok', (r = 't'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.pro_programs');
+      res := res || jsonb_build_object('teste', 'qualquer pessoa vê o programa na vitrine', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.program_modules');
+      res := res || jsonb_build_object('teste', 'NÃO vê os módulos sem comprar', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.program_purchases (program_id, buyer_id, professional_id, amount_cents, platform_fee_cents, fee_percent) values (%L, auth.uid(), %L, 5000, 0, 0)', prog, p));
+      res := res || jsonb_build_object('teste', 'NÃO registra compra sem pagar', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.record_program_purchase(%L, auth.uid(), 5000, 0, 0, ''cs_x'', ''pi_x'')', prog));
+      res := res || jsonb_build_object('teste', 'só o webhook grava a compra', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      perform public.record_program_purchase(prog, b, 5000, 1000, 20, 'cs_teste', 'pi_teste');
+      perform public.record_program_purchase(prog, b, 5000, 1000, 20, 'cs_teste', 'pi_teste');
+      res := res || jsonb_build_object('teste', 'compra gravada uma vez só (webhook repetido)',
+        'ok', (select count(*) = 1 from public.program_purchases where program_id = prog),
+        'obtido', 'verificado como superusuário');
+      res := res || jsonb_build_object('teste', 'profissional é avisado da venda',
+        'ok', exists (select 1 from public.notifications where user_id = p and type = 'programa_vendido'),
+        'obtido', 'verificado como superusuário');
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.program_modules');
+      res := res || jsonb_build_object('teste', 'quem comprou vê os módulos', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.program_progress (user_id, module_id) values (auth.uid(), %L)', modu));
+      res := res || jsonb_build_object('teste', 'quem comprou marca o módulo como feito', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.program_progress (user_id, module_id) values (auth.uid(), %L)', modu));
+      res := res || jsonb_build_object('teste', 'quem não comprou NÃO marca progresso', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', 'select net_cents from public.my_program_sales(30)');
+      res := res || jsonb_build_object('teste', 'painel mostra o líquido das vendas', 'ok', (r = '4000'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.program_purchases');
+      res := res || jsonb_build_object('teste', 'terceiro NÃO vê compras alheias', 'ok', (r = '0'), 'obtido', r);
+      update public.program_purchases set status = 'reembolsada' where program_id = prog;
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.program_modules');
+      res := res || jsonb_build_object('teste', 'estorno tira o acesso aos módulos', 'ok', (r = '0'), 'obtido', r);
+      perform pg_temp.as_user(p, 'authenticated', format('select public.delete_program_module(%L)', modu));
+      res := res || jsonb_build_object('teste', 'programa sem módulos sai da loja',
+        'ok', exists (select 1 from public.pro_programs where id = prog and not active),
+        'obtido', 'verificado como superusuário');
+    end;
+  end if;
+
+  -- ------------------------------------------------ MERCADOS PARCEIROS (R1)
+  if to_regclass('public.market_partners') is not null then
+    declare
+      mp uuid;
+    begin
+      select id into mp from public.market_partners where name = 'Amazon';
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) > 0 from public.market_partners');
+      res := res || jsonb_build_object('teste', 'usuário vê os parceiros ativos', 'ok', (r = 't'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'insert into public.market_partners (name, search_url) values (''Golpe'', ''https://golpe.example/{q}'')');
+      res := res || jsonb_build_object('teste', 'usuário NÃO cadastra parceiro', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.market_click(%L, ''receita'', ''azeite de oliva'')', mp));
+      res := res || jsonb_build_object('teste', 'clique devolve a busca com o produto codificado',
+        'ok', (r = 'https://www.amazon.com.br/s?k=azeite%20de%20oliva'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.market_click(%L, ''lista'', ''feijão'')', mp));
+      res := res || jsonb_build_object('teste', 'acentos viram UTF-8 na busca', 'ok', (r like '%feij%C3%A3o'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.market_clicks');
+      res := res || jsonb_build_object('teste', 'usuário NÃO lê os cliques', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.admin_market_stats(30)');
+      res := res || jsonb_build_object('teste', 'relatório de cliques é só da administração', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', 'select clicks from public.admin_market_stats(30) where name = ''Amazon''');
+      res := res || jsonb_build_object('teste', 'administração vê os cliques por parceiro', 'ok', (r = '2'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', 'insert into public.market_partners (name, search_url) values (''Sem busca'', ''https://loja.example/'')');
+      res := res || jsonb_build_object('teste', 'endereço do parceiro precisa ter {q}', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select (public.export_my_data() -> ''compras_em_parceiros'') is not null');
+      res := res || jsonb_build_object('teste', 'exportação de dados inclui os cliques', 'ok', (r = 't'), 'obtido', left(r, 90));
+    end;
+  end if;
+
+  -- ------------------------------------------------ ESTÚDIO DE REDES SOCIAIS (S1)
+  -- G é admin da plataforma; B é usuário comum; P é profissional.
+  if to_regclass('public.social_posts') is not null then
+    r := pg_temp.as_user(g, 'authenticated', 'insert into public.social_profiles (network, handle) values (''instagram'', ''nutriconnect'')');
+    res := res || jsonb_build_object('teste', 'admin cadastra perfil no estúdio', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(g, 'authenticated', 'insert into public.social_posts (title, format, status) values (''Mitos do glúten'', ''carrossel'', ''ideia'')');
+    res := res || jsonb_build_object('teste', 'admin guarda ideia de post', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.social_posts');
+    res := res || jsonb_build_object('teste', 'usuário comum NÃO vê o estúdio', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(p, 'authenticated', 'insert into public.social_posts (title) values (''Meu post'')');
+    res := res || jsonb_build_object('teste', 'profissional ainda NÃO usa o estúdio', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(b, 'authenticated', 'select public.social_trends(14)');
+    res := res || jsonb_build_object('teste', 'tendências internas só para o estúdio', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(g, 'authenticated', 'select public.social_trends(14) ? ''top_posts''');
+    res := res || jsonb_build_object('teste', 'admin vê as tendências internas', 'ok', (r = 't'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(g, 'authenticated', 'insert into public.social_posts (title, status) values (''x'', ''viral'')');
+    res := res || jsonb_build_object('teste', 'status do post só da lista', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+  end if;
+
+  -- ------------------------------------------------ HABILITAÇÃO PARA TELECONSULTA (M4)
+  -- P é profissional verificado; F e B são usuários comuns.
+  if to_regclass('public.teleconsult_checks') is not null then
+    declare
+      tc uuid;
+      ok_insert boolean;
+    begin
+      r := pg_temp.as_user(f, 'authenticated', format('select status from public.teleconsult_submit(''e-nutricionista'', ''123'', %L)', f::text || '/doc.jpg'));
+      res := res || jsonb_build_object('teste', 'quem não é profissional NÃO pede habilitação', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select status from public.teleconsult_submit(''e-nutricionista'', ''123'', %L)', b::text || '/doc.jpg'));
+      res := res || jsonb_build_object('teste', 'comprovante precisa estar na pasta do profissional', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select status from public.teleconsult_submit(''e-nutricionista'', ''CRN3-123'', %L)', p::text || '/doc.jpg'));
+      res := res || jsonb_build_object('teste', 'profissional pede habilitação para teleconsulta', 'ok', (r = 'em_analise'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select status from public.teleconsult_submit(''e-nutricionista'', ''CRN3-123'', %L)', p::text || '/doc2.jpg'));
+      res := res || jsonb_build_object('teste', 'um pedido em análise por vez', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.teleconsult_checks');
+      res := res || jsonb_build_object('teste', 'terceiro NÃO vê pedidos de habilitação', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(p, 'authenticated', 'update public.professionals set teleconsult_approved_at = now() where user_id = auth.uid()');
+      res := res || jsonb_build_object('teste', 'profissional NÃO se aprova sozinho', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.pro_online_allowed(%L)', p));
+      res := res || jsonb_build_object('teste', 'sem exigência, todos atendem online', 'ok', (r = 't'), 'obtido', r);
+      insert into public.platform_settings (key, value) values ('site_teleconsult_required', 'true'::jsonb)
+      on conflict (key) do update set value = 'true'::jsonb;
+      r := pg_temp.as_user(b, 'authenticated', format('select public.pro_online_allowed(%L)', p));
+      res := res || jsonb_build_object('teste', 'com exigência, sem aprovação NÃO atende online', 'ok', (r = 'f'), 'obtido', r);
+      begin
+        insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality)
+        values (p, b, now() + interval '30 days', now() + interval '30 days 1 hour', 'online');
+        ok_insert := true;
+      exception when others then
+        ok_insert := false;
+      end;
+      res := res || jsonb_build_object('teste', 'banco recusa consulta online sem habilitação', 'ok', not ok_insert, 'obtido', ok_insert::text);
+      select id into tc from public.teleconsult_checks where professional_id = p and status = 'em_analise';
+      r := pg_temp.as_user(b, 'authenticated', format('select public.admin_review_teleconsult(%L, true)', tc));
+      res := res || jsonb_build_object('teste', 'só a administração aprova habilitação', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', format('select public.admin_review_teleconsult(%L, true)', tc));
+      res := res || jsonb_build_object('teste', 'administração aprova e o profissional é avisado',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = p and type = 'teleconsulta_aprovada'),
+        'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.pro_online_allowed(%L)', p));
+      res := res || jsonb_build_object('teste', 'aprovado atende online com a exigência ligada', 'ok', (r = 't'), 'obtido', r);
+      delete from public.platform_settings where key = 'site_teleconsult_required';
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

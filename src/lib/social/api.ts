@@ -87,7 +87,7 @@ function toCard(row: CardRow): PersonCard {
  * Nome, @, foto e papel por id, inclusive de perfis privados (o banco só recusa quem tem
  * bloqueio com a pessoa logada). Não lê a tabela profiles: bio e objetivos seguem protegidos.
  */
-async function cardsByIds(ids: string[]): Promise<Map<string, PersonCard>> {
+export async function cardsByIds(ids: string[]): Promise<Map<string, PersonCard>> {
   if (ids.length === 0) return new Map();
   const { data, error } = await supabase.rpc("person_cards", { p_ids: ids });
   fail(error);

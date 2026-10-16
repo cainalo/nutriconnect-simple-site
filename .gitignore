@@ -37,3 +37,6 @@ dist-ssr
 # Supabase CLI (estado local)
 supabase/.branches
 supabase/.temp
+
+# Página de teste visual do estúdio (saída do build)
+.preview-harness/out/

@@ -7,7 +7,7 @@ import { AdminPerson } from "@/components/person-chip";
 import { useProfessionalMap } from "@/lib/social/professionals-queries";
 import { CATEGORIES } from "@/lib/community";
 import { communityCover, type RemoteCommunity } from "@/lib/social/communities";
-import { resetCommunityFilters, useCommunityFilters, useRailsOn } from "@/lib/community-filters";
+import { resetCommunityFilters, useCommunityFilters } from "@/lib/community-filters";
 import { CommunityCategoriesCard, CommunitySearchCard } from "@/components/rail-cards";
 import { useCommunities } from "@/lib/social/communities-queries";
 import { useI18n } from "@/hooks/use-i18n";
@@ -39,10 +39,8 @@ function ComunidadesPage() {
   const communitiesQuery = useCommunities(false, !!user);
   const hydrated = !communitiesQuery.isLoading;
   const communities = useMemo(() => communitiesQuery.data ?? [], [communitiesQuery.data]);
-  // Busca e categorias são cards das colunas laterais (ou aparecem aqui em cima, se as colunas não
-  // estiverem visíveis); o estado é compartilhado e volta ao padrão ao sair da página.
+  // Busca e categorias aparecem no topo da página; o estado é compartilhado e volta ao padrão ao sair.
   const { query: searchTerm, category } = useCommunityFilters();
-  const railsOn = useRailsOn();
   useEffect(() => resetCommunityFilters, []);
 
   const filtered = useMemo(() => {
@@ -66,14 +64,14 @@ function ComunidadesPage() {
   const showFeatured = !searchTerm && category === "Todas" && featured.length > 0;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
+    <div className="mx-auto w-full max-w-[120rem] px-4 py-8 sm:px-6 lg:px-10">
       {/* Comunidades em destaque */}
       {showFeatured && (
         <section>
           <h2 className="text-xl font-bold font-display text-foreground mb-6">
             {t("comunidades.featured")}
           </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {featured.map((c) => (
               <CommunityCard key={c.id} community={c} />
             ))}
@@ -82,14 +80,12 @@ function ComunidadesPage() {
       )}
 
       <div className={showFeatured ? "mt-12 border-t border-border pt-12" : ""}>
-        {!railsOn && (
-          <div className="mb-6 grid items-start gap-4 md:grid-cols-2">
-            <CommunitySearchCard />
-            <CommunityCategoriesCard />
-          </div>
-        )}
+        <div className="mb-6 grid items-start gap-4 md:grid-cols-2">
+          <CommunitySearchCard />
+          <CommunityCategoriesCard />
+        </div>
 
-        <section className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((c) => (
             <CommunityCard key={c.id} community={c} />
           ))}

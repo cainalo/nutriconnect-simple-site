@@ -18,6 +18,7 @@ import { formatDate, initials } from "@/lib/community";
 import { sendBrowserNotification } from "@/lib/settings";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { earnedBadges as computeBadges } from "@/lib/social/challenge-stats";
+import { ALL_HEROES, playCinematic } from "@/lib/cinematic";
 import {
   useAddTip,
   useChallenge,
@@ -107,6 +108,15 @@ function ChallengeDetailPage() {
       {
         onSuccess: () => {
           if (!willComplete) return;
+          // Desafio vencido: cena de filme com a turma e o distintivo ganho.
+          playCinematic({
+            kind: "challenge",
+            title: challenge.title,
+            subtitle: `${t("cd.doneToast")} ${challenge.badgeLabel}.`,
+            emblem: challenge.badgeIcon,
+            cast: ALL_HEROES,
+            line: t("cine.achLine"),
+          });
           toast.success(`${t("cd.doneToast")} ${challenge.badgeLabel}.`);
           sendBrowserNotification(
             user.id,
@@ -143,7 +153,7 @@ function ChallengeDetailPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
+    <div className="mx-auto w-full max-w-[120rem] px-4 sm:px-6 lg:px-10 py-8">
       <Link
         to="/desafios"
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition mb-6"

@@ -1,17 +1,16 @@
-// Menu da conta: abre pela foto (computador) ou pela aba Perfil (celular). Reúne as áreas que não
-// cabem na barra principal: acompanhamento, painel clínico, profissionais, configurações e admin.
+// Menu da conta: abre pela foto (computador) ou pela aba Perfil (celular). Só o que é da conta:
+// perfil, acompanhamento, painel clínico, configurações e admin. As ferramentas (profissionais,
+// tema da semana...) ficam na página Funções.
 import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BadgeCheck,
-  CalendarDays,
   HeartPulse,
   LayoutDashboard,
   LogOut,
   Mail,
   Settings,
   Shield,
-  Stethoscope,
   UserRound,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -77,23 +76,6 @@ export function AccountMenu({
             </Link>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem asChild>
-          <Link to="/profissionais" className={item}>
-            <Stethoscope className="h-4 w-4" />
-            {tr([
-              "Encontrar profissional",
-              "Find a professional",
-              "Encontrar profesional",
-              "Trouver un professionnel",
-            ])}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className="lg:hidden">
-          <Link to="/tema-da-semana" className={item}>
-            <CalendarDays className="h-4 w-4" />
-            {t("weekly.badge")}
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         {user.professional ? (
           <DropdownMenuItem asChild>

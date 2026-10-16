@@ -26,10 +26,12 @@ import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
+import { BuyAtMarket } from "@/components/buy-at-market";
+import { useMyHousehold } from "@/lib/household";
 import { useSeasonNow } from "@/lib/season";
 import type { Names } from "@/lib/appearance-data";
 import {
-  readFridgeItems,
+  useFridgeItems,
   useAddShoppingItems,
   useDeleteShoppingItems,
   useSavedRecipes,
@@ -349,6 +351,7 @@ export function ShoppingSection({ ingredients }: { ingredients: string[] }) {
   const { locale } = useI18n();
   const { user } = useAuth();
   const list = useShoppingItems(user?.id);
+  const fridge = useFridgeItems(user?.id);
   const add = useAddShoppingItems(user?.id);
   const update = useUpdateShoppingItem();
   const remove = useDeleteShoppingItems();
@@ -362,7 +365,7 @@ export function ShoppingSection({ ingredients }: { ingredients: string[] }) {
     setBusy(true);
     try {
       const res = await buildShoppingList({
-        data: { ingredients: ingredients.slice(0, 200), have: readFridgeItems(user?.id), locale },
+        data: { ingredients: ingredients.slice(0, 200), have: fridge.items, locale },
       });
       if ("error" in res) toast.error(tr(ERRORS[res.error]));
       else setPreview(res.items.map((i) => ({ ...i, on: true })));
@@ -548,6 +551,11 @@ export function ShoppingSection({ ingredients }: { ingredients: string[] }) {
           ))}
         </div>
       )}
+      <BuyAtMarket
+        items={items.filter((i) => !i.done).map((i) => i.text)}
+        source="cardapio"
+        className="mt-4 mr-3"
+      />
       {done.length > 0 && (
         <button
           type="button"
@@ -572,6 +580,10 @@ export function MenuPanel() {
   const qc = useQueryClient();
   const menu = useWeeklyMenu(user?.id, week);
   const save = useSaveMenu(user?.id, week);
+  const fridge = useFridgeItems(user?.id);
+  const house = useMyHousehold(user?.id);
+  // Cardápio da casa: as receitas rendem uma porção por morador.
+  const people = house.data ? house.data.members.length : undefined;
   const savedRecipes = useSavedRecipes(!!user);
   const season = useSeasonNow();
   const [wish, setWish] = useState("");
@@ -600,7 +612,7 @@ export function MenuPanel() {
         .map(([, m]) => m!.title)
         .slice(0, 14);
       const res = await suggestMenu({
-        data: { slots, budget, wish, have: readFridgeItems(user?.id), keep, season, locale },
+        data: { slots, budget, wish, have: fridge.items, keep, season, locale, people },
       });
       if (res.used !== undefined) setUsed(res.used);
       if ("error" in res) {
@@ -657,6 +669,17 @@ export function MenuPanel() {
           <h1 className="text-2xl font-extrabold font-display text-foreground">
             {tr(["Cardápio da semana", "Weekly menu", "Menú semanal", "Menu de la semaine"])}
           </h1>
+          {house.data && (
+            <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-foreground">
+              {house.data.house.emoji}{" "}
+              {tr([
+                `Cardápio da casa: ${people} ${people === 1 ? "porção" : "porções"} por receita, para todos verem e mudarem`,
+                `Home menu: ${people} serving${people === 1 ? "" : "s"} per recipe, shared with everyone`,
+                `Menú de la casa: ${people} ${people === 1 ? "porción" : "porciones"} por receta, para todos`,
+                `Menu de la maison : ${people} portion${people === 1 ? "" : "s"} par recette, pour tous`,
+              ])}
+            </p>
+          )}
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             {tr([
               "A Nina monta almoço e jantar cabendo no seu bolso, você troca o que quiser e a semana vira uma lista de compras só.",

@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { PostMasonry } from "@/components/post-masonry";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { useProfessionalMap } from "@/lib/social/professionals-queries";
@@ -27,6 +28,7 @@ import {
   useTogglePostPin,
 } from "@/lib/social/communities-queries";
 import { PostCard } from "@/components/community-cards";
+import { CommunityEvents } from "@/components/community-events";
 import { useCreatePost, useDeletePost, useFeed, useFeedRealtime } from "@/lib/social/feed-queries";
 
 type Actor = { id: string; name: string };
@@ -118,7 +120,7 @@ function CommunityFeed() {
   const coverImage = communityCover(community);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto w-full max-w-[120rem] px-4 py-8 sm:px-6 lg:px-10">
       <Link
         to="/comunidades"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground mb-4"
@@ -234,8 +236,12 @@ function CommunityFeed() {
         </p>
       )}
 
+      {actor && canSeePosts && <CommunityEvents communityId={community.id} isHost={isAdminPro} />}
+
       {canPost ? (
-        <Composer communityId={community.id} />
+        <div className="mx-auto w-full max-w-3xl">
+          <Composer communityId={community.id} />
+        </div>
       ) : actor && !canSeePosts && community.status === "ativa" ? null : (
         <p className="mt-6 rounded-2xl border bg-card p-5 text-sm text-muted-foreground shadow-card">
           {!actor ? (
@@ -258,15 +264,24 @@ function CommunityFeed() {
           {t("cf.privatePosts")}
         </p>
       ) : (
-        <section className="mt-6 space-y-5">
-          {feed.map((post) => (
-            <div key={post.id}>
-              {(isModerator || post.pinned) && (
-                <ModeratorBar postId={post.id} pinned={!!post.pinned} canModerate={isModerator} />
-              )}
-              <PostCard post={post} />
-            </div>
-          ))}
+        <section className="mt-6">
+          <PostMasonry
+            items={feed.map((post) => ({
+              id: post.id,
+              node: (
+                <div>
+                  {(isModerator || post.pinned) && (
+                    <ModeratorBar
+                      postId={post.id}
+                      pinned={!!post.pinned}
+                      canModerate={isModerator}
+                    />
+                  )}
+                  <PostCard post={post} />
+                </div>
+              ),
+            }))}
+          />
           {feed.length === 0 && (
             <p className="rounded-2xl border bg-card p-5 text-sm text-muted-foreground shadow-card">
               {t("cf.noPosts")}

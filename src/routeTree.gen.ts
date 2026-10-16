@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ApresentacaoRouteImport } from './routes/apresentacao'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as CardapioRouteImport } from './routes/cardapio'
+import { Route as CasaRouteImport } from './routes/casa'
 import { Route as ComunidadesRouteImport } from './routes/comunidades'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ConvitesRouteImport } from './routes/convites'
@@ -23,14 +24,17 @@ import { Route as DiretrizesRouteImport } from './routes/diretrizes'
 import { Route as EspacoRouteImport } from './routes/espaco'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as FeiraRouteImport } from './routes/feira'
+import { Route as FuncoesRouteImport } from './routes/funcoes'
 import { Route as GeladeiraRouteImport } from './routes/geladeira'
 import { Route as LancheiraRouteImport } from './routes/lancheira'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as NinaRouteImport } from './routes/nina'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as PainelRouteImport } from './routes/painel'
+import { Route as ParceiroRouteImport } from './routes/parceiro'
 import { Route as PersonagensLabRouteImport } from './routes/personagens-lab'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ProgramasRouteImport } from './routes/programas'
 import { Route as RecuperarSenhaRouteImport } from './routes/recuperar-senha'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TemaDaSemanaRouteImport } from './routes/tema-da-semana'
@@ -46,12 +50,14 @@ import { Route as AcompanhamentoMetasRouteImport } from './routes/acompanhamento
 import { Route as AcompanhamentoPlanoRouteImport } from './routes/acompanhamento.plano'
 import { Route as AcompanhamentoRotulosRouteImport } from './routes/acompanhamento.rotulos'
 import { Route as AssinarProfessionalIdRouteImport } from './routes/assinar.$professionalId'
+import { Route as CasaIndexRouteImport } from './routes/casa.index'
 import { Route as ComunidadesIndexRouteImport } from './routes/comunidades.index'
 import { Route as ComunidadesSlugRouteImport } from './routes/comunidades.$slug'
 import { Route as ConsultaAppointmentIdRouteImport } from './routes/consulta.$appointmentId'
 import { Route as ConviteCodeRouteImport } from './routes/convite.$code'
 import { Route as DesafiosIndexRouteImport } from './routes/desafios.index'
 import { Route as DesafiosChallengeIdRouteImport } from './routes/desafios.$challengeId'
+import { Route as EventoEventIdRouteImport } from './routes/evento.$eventId'
 import { Route as PagamentoAppointmentIdRouteImport } from './routes/pagamento.$appointmentId'
 import { Route as PainelIndexRouteImport } from './routes/painel.index'
 import { Route as PainelAgendaRouteImport } from './routes/painel.agenda'
@@ -59,14 +65,18 @@ import { Route as PainelConfiguracoesRouteImport } from './routes/painel.configu
 import { Route as PainelFinanceiroRouteImport } from './routes/painel.financeiro'
 import { Route as PainelMembrosRouteImport } from './routes/painel.membros'
 import { Route as PainelMensagensRouteImport } from './routes/painel.mensagens'
+import { Route as PainelProgramasRouteImport } from './routes/painel.programas'
 import { Route as PerfilUserIdRouteImport } from './routes/perfil.$userId'
 import { Route as PerfilConfiguracoesRouteImport } from './routes/perfil.configuracoes'
 import { Route as PerfilEditarRouteImport } from './routes/perfil.editar'
 import { Route as PerfilPersonalizacaoRouteImport } from './routes/perfil.personalizacao'
 import { Route as ProfissionaisIndexRouteImport } from './routes/profissionais.index'
 import { Route as ProfissionaisProfessionalIdRouteImport } from './routes/profissionais.$professionalId'
+import { Route as ProgramasIndexRouteImport } from './routes/programas.index'
+import { Route as ProgramasProgramIdRouteImport } from './routes/programas.$programId'
 import { Route as ReceitasIndexRouteImport } from './routes/receitas.index'
 import { Route as ReceitasIdRouteImport } from './routes/receitas.$id'
+import { Route as CasaEntrarCodeRouteImport } from './routes/casa.entrar.$code'
 import { Route as PainelAdesaoIndexRouteImport } from './routes/painel.adesao.index'
 import { Route as PainelAdesaoPatientIdRouteImport } from './routes/painel.adesao.$patientId'
 import { Route as PainelPacientesIndexRouteImport } from './routes/painel.pacientes.index'
@@ -109,6 +119,11 @@ const CardapioRoute = CardapioRouteImport.update({
   path: '/cardapio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CasaRoute = CasaRouteImport.update({
+  id: '/casa',
+  path: '/casa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComunidadesRoute = ComunidadesRouteImport.update({
   id: '/comunidades',
   path: '/comunidades',
@@ -149,6 +164,11 @@ const FeiraRoute = FeiraRouteImport.update({
   path: '/feira',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FuncoesRoute = FuncoesRouteImport.update({
+  id: '/funcoes',
+  path: '/funcoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GeladeiraRoute = GeladeiraRouteImport.update({
   id: '/geladeira',
   path: '/geladeira',
@@ -179,6 +199,11 @@ const PainelRoute = PainelRouteImport.update({
   path: '/painel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParceiroRoute = ParceiroRouteImport.update({
+  id: '/parceiro',
+  path: '/parceiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PersonagensLabRoute = PersonagensLabRouteImport.update({
   id: '/personagens-lab',
   path: '/personagens-lab',
@@ -187,6 +212,11 @@ const PersonagensLabRoute = PersonagensLabRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgramasRoute = ProgramasRouteImport.update({
+  id: '/programas',
+  path: '/programas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecuperarSenhaRoute = RecuperarSenhaRouteImport.update({
@@ -264,6 +294,11 @@ const AssinarProfessionalIdRoute = AssinarProfessionalIdRouteImport.update({
   path: '/assinar/$professionalId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CasaIndexRoute = CasaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CasaRoute,
+} as any)
 const ComunidadesIndexRoute = ComunidadesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -293,6 +328,11 @@ const DesafiosChallengeIdRoute = DesafiosChallengeIdRouteImport.update({
   id: '/$challengeId',
   path: '/$challengeId',
   getParentRoute: () => DesafiosRoute,
+} as any)
+const EventoEventIdRoute = EventoEventIdRouteImport.update({
+  id: '/evento/$eventId',
+  path: '/evento/$eventId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PagamentoAppointmentIdRoute = PagamentoAppointmentIdRouteImport.update({
   id: '/pagamento/$appointmentId',
@@ -329,6 +369,11 @@ const PainelMensagensRoute = PainelMensagensRouteImport.update({
   path: '/mensagens',
   getParentRoute: () => PainelRoute,
 } as any)
+const PainelProgramasRoute = PainelProgramasRouteImport.update({
+  id: '/programas',
+  path: '/programas',
+  getParentRoute: () => PainelRoute,
+} as any)
 const PerfilUserIdRoute = PerfilUserIdRouteImport.update({
   id: '/perfil/$userId',
   path: '/perfil/$userId',
@@ -360,6 +405,16 @@ const ProfissionaisProfessionalIdRoute =
     path: '/profissionais/$professionalId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ProgramasIndexRoute = ProgramasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProgramasRoute,
+} as any)
+const ProgramasProgramIdRoute = ProgramasProgramIdRouteImport.update({
+  id: '/$programId',
+  path: '/$programId',
+  getParentRoute: () => ProgramasRoute,
+} as any)
 const ReceitasIndexRoute = ReceitasIndexRouteImport.update({
   id: '/receitas/',
   path: '/receitas/',
@@ -369,6 +424,11 @@ const ReceitasIdRoute = ReceitasIdRouteImport.update({
   id: '/receitas/$id',
   path: '/receitas/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CasaEntrarCodeRoute = CasaEntrarCodeRouteImport.update({
+  id: '/entrar/$code',
+  path: '/entrar/$code',
+  getParentRoute: () => CasaRoute,
 } as any)
 const PainelAdesaoIndexRoute = PainelAdesaoIndexRouteImport.update({
   id: '/adesao/',
@@ -440,6 +500,7 @@ export interface FileRoutesByFullPath {
   '/apresentacao': typeof ApresentacaoRoute
   '/cadastro': typeof CadastroRoute
   '/cardapio': typeof CardapioRoute
+  '/casa': typeof CasaRouteWithChildren
   '/comunidades': typeof ComunidadesRouteWithChildren
   '/contato': typeof ContatoRoute
   '/convites': typeof ConvitesRoute
@@ -448,14 +509,17 @@ export interface FileRoutesByFullPath {
   '/espaco': typeof EspacoRoute
   '/explorar': typeof ExplorarRoute
   '/feira': typeof FeiraRoute
+  '/funcoes': typeof FuncoesRoute
   '/geladeira': typeof GeladeiraRoute
   '/lancheira': typeof LancheiraRoute
   '/login': typeof LoginRoute
   '/nina': typeof NinaRoute
   '/notificacoes': typeof NotificacoesRoute
   '/painel': typeof PainelRouteWithChildren
+  '/parceiro': typeof ParceiroRoute
   '/personagens-lab': typeof PersonagensLabRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/programas': typeof ProgramasRouteWithChildren
   '/recuperar-senha': typeof RecuperarSenhaRoute
   '/sobre': typeof SobreRoute
   '/tema-da-semana': typeof TemaDaSemanaRoute
@@ -474,24 +538,30 @@ export interface FileRoutesByFullPath {
   '/consulta/$appointmentId': typeof ConsultaAppointmentIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/desafios/$challengeId': typeof DesafiosChallengeIdRoute
+  '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
   '/painel/mensagens': typeof PainelMensagensRoute
+  '/painel/programas': typeof PainelProgramasRoute
   '/perfil/$userId': typeof PerfilUserIdRoute
   '/perfil/configuracoes': typeof PerfilConfiguracoesRouteWithChildren
   '/perfil/editar': typeof PerfilEditarRoute
   '/perfil/personalizacao': typeof PerfilPersonalizacaoRoute
   '/profissionais/$professionalId': typeof ProfissionaisProfessionalIdRoute
+  '/programas/$programId': typeof ProgramasProgramIdRoute
   '/receitas/$id': typeof ReceitasIdRoute
   '/acompanhamento/': typeof AcompanhamentoIndexRoute
+  '/casa/': typeof CasaIndexRoute
   '/comunidades/': typeof ComunidadesIndexRoute
   '/desafios/': typeof DesafiosIndexRoute
   '/painel/': typeof PainelIndexRoute
   '/profissionais/': typeof ProfissionaisIndexRoute
+  '/programas/': typeof ProgramasIndexRoute
   '/receitas/': typeof ReceitasIndexRoute
+  '/casa/entrar/$code': typeof CasaEntrarCodeRoute
   '/painel/adesao/$patientId': typeof PainelAdesaoPatientIdRoute
   '/painel/pacientes/$patientId': typeof PainelPacientesPatientIdRoute
   '/painel/planos/$planId': typeof PainelPlanosPlanIdRoute
@@ -516,11 +586,13 @@ export interface FileRoutesByTo {
   '/espaco': typeof EspacoRoute
   '/explorar': typeof ExplorarRoute
   '/feira': typeof FeiraRoute
+  '/funcoes': typeof FuncoesRoute
   '/geladeira': typeof GeladeiraRoute
   '/lancheira': typeof LancheiraRoute
   '/login': typeof LoginRoute
   '/nina': typeof NinaRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/parceiro': typeof ParceiroRoute
   '/personagens-lab': typeof PersonagensLabRoute
   '/privacidade': typeof PrivacidadeRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
@@ -541,23 +613,29 @@ export interface FileRoutesByTo {
   '/consulta/$appointmentId': typeof ConsultaAppointmentIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/desafios/$challengeId': typeof DesafiosChallengeIdRoute
+  '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
   '/painel/mensagens': typeof PainelMensagensRoute
+  '/painel/programas': typeof PainelProgramasRoute
   '/perfil/$userId': typeof PerfilUserIdRoute
   '/perfil/editar': typeof PerfilEditarRoute
   '/perfil/personalizacao': typeof PerfilPersonalizacaoRoute
   '/profissionais/$professionalId': typeof ProfissionaisProfessionalIdRoute
+  '/programas/$programId': typeof ProgramasProgramIdRoute
   '/receitas/$id': typeof ReceitasIdRoute
   '/acompanhamento': typeof AcompanhamentoIndexRoute
+  '/casa': typeof CasaIndexRoute
   '/comunidades': typeof ComunidadesIndexRoute
   '/desafios': typeof DesafiosIndexRoute
   '/painel': typeof PainelIndexRoute
   '/profissionais': typeof ProfissionaisIndexRoute
+  '/programas': typeof ProgramasIndexRoute
   '/receitas': typeof ReceitasIndexRoute
+  '/casa/entrar/$code': typeof CasaEntrarCodeRoute
   '/painel/adesao/$patientId': typeof PainelAdesaoPatientIdRoute
   '/painel/pacientes/$patientId': typeof PainelPacientesPatientIdRoute
   '/painel/planos/$planId': typeof PainelPlanosPlanIdRoute
@@ -578,6 +656,7 @@ export interface FileRoutesById {
   '/apresentacao': typeof ApresentacaoRoute
   '/cadastro': typeof CadastroRoute
   '/cardapio': typeof CardapioRoute
+  '/casa': typeof CasaRouteWithChildren
   '/comunidades': typeof ComunidadesRouteWithChildren
   '/contato': typeof ContatoRoute
   '/convites': typeof ConvitesRoute
@@ -586,14 +665,17 @@ export interface FileRoutesById {
   '/espaco': typeof EspacoRoute
   '/explorar': typeof ExplorarRoute
   '/feira': typeof FeiraRoute
+  '/funcoes': typeof FuncoesRoute
   '/geladeira': typeof GeladeiraRoute
   '/lancheira': typeof LancheiraRoute
   '/login': typeof LoginRoute
   '/nina': typeof NinaRoute
   '/notificacoes': typeof NotificacoesRoute
   '/painel': typeof PainelRouteWithChildren
+  '/parceiro': typeof ParceiroRoute
   '/personagens-lab': typeof PersonagensLabRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/programas': typeof ProgramasRouteWithChildren
   '/recuperar-senha': typeof RecuperarSenhaRoute
   '/sobre': typeof SobreRoute
   '/tema-da-semana': typeof TemaDaSemanaRoute
@@ -612,24 +694,30 @@ export interface FileRoutesById {
   '/consulta/$appointmentId': typeof ConsultaAppointmentIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/desafios/$challengeId': typeof DesafiosChallengeIdRoute
+  '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
   '/painel/mensagens': typeof PainelMensagensRoute
+  '/painel/programas': typeof PainelProgramasRoute
   '/perfil/$userId': typeof PerfilUserIdRoute
   '/perfil/configuracoes': typeof PerfilConfiguracoesRouteWithChildren
   '/perfil/editar': typeof PerfilEditarRoute
   '/perfil/personalizacao': typeof PerfilPersonalizacaoRoute
   '/profissionais/$professionalId': typeof ProfissionaisProfessionalIdRoute
+  '/programas/$programId': typeof ProgramasProgramIdRoute
   '/receitas/$id': typeof ReceitasIdRoute
   '/acompanhamento/': typeof AcompanhamentoIndexRoute
+  '/casa/': typeof CasaIndexRoute
   '/comunidades/': typeof ComunidadesIndexRoute
   '/desafios/': typeof DesafiosIndexRoute
   '/painel/': typeof PainelIndexRoute
   '/profissionais/': typeof ProfissionaisIndexRoute
+  '/programas/': typeof ProgramasIndexRoute
   '/receitas/': typeof ReceitasIndexRoute
+  '/casa/entrar/$code': typeof CasaEntrarCodeRoute
   '/painel/adesao/$patientId': typeof PainelAdesaoPatientIdRoute
   '/painel/pacientes/$patientId': typeof PainelPacientesPatientIdRoute
   '/painel/planos/$planId': typeof PainelPlanosPlanIdRoute
@@ -651,6 +739,7 @@ export interface FileRouteTypes {
     | '/apresentacao'
     | '/cadastro'
     | '/cardapio'
+    | '/casa'
     | '/comunidades'
     | '/contato'
     | '/convites'
@@ -659,14 +748,17 @@ export interface FileRouteTypes {
     | '/espaco'
     | '/explorar'
     | '/feira'
+    | '/funcoes'
     | '/geladeira'
     | '/lancheira'
     | '/login'
     | '/nina'
     | '/notificacoes'
     | '/painel'
+    | '/parceiro'
     | '/personagens-lab'
     | '/privacidade'
+    | '/programas'
     | '/recuperar-senha'
     | '/sobre'
     | '/tema-da-semana'
@@ -685,24 +777,30 @@ export interface FileRouteTypes {
     | '/consulta/$appointmentId'
     | '/convite/$code'
     | '/desafios/$challengeId'
+    | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
     | '/painel/mensagens'
+    | '/painel/programas'
     | '/perfil/$userId'
     | '/perfil/configuracoes'
     | '/perfil/editar'
     | '/perfil/personalizacao'
     | '/profissionais/$professionalId'
+    | '/programas/$programId'
     | '/receitas/$id'
     | '/acompanhamento/'
+    | '/casa/'
     | '/comunidades/'
     | '/desafios/'
     | '/painel/'
     | '/profissionais/'
+    | '/programas/'
     | '/receitas/'
+    | '/casa/entrar/$code'
     | '/painel/adesao/$patientId'
     | '/painel/pacientes/$patientId'
     | '/painel/planos/$planId'
@@ -727,11 +825,13 @@ export interface FileRouteTypes {
     | '/espaco'
     | '/explorar'
     | '/feira'
+    | '/funcoes'
     | '/geladeira'
     | '/lancheira'
     | '/login'
     | '/nina'
     | '/notificacoes'
+    | '/parceiro'
     | '/personagens-lab'
     | '/privacidade'
     | '/recuperar-senha'
@@ -752,23 +852,29 @@ export interface FileRouteTypes {
     | '/consulta/$appointmentId'
     | '/convite/$code'
     | '/desafios/$challengeId'
+    | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
     | '/painel/mensagens'
+    | '/painel/programas'
     | '/perfil/$userId'
     | '/perfil/editar'
     | '/perfil/personalizacao'
     | '/profissionais/$professionalId'
+    | '/programas/$programId'
     | '/receitas/$id'
     | '/acompanhamento'
+    | '/casa'
     | '/comunidades'
     | '/desafios'
     | '/painel'
     | '/profissionais'
+    | '/programas'
     | '/receitas'
+    | '/casa/entrar/$code'
     | '/painel/adesao/$patientId'
     | '/painel/pacientes/$patientId'
     | '/painel/planos/$planId'
@@ -788,6 +894,7 @@ export interface FileRouteTypes {
     | '/apresentacao'
     | '/cadastro'
     | '/cardapio'
+    | '/casa'
     | '/comunidades'
     | '/contato'
     | '/convites'
@@ -796,14 +903,17 @@ export interface FileRouteTypes {
     | '/espaco'
     | '/explorar'
     | '/feira'
+    | '/funcoes'
     | '/geladeira'
     | '/lancheira'
     | '/login'
     | '/nina'
     | '/notificacoes'
     | '/painel'
+    | '/parceiro'
     | '/personagens-lab'
     | '/privacidade'
+    | '/programas'
     | '/recuperar-senha'
     | '/sobre'
     | '/tema-da-semana'
@@ -822,24 +932,30 @@ export interface FileRouteTypes {
     | '/consulta/$appointmentId'
     | '/convite/$code'
     | '/desafios/$challengeId'
+    | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
     | '/painel/mensagens'
+    | '/painel/programas'
     | '/perfil/$userId'
     | '/perfil/configuracoes'
     | '/perfil/editar'
     | '/perfil/personalizacao'
     | '/profissionais/$professionalId'
+    | '/programas/$programId'
     | '/receitas/$id'
     | '/acompanhamento/'
+    | '/casa/'
     | '/comunidades/'
     | '/desafios/'
     | '/painel/'
     | '/profissionais/'
+    | '/programas/'
     | '/receitas/'
+    | '/casa/entrar/$code'
     | '/painel/adesao/$patientId'
     | '/painel/pacientes/$patientId'
     | '/painel/planos/$planId'
@@ -860,6 +976,7 @@ export interface RootRouteChildren {
   ApresentacaoRoute: typeof ApresentacaoRoute
   CadastroRoute: typeof CadastroRoute
   CardapioRoute: typeof CardapioRoute
+  CasaRoute: typeof CasaRouteWithChildren
   ComunidadesRoute: typeof ComunidadesRouteWithChildren
   ContatoRoute: typeof ContatoRoute
   ConvitesRoute: typeof ConvitesRoute
@@ -868,14 +985,17 @@ export interface RootRouteChildren {
   EspacoRoute: typeof EspacoRoute
   ExplorarRoute: typeof ExplorarRoute
   FeiraRoute: typeof FeiraRoute
+  FuncoesRoute: typeof FuncoesRoute
   GeladeiraRoute: typeof GeladeiraRoute
   LancheiraRoute: typeof LancheiraRoute
   LoginRoute: typeof LoginRoute
   NinaRoute: typeof NinaRoute
   NotificacoesRoute: typeof NotificacoesRoute
   PainelRoute: typeof PainelRouteWithChildren
+  ParceiroRoute: typeof ParceiroRoute
   PersonagensLabRoute: typeof PersonagensLabRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  ProgramasRoute: typeof ProgramasRouteWithChildren
   RecuperarSenhaRoute: typeof RecuperarSenhaRoute
   SobreRoute: typeof SobreRoute
   TemaDaSemanaRoute: typeof TemaDaSemanaRoute
@@ -884,6 +1004,7 @@ export interface RootRouteChildren {
   AssinarProfessionalIdRoute: typeof AssinarProfessionalIdRoute
   ConsultaAppointmentIdRoute: typeof ConsultaAppointmentIdRoute
   ConviteCodeRoute: typeof ConviteCodeRoute
+  EventoEventIdRoute: typeof EventoEventIdRoute
   PagamentoAppointmentIdRoute: typeof PagamentoAppointmentIdRoute
   PerfilUserIdRoute: typeof PerfilUserIdRoute
   PerfilConfiguracoesRoute: typeof PerfilConfiguracoesRouteWithChildren
@@ -937,6 +1058,13 @@ declare module '@tanstack/react-router' {
       path: '/cardapio'
       fullPath: '/cardapio'
       preLoaderRoute: typeof CardapioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/casa': {
+      id: '/casa'
+      path: '/casa'
+      fullPath: '/casa'
+      preLoaderRoute: typeof CasaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comunidades': {
@@ -995,6 +1123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeiraRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/funcoes': {
+      id: '/funcoes'
+      path: '/funcoes'
+      fullPath: '/funcoes'
+      preLoaderRoute: typeof FuncoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/geladeira': {
       id: '/geladeira'
       path: '/geladeira'
@@ -1037,6 +1172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parceiro': {
+      id: '/parceiro'
+      path: '/parceiro'
+      fullPath: '/parceiro'
+      preLoaderRoute: typeof ParceiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/personagens-lab': {
       id: '/personagens-lab'
       path: '/personagens-lab'
@@ -1049,6 +1191,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/programas': {
+      id: '/programas'
+      path: '/programas'
+      fullPath: '/programas'
+      preLoaderRoute: typeof ProgramasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recuperar-senha': {
@@ -1156,6 +1305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssinarProfessionalIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/casa/': {
+      id: '/casa/'
+      path: '/'
+      fullPath: '/casa/'
+      preLoaderRoute: typeof CasaIndexRouteImport
+      parentRoute: typeof CasaRoute
+    }
     '/comunidades/': {
       id: '/comunidades/'
       path: '/'
@@ -1197,6 +1353,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/desafios/$challengeId'
       preLoaderRoute: typeof DesafiosChallengeIdRouteImport
       parentRoute: typeof DesafiosRoute
+    }
+    '/evento/$eventId': {
+      id: '/evento/$eventId'
+      path: '/evento/$eventId'
+      fullPath: '/evento/$eventId'
+      preLoaderRoute: typeof EventoEventIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/pagamento/$appointmentId': {
       id: '/pagamento/$appointmentId'
@@ -1247,6 +1410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelMensagensRouteImport
       parentRoute: typeof PainelRoute
     }
+    '/painel/programas': {
+      id: '/painel/programas'
+      path: '/programas'
+      fullPath: '/painel/programas'
+      preLoaderRoute: typeof PainelProgramasRouteImport
+      parentRoute: typeof PainelRoute
+    }
     '/perfil/$userId': {
       id: '/perfil/$userId'
       path: '/perfil/$userId'
@@ -1289,6 +1459,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfissionaisProfessionalIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/programas/': {
+      id: '/programas/'
+      path: '/'
+      fullPath: '/programas/'
+      preLoaderRoute: typeof ProgramasIndexRouteImport
+      parentRoute: typeof ProgramasRoute
+    }
+    '/programas/$programId': {
+      id: '/programas/$programId'
+      path: '/$programId'
+      fullPath: '/programas/$programId'
+      preLoaderRoute: typeof ProgramasProgramIdRouteImport
+      parentRoute: typeof ProgramasRoute
+    }
     '/receitas/': {
       id: '/receitas/'
       path: '/receitas'
@@ -1302,6 +1486,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/receitas/$id'
       preLoaderRoute: typeof ReceitasIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/casa/entrar/$code': {
+      id: '/casa/entrar/$code'
+      path: '/entrar/$code'
+      fullPath: '/casa/entrar/$code'
+      preLoaderRoute: typeof CasaEntrarCodeRouteImport
+      parentRoute: typeof CasaRoute
     }
     '/painel/adesao/': {
       id: '/painel/adesao/'
@@ -1411,6 +1602,18 @@ const AcompanhamentoRouteWithChildren = AcompanhamentoRoute._addFileChildren(
   AcompanhamentoRouteChildren,
 )
 
+interface CasaRouteChildren {
+  CasaIndexRoute: typeof CasaIndexRoute
+  CasaEntrarCodeRoute: typeof CasaEntrarCodeRoute
+}
+
+const CasaRouteChildren: CasaRouteChildren = {
+  CasaIndexRoute: CasaIndexRoute,
+  CasaEntrarCodeRoute: CasaEntrarCodeRoute,
+}
+
+const CasaRouteWithChildren = CasaRoute._addFileChildren(CasaRouteChildren)
+
 interface ComunidadesRouteChildren {
   ComunidadesSlugRoute: typeof ComunidadesSlugRoute
   ComunidadesIndexRoute: typeof ComunidadesIndexRoute
@@ -1445,6 +1648,7 @@ interface PainelRouteChildren {
   PainelFinanceiroRoute: typeof PainelFinanceiroRoute
   PainelMembrosRoute: typeof PainelMembrosRoute
   PainelMensagensRoute: typeof PainelMensagensRoute
+  PainelProgramasRoute: typeof PainelProgramasRoute
   PainelIndexRoute: typeof PainelIndexRoute
   PainelAdesaoPatientIdRoute: typeof PainelAdesaoPatientIdRoute
   PainelPacientesPatientIdRoute: typeof PainelPacientesPatientIdRoute
@@ -1459,6 +1663,7 @@ const PainelRouteChildren: PainelRouteChildren = {
   PainelFinanceiroRoute: PainelFinanceiroRoute,
   PainelMembrosRoute: PainelMembrosRoute,
   PainelMensagensRoute: PainelMensagensRoute,
+  PainelProgramasRoute: PainelProgramasRoute,
   PainelIndexRoute: PainelIndexRoute,
   PainelAdesaoPatientIdRoute: PainelAdesaoPatientIdRoute,
   PainelPacientesPatientIdRoute: PainelPacientesPatientIdRoute,
@@ -1469,6 +1674,20 @@ const PainelRouteChildren: PainelRouteChildren = {
 
 const PainelRouteWithChildren =
   PainelRoute._addFileChildren(PainelRouteChildren)
+
+interface ProgramasRouteChildren {
+  ProgramasProgramIdRoute: typeof ProgramasProgramIdRoute
+  ProgramasIndexRoute: typeof ProgramasIndexRoute
+}
+
+const ProgramasRouteChildren: ProgramasRouteChildren = {
+  ProgramasProgramIdRoute: ProgramasProgramIdRoute,
+  ProgramasIndexRoute: ProgramasIndexRoute,
+}
+
+const ProgramasRouteWithChildren = ProgramasRoute._addFileChildren(
+  ProgramasRouteChildren,
+)
 
 interface PerfilConfiguracoesRouteChildren {
   PerfilConfiguracoesContaRoute: typeof PerfilConfiguracoesContaRoute
@@ -1498,6 +1717,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApresentacaoRoute: ApresentacaoRoute,
   CadastroRoute: CadastroRoute,
   CardapioRoute: CardapioRoute,
+  CasaRoute: CasaRouteWithChildren,
   ComunidadesRoute: ComunidadesRouteWithChildren,
   ContatoRoute: ContatoRoute,
   ConvitesRoute: ConvitesRoute,
@@ -1506,14 +1726,17 @@ const rootRouteChildren: RootRouteChildren = {
   EspacoRoute: EspacoRoute,
   ExplorarRoute: ExplorarRoute,
   FeiraRoute: FeiraRoute,
+  FuncoesRoute: FuncoesRoute,
   GeladeiraRoute: GeladeiraRoute,
   LancheiraRoute: LancheiraRoute,
   LoginRoute: LoginRoute,
   NinaRoute: NinaRoute,
   NotificacoesRoute: NotificacoesRoute,
   PainelRoute: PainelRouteWithChildren,
+  ParceiroRoute: ParceiroRoute,
   PersonagensLabRoute: PersonagensLabRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  ProgramasRoute: ProgramasRouteWithChildren,
   RecuperarSenhaRoute: RecuperarSenhaRoute,
   SobreRoute: SobreRoute,
   TemaDaSemanaRoute: TemaDaSemanaRoute,
@@ -1522,6 +1745,7 @@ const rootRouteChildren: RootRouteChildren = {
   AssinarProfessionalIdRoute: AssinarProfessionalIdRoute,
   ConsultaAppointmentIdRoute: ConsultaAppointmentIdRoute,
   ConviteCodeRoute: ConviteCodeRoute,
+  EventoEventIdRoute: EventoEventIdRoute,
   PagamentoAppointmentIdRoute: PagamentoAppointmentIdRoute,
   PerfilUserIdRoute: PerfilUserIdRoute,
   PerfilConfiguracoesRoute: PerfilConfiguracoesRouteWithChildren,

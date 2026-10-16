@@ -1290,7 +1290,7 @@ export function ChallengeInfoCard({ id }: { id: string }) {
 
 // ───────────────────────────── Nina e notificações ─────────────────────────────
 
-const NINA_TOPICS: Names[] = [
+export const NINA_TOPICS: Names[] = [
   [
     "Como montar um prato equilibrado no almoço?",
     "How do I build a balanced lunch plate?",
