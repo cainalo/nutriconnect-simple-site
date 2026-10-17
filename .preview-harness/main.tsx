@@ -203,6 +203,17 @@ if (q.get("checkins")) {
   }).reverse();
   qc.setQueryData(["checkins", "u1"], rows);
 }
+// Água de exemplo (&water=1): meta 8, últimos 5 dias batendo a meta.
+import { lastWaterDays, waterKeys } from "@/lib/water";
+if (q.get("water")) {
+  for (const n of [7, 35]) {
+    const keys = lastWaterDays(n);
+    qc.setQueryData(waterKeys.days("u1", keys[0]), keys.map((day, i) => ({
+      user_id: "u1", day, goal: 8, updated_at: now,
+      glasses: i >= keys.length - 5 ? 8 + (i % 2) : (i * 3) % 9,
+    })));
+  }
+}
 const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
 // v=page&p=funcoes → monta o componente da rota src/routes/funcoes.tsx (Supabase simulado e vazio).
 const ROUTES = import.meta.glob("../src/routes/*.tsx");

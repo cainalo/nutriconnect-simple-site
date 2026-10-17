@@ -64,6 +64,8 @@ export function WaterTracker({
   const count = days.data?.find((d) => d.day === today)?.glasses ?? 0;
   const set = useSetWater(user?.id, goal);
   const [editing, setEditing] = useState(false);
+  const [view, setView] = useState<"week" | "month">("week");
+  const month = useWaterDays(user?.id, 35);
   const noNumbers = useNoNumbers();
 
   useMigrateLegacy(user?.id, days.isSuccess, count, (n) => set.mutate(n));
@@ -98,6 +100,30 @@ export function WaterTracker({
 
   const extra = Math.max(0, count - goal);
   const pct = Math.min(100, Math.round((count / goal) * 100));
+  const byDay = new Map((month.data ?? []).map((d) => [d.day, d]));
+  const hit = (k: string) => {
+    const row = byDay.get(k);
+    return !!row && row.glasses >= (row.goal ?? goal);
+  };
+  // Dias seguidos com a meta batida (hoje conta se já bateu; senão começa ontem).
+  const keys35 = lastWaterDays(35);
+  let streak = 0;
+  for (let i = keys35.length - (hit(today) ? 1 : 2); i >= 0 && hit(keys35[i]); i--) streak += 1;
+  const monthLiters = ((month.data ?? []).reduce((sum, d) => sum + d.glasses, 0) * glassMl) / 1000;
+  // 5 semanas de segunda a domingo, terminando na semana atual.
+  const grid = (() => {
+    const monday = new Date();
+    monday.setHours(12, 0, 0, 0);
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7) - 28);
+    return Array.from({ length: 35 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const k = waterDay(d);
+      const row = byDay.get(k);
+      const g = row?.goal ?? goal;
+      return { k, d, frac: row ? Math.min(1, row.glasses / g) : 0, future: k > today };
+    });
+  })();
 
   return (
     <div>
@@ -222,7 +248,83 @@ export function WaterTracker({
       {editing && (
         <WaterSettingsForm goal={goal} glassMl={glassMl} setByPro={!!settings.data?.goal_set_by} />
       )}
-      {showWeek && !editing && <WaterWeek userId={user.id} goal={goal} />}
+      {showWeek && !editing && (
+        <>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold text-muted-foreground">
+              {!noNumbers && streak > 0
+                ? tr([
+                    `${streak} ${streak === 1 ? "dia" : "dias"} seguidos na meta`,
+                    `${streak} ${streak === 1 ? "day" : "days"} in a row on goal`,
+                    `${streak} ${streak === 1 ? "día" : "días"} seguidos en la meta`,
+                    `${streak} ${streak === 1 ? "jour" : "jours"} d'affilée`,
+                  ])
+                : view === "week"
+                  ? tr(["Últimos 7 dias", "Last 7 days", "Últimos 7 días", "7 derniers jours"])
+                  : tr([
+                      "Últimas 5 semanas",
+                      "Last 5 weeks",
+                      "Últimas 5 semanas",
+                      "5 dernières semaines",
+                    ])}
+            </span>
+            <button
+              type="button"
+              onClick={() => setView(view === "week" ? "month" : "week")}
+              className="cursor-pointer text-[11px] font-bold text-primary hover:underline"
+            >
+              {view === "week"
+                ? tr(["Ver o mês", "See the month", "Ver el mes", "Voir le mois"])
+                : tr(["Ver a semana", "See the week", "Ver la semana", "Voir la semaine"])}
+            </button>
+          </div>
+          {view === "week" ? (
+            <WaterWeek userId={user.id} goal={goal} />
+          ) : (
+            <>
+              <div className="mt-2 grid grid-cols-7 gap-1">
+                {grid.slice(0, 7).map((c) => (
+                  <span
+                    key={"h" + c.k}
+                    className="text-center text-[9px] font-bold uppercase text-muted-foreground"
+                  >
+                    {tr(WEEKDAY[c.d.getDay()])}
+                  </span>
+                ))}
+                {grid.map((c) => (
+                  <span
+                    key={c.k}
+                    title={`${c.k.split("-").reverse().join("/")}: ${Math.round(c.frac * 100)}%`}
+                    className={cn(
+                      "h-5 rounded-md sm:h-6",
+                      c.k === today && "ring-2 ring-primary ring-offset-1 ring-offset-card",
+                    )}
+                    style={{
+                      background: c.future
+                        ? "transparent"
+                        : c.frac >= 1
+                          ? "var(--color-accent)"
+                          : c.frac > 0
+                            ? `color-mix(in srgb, var(--color-accent) ${Math.round(25 + c.frac * 45)}%, var(--color-secondary))`
+                            : "var(--color-secondary)",
+                    }}
+                  />
+                ))}
+              </div>
+              {!noNumbers && monthLiters > 0 && (
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  {tr([
+                    `${monthLiters.toLocaleString(undefined, { maximumFractionDigits: 1 })} L no período`,
+                    `${monthLiters.toLocaleString(undefined, { maximumFractionDigits: 1 })} L in this period`,
+                    `${monthLiters.toLocaleString(undefined, { maximumFractionDigits: 1 })} L en el período`,
+                    `${monthLiters.toLocaleString(undefined, { maximumFractionDigits: 1 })} L sur la période`,
+                  ])}
+                </p>
+              )}
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -241,6 +343,11 @@ function WaterSettingsForm({
   const setGoal = useSetWaterGoal();
   const [reminders, setReminders] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
+  const [weight, setWeight] = useState("");
+  // Referência usual para adultos: cerca de 35 ml por kg por dia (só uma sugestão, não é salva).
+  const kg = Number(weight.replace(",", "."));
+  const suggested =
+    kg >= 30 && kg <= 250 ? Math.max(4, Math.min(20, Math.round((kg * 35) / glassMl))) : null;
 
   useEffect(() => {
     hasWaterReminders().then(setReminders, () => setReminders(false));
@@ -304,6 +411,67 @@ function WaterSettingsForm({
           </button>
         </div>
       </div>
+      {!setByPro && (
+        <div className="rounded-xl bg-card/70 p-2.5">
+          <p className="font-semibold text-foreground">
+            {tr([
+              "Sugestão pela referência usual",
+              "Suggestion from the usual reference",
+              "Sugerencia por la referencia habitual",
+              "Suggestion selon la référence habituelle",
+            ])}
+          </p>
+          <div className="mt-1.5 flex items-center gap-2">
+            <input
+              type="number"
+              inputMode="decimal"
+              min="30"
+              max="250"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              placeholder={tr([
+                "Seu peso (kg)",
+                "Your weight (kg)",
+                "Tu peso (kg)",
+                "Votre poids (kg)",
+              ])}
+              className="w-32 rounded-lg border border-border bg-card px-2 py-1 text-xs text-foreground"
+            />
+            {suggested !== null && suggested !== goal && (
+              <button
+                type="button"
+                onClick={() => save({ goal: suggested })}
+                className="cursor-pointer rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-primary-foreground hover:opacity-90"
+              >
+                {tr([
+                  `Usar ${suggested} copos`,
+                  `Use ${suggested} glasses`,
+                  `Usar ${suggested} vasos`,
+                  `Utiliser ${suggested} verres`,
+                ])}
+              </button>
+            )}
+            {suggested !== null && suggested === goal && (
+              <span className="text-[11px] font-semibold text-primary">
+                {tr([
+                  "Sua meta já bate",
+                  "Your goal already matches",
+                  "Tu meta ya coincide",
+                  "Votre objectif correspond",
+                ])}
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            {tr([
+              "Cerca de 35 ml por kg por dia, uma referência geral para adultos. O peso não é salvo.",
+              "About 35 ml per kg a day, a general reference for adults. Your weight isn't saved.",
+              "Unos 35 ml por kg al día, una referencia general para adultos. El peso no se guarda.",
+              "Environ 35 ml par kg et par jour, une référence générale pour les adultes. Le poids n'est pas enregistré.",
+            ])}
+          </p>
+        </div>
+      )}
       {setByPro && (
         <p className="text-[10px] text-muted-foreground">
           {tr([

@@ -179,7 +179,7 @@ export function HydrationCard() {
       className="relative"
     >
       <Burst id={burst} />
-      <WaterTracker onGoalReached={fire} showWeek={false} />
+      <WaterTracker onGoalReached={fire} />
     </Panel>
   );
 }
