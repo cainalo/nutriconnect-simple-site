@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 // ───────────────────────── Peças comuns ─────────────────────────
 
-function LangSelect() {
+function LangSelect({ show = "min-[360px]:block" }: { show?: string }) {
   const tr = useTr();
   const { locale, setLocale } = useI18n();
   return (
@@ -31,7 +31,7 @@ function LangSelect() {
       value={locale}
       onChange={(e) => isLocale(e.target.value) && setLocale(e.target.value)}
       aria-label={tr(["Idioma", "Language", "Idioma", "Langue"])}
-      className="hidden h-9 cursor-pointer rounded-full border border-border bg-card px-2 text-xs font-semibold min-[360px]:block"
+      className={`hidden h-9 shrink-0 cursor-pointer rounded-full border border-border bg-card px-2 text-xs font-semibold ${show}`}
     >
       {LOCALES.map((l) => (
         <option key={l.id} value={l.id}>
@@ -134,10 +134,10 @@ export function LandingVibrante() {
     <div className="min-h-screen bg-background text-foreground [&_p]:text-left">
       <header className="sticky top-0 z-30 px-3 pt-3">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 rounded-3xl border bg-card/90 px-3 shadow-card backdrop-blur-md sm:px-4">
-          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-primary to-accent font-black text-primary-foreground">
+          <span className="hidden h-9 w-9 shrink-0 place-items-center rounded-2xl sm:grid bg-gradient-to-br from-primary to-accent font-black text-primary-foreground">
             N
           </span>
-          <Wordmark className="text-lg" />
+          <Wordmark className="shrink-0 text-base sm:text-lg" />
           <nav className="ml-4 hidden items-center gap-1 text-sm font-bold md:flex">
             {[
               ["#recursos", COPY.navFeatures],
@@ -154,16 +154,16 @@ export function LandingVibrante() {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-1.5">
-            <LangSelect />
+            <LangSelect show="min-[400px]:block" />
             <Link
               to="/login"
-              className="rounded-full px-3 py-2 text-sm font-bold hover:bg-secondary"
+              className="whitespace-nowrap rounded-full px-2 py-2 text-sm font-bold hover:bg-secondary sm:px-3"
             >
               {tr(COPY.login)}
             </Link>
             <Link
               to="/cadastro"
-              className="rounded-full bg-gradient-to-r from-primary to-accent px-4 py-2 text-sm font-extrabold text-primary-foreground shadow-soft transition hover:brightness-110"
+              className="whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-accent px-3 py-2 text-sm font-extrabold sm:px-4 text-primary-foreground shadow-soft transition hover:brightness-110"
             >
               {tr(COPY.signup)}
             </Link>
@@ -628,7 +628,7 @@ export function LandingAurora() {
 
       <header className="sticky top-0 z-30 px-3 pt-3">
         <Glass className="mx-auto flex h-14 max-w-4xl items-center gap-2 rounded-full px-3 sm:px-4">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-black text-primary-foreground">
+          <span className="hidden h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br sm:grid from-primary to-accent text-sm font-black text-primary-foreground">
             N
           </span>
           <Wordmark className="text-base" />
@@ -644,16 +644,16 @@ export function LandingAurora() {
             </a>
           </nav>
           <div className="ml-auto flex items-center gap-1.5">
-            <LangSelect />
+            <LangSelect show="min-[400px]:block" />
             <Link
               to="/login"
-              className="rounded-full px-3 py-2 text-sm font-semibold hover:bg-secondary"
+              className="whitespace-nowrap rounded-full px-2 py-2 text-sm font-semibold hover:bg-secondary sm:px-3"
             >
               {tr(COPY.login)}
             </Link>
             <Link
               to="/cadastro"
-              className="rounded-full bg-gradient-to-r from-primary to-accent px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-110"
+              className="whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-accent px-3 py-2 text-sm font-semibold sm:px-4 text-primary-foreground shadow-lg transition hover:brightness-110"
             >
               {tr(COPY.signup)}
             </Link>
