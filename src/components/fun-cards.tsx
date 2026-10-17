@@ -2217,6 +2217,21 @@ export function WeeklyPledgeCard() {
   );
 
   const title = theme.data ? themeText(theme.data, locale).title : null;
+  // Semanas anteriores (as 4 antes desta): quantos dias com o compromisso em cada uma.
+  const past = useMemo(
+    () =>
+      [4, 3, 2, 1].map((back) => {
+        const d = new Date(week + "T12:00:00");
+        d.setDate(d.getDate() - back * 7);
+        const mon = checkinDay(d);
+        return {
+          mon,
+          n: weekDays(mon).filter((day) => map.get(day)?.pledge).length,
+        };
+      }),
+    [week, map],
+  );
+  const best = Math.max(days.length, ...past.map((p) => p.n));
 
   const toggle = (i: number) => {
     if (i > todayIndex || !user) return;
@@ -2281,6 +2296,34 @@ export function WeeklyPledgeCard() {
         </div>
         <span className="text-xs font-bold text-foreground">{days.length}/7</span>
       </div>
+      {past.some((p) => p.n > 0) && (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-semibold text-muted-foreground">
+            {tr([
+              "Semanas anteriores",
+              "Previous weeks",
+              "Semanas anteriores",
+              "Semaines précédentes",
+            ])}
+            {best > 0 && ` · ${tr(["melhor", "best", "mejor", "meilleure"])}: ${best}/7`}
+          </p>
+          <div className="grid grid-cols-4 gap-1.5">
+            {past.map((p) => (
+              <div key={p.mon} className="text-center">
+                <div className="flex h-8 items-end overflow-hidden rounded-md bg-secondary/60">
+                  <div
+                    className="w-full rounded-md bg-accent/70"
+                    style={{ height: `${(p.n / 7) * 100}%` }}
+                  />
+                </div>
+                <span className="text-[9px] tabular-nums text-muted-foreground">
+                  {p.mon.slice(8, 10)}/{p.mon.slice(5, 7)} · {p.n}/7
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <Link
         to="/tema-da-semana"
         className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"

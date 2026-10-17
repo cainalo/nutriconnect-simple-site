@@ -199,7 +199,7 @@ if (q.get("checkins")) {
     const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     const mood = d.getDay() === 1 ? 3 : i % 5 === 0 ? 2 : i % 2;
     const habits = mood <= 1 ? ["water", "veg", "move", "sleep"].slice(0, 3 + (i % 2)) : ["water"];
-    return { user_id: "u1", day, habits, mood, pledge: false, mindful_meals: 0, quiz_best: null, updated_at: now };
+    return { user_id: "u1", day, habits, mood, pledge: i % 3 !== 0, mindful_meals: 0, quiz_best: null, updated_at: now };
   }).reverse();
   qc.setQueryData(["checkins", "u1"], rows);
 }
