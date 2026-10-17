@@ -10,6 +10,7 @@ import {
   Carrot,
   CheckCircle2,
   ChefHat,
+  Droplets,
   Cherry,
   Citrus,
   Heart,
@@ -50,6 +51,7 @@ import type { ProfessionKey } from "@/lib/clinical/professions";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { HABIT_CATALOG, MAX_HABITS, MIN_HABITS, useHabitChoice } from "@/lib/habits";
 import { MORE_QUESTIONS, type QuizQuestion } from "@/lib/quiz-questions";
+import { MORE_TIPS, type TipTheme } from "@/lib/daily-tips";
 import { Panel } from "@/components/rail-cards";
 import { WaterTracker } from "@/components/water-tracker";
 import {
@@ -259,25 +261,151 @@ const TIPS: Names[] = [
   ],
 ];
 
+const TIP_THEMES: Record<TipTheme, { icon: LucideIcon; color: string; name: Names }> = {
+  cozinha: { icon: ChefHat, color: "#d9692a", name: ["Cozinha", "Kitchen", "Cocina", "Cuisine"] },
+  compras: {
+    icon: ShoppingBasket,
+    color: "#3b7bbf",
+    name: ["Compras", "Shopping", "Compras", "Courses"],
+  },
+  rotulo: {
+    icon: Search,
+    color: "#8a5fb0",
+    name: ["Rótulos", "Labels", "Etiquetas", "Étiquettes"],
+  },
+  habito: { icon: Heart, color: "#4f8a4b", name: ["Hábitos", "Habits", "Hábitos", "Habitudes"] },
+  agua: {
+    icon: Droplets,
+    color: "#0f9aa8",
+    name: ["Hidratação", "Hydration", "Hidratación", "Hydratation"],
+  },
+};
+const ALL_TIPS: { theme: TipTheme; text: Names }[] = [
+  ...TIPS.map((text) => ({ theme: "habito" as const, text })),
+  ...MORE_TIPS,
+];
+const SAVED_TIPS_KEY = "nc_tips_saved";
+
+/** Uma dica por dia (a mesma o dia todo), com tema; dá para pedir outra e salvar as preferidas. */
 export function DailyTipCard() {
   const tr = useTr();
   const [shift, setShift] = useState(0);
-  const tip = TIPS[(dayNumber() + shift) % TIPS.length];
+  const [saved, setSaved] = useState<string[]>([]);
+  const [showSaved, setShowSaved] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(SAVED_TIPS_KEY) ?? "[]");
+      if (Array.isArray(raw)) setSaved(raw);
+    } catch {
+      // sem armazenamento
+    }
+  }, []);
+  const tip = ALL_TIPS[(dayNumber() * 5 + shift) % ALL_TIPS.length];
+  const theme = TIP_THEMES[tip.theme];
+  const isSaved = saved.includes(tip.text[0]);
+  const persist = (next: string[]) => {
+    setSaved(next);
+    try {
+      window.localStorage.setItem(SAVED_TIPS_KEY, JSON.stringify(next));
+    } catch {
+      // sem armazenamento
+    }
+  };
+  const toggleSave = () => {
+    persist(isSaved ? saved.filter((x) => x !== tip.text[0]) : [...saved, tip.text[0]]);
+    playSound(isSaved ? "click" : "success");
+  };
+  const savedTips = ALL_TIPS.filter((t) => saved.includes(t.text[0]));
+
   return (
     <Panel title={tr(["Dica do dia", "Tip of the day", "Consejo del día", "Astuce du jour"])}>
-      <div className="flex gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
-          <Lightbulb className="h-5 w-5" />
-        </span>
-        <p key={shift} className="nc-pop-in text-sm leading-relaxed text-foreground">
-          {tr(tip)}
-        </p>
-      </div>
-      <div className="mt-3 flex justify-end">
-        <button type="button" className={iconBtn} onClick={() => setShift((n) => n + 1)}>
-          <Shuffle className="h-3 w-3" />
-          {tr(["Outra dica", "Another tip", "Otro consejo", "Autre astuce"])}
+      {showSaved ? (
+        savedTips.length ? (
+          <ul className="space-y-2">
+            {savedTips.map((t) => {
+              const th = TIP_THEMES[t.theme];
+              return (
+                <li
+                  key={t.text[0]}
+                  className="flex gap-2 rounded-xl bg-secondary/50 p-2.5 text-left text-xs leading-snug"
+                >
+                  <th.icon className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: th.color }} />
+                  <span className="flex-1">{tr(t.text)}</span>
+                  <button
+                    type="button"
+                    onClick={() => persist(saved.filter((x) => x !== t.text[0]))}
+                    className="grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    aria-label={tr(["Remover", "Remove", "Quitar", "Supprimer"])}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-center text-xs text-muted-foreground">
+            {tr([
+              "Nenhuma dica salva ainda. Toque no coração para guardar uma.",
+              "No saved tips yet. Tap the heart to keep one.",
+              "Aún no hay consejos guardados. Toca el corazón para guardar uno.",
+              "Aucune astuce enregistrée. Touchez le cœur pour en garder une.",
+            ])}
+          </p>
+        )
+      ) : (
+        <div className="flex gap-3">
+          <span
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-white"
+            style={{ background: theme.color }}
+          >
+            <theme.icon className="h-5 w-5" />
+          </span>
+          <div key={shift} className="nc-pop-in min-w-0">
+            <p
+              className="text-[10px] font-bold uppercase tracking-wider"
+              style={{ color: theme.color }}
+            >
+              {tr(theme.name)}
+            </p>
+            <p className="mt-0.5 text-left text-sm leading-relaxed text-foreground">
+              {tr(tip.text)}
+            </p>
+          </div>
+        </div>
+      )}
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setShowSaved((v) => !v)}
+          className="cursor-pointer text-[11px] font-bold text-primary hover:underline"
+        >
+          {showSaved
+            ? tr(["Voltar à dica", "Back to the tip", "Volver al consejo", "Retour à l'astuce"])
+            : `${tr(["Salvas", "Saved", "Guardados", "Enregistrées"])} (${saved.length})`}
         </button>
+        {!showSaved && (
+          <span className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={toggleSave}
+              aria-pressed={isSaved}
+              className={`${iconBtn} ${isSaved ? "!bg-accent !text-accent-foreground" : ""}`}
+              aria-label={tr([
+                "Salvar dica",
+                "Save tip",
+                "Guardar consejo",
+                "Enregistrer l'astuce",
+              ])}
+            >
+              <Heart className={`h-3 w-3 ${isSaved ? "fill-current" : ""}`} />
+            </button>
+            <button type="button" className={iconBtn} onClick={() => setShift((n) => n + 1)}>
+              <Shuffle className="h-3 w-3" />
+              {tr(["Outra dica", "Another tip", "Otro consejo", "Autre astuce"])}
+            </button>
+          </span>
+        )}
       </div>
     </Panel>
   );
