@@ -305,6 +305,9 @@ const ADULT_TRAIL_ICONS: Record<string, LucideIcon> = {
   "bem-estar": Brain,
 };
 
+/** Trilhas com foto em public/images/trail (recortes do banco de fotos do site; créditos lá). */
+const TRAIL_PHOTOS = new Set(["nutrientes", "escolhas", "bem-estar", "kid-sabores", "kid-corpo"]);
+
 /** Escolha do grande tema (trilha) a estudar. */
 export function TrailPicker({
   trails,
@@ -350,6 +353,17 @@ export function TrailPicker({
                   : "border-border bg-card hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               }`}
             >
+              {TRAIL_PHOTOS.has(trail.id) && (
+                <span className="relative -mx-5 -mt-5 mb-4 block h-28 overflow-hidden">
+                  <img
+                    src={`/images/trail/${trail.id}.jpg`}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                  />
+                </span>
+              )}
               <div className="flex items-start gap-3.5">
                 {adult ? (
                   <span
