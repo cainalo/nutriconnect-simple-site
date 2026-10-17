@@ -49,6 +49,7 @@ import {
 import type { ProfessionKey } from "@/lib/clinical/professions";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { HABIT_CATALOG, MAX_HABITS, MIN_HABITS, useHabitChoice } from "@/lib/habits";
+import { MORE_QUESTIONS, type QuizQuestion } from "@/lib/quiz-questions";
 import { Panel } from "@/components/rail-cards";
 import { WaterTracker } from "@/components/water-tracker";
 import {
@@ -283,14 +284,9 @@ export function DailyTipCard() {
 
 // ───────────────────────────── Quiz relâmpago ─────────────────────────────
 
-interface Question {
-  q: Names;
-  options: [Names, Names, Names];
-  answer: 0 | 1 | 2;
-  why: Names;
-}
+type Question = QuizQuestion;
 
-const QUESTIONS: Question[] = [
+const BASE_QUESTIONS: Question[] = [
   {
     q: [
       "Qual destes alimentos é fonte de vitamina C?",
@@ -478,7 +474,48 @@ const QUESTIONS: Question[] = [
   },
 ];
 
+const QUESTIONS: Question[] = [...BASE_QUESTIONS, ...MORE_QUESTIONS];
 const ROUND = 5;
+const SEEN_KEY = "nc_quiz_seen";
+
+function readSeen(): string[] {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(SEEN_KEY) ?? "[]");
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Alternativas em ordem sorteada (a certa não fica sempre no mesmo lugar). */
+function shuffleOptions(q: Question): Question {
+  const order = shuffled([0, 1, 2]);
+  return {
+    ...q,
+    options: order.map((i) => q.options[i]) as Question["options"],
+    answer: order.indexOf(q.answer) as Question["answer"],
+  };
+}
+
+/** Rodada nova: primeiro as perguntas que a pessoa ainda não viu neste aparelho. */
+function newRound(): Question[] {
+  const seen = new Set(readSeen());
+  const fresh = shuffled(QUESTIONS.filter((q) => !seen.has(q.q[0])));
+  const old = shuffled(QUESTIONS.filter((q) => seen.has(q.q[0])));
+  const round = [...fresh, ...old].slice(0, ROUND);
+  try {
+    const next = [
+      ...readSeen().filter((id) => !round.some((q) => q.q[0] === id)),
+      ...round.map((q) => q.q[0]),
+    ];
+    // Quando todas já foram vistas, recomeça o ciclo guardando só a rodada atual.
+    const keep = next.length >= QUESTIONS.length ? round.map((q) => q.q[0]) : next;
+    window.localStorage.setItem(SEEN_KEY, JSON.stringify(keep));
+  } catch {
+    // sem armazenamento: sorteio simples
+  }
+  return round.map(shuffleOptions);
+}
 
 function shuffled<T>(list: T[]): T[] {
   const a = [...list];
@@ -504,7 +541,7 @@ export function QuizCard() {
   const finished = index >= ROUND;
 
   // Sorteia a rodada só no navegador (evita diferença com o HTML do servidor).
-  useEffect(() => setRound(shuffled(QUESTIONS).slice(0, ROUND)), []);
+  useEffect(() => setRound(newRound()), []);
 
   const q = round[Math.min(index, ROUND - 1)];
 
@@ -533,7 +570,7 @@ export function QuizCard() {
   };
 
   const again = () => {
-    setRound(shuffled(QUESTIONS).slice(0, ROUND));
+    setRound(newRound());
     setIndex(0);
     setPicked(null);
     setScore(0);

@@ -105,6 +105,7 @@ do admin (Design do site) escolhe qual está no ar.
    - [x] T1a Hábitos do dia: catálogo de 12 hábitos, cada pessoa escolhe de 3 a 8 (fica na conta), mapa das últimas 5 semanas; relatório em PDF conta todos
    - [x] T1b Timer de cozinha: até 6 timers com nome ao mesmo tempo, atalhos por alimento, +1 min, continuam ao recarregar, tela acesa, aviso ao terminar
    - [x] T1c Medidas da cozinha: 19 ingredientes, copo americano, colher de sobremesa e ml, conversão nos dois sentidos, multiplicador de receita
+   - [x] T1d Quiz relâmpago: 33 perguntas (eram 8; Guia Alimentar, OMS, Anvisa), alternativas embaralhadas, perguntas não vistas primeiro
 8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
 10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
