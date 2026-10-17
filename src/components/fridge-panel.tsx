@@ -49,6 +49,8 @@ import {
 } from "@/lib/fridge.functions";
 import type { Names } from "@/lib/appearance-data";
 import { useSeasonUf } from "@/lib/season";
+import { guessSection } from "@/lib/aisles";
+import { BASIC_RECIPES, type BasicRecipe } from "@/lib/basic-recipes";
 import { seasonFoods } from "@/lib/season-data";
 
 const card = "rounded-3xl border border-border/70 bg-card p-5 shadow-xs";
@@ -319,6 +321,145 @@ function CommunityList({ terms }: { terms: string[] }) {
           ))}
         </ul>
       )}
+    </section>
+  );
+}
+
+// ───────────────────────────── Ideias de sempre ─────────────────────────────
+
+const plainText = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+/** Receitas caseiras de sempre comparadas com o que a pessoa marcou (sem IA): mostra o que tem,
+ *  o que falta e manda o que falta para a lista de compras. */
+function BasicIdeas({ items }: { items: string[] }) {
+  const tr = useTr();
+  const { user } = useAuth();
+  const add = useAddShoppingItems(user?.id);
+  const [open, setOpen] = useState<string | null>(null);
+  const have = items.map(plainText).filter((t) => t.length >= 3);
+  const hasIt = (key: string) => have.some((h) => h.includes(key) || key.includes(h));
+  const ranked = BASIC_RECIPES.map((r) => {
+    const missing = r.ingredients.filter(([key]) => !hasIt(key));
+    return { r, missing, got: r.ingredients.length - missing.length };
+  })
+    .filter((x) => x.got > 0)
+    .sort((a, b) => a.missing.length - b.missing.length || b.got - a.got)
+    .slice(0, 6);
+  if (!have.length || !ranked.length) return null;
+
+  const addMissing = (r: BasicRecipe, missing: BasicRecipe["ingredients"]) =>
+    add.mutate(
+      {
+        texts: missing.map(([, name]) => ({ text: tr(name), section: guessSection(name[0]) })),
+        source: "manual",
+      },
+      {
+        onSuccess: () =>
+          toast.success(
+            tr([
+              `O que falta para "${tr(r.title)}" foi para a lista.`,
+              `What's missing for "${tr(r.title)}" is on your list.`,
+              `Lo que falta para "${tr(r.title)}" fue a la lista.`,
+              `Ce qui manque pour « ${tr(r.title)} » est dans la liste.`,
+            ]),
+          ),
+        onError: (err) => toast.error((err as Error).message),
+      },
+    );
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-sm font-bold font-display text-foreground">
+        {tr([
+          "Ideias de sempre com o que você tem",
+          "Everyday ideas with what you have",
+          "Ideas de siempre con lo que tienes",
+          "Idées de tous les jours avec ce que vous avez",
+        ])}
+      </h2>
+      <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {ranked.map(({ r, missing, got }) => (
+          <li key={r.id} className={cn(card, "flex flex-col p-4")}>
+            <button
+              type="button"
+              onClick={() => setOpen(open === r.id ? null : r.id)}
+              aria-expanded={open === r.id}
+              className="flex items-start gap-3 text-left"
+            >
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
+                <ChefHat className="h-5 w-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-foreground">{tr(r.title)}</span>
+                <span className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Clock className="h-3 w-3" /> {r.minutes} min ·{" "}
+                  {missing.length === 0
+                    ? tr(["você tem tudo", "you have everything", "tienes todo", "vous avez tout"])
+                    : tr([
+                        `você tem ${got} de ${r.ingredients.length}`,
+                        `you have ${got} of ${r.ingredients.length}`,
+                        `tienes ${got} de ${r.ingredients.length}`,
+                        `vous avez ${got} sur ${r.ingredients.length}`,
+                      ])}
+                </span>
+              </span>
+            </button>
+            <p className="mt-2 text-left text-xs text-foreground">
+              {r.ingredients.map(([key, name], i) => (
+                <span key={key}>
+                  {i > 0 && ", "}
+                  <span
+                    className={
+                      hasIt(key) ? "" : "text-muted-foreground line-through decoration-accent/60"
+                    }
+                  >
+                    {tr(name)}
+                  </span>
+                </span>
+              ))}
+            </p>
+            {open === r.id && (
+              <ol className="mt-2 list-decimal space-y-1 pl-4 text-left text-xs text-foreground">
+                {r.steps.map((st, i) => (
+                  <li key={i}>{tr(st)}</li>
+                ))}
+              </ol>
+            )}
+            <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+              <button
+                type="button"
+                onClick={() => setOpen(open === r.id ? null : r.id)}
+                className="text-[11px] font-semibold text-primary hover:underline"
+              >
+                {open === r.id
+                  ? tr(["Fechar", "Close", "Cerrar", "Fermer"])
+                  : tr(["Como fazer", "How to make it", "Cómo hacerla", "Comment faire"])}
+              </button>
+              {missing.length > 0 && (
+                <button
+                  type="button"
+                  disabled={!user || add.isPending}
+                  onClick={() => addMissing(r, missing)}
+                  className={btnSoft}
+                >
+                  <ShoppingBasket className="h-3.5 w-3.5" />
+                  {tr([
+                    "Pôr o que falta na lista",
+                    "Add what's missing",
+                    "Añadir lo que falta",
+                    "Ajouter ce qui manque",
+                  ])}
+                </button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -790,6 +931,7 @@ export function FridgePanel() {
             </section>
           )}
 
+          <BasicIdeas items={ingredients.items} />
           <CommunityList terms={searched.length ? searched : ingredients.items} />
         </>
       )}

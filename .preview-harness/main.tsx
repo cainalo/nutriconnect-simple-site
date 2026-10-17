@@ -226,6 +226,9 @@ if (q.get("shop")) {
 }
 // Estado para o Calendário da feira (&uf=SP).
 if (q.get("uf")) qc.setQueryData(["social", "settings"], { season_uf: q.get("uf") });
+// Geladeira de exemplo (&fridge=1).
+if (q.get("fridge"))
+  qc.setQueryData(["fridge-items", "pessoal"], ["ovos", "tomate", "cebola", "banana", "aveia", "batata"].map((text, i) => ({ id: String(i), text })));
 const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
 // v=page&p=funcoes → monta o componente da rota src/routes/funcoes.tsx (Supabase simulado e vazio).
 const ROUTES = import.meta.glob("../src/routes/*.tsx");
