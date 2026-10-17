@@ -336,6 +336,22 @@ const plainText = (t: string) =>
 
 /** Receitas caseiras de sempre comparadas com o que a pessoa marcou (sem IA): mostra o que tem,
  *  o que falta e manda o que falta para a lista de compras. */
+/** Receitas básicas com foto em public/images/recipes (Open Images/Flickr, CC BY 2.0; créditos lá). */
+const BASIC_PHOTOS = new Set([
+  "arroz-feijao",
+  "couve-refogada",
+  "escondidinho",
+  "farofa",
+  "frango-molho",
+  "macarrao-brocolis",
+  "mingau",
+  "omelete",
+  "panqueca-banana",
+  "pure",
+  "salada-grao",
+  "sopa",
+]);
+
 function BasicIdeas({ items }: { items: string[] }) {
   const tr = useTr();
   const { user } = useAuth();
@@ -384,19 +400,38 @@ function BasicIdeas({ items }: { items: string[] }) {
       </h2>
       <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {ranked.map(({ r, missing, got }) => (
-          <li key={r.id} className={cn(card, "flex flex-col p-4")}>
+          <li key={r.id} className={cn(card, "group flex flex-col overflow-hidden p-0")}>
             <button
               type="button"
               onClick={() => setOpen(open === r.id ? null : r.id)}
               aria-expanded={open === r.id}
-              className="flex items-start gap-3 text-left"
+              className="relative isolate flex h-36 items-end gap-3 p-4 text-left text-white"
             >
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
-                <ChefHat className="h-5 w-5" />
-              </span>
+              {BASIC_PHOTOS.has(r.id) ? (
+                <img
+                  src={`/images/recipes/${r.id}.jpg`}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 -z-10 h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 -z-10 bg-gradient-to-br from-accent to-primary"
+                >
+                  <ChefHat className="absolute right-4 top-4 h-16 w-16 text-white/30 transition duration-500 group-hover:-rotate-6 group-hover:scale-110" />
+                </span>
+              )}
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/30 to-black/0"
+              />
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-foreground">{tr(r.title)}</span>
-                <span className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                <span className="block font-display text-base font-bold text-white drop-shadow">
+                  {tr(r.title)}
+                </span>
+                <span className="mt-0.5 flex items-center gap-1 text-[11px] text-white/85">
                   <Clock className="h-3 w-3" /> {r.minutes} min ·{" "}
                   {missing.length === 0
                     ? tr(["você tem tudo", "you have everything", "tienes todo", "vous avez tout"])
@@ -409,7 +444,7 @@ function BasicIdeas({ items }: { items: string[] }) {
                 </span>
               </span>
             </button>
-            <p className="mt-2 text-left text-xs text-foreground">
+            <p className="mt-3 px-4 text-left text-xs text-foreground">
               {r.ingredients.map(([key, name], i) => (
                 <span key={key}>
                   {i > 0 && ", "}
@@ -424,13 +459,13 @@ function BasicIdeas({ items }: { items: string[] }) {
               ))}
             </p>
             {open === r.id && (
-              <ol className="mt-2 list-decimal space-y-1 pl-4 text-left text-xs text-foreground">
+              <ol className="mx-4 mt-2 list-decimal space-y-1 pl-4 text-left text-xs text-foreground">
                 {r.steps.map((st, i) => (
                   <li key={i}>{tr(st)}</li>
                 ))}
               </ol>
             )}
-            <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+            <div className="mt-auto flex items-center justify-between gap-2 px-4 pb-4 pt-3">
               <button
                 type="button"
                 onClick={() => setOpen(open === r.id ? null : r.id)}
