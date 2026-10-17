@@ -64,7 +64,18 @@ import {
 import type { PersonCard } from "@/lib/social/api";
 import { useFriends } from "@/lib/social/queries";
 import { cn } from "@/lib/utils";
+import type { Names } from "@/lib/appearance-data";
 import { useSitePhotos } from "@/lib/site-photos";
+import { guessSection } from "@/lib/aisles";
+import { SECTIONS, type Section } from "@/lib/menu.functions";
+import {
+  MEAL_NAMES,
+  SECTION_NAMES,
+  mondayOf,
+  slotKey,
+  useWeeklyMenu,
+  type MenuMeals,
+} from "@/lib/menu";
 
 const card = "rounded-3xl border border-border/70 bg-card p-5 shadow-xs";
 const btnPrimary =
@@ -304,6 +315,7 @@ function HouseView({ mine }: { mine: MyHousehold }) {
     <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
       <div className="space-y-4">
         <BringItemsPrompt houseId={mine.house.id} />
+        <HouseToday />
         <HouseShopping people={people.data} />
         <HouseKitchen />
         <HouseNotes mine={mine} people={people.data} me={user?.id} />
@@ -551,7 +563,33 @@ function HouseShopping({ people }: { people?: Map<string, PersonCard> }) {
         </p>
       ) : (
         <>
-          <ul className="mt-3 divide-y divide-border/50">{open.map(row)}</ul>
+          <div className="mt-3 flex items-center gap-2">
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-accent transition-all duration-500"
+                style={{ width: `${Math.round((done.length / items.length) * 100)}%` }}
+              />
+            </div>
+            <span className="text-[11px] font-bold tabular-nums text-foreground">
+              {done.length}/{items.length}
+            </span>
+          </div>
+          {/* Agrupado pela seção do mercado (a do Cardápio, ou adivinhada pelo nome do item). */}
+          {SECTIONS.map((sec) => {
+            const group = open.filter(
+              (it) => ((it.section as Section | null) ?? guessSection(it.text)) === sec,
+            );
+            if (!group.length) return null;
+            return (
+              <section key={sec} className="mt-3">
+                <h3 className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {tr(SECTION_NAMES[sec])}
+                  <span className="tabular-nums">{group.length}</span>
+                </h3>
+                <ul className="divide-y divide-border/50">{group.map(row)}</ul>
+              </section>
+            );
+          })}
           {done.length > 0 && (
             <>
               <h3 className="mt-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -912,6 +950,65 @@ function LeaveHouse() {
   );
 }
 
+/** Almoço e jantar de hoje no cardápio da casa (some se a semana ainda não tem cardápio). */
+function HouseToday() {
+  const tr = useTr();
+  const { user } = useAuth();
+  const menu = useWeeklyMenu(user?.id, mondayOf());
+  const meals = (menu.data?.meals ?? {}) as MenuMeals;
+  const day = (new Date().getDay() + 6) % 7;
+  const today = (["almoco", "jantar"] as const)
+    .map((m) => ({ m, meal: meals[slotKey(day, m)] }))
+    .filter((x) => x.meal);
+  if (!today.length) return null;
+  return (
+    <section className={card}>
+      <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+        <CalendarDays className="h-4 w-4 text-accent" />
+        {tr(["Hoje na casa", "Today at home", "Hoy en casa", "Aujourd'hui à la maison"])}
+        <Link
+          to="/cardapio"
+          className="ml-auto text-[11px] font-semibold text-accent hover:underline"
+        >
+          {tr(["Ver a semana", "See the week", "Ver la semana", "Voir la semaine"])}
+        </Link>
+      </h2>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        {today.map(({ m, meal }) => (
+          <div key={m} className="rounded-2xl border border-border/60 bg-background/60 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              {tr(MEAL_NAMES[m])}
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-foreground">{meal!.title}</p>
+            {meal!.prepTime && (
+              <p className="text-[11px] text-muted-foreground">{meal!.prepTime}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Recados prontos do mural, para mandar com um toque. */
+const QUICK_NOTES: Names[] = [
+  ["Janta pronta!", "Dinner's ready!", "¡La cena está lista!", "Le dîner est prêt !"],
+  [
+    "Sobrou comida na geladeira",
+    "There are leftovers in the fridge",
+    "Sobró comida en la nevera",
+    "Il reste à manger au frigo",
+  ],
+  ["Cheguei em casa", "I'm home", "Ya llegué a casa", "Je suis rentré(e)"],
+  ["Hoje janto fora", "Eating out tonight", "Hoy ceno fuera", "Je dîne dehors ce soir"],
+  [
+    "Vou ao mercado, precisa de algo?",
+    "Going to the store, need anything?",
+    "Voy al mercado, ¿necesitan algo?",
+    "Je vais faire les courses, besoin de quelque chose ?",
+  ],
+];
+
 /** Geladeira e cardápio, que também passam a ser da casa. */
 function HouseKitchen() {
   const tr = useTr();
@@ -1050,6 +1147,19 @@ function HouseNotes({
           <span className="sr-only">{tr(["Enviar", "Send", "Enviar", "Envoyer"])}</span>
         </button>
       </form>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {QUICK_NOTES.map((q) => (
+          <button
+            key={q[0]}
+            type="button"
+            disabled={add.isPending}
+            onClick={() => add.mutate(tr(q), { onError })}
+            className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition hover:border-accent hover:text-accent disabled:opacity-50"
+          >
+            {tr(q)}
+          </button>
+        ))}
+      </div>
       {notes.isLoading ? (
         <Loader2 className="mx-auto mt-4 h-5 w-5 animate-spin text-muted-foreground" />
       ) : (notes.data ?? []).length === 0 ? (
