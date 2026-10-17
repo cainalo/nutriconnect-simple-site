@@ -3,7 +3,13 @@
 **Regra de branches (17/10, vale sempre):** trabalhe e faça push **direto na `main`** (sincroniza com o
 Lovable). A branch **`prod` é a que o Netlify publica e gasta crédito**: só leve a `main` para a `prod`
 quando o dono mandar. As permissões estão em `.claude/settings.json` (push da `main` liberado, push da
-`prod` bloqueado). D5 parte 2 (17/10): cabeçalho das landings Vibrante e Aurora cabe no celular.
+`prod` bloqueado). D5 (17/10): parte 2, cabeçalho das landings Vibrante e Aurora cabe no celular;
+parte 3, últimos emojis da tela viraram ícones; parte 4, Configurações e Conquistas da trilha sem
+cortes, texto justificado fora de letras miúdas e blocos centralizados; parte 5, palavras longas
+(links, hashtags) quebram em vez de serem cortadas na borda do post (era o corte à direita do
+Editorial). A bancada monta qualquer página real: `v=page&p=<arquivo da rota sem .tsx>&d=<design>`
+(`&dark=1` para o escuro); páginas filhas aparecem sem o layout-pai (sem a margem lateral).
+Falta do D5: conferir no site logado de verdade (com dados) e no aparelho do dono.
 
 **Atualização de 15/10 (leia primeiro):** o rumo do projeto mudou; veja a seção "Rumo definido em
 15/10/2026" do `roadmap.md`. Feitos: D1 (seletor "Design do site" no admin, `src/lib/site-design.ts`),

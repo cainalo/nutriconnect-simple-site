@@ -190,6 +190,14 @@
     text-align: justify;
     hyphens: auto;
   }
+  /* Palavras sem espaço maiores que a linha (links, hashtags, títulos em letra grande) quebram em
+     vez de sair da caixa; nos posts, que cortam o que passa da borda, quebram em qualquer ponto. */
+  :is(p, li, dd, blockquote, h1, h2, h3, h4) {
+    overflow-wrap: break-word;
+  }
+  .post-card :is(p, li, h2, h3, a, span) {
+    overflow-wrap: anywhere;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
