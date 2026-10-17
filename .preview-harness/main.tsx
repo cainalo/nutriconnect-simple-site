@@ -190,7 +190,9 @@ function PageDemo() {
   }, []);
   if (!Comp) return null;
   const root = createRootRoute({ component: () => <Comp /> });
-  const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: ["/"] }) });
+  // Endereço real da página (comunidades.index → /comunidades), para a faixa de título aparecer.
+  const path = "/" + (q.get("p") ?? "funcoes").split(".").filter((x) => x !== "index" && !x.startsWith("$")).join("/");
+  const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: [path] }) });
   return <RouterProvider router={router} />;
 }
 // v=card&c=HabitCheckinCard → um card de Funções sozinho (&click=<texto do botão> para clicar).

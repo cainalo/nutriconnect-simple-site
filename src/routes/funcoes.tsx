@@ -89,6 +89,7 @@ import { useRequireAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import type { Names } from "@/lib/appearance-data";
 import { checkinDay, checkinsByDay, useCheckins, weekStartDay } from "@/lib/checkins";
+import { fillSpans, useGridColumns } from "@/lib/fill-grid";
 import { useHabitChoice } from "@/lib/habits";
 import { useFeatures, type FeatureKey } from "@/lib/features";
 import { getActiveStreak } from "@/lib/learning-trail";
@@ -795,7 +796,8 @@ function FuncoesPage() {
           <h2 className="mb-3 font-display text-lg font-bold text-foreground">
             {tr(["Meus cards", "My cards", "Mis tarjetas", "Mes cartes"])}
           </h2>
-          <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
+          {/* Cada linha se completa sozinha (a quantidade de cards varia): bordas sempre alinhadas. */}
+          <div className="flex flex-wrap gap-4 [&>*]:min-w-0 [&>*]:flex-[1_1_17rem]">
             <ProfileCard />
             <TrailCard />
             <MyChallengesCard />
@@ -834,29 +836,18 @@ function FuncoesPage() {
                   }}
                 />
               </h2>
-              <ul
-                data-funcoes-grid
-                className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7"
-              >
-                {tiles.map((tile) => (
-                  <li
-                    key={tile.id}
-                    className={cn(
-                      tile.span === "wide" && "col-span-2",
-                      tile.span === "tall" && "@2xl:row-span-2",
-                    )}
-                  >
-                    <TileCard
-                      tile={tile}
-                      index={order++}
-                      badge={badges[tile.id]}
-                      data={art[tile.id] ?? {}}
-                      subtitle={tile.id === "tema" ? themeTitle : undefined}
-                      onOpen={() => setOpen(tile)}
-                    />
-                  </li>
-                ))}
-              </ul>
+              <TileGrid tiles={tiles}>
+                {(tile) => (
+                  <TileCard
+                    tile={tile}
+                    index={order++}
+                    badge={badges[tile.id]}
+                    data={art[tile.id] ?? {}}
+                    subtitle={tile.id === "tema" ? themeTitle : undefined}
+                    onOpen={() => setOpen(tile)}
+                  />
+                )}
+              </TileGrid>
             </section>
           );
         })}
@@ -1033,6 +1024,47 @@ function Chip({
 /** Degradê de cada card nas cores dele (claro e escuro: mistura com a cor do cartão do tema). */
 const tileBackground = (t: Tile) =>
   `linear-gradient(140deg, color-mix(in srgb, ${t.color} 20%, var(--card)) 0%, color-mix(in srgb, ${t.color2} 34%, var(--card)) 100%)`;
+
+/** Grade de tiles de uma seção: encaixe denso e, medido o número de colunas, os últimos tiles
+ *  crescem até a seção fechar sem buracos (lib/fill-grid). */
+function TileGrid({ tiles, children }: { tiles: Tile[]; children: (tile: Tile) => ReactNode }) {
+  const ref = useRef<HTMLUListElement>(null);
+  const cols = useGridColumns(ref);
+  const spans = useMemo(
+    () =>
+      fillSpans(
+        tiles.map((t) => ({
+          w: t.span === "wide" ? 2 : 1,
+          h: t.span === "tall" && cols >= 3 ? 2 : 1,
+        })),
+        cols,
+      ),
+    [tiles, cols],
+  );
+  return (
+    <ul
+      ref={ref}
+      data-funcoes-grid
+      className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7"
+    >
+      {tiles.map((tile, i) => (
+        <li
+          key={tile.id}
+          className={
+            cols
+              ? undefined
+              : cn(tile.span === "wide" && "col-span-2", tile.span === "tall" && "@2xl:row-span-2")
+          }
+          style={
+            cols ? { gridColumn: `span ${spans[i].w}`, gridRow: `span ${spans[i].h}` } : undefined
+          }
+        >
+          {children(tile)}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 const tileClass =
   "nc-tile group relative flex h-full w-full cursor-pointer flex-col items-start gap-2 overflow-hidden rounded-[1.6rem] border p-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring";

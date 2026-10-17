@@ -24,6 +24,14 @@ borda direita "torta". Uma regra global em `styles.css` (procure "Fileiras de p�
 fileira com `flex-wrap` de 2 ou mais pílulas preencher a largura, com as duas bordas alinhadas.
 Rótulo na mesma fileira das pílulas quebra a regra: ponha o rótulo numa linha própria acima.
 `data-free-wrap` desliga a regra numa fileira específica.
+Grades: card sozinho na última linha ocupa a linha (2 colunas) ou vai ao meio (3 colunas);
+`data-free-grid` desliga. Funções fecha cada seção sem buracos (`src/lib/fill-grid.ts`).
+
+**Site animado como Funções (17/10, pedido do dono):** regras no fim de `styles.css` ("Site
+animado") fazem os cards das páginas entrarem em cascata, links/botões com fundo de card subirem
+ao passar o mouse e inclinarem na direção dele (`src/lib/tilt.ts`, ligado no `__root`) e botões
+afundarem ao toque. A faixa de título de cada página (`design-page-head.tsx`) existe em todos os
+designs, inclusive o Natural, com ícones flutuando. Tudo respeita "reduzir movimento".
 
 **Atualização de 15/10 (leia primeiro):** o rumo do projeto mudou; veja a seção "Rumo definido em
 15/10/2026" do `roadmap.md`. Feitos: D1 (seletor "Design do site" no admin, `src/lib/site-design.ts`),

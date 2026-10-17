@@ -9,6 +9,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { installTilt } from "@/lib/tilt";
 import { Toaster } from "sonner";
 import { ConsentGate } from "../components/consent-gate";
 import { HeroCinematic } from "../components/hero-cinematic";
@@ -166,6 +167,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => initAppearance(), []);
+  useEffect(() => installTilt(), []);
   useEffect(() => initI18n(), []);
   useAppearanceSync();
   useAppSounds();
