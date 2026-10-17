@@ -71,8 +71,9 @@ Lovable e para o site).
 - **Imagens (pedido de 17/10):** site com mais fotos e mais imersivo. Fotos sempre inteiras, com
   fundo (nada de recorte em fundo branco). Já têm foto: faixas de título de cada área
   (`public/images/heads`), cards da Feira (`images/season`, 40 de 45), receitas básicas da
-  Geladeira (`images/recipes`, 12 de 14), temas da Trilha (`images/trail`), atalhos da Casa e os
-  cards altos de Funções. Sem foto ainda: jabuticaba, pequi, umbu, cupuaçu, rúcula, cuscuz e
+  Geladeira (`images/recipes`, 12 de 14), temas da Trilha (`images/trail`), atalhos da Casa, os
+  cards altos de Funções e os estados vazios (`EmptyPhoto` em `components/clinical/ui.tsx`;
+  usar foto diferente da faixa de título logo acima). Sem foto ainda: jabuticaba, pequi, umbu, cupuaçu, rúcula, cuscuz e
   tapioca (o acervo aberto não tem). Daqui só se alcança o Open Images (S3/GCS, CC BY 2.0, créditos
   obrigatórios no CREDITS.md de cada pasta); Unsplash/Wikimedia são bloqueados.
 - Textos do app nos 4 idiomas (pt-BR, en, es, fr) no padrão `tr([pt, en, es, fr])`.
