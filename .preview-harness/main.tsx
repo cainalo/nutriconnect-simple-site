@@ -263,6 +263,22 @@ import { DocsSection } from "@/components/admin/sections-docs";
 import { QualitySection } from "@/components/admin/sections-quality";
 // v=photos → painel "Imagens do site" do admin, sozinho.
 import { SitePhotosSection } from "@/components/admin/sections-site-photos";
+// v=reviews → avaliações (P1) do profissional de demonstração; &dialog=1 abre o formulário.
+import { setDemoEnabled, DEMO_PRO } from "@/lib/clinical/demo";
+import { ProReviewsSection, ReviewDialog } from "@/components/clinical/reviews";
+import { useRatingSummaries } from "@/lib/clinical/reviews";
+if (q.get("demo")) setDemoEnabled(true);
+function ReviewsDemo() {
+  const s = useRatingSummaries();
+  return (
+    <RouterApp>
+      <div className="mx-auto max-w-2xl p-4">
+        <div className="rounded-2xl border bg-card p-5"><ProReviewsSection proId={DEMO_PRO} summary={s.data?.get(DEMO_PRO)} isOwner={!!q.get("owner")} /></div>
+        {q.get("dialog") && <ReviewDialog appointmentId="a1" proName="Ana Paula" open onOpenChange={() => {}} />}
+      </div>
+    </RouterApp>
+  );
+}
 function App() {
   if (v === "card") return <CardDemo />;
   if (v === "photos") return wrap(<SitePhotosSection />);
@@ -270,6 +286,7 @@ function App() {
   if (v === "quality") return <RouterApp><div className="p-4"><QualitySection /></div></RouterApp>;
   if (v === "post") return <PostDemo />;
   if (v === "page") return <PageDemo />;
+  if (v === "reviews") return <ReviewsDemo />;
   if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);
   if (v === "calendar") return wrap(<CalendarTab onOpen={() => {}} onNew={() => {}} />);
   if (v === "trends") return wrap(<TrendsTab onCreate={() => {}} />);

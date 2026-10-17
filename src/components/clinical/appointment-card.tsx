@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   CalendarClock,
@@ -75,6 +75,7 @@ export function AppointmentCard({
   payment,
   onPay,
   compact,
+  extra,
 }: {
   appt: Appointment;
   person?: PersonSummary;
@@ -82,6 +83,8 @@ export function AppointmentCard({
   payment?: Payment;
   onPay?: (appt: Appointment) => void;
   compact?: boolean;
+  /** Ação a mais no fim da linha de botões (ex.: avaliar a consulta). */
+  extra?: ReactNode;
 }) {
   const { t, locale } = useClinicalI18n();
   const [dialog, setDialog] = useState<null | "cancel" | "reschedule" | "manage">(null);
@@ -197,6 +200,7 @@ export function AppointmentCard({
               {t("appt.manage")}
             </button>
           )}
+          {extra}
         </div>
       </div>
 

@@ -53,6 +53,8 @@ import { startCheckout } from "@/lib/clinical/payments";
 import { td } from "@/lib/i18n/data";
 import { cn } from "@/lib/utils";
 import { AppScreen } from "@/components/app-screen";
+import { ProReviewsSection, RatingBadge } from "@/components/clinical/reviews";
+import { useRatingSummaries } from "@/lib/clinical/reviews";
 
 export const Route = createFileRoute("/profissionais/$professionalId")({
   validateSearch: (search: Record<string, unknown>): { comunidade?: string } => ({
@@ -80,6 +82,7 @@ function ProfessionalPage() {
   // Teleconsulta (M4): com a exigência ligada, só quem foi aprovado atende online.
   const onlineAllowed = useProOnlineAllowed(professionalId);
   const teleBadge = useTeleconsultBadge(professionalId);
+  const ratings = useRatingSummaries();
   const tr = useTr();
 
   // Só quem está logado vê o perfil do profissional (os perfis não são públicos).
@@ -128,6 +131,9 @@ function ProfessionalPage() {
                 <p className="text-sm text-muted-foreground">
                   {td(p.profession, locale)} · {p.council} {p.registration}/{p.uf}
                 </p>
+                <a href="#avaliacoes" className="mt-1 inline-flex hover:underline">
+                  <RatingBadge summary={ratings.data?.get(professionalId)} />
+                </a>
                 {p.headline && <p className="mt-2 text-sm text-foreground">{p.headline}</p>}
               </div>
             </div>
@@ -192,7 +198,7 @@ function ProfessionalPage() {
           )}
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-6">
           {isSelf ? (
             <Card>
               <p className="text-sm text-muted-foreground">{t("pro.selfNotice")}</p>
@@ -214,6 +220,20 @@ function ProfessionalPage() {
               communitySlug={comunidade}
             />
           )}
+          <Card
+            title={tr([
+              "Avaliações de pacientes",
+              "Patient reviews",
+              "Reseñas de pacientes",
+              "Avis des patients",
+            ])}
+          >
+            <ProReviewsSection
+              proId={professionalId}
+              summary={ratings.data?.get(professionalId)}
+              isOwner={isSelf}
+            />
+          </Card>
         </div>
       </div>
     </Shell>

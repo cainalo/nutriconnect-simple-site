@@ -121,7 +121,7 @@ do admin (Design do site) escolhe qual está no ar.
    - [x] T1q Lancheira: "Completar com ideias prontas" (seguras para idade e alergias, primeiro as que a criança gostou, sem as que não gostou nem o que ela não come), "Repetir a semana anterior" e o quadro "o que a criança achou dos lanches"
 8. [x] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração (src/lib/native.ts; falta conferir no celular com o APK de teste)
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
-10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
+10. [x] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento) — avaliações e ordenação feitas em 17/10
 11. [ ] X1 — Diário de sintomas e alimentação com correlações (para levar à consulta)
 12. [ ] X2 — Lembretes de consulta e de exames (e-mail e push, confirmação de presença)
 13. [ ] X3 — Desafios entre amigos e ligas semanais (ranking gentil, sem culpa)

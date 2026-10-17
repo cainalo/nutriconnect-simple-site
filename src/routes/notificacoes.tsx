@@ -33,6 +33,7 @@ import {
   X,
   ChefHat,
   Video,
+  Star,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -650,6 +651,25 @@ function describe(
         ]),
         detail: str(data.title),
         go: { to: "/painel/programas" },
+      };
+    case "consulta_avaliada":
+      return {
+        icon: Star,
+        text: (n.actor_id
+          ? fill([
+              "{name} avaliou a consulta com {n} estrelas",
+              "{name} rated the appointment {n} stars",
+              "{name} calificó la consulta con {n} estrellas",
+              "{name} a noté la consultation {n} étoiles",
+            ])
+          : tr([
+              "Um paciente avaliou a consulta com {n} estrelas",
+              "A patient rated the appointment {n} stars",
+              "Un paciente calificó la consulta con {n} estrellas",
+              "Un patient a noté la consultation {n} étoiles",
+            ])
+        ).replace("{n}", String(data.rating ?? "")),
+        go: { to: "/painel/avaliacoes" },
       };
     case "teleconsulta_aprovada":
       return {

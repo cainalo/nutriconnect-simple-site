@@ -1516,6 +1516,59 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ AVALIAÇÕES VERIFICADAS (P1)
+  -- P é profissional; B teve consulta com P; F não teve; G é admin.
+  if to_regclass('public.professional_reviews') is not null then
+    declare
+      ap_ok uuid;
+      ap_fut uuid;
+      rv uuid;
+    begin
+      insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality, status)
+      values (p, b, now() - interval '3 days', now() - interval '3 days' + interval '1 hour', 'presencial', 'realizada')
+      returning id into ap_ok;
+      insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality, status)
+      values (p, b, now() + interval '40 days', now() + interval '40 days 1 hour', 'presencial', 'agendada')
+      returning id into ap_fut;
+
+      r := pg_temp.as_user(f, 'authenticated', format('select public.submit_professional_review(%L, 5)', ap_ok));
+      res := res || jsonb_build_object('teste', 'quem não teve a consulta NÃO avalia', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.submit_professional_review(%L, 5)', ap_fut));
+      res := res || jsonb_build_object('teste', 'consulta futura NÃO pode ser avaliada', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.submit_professional_review(%L, 9)', ap_ok));
+      res := res || jsonb_build_object('teste', 'nota fora de 1 a 5 é recusada', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.professional_reviews (appointment_id, professional_id, patient_id, rating) values (%L, %L, %L, 5)', ap_ok, p, b));
+      res := res || jsonb_build_object('teste', 'avaliação NÃO entra por insert direto', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.submit_professional_review(%L, 4, ''Muito_atenciosa'')', ap_ok));
+      res := res || jsonb_build_object('teste', 'paciente avalia a consulta que teve',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = p and type = 'consulta_avaliada'),
+        'obtido', left(r, 90));
+      rv := r::uuid;
+      r := pg_temp.as_user(b, 'authenticated', format('select public.submit_professional_review(%L, 5)', ap_ok));
+      res := res || jsonb_build_object('teste', 'segunda avaliação da mesma consulta edita a primeira',
+        'ok', (select count(*) from public.professional_reviews where appointment_id = ap_ok) = 1
+          and (select rating from public.professional_reviews where appointment_id = ap_ok) = 5,
+        'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select average || ''/'' || total from public.professional_rating_summaries() where professional_id = %L', p));
+      res := res || jsonb_build_object('teste', 'média pública conta a avaliação', 'ok', (r = '5.0/1'), 'obtido', r);
+      r := pg_temp.as_user(f, 'authenticated', format('select public.reply_professional_review(%L, ''Obrigada'')', rv));
+      res := res || jsonb_build_object('teste', 'só o profissional avaliado responde', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select public.reply_professional_review(%L, ''Obrigada'')', rv));
+      res := res || jsonb_build_object('teste', 'profissional responde a avaliação',
+        'ok', r not like 'ERRO%' and (select reply from public.professional_reviews where id = rv) = 'Obrigada', 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.professional_reviews');
+      res := res || jsonb_build_object('teste', 'terceiro NÃO lê a tabela de avaliações direto', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('select public.admin_set_review_hidden(%L, true)', rv));
+      res := res || jsonb_build_object('teste', 'só a administração oculta avaliação', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', format('select public.admin_set_review_hidden(%L, true)', rv));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.list_professional_reviews(%L)', p));
+      res := res || jsonb_build_object('teste', 'avaliação oculta some da lista pública', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('delete from public.professional_reviews where id = %L', rv));
+      res := res || jsonb_build_object('teste', 'autor apaga a própria avaliação',
+        'ok', not exists (select 1 from public.professional_reviews where id = rv), 'obtido', left(r, 90));
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

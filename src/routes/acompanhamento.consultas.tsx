@@ -9,6 +9,9 @@ import type { Appointment } from "@/lib/clinical/api";
 import { useAppointments, usePayments, usePeople } from "@/lib/clinical/queries";
 import { startCheckout } from "@/lib/clinical/payments";
 import { useClinicalI18n } from "@/lib/clinical/i18n";
+import { isReviewable, useMyReviews } from "@/lib/clinical/reviews";
+import { ReviewButton } from "@/components/clinical/reviews";
+import { useAuth } from "@/hooks/use-auth";
 
 type PaymentReturn = "sucesso" | "pendente" | "falha";
 
@@ -62,6 +65,8 @@ function PatientAppointmentsPage() {
   const people = usePeople((data ?? []).map((a) => a.professional_id));
   const payments = usePayments((data ?? []).filter((a) => a.price_cents > 0).map((a) => a.id));
   const paymentFor = (id: string) => payments.data?.find((p) => p.appointment_id === id);
+  const { user } = useAuth();
+  const myReviews = useMyReviews(user?.id);
 
   const pay = async (appt: Appointment) => {
     try {
@@ -110,6 +115,15 @@ function PatientAppointmentsPage() {
               person={people.data?.get(a.professional_id)}
               payment={paymentFor(a.id)}
               onPay={pay}
+              extra={
+                isReviewable(a) && (
+                  <ReviewButton
+                    appointmentId={a.id}
+                    proName={people.data?.get(a.professional_id)?.name}
+                    existing={myReviews.data?.get(a.id)}
+                  />
+                )
+              }
             />
           ))}
         </div>

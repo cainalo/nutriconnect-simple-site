@@ -245,3 +245,21 @@ Print pelo Edge headless: `"/c/Program Files (x86)/Microsoft/Edge/Application/ms
   `src/lib/social-templates.ts`, `src/lib/social-media.ts`, `src/lib/social-calendar.ts`.
 - Tipos do Supabase (`src/integrations/supabase/types.ts`) foram editados à mão para as tabelas
   novas. **Nunca rode o prettier nesse arquivo** (ele reformata o arquivo inteiro).
+
+## P1 — Avaliações verificadas e ordenação na busca (17/10/2026)
+
+O marketplace já tinha busca, agenda e pagamento; faltavam as avaliações. Migration
+`20261017120000_professional_reviews.sql` (**ainda não aplicada em produção**: aplicar antes de
+subir para a prod; o site funciona sem ela, só sem avaliações). Regras no banco: só o paciente da
+consulta avalia (realizada, ou agendada/confirmada que já terminou; até 90 dias), uma por consulta
+(enviar de novo edita), comentário opcional, "sem o meu nome"; o profissional é avisado
+(`consulta_avaliada`) e responde; a administração oculta (`admin_set_review_hidden`). Leitura
+pública só pelas funções `professional_rating_summaries()` e `list_professional_reviews()` (primeiro
+nome do autor). 13 testes novos no `social_security.sql` (479 no total, 0 falhas).
+Telas: botão Avaliar em Minhas consultas → Anteriores, nota nos cards e no perfil do profissional,
+seção de avaliações no perfil, página `/painel/avaliacoes` para responder, ordenação na busca
+(Recomendados usa média ponderada, para 1 voto 5,0 não passar todos). No modo demonstração do
+admin, o profissional de exemplo tem 3 avaliações. Harness: `?v=reviews&fx=1&owner=1` (e
+`&dialog=1`) mostra a seção com dados de exemplo.
+Pendente: o push de `consulta_avaliada` abre `/painel/agenda` (regra genérica `consulta_%` em
+`push_pending`); trocar para `/painel/avaliacoes` quando mexer nessa função.

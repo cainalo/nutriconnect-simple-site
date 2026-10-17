@@ -61,6 +61,7 @@ import { Route as EventoEventIdRouteImport } from './routes/evento.$eventId'
 import { Route as PagamentoAppointmentIdRouteImport } from './routes/pagamento.$appointmentId'
 import { Route as PainelIndexRouteImport } from './routes/painel.index'
 import { Route as PainelAgendaRouteImport } from './routes/painel.agenda'
+import { Route as PainelAvaliacoesRouteImport } from './routes/painel.avaliacoes'
 import { Route as PainelConfiguracoesRouteImport } from './routes/painel.configuracoes'
 import { Route as PainelFinanceiroRouteImport } from './routes/painel.financeiro'
 import { Route as PainelMembrosRouteImport } from './routes/painel.membros'
@@ -349,6 +350,11 @@ const PainelAgendaRoute = PainelAgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => PainelRoute,
 } as any)
+const PainelAvaliacoesRoute = PainelAvaliacoesRouteImport.update({
+  id: '/avaliacoes',
+  path: '/avaliacoes',
+  getParentRoute: () => PainelRoute,
+} as any)
 const PainelConfiguracoesRoute = PainelConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -541,6 +547,7 @@ export interface FileRoutesByFullPath {
   '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
+  '/painel/avaliacoes': typeof PainelAvaliacoesRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
@@ -616,6 +623,7 @@ export interface FileRoutesByTo {
   '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
+  '/painel/avaliacoes': typeof PainelAvaliacoesRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
@@ -697,6 +705,7 @@ export interface FileRoutesById {
   '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
+  '/painel/avaliacoes': typeof PainelAvaliacoesRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
@@ -780,6 +789,7 @@ export interface FileRouteTypes {
     | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
+    | '/painel/avaliacoes'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
@@ -855,6 +865,7 @@ export interface FileRouteTypes {
     | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
+    | '/painel/avaliacoes'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
@@ -935,6 +946,7 @@ export interface FileRouteTypes {
     | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
+    | '/painel/avaliacoes'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
@@ -1382,6 +1394,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelAgendaRouteImport
       parentRoute: typeof PainelRoute
     }
+    '/painel/avaliacoes': {
+      id: '/painel/avaliacoes'
+      path: '/avaliacoes'
+      fullPath: '/painel/avaliacoes'
+      preLoaderRoute: typeof PainelAvaliacoesRouteImport
+      parentRoute: typeof PainelRoute
+    }
     '/painel/configuracoes': {
       id: '/painel/configuracoes'
       path: '/configuracoes'
@@ -1644,6 +1663,7 @@ const DesafiosRouteWithChildren = DesafiosRoute._addFileChildren(
 
 interface PainelRouteChildren {
   PainelAgendaRoute: typeof PainelAgendaRoute
+  PainelAvaliacoesRoute: typeof PainelAvaliacoesRoute
   PainelConfiguracoesRoute: typeof PainelConfiguracoesRoute
   PainelFinanceiroRoute: typeof PainelFinanceiroRoute
   PainelMembrosRoute: typeof PainelMembrosRoute
@@ -1659,6 +1679,7 @@ interface PainelRouteChildren {
 
 const PainelRouteChildren: PainelRouteChildren = {
   PainelAgendaRoute: PainelAgendaRoute,
+  PainelAvaliacoesRoute: PainelAvaliacoesRoute,
   PainelConfiguracoesRoute: PainelConfiguracoesRoute,
   PainelFinanceiroRoute: PainelFinanceiroRoute,
   PainelMembrosRoute: PainelMembrosRoute,
