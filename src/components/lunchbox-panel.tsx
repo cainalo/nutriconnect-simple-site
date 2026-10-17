@@ -34,6 +34,7 @@ import { useSeasonNow } from "@/lib/season";
 import { useHouseholdKids, useMyHousehold } from "@/lib/household";
 import { useTrailProfiles } from "@/lib/trail-profiles";
 import type { TrailProfile } from "@/lib/trail-types";
+import { EmptyPhoto } from "@/components/clinical/ui";
 import {
   AGE_NAMES,
   AGE_RANGES,
@@ -776,7 +777,8 @@ export function LunchboxPanel() {
       </header>
 
       {!kid ? (
-        <div className={cn(card, "text-center")}>
+        <div className={cn(card, "overflow-hidden text-center")}>
+          <EmptyPhoto src="/images/social/frutas-variadas.jpg" className="-mx-5 -mt-5 mb-5" />
           <p className="text-sm text-muted-foreground">
             {tr([
               "A lancheira usa os perfis infantis da Trilha. Crie um perfil para cada criança e volte aqui.",

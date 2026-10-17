@@ -11,6 +11,7 @@ import { resetCommunityFilters, useCommunityFilters } from "@/lib/community-filt
 import { CommunityCategoriesCard, CommunitySearchCard } from "@/components/rail-cards";
 import { useCommunities } from "@/lib/social/communities-queries";
 import { useI18n } from "@/hooks/use-i18n";
+import { EmptyPhoto } from "@/components/clinical/ui";
 
 export const Route = createFileRoute("/comunidades/")({
   head: () => ({
@@ -95,9 +96,10 @@ function ComunidadesPage() {
             </p>
           )}
           {hydrated && communities.length === 0 && (
-            <p className="text-sm text-muted-foreground col-span-full">
-              {t("comunidades.noneYet")}
-            </p>
+            <div className="col-span-full overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-6 text-center">
+              <EmptyPhoto src="/images/presentation/friends.jpg" className="-mx-6 -mt-6 mb-5" />
+              <p className="text-sm text-muted-foreground">{t("comunidades.noneYet")}</p>
+            </div>
           )}
         </section>
       </div>
