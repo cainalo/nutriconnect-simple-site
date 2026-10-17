@@ -955,14 +955,29 @@ function HouseKitchen() {
         <Link
           key={l.to}
           to={l.to}
-          className={cn(card, "flex items-start gap-3 transition hover:bg-secondary/50")}
+          className={cn(
+            card,
+            "group flex flex-col overflow-hidden p-0 transition hover:bg-secondary/50",
+          )}
         >
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
-            <l.icon className="h-5 w-5" />
+          {/* Mesma foto da faixa de título da página de destino. */}
+          <span className="relative block h-24 overflow-hidden">
+            <img
+              src={`/images/heads${l.to}.jpg`}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+            />
           </span>
-          <span>
-            <span className="block text-sm font-bold text-foreground">{l.title}</span>
-            <span className="block text-xs text-muted-foreground">{l.text}</span>
+          <span className="flex items-start gap-3 p-4">
+            <span className="relative z-10 -mt-9 grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-card text-accent shadow-md ring-4 ring-card">
+              <l.icon className="h-5 w-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-bold text-foreground">{l.title}</span>
+              <span className="block text-xs text-muted-foreground">{l.text}</span>
+            </span>
           </span>
         </Link>
       ))}
