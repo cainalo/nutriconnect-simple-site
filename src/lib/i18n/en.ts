@@ -149,6 +149,8 @@ const en: Record<DictKey, string> = {
   "espaco.loading": "Loading Today's Space…",
   "espaco.firstPost": "Make the first post",
   "espaco.filter.all": "All",
+  "espaco.filter.saved": "Saved",
+  "espaco.empty.salvos": "You haven't saved any posts yet. Use a post's three dots and tap Save.",
   "espaco.loadMore": "Show more posts",
   "espaco.loadingMore": "Loading more posts…",
   "espaco.end": "You're all caught up.",

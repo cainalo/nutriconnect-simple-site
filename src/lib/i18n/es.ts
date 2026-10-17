@@ -150,6 +150,9 @@ const es: Record<DictKey, string> = {
   "espaco.loading": "Cargando el Espacio de Hoy…",
   "espaco.firstPost": "Hacer la primera publicación",
   "espaco.filter.all": "Todos",
+  "espaco.filter.saved": "Guardados",
+  "espaco.empty.salvos":
+    "Aún no guardaste ninguna publicación. Usa los tres puntos de una publicación y toca Guardar.",
   "espaco.loadMore": "Ver más publicaciones",
   "espaco.loadingMore": "Cargando más publicaciones…",
   "espaco.end": "Ya lo viste todo por aquí.",

@@ -13,6 +13,12 @@ import {
   Trash2,
   Lock,
   Share2,
+  MoreHorizontal,
+  Bookmark,
+  BookmarkCheck,
+  Flag,
+  Link as LinkIcon,
+  UserRound,
 } from "lucide-react";
 import { Fragment, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -21,7 +27,7 @@ import { VerifiedBadge } from "@/components/person-chip";
 import { PostCardFrame } from "@/components/post-card-frame";
 import { postDisplayImage } from "@/lib/post-type";
 import { PostImage } from "@/components/post-image";
-import { ReportButton } from "@/components/report-button";
+import { ReportButton, ReportDialog } from "@/components/report-button";
 import {
   Dialog,
   DialogContent,
@@ -55,6 +61,14 @@ import { BuyAtMarket } from "@/components/buy-at-market";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { shareContent } from "@/lib/native";
 import { useTr } from "@/components/settings-ui";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToggleSaved } from "@/lib/social/feed-queries";
 
 interface PostCardProps {
   post: Post;
@@ -65,10 +79,14 @@ export function PostCard({ post }: PostCardProps) {
   const { t } = useI18n();
   const tr = useTr();
   // Compartilhar do sistema (no app Android, o nativo); sem ele, copia o link do post.
+  const postUrl = () => `${window.location.origin}/explorar?post=${post.id}`;
   const sharePost = async () => {
-    const url = `${window.location.origin}/explorar?post=${post.id}`;
     const title = (post.title || post.text || "NutriConnect").slice(0, 120);
-    if (await shareContent({ title, text: title, url })) return;
+    if (await shareContent({ title, text: title, url: postUrl() })) return;
+    await copyPostLink();
+  };
+  const copyPostLink = async () => {
+    const url = postUrl();
     try {
       await navigator.clipboard.writeText(url);
       toast.success(tr(["Link copiado!", "Link copied!", "¡Enlace copiado!", "Lien copié !"]));
@@ -82,6 +100,8 @@ export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const toggleSaved = useToggleSaved();
 
   const toggleReaction = useToggleReaction();
   const addRemoteComment = useAddComment();
@@ -206,49 +226,111 @@ export function PostCard({ post }: PostCardProps) {
         </div>
       </div>
 
-      {isOwnPost && (
-        <div className="shrink-0">
-          {confirmDelete ? (
-            <span className="flex items-center gap-1.5 text-[11px]">
-              <button
-                type="button"
-                disabled={deleteRemotePost.isPending}
-                onClick={() => deleteRemotePost.mutate(post.id)}
-                className="rounded-full bg-destructive px-2.5 py-1 font-semibold text-white disabled:opacity-60 cursor-pointer"
-              >
-                {t("cf.removePost")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(false)}
-                className="rounded-full border border-border px-2.5 py-1 font-semibold text-foreground cursor-pointer"
-              >
-                {t("common.cancel")}
-              </button>
-            </span>
-          ) : (
+      <div className="ml-auto flex shrink-0 items-center gap-1.5">
+        {community && (
+          <Link
+            to="/comunidades/$slug"
+            params={{ slug: community.slug }}
+            className="shrink-0 text-[10px] font-semibold bg-secondary hover:bg-secondary/80 text-foreground px-2 py-1 rounded-md transition border border-border"
+          >
+            {t("postcard.fromCommunity")} <span className="text-accent">{community.name}</span>
+          </Link>
+        )}
+        {confirmDelete ? (
+          <span className="flex items-center gap-1.5 text-[11px]">
             <button
               type="button"
-              onClick={() => setConfirmDelete(true)}
-              aria-label={t("cf.removePost")}
-              title={t("cf.removePost")}
-              className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-destructive cursor-pointer"
+              disabled={deleteRemotePost.isPending}
+              onClick={() => deleteRemotePost.mutate(post.id)}
+              className="rounded-full bg-destructive px-2.5 py-1 font-semibold text-white disabled:opacity-60 cursor-pointer"
             >
-              <Trash2 className="h-4 w-4" />
+              {t("cf.removePost")}
             </button>
-          )}
-        </div>
-      )}
-
-      {community && (
-        <Link
-          to="/comunidades/$slug"
-          params={{ slug: community.slug }}
-          className="shrink-0 text-[10px] font-semibold bg-secondary hover:bg-secondary/80 text-foreground px-2 py-1 rounded-md transition border border-border"
-        >
-          {t("postcard.fromCommunity")} <span className="text-accent">{community.name}</span>
-        </Link>
-      )}
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(false)}
+              className="rounded-full border border-border px-2.5 py-1 font-semibold text-foreground cursor-pointer"
+            >
+              {t("common.cancel")}
+            </button>
+          </span>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label={tr(["Mais opções", "More options", "Más opciones", "Plus d'options"])}
+              title={tr(["Mais opções", "More options", "Más opciones", "Plus d'options"])}
+              className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-muted-foreground outline-none transition hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              {user && (
+                <DropdownMenuItem
+                  onSelect={() => toggleSaved.mutate({ postId: post.id, saved: !post.saved })}
+                >
+                  {post.saved ? (
+                    <BookmarkCheck className="h-4 w-4 text-accent" />
+                  ) : (
+                    <Bookmark className="h-4 w-4" />
+                  )}
+                  {post.saved
+                    ? tr([
+                        "Tirar dos salvos",
+                        "Remove from saved",
+                        "Quitar de guardados",
+                        "Retirer des enregistrés",
+                      ])
+                    : tr(["Salvar", "Save", "Guardar", "Enregistrer"])}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onSelect={() => void sharePost()}>
+                <Share2 className="h-4 w-4" />
+                {tr(["Compartilhar", "Share", "Compartir", "Partager"])}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => void copyPostLink()}>
+                <LinkIcon className="h-4 w-4" />
+                {tr(["Copiar link", "Copy link", "Copiar enlace", "Copier le lien"])}
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/perfil/$userId" params={{ userId: post.authorId }}>
+                  <UserRound className="h-4 w-4" />
+                  {tr([
+                    "Ver perfil do autor",
+                    "View author's profile",
+                    "Ver perfil del autor",
+                    "Voir le profil",
+                  ])}
+                </Link>
+              </DropdownMenuItem>
+              {(isOwnPost || (user && !isOwnPost)) && <DropdownMenuSeparator />}
+              {isOwnPost && (
+                <DropdownMenuItem
+                  onSelect={() => setConfirmDelete(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {t("cf.removePost")}
+                </DropdownMenuItem>
+              )}
+              {user && !isOwnPost && (
+                <DropdownMenuItem
+                  onSelect={() => setReporting(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Flag className="h-4 w-4" />
+                  {tr(["Denunciar", "Report", "Denunciar", "Signaler"])}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+      <ReportDialog
+        targetType="post"
+        targetId={post.id}
+        open={reporting}
+        onOpenChange={setReporting}
+      />
     </div>
   );
 
@@ -390,17 +472,6 @@ export function PostCard({ post }: PostCardProps) {
             active: hasSupported,
             activeClass: "bg-accent-soft text-accent",
           })}
-
-        {action({
-          label: tr(["Compartilhar", "Share", "Compartir", "Partager"]),
-          icon: <Share2 className="h-4 w-4" />,
-          onClick: () => void sharePost(),
-          activeClass: "",
-        })}
-
-        {user && !isOwnPost && (
-          <ReportButton targetType="post" targetId={post.id} className="mt-2" />
-        )}
       </div>
     );
   };

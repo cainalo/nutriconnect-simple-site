@@ -154,6 +154,9 @@ const fr: Record<DictKey, string> = {
   "espaco.loading": "Chargement de l'Espace du Jour…",
   "espaco.firstPost": "Faire la première publication",
   "espaco.filter.all": "Tous",
+  "espaco.filter.saved": "Enregistrés",
+  "espaco.empty.salvos":
+    "Vous n'avez encore enregistré aucune publication. Utilisez les trois points d'une publication et touchez Enregistrer.",
   "espaco.loadMore": "Voir plus de publications",
   "espaco.loadingMore": "Chargement d’autres publications…",
   "espaco.end": "Vous avez tout vu.",

@@ -21,19 +21,21 @@ import type { DictKey } from "@/lib/i18n";
 import { EmptyPhoto } from "@/components/clinical/ui";
 import { useSitePhotos } from "@/lib/site-photos";
 
-// Filtros da página Geral: tudo, amigos, ou profissionais que a pessoa segue.
-type Filter = "todos" | "amigos" | "seguindo";
+// Filtros da página Geral: tudo, amigos, profissionais que a pessoa segue ou os posts que ela salvou.
+type Filter = "todos" | "amigos" | "seguindo" | "salvos";
 
 const FILTERS: { id: Filter; labelKey: DictKey }[] = [
   { id: "todos", labelKey: "espaco.filter.all" },
   { id: "amigos", labelKey: "espaco.tab.amigos" },
   { id: "seguindo", labelKey: "espaco.tab.profissionais" },
+  { id: "salvos", labelKey: "espaco.filter.saved" },
 ];
 
 const EMPTY_FILTER_KEYS: Record<Filter, DictKey> = {
   todos: "espaco.empty.geral",
   amigos: "espaco.empty.amigos",
   seguindo: "espaco.empty.profissionais",
+  salvos: "espaco.empty.salvos",
 };
 
 /** Posts por leva da rolagem infinita. */
@@ -185,7 +187,12 @@ function EspacoDeHojePage() {
   const onNewPost = useCallback(() => setHasNew(true), []);
   useFeedRealtime(user?.id, onNewPost);
   // Geral, Amigos e Profissionais: na ordem do algoritmo (últimos 7 dias), depois por data.
-  const geralFeed = useInfiniteFeed({ scope: filter, limit: pageSize }, true, enabled);
+  // Salvos: por data (o algoritmo só olha os últimos 7 dias).
+  const geralFeed = useInfiniteFeed(
+    { scope: filter, limit: pageSize },
+    filter !== "salvos",
+    enabled,
+  );
   // Aba Profissionais: quem a pessoa segue; se nenhum deles publicou ainda, os profissionais em geral.
   const prosFallback =
     filter === "seguindo" && geralFeed.query.isSuccess && geralFeed.posts.length === 0;

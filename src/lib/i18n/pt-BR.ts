@@ -160,6 +160,9 @@ const ptBR = {
   "espaco.loading": "Carregando o Espaço de Hoje…",
   "espaco.firstPost": "Fazer primeira publicação",
   "espaco.filter.all": "Todos",
+  "espaco.filter.saved": "Salvos",
+  "espaco.empty.salvos":
+    "Você ainda não salvou nenhum post. Use os três pontinhos de um post e toque em Salvar.",
   "espaco.loadMore": "Ver mais publicações",
   "espaco.loadingMore": "Carregando mais publicações…",
   "espaco.end": "Você viu tudo por aqui.",
