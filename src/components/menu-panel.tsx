@@ -774,7 +774,7 @@ export function MenuPanel() {
           <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
             {tr(["Cardápio da semana", "Weekly menu", "Menú semanal", "Menu de la semaine"])}
           </h1>
-          {house.data && (
+          {house.data && !!people && (
             <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-foreground">
               <EmojiIcon emoji={house.data.house.emoji} fallback={Home} className="h-3.5 w-3.5" />
               {tr([

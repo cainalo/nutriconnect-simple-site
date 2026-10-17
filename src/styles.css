@@ -3297,6 +3297,6 @@ html[data-motion="reduce"] .nc-menu-item {
   animation: none;
 }
 /* Popovers (seletor de perfil da trilha, ícones do perfil): mesma caixa, com mais respiro. */
-.nc-pop {
+.nc-popover {
   padding: 1.05rem 0.8rem 0.8rem;
 }

@@ -13,6 +13,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { initials, type Post, type PostType } from "@/lib/community";
 import { pickName, type Names } from "@/lib/appearance-data";
+import { EXPLORE_TOPICS } from "@/lib/explore-topics";
 import { trendingMix } from "@/lib/trending";
 import { useFeed, useFeedRealtime, usePost } from "@/lib/social/feed-queries";
 import { useSearchUsers } from "@/lib/social/queries";
@@ -237,6 +238,19 @@ function ExplorarPage() {
             {debounced && (
               <p className="mt-1 text-xs text-muted-foreground">{t("explore.noResultsHint")}</p>
             )}
+            {/* Sugestões do que buscar (as mesmas de "Temas para explorar"). */}
+            <div className="mt-4 grid grid-cols-2 gap-1.5">
+              {EXPLORE_TOPICS.map((topic) => (
+                <button
+                  key={topic[0]}
+                  type="button"
+                  onClick={() => setQuery(pickName(topic, locale))}
+                  className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-accent hover:text-accent"
+                >
+                  {pickName(topic, locale)}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">

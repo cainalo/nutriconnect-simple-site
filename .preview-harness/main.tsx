@@ -232,6 +232,7 @@ if (q.get("fridge"))
 const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
 // v=page&p=funcoes → monta o componente da rota src/routes/funcoes.tsx (Supabase simulado e vazio).
 const ROUTES = import.meta.glob("../src/routes/*.tsx");
+import { BackToTop } from "@/components/back-to-top";
 function PageDemo() {
   const [Comp, setComp] = useState<any>(null);
   useEffect(() => {
@@ -239,7 +240,7 @@ function PageDemo() {
     void load?.().then((m: any) => setComp(() => m.Route.options.component));
   }, []);
   if (!Comp) return null;
-  const root = createRootRoute({ component: () => <Comp /> });
+  const root = createRootRoute({ component: () => <><Comp /><BackToTop /></> });
   // Endereço real da página (comunidades.index → /comunidades), para a faixa de título aparecer.
   const path = "/" + (q.get("p") ?? "funcoes").split(".").filter((x) => x !== "index" && !x.startsWith("$")).join("/");
   const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: [path] }) });

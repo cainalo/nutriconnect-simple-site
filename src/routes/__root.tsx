@@ -26,6 +26,7 @@ import { APPEARANCE_INIT_SCRIPT, initAppearance } from "../lib/appearance";
 import { DESIGN_INIT_SCRIPT, useSiteDesign } from "../lib/site-design";
 import { LANG_INIT_SCRIPT, initI18n } from "../lib/i18n";
 import { listenAppLinks } from "@/lib/native";
+import { BackToTop } from "@/components/back-to-top";
 
 function NotFoundComponent() {
   return (
@@ -188,6 +189,7 @@ function RootComponent() {
       <AccessibilityTools />
       <AnnouncementBar />
       <Toaster position="top-right" richColors />
+      <BackToTop />
     </QueryClientProvider>
   );
 }

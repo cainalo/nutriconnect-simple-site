@@ -82,6 +82,7 @@ import { td } from "@/lib/i18n/data";
 import { playSound } from "@/lib/sounds";
 import { themeText } from "@/lib/social/feed";
 import { useActiveTheme, useFeed } from "@/lib/social/feed-queries";
+import { EXPLORE_TOPICS as TOPICS } from "@/lib/explore-topics";
 
 // ───────────────────────────── Ajudantes ─────────────────────────────
 
@@ -2542,17 +2543,6 @@ export function IcebreakerCard() {
 }
 
 // ───────────────────────────── Explorar e profissionais ─────────────────────────────
-
-const TOPICS: Names[] = [
-  ["receitas", "recipes", "recetas", "recettes"],
-  ["café da manhã", "breakfast", "desayuno", "petit-déjeuner"],
-  ["lanche saudável", "healthy snack", "merienda saludable", "en-cas sain"],
-  ["proteína", "protein", "proteína", "protéines"],
-  ["vegetariano", "vegetarian", "vegetariano", "végétarien"],
-  ["sem glúten", "gluten free", "sin gluten", "sans gluten"],
-  ["fibras", "fiber", "fibra", "fibres"],
-  ["hidratação", "hydration", "hidratación", "hydratation"],
-];
 
 /** Atalhos de busca: preenchem o campo da página Explorar. */
 export function ExploreTopicsCard() {

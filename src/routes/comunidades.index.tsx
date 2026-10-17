@@ -13,6 +13,7 @@ import { useCommunities } from "@/lib/social/communities-queries";
 import { useI18n } from "@/hooks/use-i18n";
 import { EmptyPhoto } from "@/components/clinical/ui";
 import { useSitePhotos } from "@/lib/site-photos";
+import { useTr } from "@/components/settings-ui";
 
 export const Route = createFileRoute("/comunidades/")({
   head: () => ({
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/comunidades/")({
 });
 
 function ComunidadesPage() {
+  const tr = useTr();
   const photos = useSitePhotos();
   const { user } = useAuth();
   const { t } = useI18n();
@@ -107,6 +109,17 @@ function ComunidadesPage() {
             >
               <EmptyPhoto src="/images/presentation/friends.jpg" className="-mx-6 -mt-6 mb-5" />
               <p className="text-sm text-muted-foreground">{t("comunidades.noneYet")}</p>
+              <Link
+                to="/contato"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold text-foreground transition hover:border-accent hover:text-accent"
+              >
+                {tr([
+                  "Sugerir uma comunidade",
+                  "Suggest a community",
+                  "Sugerir una comunidad",
+                  "Proposer une communauté",
+                ])}
+              </Link>
             </div>
           )}
         </section>

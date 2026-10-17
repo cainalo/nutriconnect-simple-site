@@ -19,8 +19,8 @@ const PopoverContent = React.forwardRef<
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        // Mesmo estilo dos menus do NutriConnect (.nc-menu .nc-pop em styles.css).
-        "nc-menu nc-pop z-50 w-72 outline-none",
+        // Mesmo estilo dos menus do NutriConnect (.nc-menu .nc-popover em styles.css).
+        "nc-menu nc-popover z-50 w-72 outline-none",
         className,
       )}
       {...props}
