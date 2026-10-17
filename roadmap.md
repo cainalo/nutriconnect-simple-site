@@ -116,6 +116,7 @@ do admin (Design do site) escolhe qual está no ar.
    - [x] T1l Lista de compras: vários itens de uma vez (vírgula), agrupada por seção do mercado (classificador por palavras, sem IA, src/lib/aisles.ts), progresso das compras
    - [x] T1m Calendário da feira: busca "quando é época de…" (mostra os meses mesmo fora de época) e "pôr os do auge na lista"
    - [x] T1n Geladeira: "Ideias de sempre" (14 receitas caseiras comparadas com o que a pessoa tem, sem IA), com o que falta e "pôr o que falta na lista"
+   - [x] T1o Cardápio da semana: "Completar sem a Nina" (receitas guardadas e pratos de sempre, priorizando o que está na Geladeira, sem repetir prato no mesmo dia; src/lib/menu-fill.ts), "Repetir a semana anterior" e "a sobra do jantar vira o almoço de amanhã" (sem duplicar na lista de compras)
 8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
 10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
