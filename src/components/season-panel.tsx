@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Leaf, Loader2, MapPin, ShoppingBasket, Sprout } from "lucide-react";
+import { Leaf, Loader2, MapPin, Search, ShoppingBasket, Sprout } from "lucide-react";
 import { Panel } from "@/components/rail-cards";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,7 +16,10 @@ import {
   MONTH_NAMES,
   REGION_NAMES,
   UFS,
+  SEASON_FOODS,
+  availableIn,
   monthsIn,
+  phaseOf,
   seasonFoods,
   type FoodKind,
   type Region,
@@ -35,6 +38,13 @@ const PHASE_NAMES: Record<SeasonPhase, Names> = {
   terminando: ["Últimas semanas", "Last weeks", "Últimas semanas", "Fin de saison"],
   "ano-todo": ["O ano todo", "All year", "Todo el año", "Toute l'année"],
 };
+/** Rótulo para quem buscou um alimento fora da época. */
+const OFF_SEASON: Names = ["Fora de época", "Out of season", "Fuera de temporada", "Hors saison"];
+const plainText = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 const PHASE_STYLE: Record<SeasonPhase, string> = {
   auge: "bg-primary/15 text-primary",
   comecando: "bg-accent-soft text-accent",
@@ -96,7 +106,7 @@ function FoodCard({
   region,
 }: {
   food: SeasonFood;
-  phase: SeasonPhase;
+  phase: SeasonPhase | null;
   region: Region;
 }) {
   const tr = useTr();
@@ -124,10 +134,10 @@ function FoodCard({
           <span
             className={cn(
               "mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold",
-              PHASE_STYLE[phase],
+              phase ? PHASE_STYLE[phase] : "bg-secondary text-muted-foreground",
             )}
           >
-            {tr(PHASE_NAMES[phase])}
+            {tr(phase ? PHASE_NAMES[phase] : OFF_SEASON)}
           </span>
         </span>
       </button>
@@ -200,11 +210,43 @@ export function SeasonPanel() {
   const { region, loading } = useSeasonUf();
   const [month, setMonth] = useState(() => new Date().getMonth() + 1);
   const [kind, setKind] = useState<FoodKind | "todos">("todos");
+  const [query, setQuery] = useState("");
+  const { user } = useAuth();
+  const addMany = useAddShoppingItems(user?.id);
   const now = new Date().getMonth() + 1;
 
-  const foods = region
-    ? seasonFoods(region, month).filter((x) => kind === "todos" || x.food.kind === kind)
-    : [];
+  const q = plainText(query.trim());
+  // Com busca: todos os alimentos da região que batem com o nome (em qualquer idioma), mesmo fora
+  // da época, os da estação primeiro. Sem busca: os da estação no mês escolhido.
+  const foods: { food: SeasonFood; phase: SeasonPhase | null }[] = !region
+    ? []
+    : q
+      ? SEASON_FOODS.filter(
+          (f) => availableIn(f, region) && f.name.some((n) => plainText(n).includes(q)),
+        )
+          .map((food) => ({ food, phase: phaseOf(food, region, month) }))
+          .sort((a, b) => Number(a.phase === null) - Number(b.phase === null))
+      : seasonFoods(region, month).filter((x) => kind === "todos" || x.food.kind === kind);
+  const peak = foods.filter((x) => x.phase === "auge");
+  const addPeak = () =>
+    addMany.mutate(
+      {
+        texts: peak.map((x) => ({ text: tr(x.food.name), section: "hortifruti" })),
+        source: "manual",
+      },
+      {
+        onSuccess: (n) =>
+          toast.success(
+            tr([
+              `${n} ${n === 1 ? "item foi" : "itens foram"} para a sua lista de compras.`,
+              `${n} ${n === 1 ? "item" : "items"} added to your shopping list.`,
+              `${n} ${n === 1 ? "artículo fue" : "artículos fueron"} a tu lista de compras.`,
+              `${n} ${n === 1 ? "élément ajouté" : "éléments ajoutés"} à votre liste de courses.`,
+            ]),
+          ),
+        onError: (err) => toast.error((err as Error).message),
+      },
+    );
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
@@ -243,6 +285,20 @@ export function SeasonPanel() {
         </p>
       ) : (
         <>
+          <label className="mb-3 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm">
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={tr([
+                "Quando é época de… (ex.: manga)",
+                "When is it in season… (e.g. mango)",
+                "¿Cuándo es temporada de… (ej.: mango)",
+                "Quand est-ce la saison de… (ex. : mangue)",
+              ])}
+              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+            />
+          </label>
           <div className="flex flex-wrap items-center gap-1.5" role="group">
             {MONTH_NAMES.map((m, i) => (
               <button
@@ -286,19 +342,46 @@ export function SeasonPanel() {
 
           {foods.length === 0 ? (
             <p className={cn(card, "mt-6 text-center text-sm text-muted-foreground")}>
-              {tr([
-                "Nada nesta categoria neste mês.",
-                "Nothing in this category this month.",
-                "Nada en esta categoría este mes.",
-                "Rien dans cette catégorie ce mois-ci.",
-              ])}
+              {q
+                ? tr([
+                    "Nenhum alimento com esse nome no calendário.",
+                    "No food with that name in the calendar.",
+                    "Ningún alimento con ese nombre en el calendario.",
+                    "Aucun aliment de ce nom dans le calendrier.",
+                  ])
+                : tr([
+                    "Nada nesta categoria neste mês.",
+                    "Nothing in this category this month.",
+                    "Nada en esta categoría este mes.",
+                    "Rien dans cette catégorie ce mois-ci.",
+                  ])}
             </p>
           ) : (
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {foods.map(({ food, phase }) => (
-                <FoodCard key={food.id} food={food} phase={phase} region={region} />
-              ))}
-            </ul>
+            <>
+              {!q && peak.length > 1 && (
+                <div className="mt-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={addPeak}
+                    disabled={!user || addMany.isPending}
+                    className={btnSoft}
+                  >
+                    <ShoppingBasket className="h-3.5 w-3.5" />
+                    {tr([
+                      `Pôr os ${peak.length} do auge na lista`,
+                      `Add the ${peak.length} at their peak to the list`,
+                      `Añadir los ${peak.length} de temporada alta a la lista`,
+                      `Ajouter les ${peak.length} de pleine saison à la liste`,
+                    ])}
+                  </button>
+                </div>
+              )}
+              <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {foods.map(({ food, phase }) => (
+                  <FoodCard key={food.id} food={food} phase={phase} region={region} />
+                ))}
+              </ul>
+            </>
           )}
 
           <div className="mt-8 flex flex-wrap gap-2">

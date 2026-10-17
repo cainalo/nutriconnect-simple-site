@@ -114,6 +114,7 @@ do admin (Design do site) escolhe qual está no ar.
    - [x] T1j Água de hoje: sequência de dias na meta, mapa das últimas 5 semanas, litros no período, sugestão de meta pelo peso (~35 ml/kg); semana visível também em Funções
    - [x] T1k Compromisso da semana: histórico das 4 semanas anteriores em barras e a melhor semana
    - [x] T1l Lista de compras: vários itens de uma vez (vírgula), agrupada por seção do mercado (classificador por palavras, sem IA, src/lib/aisles.ts), progresso das compras
+   - [x] T1m Calendário da feira: busca "quando é época de…" (mostra os meses mesmo fora de época) e "pôr os do auge na lista"
 8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
 10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
