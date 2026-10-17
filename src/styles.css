@@ -205,20 +205,22 @@
      só de ícone ficam como estão). Para manter uma fileira solta, use data-free-wrap. */
   :where(.flex-wrap):not([data-free-wrap], .post-card *, header *):has(> :nth-child(3)):not(
       :has(
-          > :not(li, :is(button, a, span, label)[class*="rounded"]),
-          > [class*=" w-"],
-          > [class^="w-"],
-          > [class*=" p-"],
-          > [class^="p-"],
-          > li > [class*=" w-"]
-        )
+        > :not(li, :is(button, a, span, label)[class*="rounded"]),
+        > [class*=" w-"],
+        > [class^="w-"],
+        > [class*=" p-"],
+        > [class^="p-"],
+        > li > [class*=" w-"]
+      )
     )
     > * {
     flex: 1 1 auto;
     justify-content: center;
     text-align: center;
   }
-  :where(.flex-wrap):not([data-free-wrap], .post-card *, header *):has(> li:nth-child(3)) > li > :is(button, a, span, label) {
+  :where(.flex-wrap):not([data-free-wrap], .post-card *, header *):has(> li:nth-child(3))
+    > li
+    > :is(button, a, span, label) {
     width: 100%;
     justify-content: center;
   }
@@ -581,7 +583,6 @@ html[data-imgc="soft"] .post-image {
 html[data-cardaccent] .post-card {
   border-left: 4px solid var(--accent) !important;
 }
-
 
 /* O logo mantém a fonte original: a personalização de fontes não o afeta (só a cor, via tema). */
 .font-logo-serif {
@@ -1006,6 +1007,18 @@ html[data-cardaccent] .post-card {
     transform: translateY(-14px) rotate(6deg);
   }
 }
+/* Foto das faixas de título: aproximação lenta, quase parada (efeito "Ken Burns"). */
+@keyframes nc-kenburns {
+  from {
+    transform: scale(1.02) translateX(0);
+  }
+  to {
+    transform: scale(1.12) translateX(-2%);
+  }
+}
+.nc-kenburns {
+  animation: nc-kenburns 18s ease-in-out infinite alternate;
+}
 @keyframes nc-draw {
   from {
     stroke-dashoffset: var(--nc-len, 1000);
@@ -1377,7 +1390,6 @@ html[data-cardaccent] .post-card {
 .nc-breathe {
   animation: nc-breathe 8s ease-in-out infinite;
 }
-
 
 /* Transições entre slides personalizados (escolhidas por slide no editor) */
 @keyframes nc-tr-fade {
@@ -2229,8 +2241,16 @@ html[data-design="vibrante"].dark {
 }
 html[data-design="vibrante"] body {
   background-image:
-    radial-gradient(70rem 36rem at 100% -8%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
-    radial-gradient(60rem 34rem at -10% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%);
+    radial-gradient(
+      70rem 36rem at 100% -8%,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      60rem 34rem at -10% 0%,
+      color-mix(in srgb, var(--primary) 14%, transparent),
+      transparent 60%
+    );
   background-attachment: fixed;
 }
 html[data-design="vibrante"] h1,
@@ -2347,7 +2367,8 @@ html[data-design="editorial"] h3 {
   letter-spacing: -0.01em;
 }
 /* Sem cantos arredondados: só os interruptores e os desenhos mantêm a forma. */
-html[data-design="editorial"] [class*="rounded"]:not([role="switch"], [role="switch"] *, svg, svg *, canvas) {
+html[data-design="editorial"]
+  [class*="rounded"]:not([role="switch"], [role="switch"] *, svg, svg *, canvas) {
   border-radius: 0 !important;
 }
 html[data-design="editorial"] :is(input, textarea, select, button):not([role="switch"]) {
@@ -2365,7 +2386,9 @@ html[data-design="editorial"] :is(.post-card, main, [data-landing]) img:not([dat
   filter: grayscale(1) sepia(0.4) contrast(1.08);
   mix-blend-mode: multiply;
 }
-html[data-design="editorial"].dark :is(.post-card, main, [data-landing]) img:not([data-no-engrave]) {
+html[data-design="editorial"].dark
+  :is(.post-card, main, [data-landing])
+  img:not([data-no-engrave]) {
   mix-blend-mode: normal;
   filter: grayscale(1) sepia(0.25) contrast(1.05) brightness(0.9);
 }
@@ -2488,9 +2511,21 @@ html[data-design="aurora"].dark {
 }
 html[data-design="aurora"] body {
   background-image:
-    radial-gradient(46rem 30rem at 8% -6%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 62%),
-    radial-gradient(44rem 30rem at 96% 8%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%),
-    radial-gradient(40rem 28rem at 50% 108%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%);
+    radial-gradient(
+      46rem 30rem at 8% -6%,
+      color-mix(in srgb, var(--primary) 26%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      44rem 30rem at 96% 8%,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      40rem 28rem at 50% 108%,
+      color-mix(in srgb, var(--primary) 14%, transparent),
+      transparent 60%
+    );
   background-attachment: fixed;
 }
 html[data-design="aurora"] h1,
@@ -2733,7 +2768,11 @@ html[data-design="aurora"] [data-funcoes-hero] {
 html[data-design="aurora"] .nc-tile {
   border: 1px solid color-mix(in srgb, var(--tile) 40%, transparent) !important;
   border-radius: 1.9rem !important;
-  background: color-mix(in srgb, var(--tile) 14%, color-mix(in srgb, var(--card) 55%, transparent)) !important;
+  background: color-mix(
+    in srgb,
+    var(--tile) 14%,
+    color-mix(in srgb, var(--card) 55%, transparent)
+  ) !important;
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
@@ -2905,7 +2944,9 @@ html[data-design="editorial"] .post-card {
   animation-delay: 200ms;
 }
 :where([data-app-main])
-  :where(article, section, li, a, div, button):where([class*="bg-card"], .post-card):nth-child(n + 6) {
+  :where(article, section, li, a, div, button):where([class*="bg-card"], .post-card):nth-child(
+    n + 6
+  ) {
   animation-delay: 250ms;
 }
 :where(a, button)[class*="bg-card"]:not(:disabled) {
@@ -2948,7 +2989,8 @@ html[data-design="editorial"] .post-card {
   :where(.grid-cols-2):not([data-free-grid], [data-funcoes-grid]) > :last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
-  :where(.grid-cols-3):not([data-free-grid], [data-funcoes-grid]) > :last-child:nth-child(3n + 1):not(:first-child) {
+  :where(.grid-cols-3):not([data-free-grid], [data-funcoes-grid])
+    > :last-child:nth-child(3n + 1):not(:first-child) {
     grid-column: 2;
   }
 }
@@ -2975,11 +3017,21 @@ html[data-design="editorial"] .post-card {
   }
 }
 @media (min-width: 768px) {
-  :where(.md\:grid-cols-2):not([data-free-grid], [data-funcoes-grid], [class*="lg:grid-cols"], [class*="xl:grid-cols"])
+  :where(.md\:grid-cols-2):not(
+      [data-free-grid],
+      [data-funcoes-grid],
+      [class*="lg:grid-cols"],
+      [class*="xl:grid-cols"]
+    )
     > :last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
-  :where(.md\:grid-cols-3):not([data-free-grid], [data-funcoes-grid], [class*="lg:grid-cols"], [class*="xl:grid-cols"])
+  :where(.md\:grid-cols-3):not(
+      [data-free-grid],
+      [data-funcoes-grid],
+      [class*="lg:grid-cols"],
+      [class*="xl:grid-cols"]
+    )
     > :last-child:nth-child(3n + 1):not(:first-child) {
     grid-column: 2;
   }
