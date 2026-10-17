@@ -1208,6 +1208,7 @@ interface Ingredient {
   gramsPerCup: number | null;
 }
 
+// Equivalências caseiras usuais (aproximadas; variam com a marca e o jeito de medir).
 const INGREDIENTS: Ingredient[] = [
   { name: ["Água / leite", "Water / milk", "Agua / leche", "Eau / lait"], gramsPerCup: null },
   {
@@ -1218,35 +1219,101 @@ const INGREDIENTS: Ingredient[] = [
     name: ["Açúcar refinado", "Granulated sugar", "Azúcar refinada", "Sucre en poudre"],
     gramsPerCup: 180,
   },
+  {
+    name: ["Açúcar mascavo", "Brown sugar", "Azúcar mascabado", "Sucre complet"],
+    gramsPerCup: 150,
+  },
   { name: ["Arroz cru", "Raw rice", "Arroz crudo", "Riz cru"], gramsPerCup: 185 },
+  { name: ["Feijão cru", "Dry beans", "Frijoles crudos", "Haricots secs"], gramsPerCup: 190 },
   {
     name: ["Aveia em flocos", "Rolled oats", "Avena en hojuelas", "Flocons d'avoine"],
     gramsPerCup: 90,
   },
-  { name: ["Óleo", "Oil", "Aceite", "Huile"], gramsPerCup: 220 },
+  { name: ["Fubá", "Cornmeal", "Harina de maíz", "Semoule de maïs"], gramsPerCup: 120 },
+  { name: ["Amido de milho", "Cornstarch", "Maicena", "Fécule de maïs"], gramsPerCup: 150 },
+  { name: ["Polvilho", "Tapioca starch", "Almidón de yuca", "Fécule de manioc"], gramsPerCup: 150 },
+  {
+    name: ["Farinha de mandioca", "Cassava flour", "Harina de yuca", "Farine de manioc"],
+    gramsPerCup: 150,
+  },
+  { name: ["Cacau em pó", "Cocoa powder", "Cacao en polvo", "Cacao en poudre"], gramsPerCup: 90 },
+  { name: ["Leite em pó", "Powdered milk", "Leche en polvo", "Lait en poudre"], gramsPerCup: 120 },
+  {
+    name: ["Coco ralado", "Grated coconut", "Coco rallado", "Noix de coco râpée"],
+    gramsPerCup: 80,
+  },
+  { name: ["Queijo ralado", "Grated cheese", "Queso rallado", "Fromage râpé"], gramsPerCup: 80 },
+  { name: ["Manteiga", "Butter", "Mantequilla", "Beurre"], gramsPerCup: 200 },
+  { name: ["Óleo / azeite", "Oil / olive oil", "Aceite", "Huile"], gramsPerCup: 220 },
+  { name: ["Mel", "Honey", "Miel", "Miel"], gramsPerCup: 340 },
+  { name: ["Sal", "Salt", "Sal", "Sel"], gramsPerCup: 290 },
 ];
 
 // Fração de 1 xícara de chá (240 ml).
 const UNITS: { name: Names; cup: number }[] = [
   { name: ["xícara", "cup", "taza", "tasse"], cup: 1 },
+  {
+    name: ["copo americano", "small glass (190 ml)", "vaso (190 ml)", "verre (190 ml)"],
+    cup: 190 / 240,
+  },
   { name: ["colher de sopa", "tablespoon", "cucharada", "cuillère à soupe"], cup: 15 / 240 },
+  {
+    name: ["colher de sobremesa", "dessert spoon", "cuchara de postre", "cuillère à dessert"],
+    cup: 10 / 240,
+  },
   { name: ["colher de chá", "teaspoon", "cucharadita", "cuillère à café"], cup: 5 / 240 },
+  { name: ["ml", "ml", "ml", "ml"], cup: 1 / 240 },
 ];
+
+const MULTIPLIERS = [0.5, 1, 2, 3];
+
+/** Número curto: até 2 casas, sem zeros à direita, com vírgula no português/espanhol/francês. */
+function shortNumber(n: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
+    maximumFractionDigits: n < 10 ? 2 : n < 100 ? 1 : 0,
+  }).format(n);
+}
 
 export function UnitConverterCard() {
   const tr = useTr();
+  const { locale } = useI18n();
   const [amount, setAmount] = useState("1");
   const [unit, setUnit] = useState(0);
   const [ing, setIng] = useState(1);
+  const [toWeight, setToWeight] = useState(true);
+  const [times, setTimes] = useState(1);
 
-  const qty = Number(amount.replace(",", "."));
-  const cups = Number.isFinite(qty) ? qty * UNITS[unit].cup : 0;
+  const switchMode = (weightMode: boolean) => {
+    if (weightMode === toWeight) return;
+    setToWeight(weightMode);
+    setAmount(weightMode ? "1" : "100");
+  };
+
   const item = INGREDIENTS[ing];
-  const result =
-    item.gramsPerCup === null ? Math.round(cups * 240) : Math.round(cups * item.gramsPerCup);
+  const liquid = item.gramsPerCup === null;
+  const perCup = item.gramsPerCup ?? 240;
+  const qty = Number(amount.replace(",", "."));
+  const valid = Number.isFinite(qty) && qty > 0;
+  const base = valid ? qty * times : 0;
+
+  // Medida → gramas (ou ml).
+  const weight = Math.round(base * UNITS[unit].cup * perCup);
+  // Gramas (ou ml) → medidas caseiras mais úteis.
+  const cups = base / perCup;
+  const asMeasures = [
+    { name: UNITS[0].name, v: cups },
+    { name: UNITS[2].name, v: cups / UNITS[2].cup },
+    { name: UNITS[4].name, v: cups / UNITS[4].cup },
+  ];
 
   const field =
     "w-full rounded-xl border border-input bg-background px-2.5 py-2 text-xs text-foreground outline-none focus:border-accent";
+  const seg = (on: boolean) =>
+    `flex-1 cursor-pointer rounded-full px-2 py-1.5 text-[11px] font-bold transition ${
+      on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+    }`;
+  const massUnit = liquid ? "ml" : "g";
+
   return (
     <Panel
       title={tr([
@@ -1256,24 +1323,46 @@ export function UnitConverterCard() {
         "Mesures de cuisine",
       ])}
     >
+      <div className="mb-3 flex gap-1 rounded-full bg-secondary/60 p-1" role="group">
+        <button
+          type="button"
+          className={seg(toWeight)}
+          onClick={() => switchMode(true)}
+          aria-pressed={toWeight}
+        >
+          {tr(["Medida → gramas", "Measure → grams", "Medida → gramos", "Mesure → grammes"])}
+        </button>
+        <button
+          type="button"
+          className={seg(!toWeight)}
+          onClick={() => switchMode(false)}
+          aria-pressed={!toWeight}
+        >
+          {tr(["Gramas → medida", "Grams → measure", "Gramos → medida", "Grammes → mesure"])}
+        </button>
+      </div>
       <div className="grid grid-cols-[4.5rem_1fr] gap-2">
         <input
           type="number"
           min="0"
-          step="0.25"
+          step="any"
           inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           className={field}
           aria-label={tr(["Quantidade", "Amount", "Cantidad", "Quantité"])}
         />
-        <select value={unit} onChange={(e) => setUnit(Number(e.target.value))} className={field}>
-          {UNITS.map((u, i) => (
-            <option key={i} value={i}>
-              {tr(u.name)}
-            </option>
-          ))}
-        </select>
+        {toWeight ? (
+          <select value={unit} onChange={(e) => setUnit(Number(e.target.value))} className={field}>
+            {UNITS.map((u, i) => (
+              <option key={i} value={i}>
+                {tr(u.name)}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className={`${field} flex items-center font-semibold`}>{massUnit}</span>
+        )}
       </div>
       <select
         value={ing}
@@ -1286,17 +1375,46 @@ export function UnitConverterCard() {
           </option>
         ))}
       </select>
-      <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-accent-soft/60 py-3 text-foreground">
-        <Scale className="h-4 w-4 text-accent" />
-        <span className="text-lg font-black tabular-nums">≈ {result}</span>
-        <span className="text-xs font-semibold">{item.gramsPerCup === null ? "ml" : "g"}</span>
+      <div className="mt-2 flex items-center gap-1.5">
+        <span className="text-[11px] font-semibold text-muted-foreground">
+          {tr(["Receita", "Recipe", "Receta", "Recette"])}
+        </span>
+        {MULTIPLIERS.map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setTimes(m)}
+            aria-pressed={times === m}
+            className={`${iconBtn} ${times === m ? "!bg-accent !text-accent-foreground" : ""}`}
+          >
+            ×{m === 0.5 ? "½" : m}
+          </button>
+        ))}
       </div>
+      {toWeight ? (
+        <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-accent-soft/60 py-3 text-foreground">
+          <Scale className="h-4 w-4 text-accent" />
+          <span className="text-lg font-black tabular-nums">≈ {valid ? weight : 0}</span>
+          <span className="text-xs font-semibold">{massUnit}</span>
+        </div>
+      ) : (
+        <ul className="mt-3 divide-y divide-border/60 rounded-2xl bg-accent-soft/60 px-3 text-foreground">
+          {asMeasures.map((m, i) => (
+            <li key={i} className="flex items-baseline justify-between py-2">
+              <span className="text-xs font-semibold">{tr(m.name)}</span>
+              <span className="text-base font-black tabular-nums">
+                ≈ {valid ? shortNumber(m.v, locale) : 0}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
       <p className={note}>
         {tr([
-          "Valores aproximados: xícara de chá de 240 ml. Varia com a marca e com o jeito de medir.",
-          "Approximate values: 240 ml cup. They vary with brand and how you measure.",
-          "Valores aproximados: taza de 240 ml. Varían con la marca y la forma de medir.",
-          "Valeurs approximatives : tasse de 240 ml. Elles varient selon la marque et la mesure.",
+          "Valores aproximados: xícara de chá de 240 ml, copo americano de 190 ml. Varia com a marca e com o jeito de medir.",
+          "Approximate values: 240 ml cup, 190 ml glass. They vary with brand and how you measure.",
+          "Valores aproximados: taza de 240 ml, vaso de 190 ml. Varían con la marca y la forma de medir.",
+          "Valeurs approximatives : tasse de 240 ml, verre de 190 ml. Elles varient selon la marque et la mesure.",
         ])}
       </p>
     </Panel>
