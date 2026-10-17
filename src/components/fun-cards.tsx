@@ -52,6 +52,9 @@ import { EmojiIcon } from "@/components/emoji-icon";
 import { HABIT_CATALOG, MAX_HABITS, MIN_HABITS, useHabitChoice } from "@/lib/habits";
 import { MORE_QUESTIONS, type QuizQuestion } from "@/lib/quiz-questions";
 import { MORE_TIPS, type TipTheme } from "@/lib/daily-tips";
+import { guessSection } from "@/lib/aisles";
+import { SECTION_NAMES } from "@/lib/menu";
+import { SECTIONS, type Section } from "@/lib/menu.functions";
 import { Panel } from "@/components/rail-cards";
 import { WaterTracker } from "@/components/water-tracker";
 import {
@@ -1808,15 +1811,24 @@ export function ShoppingListCard() {
     }
   }, [user, list.isSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Vários itens de uma vez, separados por vírgula ou ponto e vírgula.
   const add = (e: React.FormEvent) => {
     e.preventDefault();
-    const text = draft.trim().slice(0, 80);
-    if (!text || !user) return;
-    addItems.mutate({ texts: [text] });
+    const texts = draft
+      .split(/[,;\n]/)
+      .map((t) => t.trim().slice(0, 80))
+      .filter(Boolean);
+    if (!texts.length || !user) return;
+    addItems.mutate({ texts });
     setDraft("");
     playSound("click");
   };
   const done = items.filter((i) => i.done);
+  // Agrupado pela seção do mercado (a do Cardápio, ou adivinhada pelo nome do item).
+  const groups = SECTIONS.map((sec) => ({
+    sec,
+    list: items.filter((it) => ((it.section as Section | null) ?? guessSection(it.text)) === sec),
+  })).filter((g) => g.list.length > 0);
 
   return (
     <Panel
@@ -1839,10 +1851,10 @@ export function ShoppingListCard() {
           onChange={(e) => setDraft(e.target.value)}
           maxLength={80}
           placeholder={tr([
-            "Ex.: tomate, aveia…",
-            "E.g. tomato, oats…",
-            "Ej.: tomate, avena…",
-            "Ex. : tomate, avoine…",
+            "Ex.: tomate, aveia, ovos",
+            "E.g. tomato, oats, eggs",
+            "Ej.: tomate, avena, huevos",
+            "Ex. : tomate, avoine, œufs",
           ])}
           className="min-w-0 flex-1 rounded-xl border border-input bg-background px-2.5 py-2 text-xs outline-none focus:border-accent"
         />
@@ -1866,38 +1878,58 @@ export function ShoppingListCard() {
           ])}
         </p>
       ) : (
-        <ul className="mt-3 max-h-48 space-y-1 overflow-y-auto">
-          {items.map((it) => (
-            <li
-              key={it.id}
-              className="group flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-secondary/60"
-            >
-              <button
-                type="button"
-                onClick={() => update.mutate({ id: it.id, done: !it.done })}
-                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
-                aria-pressed={it.done}
-              >
-                <CheckCircle2
-                  className={`h-4 w-4 shrink-0 ${it.done ? "text-accent" : "text-muted-foreground/50"}`}
-                />
-                <span
-                  className={`truncate text-xs ${it.done ? "text-muted-foreground line-through" : "text-foreground"}`}
-                >
-                  {it.text}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => remove.mutate([it.id])}
-                className="cursor-pointer text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100 focus:opacity-100"
-                aria-label={tr(["Remover", "Remove", "Quitar", "Retirer"])}
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="mt-3 flex items-center gap-2">
+            <div className="flex-1">
+              <Bar value={done.length} max={items.length} />
+            </div>
+            <span className="text-[11px] font-bold tabular-nums text-foreground">
+              {done.length}/{items.length}
+            </span>
+          </div>
+          <div className="mt-2 max-h-64 space-y-2 overflow-y-auto pr-1">
+            {groups.map(({ sec, list: group }) => (
+              <section key={sec}>
+                <p className="mb-0.5 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {tr(SECTION_NAMES[sec])}
+                  <span className="tabular-nums">{group.filter((i) => !i.done).length}</span>
+                </p>
+                <ul className="space-y-0.5">
+                  {group.map((it) => (
+                    <li
+                      key={it.id}
+                      className="group flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-secondary/60"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => update.mutate({ id: it.id, done: !it.done })}
+                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
+                        aria-pressed={it.done}
+                      >
+                        <CheckCircle2
+                          className={`h-4 w-4 shrink-0 ${it.done ? "text-accent" : "text-muted-foreground/50"}`}
+                        />
+                        <span
+                          className={`truncate text-xs ${it.done ? "text-muted-foreground line-through" : "text-foreground"}`}
+                        >
+                          {it.text}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => remove.mutate([it.id])}
+                        className="cursor-pointer text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100 focus:opacity-100"
+                        aria-label={tr(["Remover", "Remove", "Quitar", "Retirer"])}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </>
       )}
       <div className="mt-3 flex flex-col items-start gap-1">
         <Link to="/geladeira" className="text-[11px] font-semibold text-accent hover:underline">

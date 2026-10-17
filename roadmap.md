@@ -113,6 +113,7 @@ do admin (Design do site) escolhe qual está no ar.
    - [x] T1i Dica do dia: 42 dicas (eram 12) com tema e ícone (cozinha, compras, rótulos, hábitos, hidratação), salvar as preferidas
    - [x] T1j Água de hoje: sequência de dias na meta, mapa das últimas 5 semanas, litros no período, sugestão de meta pelo peso (~35 ml/kg); semana visível também em Funções
    - [x] T1k Compromisso da semana: histórico das 4 semanas anteriores em barras e a melhor semana
+   - [x] T1l Lista de compras: vários itens de uma vez (vírgula), agrupada por seção do mercado (classificador por palavras, sem IA, src/lib/aisles.ts), progresso das compras
 8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
 10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)

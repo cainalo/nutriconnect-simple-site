@@ -214,6 +214,16 @@ if (q.get("water")) {
     })));
   }
 }
+// Lista de compras de exemplo (&shop=1).
+if (q.get("shop")) {
+  const it = (id: string, text: string, done = false, section: string | null = null) => ({
+    id, text, done, section, user_id: "u1", household_id: null, bought_by: null, created_at: now, source: "manual",
+  });
+  qc.setQueryData(["shopping", "pessoal"], [
+    it("1", "Tomates"), it("2", "Cebola", true), it("3", "Ovos"), it("4", "Peito de frango"),
+    it("5", "Leite"), it("6", "Pão francês"), it("7", "Feijão carioca", true), it("8", "Aveia"), it("9", "Detergente"),
+  ]);
+}
 const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
 // v=page&p=funcoes → monta o componente da rota src/routes/funcoes.tsx (Supabase simulado e vazio).
 const ROUTES = import.meta.glob("../src/routes/*.tsx");
