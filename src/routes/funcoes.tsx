@@ -86,6 +86,7 @@ import { useShoppingItems } from "@/lib/fridge";
 import { themeText } from "@/lib/social/feed";
 import { useActiveTheme } from "@/lib/social/feed-queries";
 import { useWaterDays, useWaterSettings, waterDay, DEFAULT_GOAL } from "@/lib/water";
+import { useSitePhotos } from "@/lib/site-photos";
 
 export const Route = createFileRoute("/funcoes")({
   head: () => ({
@@ -1055,6 +1056,7 @@ function TileCard({
   onOpen: () => void;
 }) {
   const tr = useTr();
+  const photos = useSitePhotos();
   const ref = useRef<HTMLElement | null>(null);
   // Inclina o card na direção do mouse (só com mouse; no toque ele só afunda um pouco).
   const onMove = (e: React.PointerEvent) => {
@@ -1082,7 +1084,7 @@ function TileCard({
   };
   const body = (
     <>
-      {tile.photo && (
+      {photos && tile.photo && (
         <img
           src={tile.photo}
           alt=""

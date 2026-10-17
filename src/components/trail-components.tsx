@@ -31,6 +31,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { LEVEL_LABEL_KEYS } from "@/lib/i18n/content";
 import type { DictKey } from "@/lib/i18n";
 import { EmojiIcon } from "@/components/emoji-icon";
+import { useSitePhotos } from "@/lib/site-photos";
 
 /* ------------------------------ Cabeçalho ------------------------------ */
 
@@ -323,6 +324,7 @@ export function TrailPicker({
   variant: ProfileKind;
 }) {
   const { t } = useI18n();
+  const photos = useSitePhotos();
   const adult = variant === "adult";
   return (
     <div className="mb-8">
@@ -353,7 +355,7 @@ export function TrailPicker({
                   : "border-border bg-card hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               }`}
             >
-              {TRAIL_PHOTOS.has(trail.id) && (
+              {photos && TRAIL_PHOTOS.has(trail.id) && (
                 <span className="relative -mx-5 -mt-5 mb-4 block h-28 overflow-hidden">
                   <img
                     src={`/images/trail/${trail.id}.jpg`}

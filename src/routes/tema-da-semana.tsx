@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { AppScreen } from "@/components/app-screen";
 import { EmptyPhoto } from "@/components/clinical/ui";
+import { useSitePhotos } from "@/lib/site-photos";
 
 export const Route = createFileRoute("/tema-da-semana")({
   head: () => ({
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/tema-da-semana")({
 });
 
 function TemaDaSemanaPage() {
+  const photos = useSitePhotos();
   const { user, hydrated: authHydrated } = useRequireAuth();
   const { t, locale } = useI18n();
   const tr = useTr();
@@ -71,7 +73,13 @@ function TemaDaSemanaPage() {
             {t("theme.loading")}
           </div>
         ) : !theme || !text ? (
-          <div className="mx-auto max-w-xl overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-6 text-center text-sm text-muted-foreground">
+          <div
+            className={
+              photos
+                ? "mx-auto max-w-xl overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-6 text-center text-sm text-muted-foreground"
+                : "py-12 text-center text-sm text-muted-foreground"
+            }
+          >
             <EmptyPhoto src="/images/presentation/cutting-board.jpg" className="-mx-6 -mt-6 mb-5" />
             {tr([
               "O tema desta semana ainda está sendo preparado. Volte em breve!",

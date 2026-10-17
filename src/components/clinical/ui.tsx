@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { initials } from "@/lib/clinical/format";
 import { useClinicalI18n, type ClinicalKey } from "@/lib/clinical/i18n";
 import type { AppointmentStatus, LinkStatus, PaymentStatus } from "@/lib/clinical/api";
+import { useSitePhotos } from "@/lib/site-photos";
 
 /**
  * O app justifica textos dentro de cards (styles.css). Nas telas clínicas, cheias de rótulos
@@ -96,6 +97,8 @@ export function EmptyState({
   /** Foto no alto do card (fotos de public/images), com o ícone sobre a borda dela. */
   photo?: string;
 }) {
+  const photos = useSitePhotos();
+  if (!photos) photo = undefined;
   return (
     <div className="flex flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border border-dashed border-border/60 bg-card/30 backdrop-blur-sm px-6 py-12 text-center transition-all duration-300 hover:bg-card/50">
       {photo && <EmptyPhoto src={photo} className="-mx-6 -mt-12 mb-0" />}
@@ -116,6 +119,8 @@ export function EmptyState({
 
 /** Faixa de foto para o alto de um card vazio; quem usa ajusta as margens ao padding do card. */
 export function EmptyPhoto({ src, className }: { src: string; className?: string }) {
+  const photos = useSitePhotos();
+  if (!photos) return null;
   return (
     <span
       aria-hidden="true"

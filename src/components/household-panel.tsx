@@ -64,6 +64,7 @@ import {
 import type { PersonCard } from "@/lib/social/api";
 import { useFriends } from "@/lib/social/queries";
 import { cn } from "@/lib/utils";
+import { useSitePhotos } from "@/lib/site-photos";
 
 const card = "rounded-3xl border border-border/70 bg-card p-5 shadow-xs";
 const btnPrimary =
@@ -914,6 +915,7 @@ function LeaveHouse() {
 /** Geladeira e cardápio, que também passam a ser da casa. */
 function HouseKitchen() {
   const tr = useTr();
+  const photos = useSitePhotos();
   const links = [
     {
       to: "/geladeira" as const,
@@ -961,17 +963,24 @@ function HouseKitchen() {
           )}
         >
           {/* Mesma foto da faixa de título da página de destino. */}
-          <span className="relative block h-24 overflow-hidden">
-            <img
-              src={`/images/heads${l.to}.jpg`}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-            />
-          </span>
+          {photos && (
+            <span className="relative block h-24 overflow-hidden">
+              <img
+                src={`/images/heads${l.to}.jpg`}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+              />
+            </span>
+          )}
           <span className="flex items-start gap-3 p-4">
-            <span className="relative z-10 -mt-9 grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-card text-accent shadow-md ring-4 ring-card">
+            <span
+              className={cn(
+                "relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-accent",
+                photos ? "-mt-9 bg-card shadow-md ring-4 ring-card" : "bg-accent-soft",
+              )}
+            >
               <l.icon className="h-5 w-5" />
             </span>
             <span className="min-w-0">

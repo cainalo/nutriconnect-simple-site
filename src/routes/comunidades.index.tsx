@@ -12,6 +12,7 @@ import { CommunityCategoriesCard, CommunitySearchCard } from "@/components/rail-
 import { useCommunities } from "@/lib/social/communities-queries";
 import { useI18n } from "@/hooks/use-i18n";
 import { EmptyPhoto } from "@/components/clinical/ui";
+import { useSitePhotos } from "@/lib/site-photos";
 
 export const Route = createFileRoute("/comunidades/")({
   head: () => ({
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/comunidades/")({
 });
 
 function ComunidadesPage() {
+  const photos = useSitePhotos();
   const { user } = useAuth();
   const { t } = useI18n();
   // As comunidades vêm do banco, que já esconde as pendentes de quem não pode vê-las.
@@ -96,7 +98,13 @@ function ComunidadesPage() {
             </p>
           )}
           {hydrated && communities.length === 0 && (
-            <div className="col-span-full overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-6 text-center">
+            <div
+              className={
+                photos
+                  ? "col-span-full overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-6 text-center"
+                  : "col-span-full"
+              }
+            >
               <EmptyPhoto src="/images/presentation/friends.jpg" className="-mx-6 -mt-6 mb-5" />
               <p className="text-sm text-muted-foreground">{t("comunidades.noneYet")}</p>
             </div>

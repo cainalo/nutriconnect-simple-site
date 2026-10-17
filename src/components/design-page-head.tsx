@@ -1,18 +1,22 @@
 // Cabeçalho de página próprio de cada design do site, mostrado no topo das páginas internas
 // (Comunidades, Desafios, Acompanhamento, Painel...), inclusive no Natural; Espaço e Funções
-// já têm abertura própria. Texto, ícone e a foto da área: nada aqui muda o conteúdo da página.
+// já têm abertura própria. Texto, ícone e a foto da área (ou só ícones, no site sem fotos):
+// nada aqui muda o conteúdo da página.
 import { useRouterState } from "@tanstack/react-router";
 import {
   Award,
   Bell,
   BookOpenText,
   CalendarRange,
+  Apple,
   Backpack,
+  Carrot,
   ChefHat,
   HeartHandshake,
   HeartPulse,
   House,
   LayoutDashboard,
+  Leaf,
   Refrigerator,
   Search,
   ShoppingBag,
@@ -22,6 +26,7 @@ import {
 } from "lucide-react";
 import { useTr } from "@/components/settings-ui";
 import { useDesignId } from "@/lib/site-design";
+import { useSitePhotos } from "@/lib/site-photos";
 import type { Names } from "@/lib/appearance-data";
 
 interface HeadDef {
@@ -242,6 +247,38 @@ function useHead(): (HeadDef & { photo: string }) | null {
   return def ? { ...def, photo: `/images/heads${key}.jpg` } : null;
 }
 
+/** Ícones que flutuam na faixa, como na abertura de Funções (só enfeite; some em telas estreitas). */
+function Floaters({
+  icon: Icon,
+  color,
+  light,
+}: {
+  icon: LucideIcon;
+  color: string;
+  light?: boolean;
+}) {
+  const items: { I: LucideIcon; c: string; cls: string; d: string }[] = [
+    { I: Icon, c: color, cls: "right-[30%] top-3", d: "0s" },
+    { I: Apple, c: "#d6456b", cls: "right-[16%] bottom-3", d: "-1.4s" },
+    { I: Carrot, c: "#d9692a", cls: "right-6 top-4", d: "-2.2s" },
+    { I: Leaf, c: "#4f8a4b", cls: "right-[44%] bottom-4", d: "-3s" },
+  ];
+  return (
+    <>
+      {items.map(({ I, c, cls, d }, i) => (
+        <span
+          key={i}
+          aria-hidden="true"
+          className={`nc-floaty pointer-events-none absolute hidden opacity-50 md:block ${cls}`}
+          style={{ animationDelay: d }}
+        >
+          <I className="h-5 w-5" style={{ color: light ? "rgb(255 255 255 / 0.8)" : c }} />
+        </span>
+      ))}
+    </>
+  );
+}
+
 /** Foto da área, presa à direita da faixa e dissolvida para a esquerda (só enfeite). */
 function HeadPhoto({
   src,
@@ -274,7 +311,9 @@ export function DesignPageHead() {
   const design = useDesignId();
   const head = useHead();
   const tr = useTr();
+  const photos = useSitePhotos();
   if (!head) return null;
+  if (!photos) return <PlainHead design={design} head={head} />;
   const Icon = head.icon;
 
   if (design === "natural") {
@@ -387,6 +426,107 @@ export function DesignPageHead() {
             {tr(head.title)}
           </p>
           <p className="!text-left text-xs text-muted-foreground sm:text-sm">{tr(head.text)}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Versão anterior, sem foto (Admin → Design e imagens → "Site anterior"). */
+function PlainHead({ design, head }: { design: string; head: HeadDef }) {
+  const tr = useTr();
+  const Icon = head.icon;
+
+  if (design === "natural") {
+    // Mesma linguagem da abertura de Funções: fundo de cores suaves que corre devagar, ícones
+    // flutuando e o selo do ícone que gira de leve ao passar o mouse.
+    return (
+      <div data-design-head className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+        <div
+          className="nc-tile-in nc-gradient-pan group relative flex items-center gap-4 overflow-hidden rounded-[1.75rem] border border-border/60 p-4 shadow-soft sm:p-5"
+          style={{
+            background: `linear-gradient(120deg, color-mix(in srgb, ${head.color} 22%, var(--card)), color-mix(in srgb, #f6c27a 22%, var(--card)), color-mix(in srgb, #9fd18c 20%, var(--card)), color-mix(in srgb, ${head.color} 16%, var(--card)))`,
+          }}
+        >
+          <Floaters icon={Icon} color={head.color} />
+          <span
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white shadow-md transition duration-300 group-hover:-rotate-6 group-hover:scale-110"
+            style={{
+              background: `linear-gradient(145deg, ${head.color}, color-mix(in srgb, ${head.color} 70%, #000))`,
+            }}
+          >
+            <Icon className="h-6 w-6" />
+          </span>
+          <div className="relative min-w-0">
+            <p className="!text-left font-display text-xl font-bold leading-tight text-foreground sm:text-2xl">
+              {tr(head.title)}
+            </p>
+            <p className="mt-0.5 !text-left text-sm text-foreground/75">{tr(head.text)}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (design === "vibrante") {
+    return (
+      <div data-design-head className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+        <div
+          className="nc-tile-in group relative flex items-center gap-4 overflow-hidden rounded-[2rem] p-4 text-white shadow-card sm:p-5"
+          style={{
+            background: `linear-gradient(120deg, ${head.color}, color-mix(in srgb, ${head.color} 70%, #000))`,
+          }}
+        >
+          <Floaters icon={Icon} color={head.color} light />
+          <Icon className="nc-floaty pointer-events-none absolute -right-3 -top-3 h-28 w-28 text-white/15" />
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/25 transition duration-300 group-hover:-rotate-6 group-hover:scale-110">
+            <Icon className="h-6 w-6" />
+          </span>
+          <div className="relative min-w-0">
+            <p className="!text-left font-display text-xl font-black text-white sm:text-2xl">
+              {tr(head.title)}
+            </p>
+            <p className="!text-left text-sm text-white/90">{tr(head.text)}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (design === "editorial") {
+    return (
+      <div data-design-head className="nc-tile-in mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+        <div className="border-y-4 border-double border-foreground py-3 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent">
+            {tr(["Seção", "Section", "Sección", "Rubrique"])}
+          </p>
+          <p className="mt-1 !text-center font-display text-3xl font-bold leading-none sm:text-4xl">
+            {tr(head.title)}
+          </p>
+          <p className="mt-1.5 !text-center text-sm italic text-muted-foreground">
+            {tr(head.text)}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // aurora
+  return (
+    <div data-design-head className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+      <div className="nc-tile-in group relative flex items-center gap-3 overflow-hidden rounded-full border border-foreground/10 bg-card/60 py-2 pl-2 pr-6 shadow-xl backdrop-blur-xl">
+        <Floaters icon={Icon} color={head.color} />
+        <span
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-white transition duration-300 group-hover:-rotate-6 group-hover:scale-110"
+          style={{ background: head.color }}
+        >
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="relative min-w-0">
+          <p className="!text-left font-display text-lg font-semibold text-primary">
+            {tr(head.title)}
+          </p>
+          <p className="!text-left truncate text-xs text-muted-foreground">{tr(head.text)}</p>
         </div>
       </div>
     </div>

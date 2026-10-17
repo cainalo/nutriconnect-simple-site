@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import type { Names } from "@/lib/appearance-data";
 import { useAddShoppingItems } from "@/lib/fridge";
 import { useSeasonUf } from "@/lib/season";
+import { useSitePhotos } from "@/lib/site-photos";
 import {
   KIND_NAMES,
   MONTH_NAMES,
@@ -81,6 +82,36 @@ const SEASON_PHOTOS = new Set([
   "uva",
   "vagem",
 ]);
+/** Versão anterior (site sem fotos): recortes em fundo branco em public/images/season-cutout
+ * (Fruits-360, CC BY-SA 4.0; créditos lá). */
+const SEASON_CUTOUTS = new Set([
+  "abacate",
+  "abacaxi",
+  "abobrinha",
+  "banana",
+  "batata-doce",
+  "berinjela",
+  "beterraba",
+  "caqui",
+  "cenoura",
+  "couve-flor",
+  "goiaba",
+  "laranja",
+  "limao",
+  "maca",
+  "mamao",
+  "manga",
+  "maracuja",
+  "melancia",
+  "milho",
+  "morango",
+  "pepino",
+  "pessego",
+  "pimentao",
+  "repolho",
+  "tangerina",
+  "tomate",
+]);
 /** Rótulo para quem buscou um alimento fora da época. */
 const OFF_SEASON: Names = ["Fora de época", "Out of season", "Fuera de temporada", "Hors saison"];
 const plainText = (t: string) =>
@@ -130,20 +161,37 @@ function UfSelect({ className }: { className?: string }) {
   );
 }
 
-function MonthsBar({ food, region }: { food: SeasonFood; region: Region }) {
+function MonthsBar({
+  food,
+  region,
+  plain,
+}: {
+  food: SeasonFood;
+  region: Region;
+  /** Card claro do site sem fotos (o padrão é por cima da foto). */
+  plain?: boolean;
+}) {
   const tr = useTr();
   const months = monthsIn(food, region);
   return (
-    <div className="mt-2 grid grid-cols-12 gap-0.5" aria-hidden>
+    <div className={cn("grid grid-cols-12 gap-0.5", plain ? "mt-3" : "mt-2")} aria-hidden>
       {MONTH_NAMES.map((m, i) => (
         <div key={i} className="text-center">
           <div
             className={cn(
               "h-1.5 rounded-full",
-              months.includes(i + 1) ? "bg-white" : "bg-white/25",
+              months.includes(i + 1)
+                ? plain
+                  ? "bg-primary"
+                  : "bg-white"
+                : plain
+                  ? "bg-secondary"
+                  : "bg-white/25",
             )}
           />
-          <span className="text-[8px] text-white/75">{tr(m).slice(0, 1)}</span>
+          <span className={cn("text-[8px]", plain ? "text-muted-foreground" : "text-white/75")}>
+            {tr(m).slice(0, 1)}
+          </span>
         </div>
       ))}
     </div>
@@ -163,11 +211,117 @@ function FoodCard({
   const { user } = useAuth();
   const add = useAddShoppingItems(user?.id);
   const [open, setOpen] = useState(false);
+  const photos = useSitePhotos();
   const months = monthsIn(food, region)
     .slice()
     .sort((a, b) => a - b)
     .map((m) => tr(MONTH_NAMES[m - 1]));
 
+  if (!photos)
+    return (
+      <li className={cn(card, "group flex flex-col overflow-hidden p-0")}>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="relative block text-left"
+        >
+          {/* Foto do alimento (fundo branco, como vitrine de feira); sem foto, o ícone grande. */}
+          <span
+            className={cn(
+              "relative grid h-36 place-items-center overflow-hidden",
+              SEASON_CUTOUTS.has(food.id) ? "bg-white" : "bg-accent-soft/70",
+            )}
+          >
+            {SEASON_CUTOUTS.has(food.id) ? (
+              <img
+                src={`/images/season-cutout/${food.id}.jpg`}
+                alt={tr(food.name)}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-contain p-2 transition duration-500 group-hover:scale-110"
+              />
+            ) : (
+              <EmojiIcon
+                emoji={food.emoji}
+                tinted
+                className="h-16 w-16 transition duration-500 group-hover:scale-110 group-hover:-rotate-6"
+              />
+            )}
+            <span
+              className={cn(
+                "absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-xs",
+                phase ? PHASE_BADGE[phase] : "bg-foreground/60 text-background",
+              )}
+            >
+              {tr(phase ? PHASE_NAMES[phase] : OFF_SEASON)}
+            </span>
+          </span>
+          <span className="block px-4 pt-3 font-display text-base font-bold text-foreground">
+            {tr(food.name)}
+          </span>
+        </button>
+        <div className="flex flex-1 flex-col px-4 pb-4">
+          <MonthsBar food={food} region={region} plain />
+          <p className="sr-only">
+            {tr(["Safra:", "Season:", "Temporada:", "Saison :"])} {months.join(", ")}
+          </p>
+          {open && (
+            <dl className="mt-3 space-y-2 text-xs text-foreground">
+              <div>
+                <dt className="font-bold text-muted-foreground">
+                  {tr(["Como escolher", "How to choose", "Cómo elegir", "Comment choisir"])}
+                </dt>
+                <dd>{tr(food.choose)}</dd>
+              </div>
+              <div>
+                <dt className="font-bold text-muted-foreground">
+                  {tr(["Como conservar", "How to store", "Cómo conservar", "Comment conserver"])}
+                </dt>
+                <dd>{tr(food.keep)}</dd>
+              </div>
+              <dd className="flex gap-1.5 rounded-xl bg-accent-soft/50 px-2 py-1.5">
+                <Leaf className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+                {tr(food.tip)}
+              </dd>
+            </dl>
+          )}
+          <div className="mt-auto pt-3">
+            <button
+              type="button"
+              disabled={!user || add.isPending}
+              onClick={() =>
+                add.mutate(
+                  { texts: [{ text: tr(food.name), section: "hortifruti" }], source: "manual" },
+                  {
+                    onSuccess: (n) =>
+                      toast.success(
+                        n
+                          ? tr([
+                              "Na sua lista de compras.",
+                              "On your shopping list.",
+                              "En tu lista de compras.",
+                              "Dans votre liste de courses.",
+                            ])
+                          : tr([
+                              "Já estava na lista.",
+                              "Already on the list.",
+                              "Ya estaba en la lista.",
+                              "Déjà dans la liste.",
+                            ]),
+                      ),
+                    onError: (err) => toast.error((err as Error).message),
+                  },
+                )
+              }
+              className={btnSoft}
+            >
+              <ShoppingBasket className="h-3.5 w-3.5" />
+              {tr(["Pôr na lista", "Add to list", "Añadir a la lista", "Ajouter à la liste"])}
+            </button>
+          </div>
+        </div>
+      </li>
+    );
   return (
     <li className="group relative isolate flex min-h-72 flex-col overflow-hidden rounded-3xl border border-border/70 bg-primary text-white shadow-xs">
       {/* A foto do alimento é o fundo do card inteiro; o escuro de baixo deixa o texto legível. */}

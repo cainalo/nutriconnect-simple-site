@@ -49,6 +49,7 @@ import {
 } from "@/lib/fridge.functions";
 import type { Names } from "@/lib/appearance-data";
 import { useSeasonUf } from "@/lib/season";
+import { useSitePhotos } from "@/lib/site-photos";
 import { guessSection } from "@/lib/aisles";
 import { BASIC_RECIPES, type BasicRecipe } from "@/lib/basic-recipes";
 import { seasonFoods } from "@/lib/season-data";
@@ -357,6 +358,7 @@ function BasicIdeas({ items }: { items: string[] }) {
   const { user } = useAuth();
   const add = useAddShoppingItems(user?.id);
   const [open, setOpen] = useState<string | null>(null);
+  const photos = useSitePhotos();
   const have = items.map(plainText).filter((t) => t.length >= 3);
   const hasIt = (key: string) => have.some((h) => h.includes(key) || key.includes(h));
   const ranked = BASIC_RECIPES.map((r) => {
@@ -405,9 +407,16 @@ function BasicIdeas({ items }: { items: string[] }) {
               type="button"
               onClick={() => setOpen(open === r.id ? null : r.id)}
               aria-expanded={open === r.id}
-              className="relative isolate flex h-36 items-end gap-3 p-4 text-left text-white"
+              className={cn(
+                "relative isolate flex text-left",
+                photos ? "h-36 items-end gap-3 p-4 text-white" : "items-start gap-3 px-4 pt-4",
+              )}
             >
-              {BASIC_PHOTOS.has(r.id) ? (
+              {!photos ? (
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
+                  <ChefHat className="h-5 w-5" />
+                </span>
+              ) : BASIC_PHOTOS.has(r.id) ? (
                 <img
                   src={`/images/recipes/${r.id}.jpg`}
                   alt=""
@@ -423,15 +432,29 @@ function BasicIdeas({ items }: { items: string[] }) {
                   <ChefHat className="absolute right-4 top-4 h-16 w-16 text-white/30 transition duration-500 group-hover:-rotate-6 group-hover:scale-110" />
                 </span>
               )}
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/30 to-black/0"
-              />
+              {photos && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/30 to-black/0"
+                />
+              )}
               <span className="min-w-0 flex-1">
-                <span className="block font-display text-base font-bold text-white drop-shadow">
+                <span
+                  className={cn(
+                    "block font-bold",
+                    photos
+                      ? "font-display text-base text-white drop-shadow"
+                      : "text-sm text-foreground",
+                  )}
+                >
                   {tr(r.title)}
                 </span>
-                <span className="mt-0.5 flex items-center gap-1 text-[11px] text-white/85">
+                <span
+                  className={cn(
+                    "mt-0.5 flex items-center gap-1 text-[11px]",
+                    photos ? "text-white/85" : "text-muted-foreground",
+                  )}
+                >
                   <Clock className="h-3 w-3" /> {r.minutes} min ·{" "}
                   {missing.length === 0
                     ? tr(["você tem tudo", "you have everything", "tienes todo", "vous avez tout"])
@@ -444,7 +467,7 @@ function BasicIdeas({ items }: { items: string[] }) {
                 </span>
               </span>
             </button>
-            <p className="mt-3 px-4 text-left text-xs text-foreground">
+            <p className={cn("px-4 text-left text-xs text-foreground", photos ? "mt-3" : "mt-2")}>
               {r.ingredients.map(([key, name], i) => (
                 <span key={key}>
                   {i > 0 && ", "}

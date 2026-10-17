@@ -67,7 +67,7 @@ export const SECTIONS: SectionDef[] = [
   { id: "redes", label: "Redes sociais", icon: Share2, group: "Conteúdo" },
   { id: "site_features", label: "Funcionalidades", icon: ToggleRight, group: "Site" },
   { id: "site_nina", label: "Nina", icon: Smile, group: "Site" },
-  { id: "site_design", label: "Design do site", icon: Palette, group: "Site" },
+  { id: "site_design", label: "Design e imagens", icon: Palette, group: "Site" },
   { id: "financeiro", label: "Financeiro", icon: Banknote, group: "Negócio" },
   { id: "mercados", label: "Mercados parceiros", icon: ShoppingCart, group: "Negócio" },
   { id: "ia", label: "Inteligência artificial", icon: Brain, group: "Sistema" },

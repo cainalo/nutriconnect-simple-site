@@ -251,8 +251,11 @@ function CardDemo() {
   const Card = (FunCards as any)[q.get("c") ?? "HabitCheckinCard"];
   return <RouterApp><div className="mx-auto max-w-md p-4">{Card ? <Card /> : "card?"}</div></RouterApp>;
 }
+// v=photos → painel "Imagens do site" do admin, sozinho.
+import { SitePhotosSection } from "@/components/admin/sections-site-photos";
 function App() {
   if (v === "card") return <CardDemo />;
+  if (v === "photos") return wrap(<SitePhotosSection />);
   if (v === "page") return <PageDemo />;
   if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);
   if (v === "calendar") return wrap(<CalendarTab onOpen={() => {}} onNew={() => {}} />);

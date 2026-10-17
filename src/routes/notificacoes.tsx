@@ -58,6 +58,7 @@ import {
 } from "@/lib/social/queries";
 import { AppScreen } from "@/components/app-screen";
 import { EmptyPhoto } from "@/components/clinical/ui";
+import { useSitePhotos } from "@/lib/site-photos";
 
 export const Route = createFileRoute("/notificacoes")({
   head: () => ({
@@ -721,6 +722,7 @@ function useDark() {
 }
 
 function NotificacoesPage() {
+  const photos = useSitePhotos();
   const { user, hydrated: authHydrated } = useRequireAuth();
   const { t, locale } = useI18n();
   const navigate = useNavigate();
@@ -1223,9 +1225,13 @@ function NotificacoesPage() {
         {unread.length === 0 && pendingCount === 0 && !list.isLoading && (
           <div className="mt-5 overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-10 text-center">
             <EmptyPhoto src="/images/social/frutas-tropicais.jpg" className="-mx-10 -mt-10 mb-0" />
-            <span className="relative mx-auto -mt-7 mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-card text-accent shadow-md ring-4 ring-card">
-              <CheckCheck className="h-6 w-6" />
-            </span>
+            {photos ? (
+              <span className="relative mx-auto -mt-7 mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-card text-accent shadow-md ring-4 ring-card">
+                <CheckCheck className="h-6 w-6" />
+              </span>
+            ) : (
+              <CheckCheck className="mx-auto mb-3 h-9 w-9 text-accent" />
+            )}
             <p className="text-base font-semibold text-foreground">
               {empty
                 ? t("notif.empty")

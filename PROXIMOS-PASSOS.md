@@ -73,7 +73,11 @@ Lovable e para o site).
   (`public/images/heads`), cards da Feira (`images/season`, 40 de 45), receitas básicas da
   Geladeira (`images/recipes`, 12 de 14), temas da Trilha (`images/trail`), atalhos da Casa, os
   cards altos de Funções e os estados vazios (`EmptyPhoto` em `components/clinical/ui.tsx`;
-  usar foto diferente da faixa de título logo acima). Sem foto ainda: jabuticaba, pequi, umbu, cupuaçu, rúcula, cuscuz e
+  usar foto diferente da faixa de título logo acima).
+  O admin escolhe **site com fotos** ou **site anterior (menos imagens)** em Admin → Design e
+  imagens → "Imagens do site" (chave `site_photos`; `useSitePhotos()` em `lib/site-photos.ts`;
+  "Testar" vale só no navegador). Toda foto nova precisa respeitar `useSitePhotos()` e, sem ela,
+  mostrar a versão anterior. Os recortes antigos da Feira ficam em `images/season-cutout`. Sem foto ainda: jabuticaba, pequi, umbu, cupuaçu, rúcula, cuscuz e
   tapioca (o acervo aberto não tem). Daqui só se alcança o Open Images (S3/GCS, CC BY 2.0, créditos
   obrigatórios no CREDITS.md de cada pasta); Unsplash/Wikimedia são bloqueados.
 - Textos do app nos 4 idiomas (pt-BR, en, es, fr) no padrão `tr([pt, en, es, fr])`.

@@ -24,6 +24,8 @@ import { NINA_TOPICS } from "@/components/rail-cards";
 import { useTr } from "@/components/settings-ui";
 import { useLinks } from "@/lib/clinical/queries";
 import { EmptyPhoto } from "@/components/clinical/ui";
+import { useSitePhotos } from "@/lib/site-photos";
+import { cn } from "@/lib/utils";
 import {
   dismissPrompt,
   isPromptDismissed,
@@ -60,6 +62,7 @@ interface ChatMessage {
 }
 
 function NinaPage() {
+  const photos = useSitePhotos();
   const { user, hydrated } = useRequireAuth();
   const { t, locale } = useI18n();
   const queryClient = useQueryClient();
@@ -413,9 +416,17 @@ function NinaPage() {
             <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
           )}
           {!history.isLoading && messages.length === 0 && !pending && (
-            <div className="m-auto w-full max-w-md overflow-hidden rounded-2xl border border-border/60 bg-background/60 text-center">
+            <div
+              className={
+                photos
+                  ? "m-auto w-full max-w-md overflow-hidden rounded-2xl border border-border/60 bg-background/60 text-center"
+                  : "m-auto max-w-sm text-center"
+              }
+            >
               <EmptyPhoto src="/images/social/mesa-cafe-da-manha.jpg" />
-              <p className="px-5 py-4 text-sm text-muted-foreground">{t("nina.empty")}</p>
+              <p className={cn("text-sm text-muted-foreground", photos && "px-5 py-4")}>
+                {t("nina.empty")}
+              </p>
             </div>
           )}
           {messages.map((m, i) => {
