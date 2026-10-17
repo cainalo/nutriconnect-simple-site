@@ -299,7 +299,7 @@ export function Tabs<T extends string>({
   items: { value: T; label: string; count?: number }[];
 }) {
   return (
-    <div className="-mx-1 mb-6 flex gap-2 overflow-x-auto px-1 pb-2 scroll-smooth">
+    <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scroll-smooth">
       {items.map((item) => (
         <button
           key={item.value}

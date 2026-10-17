@@ -70,7 +70,7 @@ function ProfessionalSettingsPage() {
       address: p.address ?? "",
       online_instructions: p.online_instructions ?? "",
       timezone: p.timezone,
-      specialties: p.specialties,
+      specialties: p.specialties ?? [],
     });
   }, [pro.data]);
 

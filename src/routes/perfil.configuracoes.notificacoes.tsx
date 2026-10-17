@@ -134,6 +134,7 @@ function NotificacoesPage() {
                   checked={isCategoryOn(serverSettings.data?.notification_prefs, cat)}
                   disabled={serverSettings.isLoading || setCategory.isPending}
                   onCheckedChange={(v) => setCategory.mutate({ category: cat, on: v })}
+                  aria-label={tr(title)}
                 />
               </div>
             ))}
@@ -147,6 +148,7 @@ function NotificacoesPage() {
                 </p>
               </div>
               <Switch
+                aria-label={t("settings.notifications.categories.achievements")}
                 checked={achievements}
                 disabled={serverSettings.isLoading || setCategory.isPending}
                 onCheckedChange={(v) => {
@@ -188,6 +190,12 @@ function NotificacoesPage() {
                 </p>
               </div>
               <Switch
+                aria-label={tr([
+                  "Horário de silêncio",
+                  "Quiet hours",
+                  "Horario de silencio",
+                  "Heures de silence",
+                ])}
                 checked={ap.quietOn}
                 onCheckedChange={(quietOn) => updateAppearance({ quietOn })}
               />
@@ -230,6 +238,12 @@ function NotificacoesPage() {
                 </p>
               </div>
               <Switch
+                aria-label={tr([
+                  "Mostrar o texto nos avisos",
+                  "Show text in alerts",
+                  "Mostrar el texto en los avisos",
+                  "Afficher le texte dans les alertes",
+                ])}
                 checked={ap.notifPreview}
                 onCheckedChange={(notifPreview) => updateAppearance({ notifPreview })}
               />
