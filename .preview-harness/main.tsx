@@ -1,4 +1,5 @@
 import "@/styles.css";
+import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRootRoute, createRouter, createMemoryHistory } from "@tanstack/react-router";
@@ -179,7 +180,21 @@ if (!q.get("empty")) {
   });
 }
 const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
+// v=page&p=funcoes → monta o componente da rota src/routes/funcoes.tsx (Supabase simulado e vazio).
+const ROUTES = import.meta.glob("../src/routes/*.tsx");
+function PageDemo() {
+  const [Comp, setComp] = useState<any>(null);
+  useEffect(() => {
+    const load = ROUTES[`../src/routes/${q.get("p") ?? "funcoes"}.tsx`];
+    void load?.().then((m: any) => setComp(() => m.Route.options.component));
+  }, []);
+  if (!Comp) return null;
+  const root = createRootRoute({ component: () => <Comp /> });
+  const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: ["/"] }) });
+  return <RouterProvider router={router} />;
+}
 function App() {
+  if (v === "page") return <PageDemo />;
   if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);
   if (v === "calendar") return wrap(<CalendarTab onOpen={() => {}} onNew={() => {}} />);
   if (v === "trends") return wrap(<TrendsTab onCreate={() => {}} />);

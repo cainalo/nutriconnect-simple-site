@@ -543,7 +543,7 @@ export function TrailAchievements({ unlocked }: { unlocked: string[] }) {
           {count}/{ACHIEVEMENTS.length}
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {ACHIEVEMENTS.map((a) => {
           const has = unlocked.includes(a.id);
           return (
@@ -569,11 +569,11 @@ export function TrailAchievements({ unlocked }: { unlocked: string[] }) {
               </span>
               <div className="min-w-0">
                 <p
-                  className={`truncate text-xs font-black ${has ? "text-foreground" : "text-muted-foreground"}`}
+                  className={`text-left text-xs font-black leading-tight ${has ? "text-foreground" : "text-muted-foreground"}`}
                 >
                   {t(`ach.${a.id}.title` as DictKey)}
                 </p>
-                <p className="line-clamp-2 text-[10px] font-medium leading-snug text-muted-foreground">
+                <p className="mt-0.5 line-clamp-3 text-left text-[11px] font-medium leading-snug text-muted-foreground">
                   {t(`ach.${a.id}.desc` as DictKey)}
                 </p>
               </div>

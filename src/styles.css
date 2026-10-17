@@ -171,10 +171,22 @@
   }
   /* Textos corridos dos cards ficam justificados. Vive no layer base com :where() (especificidade
      zero) para que utilitários como text-center e text-left continuem podendo sobrescrever. */
-  /* Fora disso: colunas laterais (estreitas) e textos em destaque (curtos), onde justificar abriria
-     buracos entre as palavras. */
+  /* Fora disso: colunas laterais (estreitas), blocos centralizados (estados vazios, avisos), textos
+     em destaque (curtos) e letras miúdas de dica (text-xs e menores, quase sempre em caixas
+     estreitas), onde justificar abriria buracos entre as palavras. */
   :where(article, [class*="bg-card"]):not(footer)
-    :is(p, li, dd):not(aside *, .font-display, .font-bold, .font-semibold, .font-black, .italic) {
+    :is(p, li, dd):not(
+      aside *,
+      .text-center *,
+      .font-display,
+      .font-bold,
+      .font-semibold,
+      .font-black,
+      .italic,
+      .text-xs,
+      .text-\[11px\],
+      .text-\[10px\]
+    ) {
     text-align: justify;
     hyphens: auto;
   }
