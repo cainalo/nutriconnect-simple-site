@@ -3046,3 +3046,257 @@ html[data-design="editorial"] .post-card {
     grid-column: 2;
   }
 }
+
+/* ───────────── Menus do NutriConnect ─────────────
+   Estilo próprio para todos os menus suspensos (conta, perfil, ⋯ do post, admin) e popovers: alça
+   colorida no topo, sombra de "adesivo" na cor do site, ícones em pastilhas que acendem e giram,
+   setinha no item ativo e entrada em cascata. Cada design tem a sua versão. */
+@keyframes nc-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.94) rotate(-1.5deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes nc-menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.nc-menu {
+  position: relative;
+  border: 1.5px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+  border-radius: 1.4rem;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0.85rem 0.45rem 0.45rem;
+  box-shadow:
+    6px 7px 0 -1px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 22px 44px -22px rgb(0 0 0 / 0.45);
+  transform-origin: var(
+    --radix-dropdown-menu-content-transform-origin,
+    var(--radix-popover-content-transform-origin, top)
+  );
+}
+.nc-menu[data-state="open"] {
+  animation: nc-menu-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.nc-menu[data-state="closed"] {
+  animation: nc-menu-in 0.14s ease-in reverse both;
+}
+/* Alça no topo, nas duas cores do site. */
+.nc-menu::before {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  left: 50%;
+  width: 2.6rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  opacity: 0.85;
+}
+.nc-menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 1px 0;
+  border-radius: 1rem;
+  padding: 0.35rem 1.9rem 0.35rem 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+  animation: nc-menu-item-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.nc-menu-item:nth-child(2) {
+  animation-delay: 25ms;
+}
+.nc-menu-item:nth-child(3) {
+  animation-delay: 50ms;
+}
+.nc-menu-item:nth-child(4) {
+  animation-delay: 75ms;
+}
+.nc-menu-item:nth-child(5) {
+  animation-delay: 100ms;
+}
+.nc-menu-item:nth-child(6) {
+  animation-delay: 125ms;
+}
+.nc-menu-item:nth-child(7) {
+  animation-delay: 150ms;
+}
+.nc-menu-item:nth-child(8) {
+  animation-delay: 175ms;
+}
+.nc-menu-item:nth-child(n + 9) {
+  animation-delay: 200ms;
+}
+/* Pastilha do ícone. */
+.nc-menu-item > svg,
+.nc-menu-item > a > svg,
+.nc-menu-item > span > svg:first-child {
+  box-sizing: border-box;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  padding: 0.48rem;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--primary) 11%, var(--card));
+  color: var(--primary);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s,
+    color 0.2s;
+}
+/* Setinha que aparece no item ativo. */
+.nc-menu-item::after {
+  content: "›";
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  font-size: 1.15rem;
+  line-height: 1;
+  opacity: 0;
+  transform: translate(-6px, -55%);
+  transition:
+    opacity 0.2s,
+    transform 0.25s;
+  color: var(--accent);
+}
+.nc-menu-item[data-highlighted],
+.nc-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--accent) 11%, var(--card));
+  color: var(--foreground);
+}
+.nc-menu-item[data-highlighted]::after {
+  opacity: 1;
+  transform: translate(0, -55%);
+}
+.nc-menu-item[data-highlighted] > svg,
+.nc-menu-item[data-highlighted] > a > svg {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  transform: rotate(-8deg) scale(1.06);
+}
+.nc-menu-item[data-disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* Ações de risco (apagar, denunciar, sair): tons de vermelho. */
+.nc-menu-item.text-destructive > svg {
+  background: color-mix(in srgb, var(--destructive) 12%, var(--card));
+  color: var(--destructive);
+}
+.nc-menu-item.text-destructive[data-highlighted] {
+  background: color-mix(in srgb, var(--destructive) 10%, var(--card));
+  color: var(--destructive);
+}
+.nc-menu-item.text-destructive[data-highlighted] > svg {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+.nc-menu-item.text-destructive::after {
+  color: var(--destructive);
+}
+.nc-menu-sep {
+  margin: 0.35rem 0.8rem;
+  height: 0;
+  border-top: 2px dotted color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+.nc-menu-label {
+  margin: 0 0.1rem 0.2rem;
+  border-radius: 1rem;
+  padding: 0.55rem 0.75rem;
+  background: color-mix(in srgb, var(--primary) 8%, var(--card));
+}
+
+/* Editorial: caixa de jornal, borda dupla, sem arredondado. */
+html[data-design="editorial"] .nc-menu {
+  border: 4px double var(--foreground);
+  border-radius: 2px;
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--foreground) 85%, transparent);
+  padding-top: 0.45rem;
+}
+html[data-design="editorial"] .nc-menu::before {
+  display: none;
+}
+html[data-design="editorial"] .nc-menu-item {
+  border-radius: 0;
+  font-family: var(--font-display, inherit);
+}
+html[data-design="editorial"] .nc-menu-item > svg {
+  border-radius: 0;
+  background: transparent;
+  border: 1px solid currentColor;
+}
+html[data-design="editorial"] .nc-menu-item[data-highlighted] {
+  background: var(--foreground);
+  color: var(--background);
+}
+html[data-design="editorial"] .nc-menu-item[data-highlighted] > svg {
+  background: var(--background);
+  color: var(--foreground);
+  transform: none;
+}
+html[data-design="editorial"] .nc-menu-sep {
+  border-top: 1px solid var(--foreground);
+  margin: 0.35rem 0;
+}
+html[data-design="editorial"] .nc-menu-label {
+  border-radius: 0;
+  border-bottom: 1px solid var(--foreground);
+  background: transparent;
+}
+
+/* Vibrante: borda forte na cor principal e sombra sólida. */
+html[data-design="vibrante"] .nc-menu {
+  border: 2.5px solid var(--primary);
+  border-radius: 1.6rem;
+  box-shadow: 6px 6px 0 var(--primary);
+}
+html[data-design="vibrante"] .nc-menu-item[data-highlighted] {
+  background: color-mix(in srgb, var(--primary) 16%, var(--card));
+}
+
+/* Aurora: vidro fosco. */
+html[data-design="aurora"] .nc-menu {
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.5);
+}
+html[data-design="aurora"] .nc-menu-item > svg {
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nc-menu[data-state],
+  .nc-menu-item {
+    animation: none;
+  }
+}
+html[data-motion="reduce"] .nc-menu[data-state],
+html[data-motion="reduce"] .nc-menu-item {
+  animation: none;
+}
+/* Popovers (seletor de perfil da trilha, ícones do perfil): mesma caixa, com mais respiro. */
+.nc-pop {
+  padding: 1.05rem 0.8rem 0.8rem;
+}

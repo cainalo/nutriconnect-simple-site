@@ -18,7 +18,6 @@ import {
   BookmarkCheck,
   Flag,
   Link as LinkIcon,
-  UserRound,
 } from "lucide-react";
 import { Fragment, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -290,17 +289,6 @@ export function PostCard({ post }: PostCardProps) {
               <DropdownMenuItem onSelect={() => void copyPostLink()}>
                 <LinkIcon className="h-4 w-4" />
                 {tr(["Copiar link", "Copy link", "Copiar enlace", "Copier le lien"])}
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/perfil/$userId" params={{ userId: post.authorId }}>
-                  <UserRound className="h-4 w-4" />
-                  {tr([
-                    "Ver perfil do autor",
-                    "View author's profile",
-                    "Ver perfil del autor",
-                    "Voir le profil",
-                  ])}
-                </Link>
               </DropdownMenuItem>
               {(isOwnPost || (user && !isOwnPost)) && <DropdownMenuSeparator />}
               {isOwnPost && (
