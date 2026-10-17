@@ -151,6 +151,8 @@ interface Tile {
   art: ArtId;
   /** No mosaico: ocupa duas colunas ou duas linhas. */
   span?: "wide" | "tall";
+  /** Foto no alto do card, fundida na cor dele (só nos cards altos, que têm espaço). */
+  photo?: string;
   title: Names;
   text: Names;
   tool?: ToolId;
@@ -249,6 +251,7 @@ const SECTIONS: Section[] = [
         art: "trophy",
         color2: "#f4c84a",
         span: "tall",
+        photo: "/images/heads/desafios.jpg",
         icon: Award,
         color: "#c58a12",
         to: "/desafios",
@@ -419,6 +422,7 @@ const SECTIONS: Section[] = [
         art: "basket",
         color2: "#f6b07a",
         span: "tall",
+        photo: "/images/heads/feira.jpg",
         icon: ShoppingBasket,
         color: "#d9692a",
         tool: "compras",
@@ -1078,6 +1082,20 @@ function TileCard({
   };
   const body = (
     <>
+      {tile.photo && (
+        <img
+          src={tile.photo}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          className="pointer-events-none absolute inset-x-0 top-0 h-2/5 w-full object-cover transition duration-700 group-hover:scale-110 @2xl:h-3/5"
+          style={{
+            maskImage: "linear-gradient(to bottom, black 35%, transparent)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent)",
+          }}
+        />
+      )}
       <TileArt id={tile.art} color={tile.color} data={data} />
       <span className="relative flex w-full items-start justify-between gap-2">
         <span
