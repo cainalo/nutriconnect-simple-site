@@ -631,7 +631,7 @@ const clinical: Record<ClinicalKey, string> = {
   "goals.increase": "Increase",
   "goals.decrease": "Decrease",
   "goals.complete": "Complete",
-  "goals.done": "Done for today! 🎉",
+  "goals.done": "Done for today!",
   "patientEvolution.title": "My progress",
   "patientEvolution.subtitle": "Measurements from appointments and the weight you logged at home.",
   "patientEvolution.empty": "No measurements yet",

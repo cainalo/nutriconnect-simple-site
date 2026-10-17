@@ -97,10 +97,10 @@ function JoinHousePage() {
                   onSuccess: () => {
                     toast.success(
                       tr([
-                        "Bem-vindo(a) à casa! 🏠",
-                        "Welcome home! 🏠",
-                        "¡Bienvenido(a) a la casa! 🏠",
-                        "Bienvenue à la maison ! 🏠",
+                        "Bem-vindo(a) à casa!",
+                        "Welcome home!",
+                        "¡Bienvenido(a) a la casa!",
+                        "Bienvenue à la maison !",
                       ]),
                     );
                     void navigate({ to: "/casa" });

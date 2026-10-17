@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
+  Award,
   Brain,
   CheckCircle2,
   Crown,
   Flame,
   Lock,
   ShoppingBasket,
+  Sparkles,
   Star,
   Target,
   Users,
@@ -378,6 +380,7 @@ export function TrailHero({ variant, name }: { variant: ProfileKind; name: strin
       <div className="relative flex flex-col items-center justify-between gap-6 lg:flex-row">
         <div className="max-w-xl space-y-2 text-center lg:text-left">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-widest backdrop-blur-sm">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             {t("tc.kid.hello").replace("{name}", name)}
           </span>
           <h2 className="font-display text-3xl font-black text-white drop-shadow-sm sm:text-4xl">
@@ -533,6 +536,7 @@ export function TrailAchievements({ unlocked }: { unlocked: string[] }) {
     <div className="mb-8 rounded-[2rem] border-2 border-border bg-card p-5 shadow-sm sm:p-7">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-display text-base font-black text-foreground">
+          <Award className="h-5 w-5 text-accent" aria-hidden="true" />
           {t("tc.achievementsTitle")}
         </h2>
         <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-bold text-muted-foreground">

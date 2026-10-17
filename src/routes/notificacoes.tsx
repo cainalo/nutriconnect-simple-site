@@ -582,10 +582,10 @@ function describe(
       return {
         icon: HandHeart,
         text: fill([
-          "{name} mandou força para você 💪",
-          "{name} sent you encouragement 💪",
-          "{name} te mandó ánimo 💪",
-          "{name} vous encourage 💪",
+          "{name} mandou força para você",
+          "{name} sent you encouragement",
+          "{name} te mandó ánimo",
+          "{name} vous encourage",
         ]),
         go: { to: "/parceiro" },
       };

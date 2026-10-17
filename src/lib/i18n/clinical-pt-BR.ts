@@ -673,7 +673,7 @@ const clinicalPtBR = {
   "goals.increase": "Aumentar",
   "goals.decrease": "Diminuir",
   "goals.complete": "Concluir",
-  "goals.done": "Feito hoje! 🎉",
+  "goals.done": "Feito hoje!",
   "patientEvolution.title": "Minha evolução",
   "patientEvolution.subtitle": "Medidas das consultas e o seu peso registrado em casa.",
   "patientEvolution.empty": "Nenhuma medida ainda",

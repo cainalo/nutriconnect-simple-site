@@ -909,21 +909,21 @@ export function KidLunchboxToday({ profileId }: { profileId: string }) {
                 onClick={() => rate(key, "gostei")}
                 aria-pressed={snack!.rating === "gostei"}
                 className={cn(
-                  "rounded-full border-2 px-3 py-2 text-xl transition",
+                  "grid h-10 w-12 place-items-center rounded-full border-2 transition",
                   snack!.rating === "gostei"
                     ? "border-primary bg-primary/15"
                     : "border-border bg-card hover:border-primary/60",
                 )}
                 aria-label={tr(["Gostei", "I liked it", "Me gustó", "J'ai aimé"])}
               >
-                😋
+                <ThumbsUp className="h-5 w-5" />
               </button>
               <button
                 type="button"
                 onClick={() => rate(key, "nao_gostei")}
                 aria-pressed={snack!.rating === "nao_gostei"}
                 className={cn(
-                  "rounded-full border-2 px-3 py-2 text-xl transition",
+                  "grid h-10 w-12 place-items-center rounded-full border-2 transition",
                   snack!.rating === "nao_gostei"
                     ? "border-muted-foreground bg-secondary"
                     : "border-border bg-card hover:border-muted-foreground/60",
@@ -935,7 +935,7 @@ export function KidLunchboxToday({ profileId }: { profileId: string }) {
                   "Je n'ai pas aimé",
                 ])}
               >
-                😕
+                <ThumbsDown className="h-5 w-5" />
               </button>
             </div>
           </li>
