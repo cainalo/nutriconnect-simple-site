@@ -55,6 +55,7 @@ import { WaterTracker } from "@/components/water-tracker";
 import {
   useAddShoppingItems,
   useDeleteShoppingItems,
+  useFridgeItems,
   useShoppingItems,
   useUpdateShoppingItem,
 } from "@/lib/fridge";
@@ -827,35 +828,98 @@ export function PlateBuilderCard() {
 
 // ───────────────────────────── Roleta de receitas ─────────────────────────────
 
+type RouletteFilter = "todas" | "geladeira" | "rapidas" | "faceis";
+
+/** Texto sem acento e em minúsculas, para comparar ingredientes. */
+const plain = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+/** Minutos do campo "tempo de preparo" ("30 min", "1h", "1 h 20 min"); null se não der. */
+function prepMinutes(text: string | undefined): number | null {
+  if (!text) return null;
+  const t = plain(text);
+  const h = /(\d+)\s*h/.exec(t);
+  const m = /(\d+)\s*m/.exec(t);
+  if (!h && !m) {
+    const n = /(\d+)/.exec(t);
+    return n ? Number(n[1]) : null;
+  }
+  return (h ? Number(h[1]) * 60 : 0) + (m ? Number(m[1]) : 0);
+}
+
+/** Receita da comunidade sorteada, com filtros: o que tem na Geladeira, rápidas (até 30 min) e
+ *  fáceis. Não repete as últimas sorteadas. */
 export function RecipeRouletteCard() {
   const tr = useTr();
-  const feed = useFeed({ scope: "todos", type: "receita", limit: 40 });
-  const recipes = feed.data ?? [];
-  const [shown, setShown] = useState<number | null>(null);
+  const { user } = useAuth();
+  const feed = useFeed({ scope: "todos", type: "receita", limit: 60 });
+  const fridge = useFridgeItems(user?.id);
+  const [filter, setFilter] = useState<RouletteFilter>("todas");
+  const [shownId, setShownId] = useState<string | null>(null);
   const [spinning, setSpinning] = useState(false);
+  const recent = useRef<string[]>([]);
   const timer = useRef<number | null>(null);
 
   useEffect(() => () => void (timer.current && window.clearInterval(timer.current)), []);
 
-  if (recipes.length === 0) return null;
+  const all = useMemo(() => feed.data ?? [], [feed.data]);
+  const fridgeTerms = useMemo(
+    () => fridge.items.map(plain).filter((t) => t.length >= 3),
+    [fridge.items],
+  );
+  const pool = useMemo(() => {
+    if (filter === "todas") return all;
+    return all.filter((r) => {
+      if (filter === "rapidas") {
+        const min = prepMinutes(r.recipeData?.prepTime);
+        return min !== null && min <= 30;
+      }
+      if (filter === "faceis") return r.recipeData?.difficulty === "Fácil";
+      const hay = plain([r.title ?? "", r.text, ...(r.recipeData?.ingredients ?? [])].join(" "));
+      return fridgeTerms.some((t) => hay.includes(t));
+    });
+  }, [all, filter, fridgeTerms]);
+
+  if (all.length === 0) return null;
 
   const spin = () => {
-    if (spinning) return;
+    if (spinning || pool.length === 0) return;
     setSpinning(true);
+    // Sorteia entre as que não saíram por último (se sobrar alguma).
+    const fresh = pool.filter((r) => !recent.current.includes(r.id));
+    const choices = fresh.length ? fresh : pool;
+    const final = choices[Math.floor(Math.random() * choices.length)];
     let ticks = 0;
     timer.current = window.setInterval(() => {
       ticks += 1;
-      setShown(Math.floor(Math.random() * recipes.length));
-      playSound("click");
       if (ticks >= 12) {
         if (timer.current) window.clearInterval(timer.current);
+        setShownId(final.id);
+        recent.current = [final.id, ...recent.current].slice(0, Math.min(5, pool.length - 1));
         setSpinning(false);
         playSound("success");
+      } else {
+        setShownId(pool[Math.floor(Math.random() * pool.length)].id);
+        playSound("click");
       }
     }, 90);
   };
 
-  const recipe = shown !== null ? recipes[shown] : null;
+  const recipe = all.find((r) => r.id === shownId) ?? null;
+  const filters: { id: RouletteFilter; label: Names }[] = [
+    { id: "todas", label: ["Todas", "All", "Todas", "Toutes"] },
+    {
+      id: "geladeira",
+      label: ["Com o que tenho", "With what I have", "Con lo que tengo", "Avec ce que j'ai"],
+    },
+    { id: "rapidas", label: ["Rápidas", "Quick", "Rápidas", "Rapides"] },
+    { id: "faceis", label: ["Fáceis", "Easy", "Fáciles", "Faciles"] },
+  ];
+  const minutes = prepMinutes(recipe?.recipeData?.prepTime);
+
   return (
     <Panel
       title={tr([
@@ -865,27 +929,72 @@ export function RecipeRouletteCard() {
         "Roulette de recettes",
       ])}
     >
-      <div className="grid min-h-[5rem] place-items-center rounded-2xl bg-secondary/40 p-3 text-center">
+      <div className="mb-3 flex flex-wrap gap-1.5" role="group">
+        {filters.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            aria-pressed={filter === f.id}
+            onClick={() => {
+              setFilter(f.id);
+              setShownId(null);
+            }}
+            className={`${iconBtn} ${filter === f.id ? "!bg-primary !text-primary-foreground" : ""}`}
+          >
+            {tr(f.label)}
+          </button>
+        ))}
+      </div>
+      <div className="grid min-h-[6rem] place-items-center overflow-hidden rounded-2xl bg-secondary/40 text-center">
         {recipe ? (
-          <div className={spinning ? "opacity-60" : "nc-pop-in"}>
-            <p className="text-sm font-bold text-foreground">{recipe.title || "—"}</p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">{recipe.authorName}</p>
+          <div className={`w-full ${spinning ? "opacity-60" : "nc-pop-in"}`}>
+            {recipe.image && !spinning && (
+              <img src={recipe.image} alt="" className="h-28 w-full object-cover" loading="lazy" />
+            )}
+            <div className="p-3">
+              <p className="text-sm font-bold text-foreground">{recipe.title || "—"}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {recipe.authorName}
+                {!spinning && minutes !== null && ` · ${minutes} min`}
+                {!spinning && recipe.recipeData?.difficulty && ` · ${recipe.recipeData.difficulty}`}
+              </p>
+            </div>
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">
-            {tr([
-              "Sem ideia do que cozinhar? Gire a roleta!",
-              "No idea what to cook? Spin the roulette!",
-              "¿Sin idea de qué cocinar? ¡Gira la ruleta!",
-              "Pas d'idée de quoi cuisiner ? Tournez la roulette !",
-            ])}
+          <p className="p-3 text-xs text-muted-foreground">
+            {pool.length === 0
+              ? filter === "geladeira"
+                ? tr([
+                    "Nenhuma receita com o que está na sua Geladeira. Marque mais itens lá.",
+                    "No recipes with what's in your Fridge. Add more items there.",
+                    "Ninguna receta con lo que hay en tu Nevera. Marca más artículos allí.",
+                    "Aucune recette avec ce qu'il y a dans votre Frigo. Ajoutez des éléments.",
+                  ])
+                : tr([
+                    "Nenhuma receita com esse filtro ainda.",
+                    "No recipes with this filter yet.",
+                    "Aún no hay recetas con este filtro.",
+                    "Pas encore de recettes avec ce filtre.",
+                  ])
+              : tr([
+                  "Sem ideia do que cozinhar? Gire a roleta!",
+                  "No idea what to cook? Spin the roulette!",
+                  "¿Sin idea de qué cocinar? ¡Gira la ruleta!",
+                  "Pas d'idée de quoi cuisiner ? Tournez la roulette !",
+                ])}
           </p>
         )}
       </div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <button type="button" className={primaryBtn} onClick={spin} disabled={spinning}>
+        <button
+          type="button"
+          className={primaryBtn}
+          onClick={spin}
+          disabled={spinning || pool.length === 0}
+        >
           <Dices className={`h-3.5 w-3.5 ${spinning ? "animate-spin" : ""}`} />
           {tr(["Girar", "Spin", "Girar", "Tourner"])}
+          <span className="font-semibold opacity-80">({pool.length})</span>
         </button>
         {recipe && !spinning && (
           <Link

@@ -179,6 +179,19 @@ if (!q.get("empty")) {
     challenges: [{ title: "21 dias de água", people: 54 }, { title: "Mais verduras", people: 23 }],
   });
 }
+// Receitas de exemplo para a Roleta de receitas (v=card&c=RecipeRouletteCard).
+import { qkFeed } from "@/lib/social/feed-queries";
+const rec = (id: string, title: string, prep: string, diff: string, ing: string[], image?: string) => ({
+  id, type: "receita", authorId: "a", authorName: "Ana Lima", title, text: "", image, tags: [], createdAt: now,
+  pinned: false, likes: [], supports: [], preparedBy: [], comments: [],
+  recipeData: { prepTime: prep, servings: "2", difficulty: diff, ingredients: ing, steps: [], category: "" },
+});
+qc.setQueryData(qkFeed.list({ scope: "todos", type: "receita", limit: 60 }), [
+  rec("r1", "Omelete de espinafre", "15 min", "Fácil", ["2 ovos", "espinafre", "sal"], "/images/presentation/cooking-together.jpg"),
+  rec("r2", "Feijoada leve", "1h 30 min", "Médio", ["feijão preto", "cebola", "alho"]),
+  rec("r3", "Arroz de forno com legumes", "40 min", "Médio", ["arroz", "cenoura", "abobrinha"]),
+  rec("r4", "Salada de grão-de-bico", "10 min", "Fácil", ["grão-de-bico", "tomate", "cebola"], "/images/presentation/market.jpg"),
+]);
 const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
 // v=page&p=funcoes → monta o componente da rota src/routes/funcoes.tsx (Supabase simulado e vazio).
 const ROUTES = import.meta.glob("../src/routes/*.tsx");
