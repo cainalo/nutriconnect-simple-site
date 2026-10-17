@@ -2414,53 +2414,53 @@ html[data-design="editorial"] .font-blackletter {
 /* ---- Aurora: vidro e luz ---------------------------------------------------------------- */
 html[data-design="aurora"] {
   --radius: 1.75rem;
-  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
-  --background: #eef3fb;
-  --foreground: #14213d;
-  --card: #ffffff;
-  --card-foreground: #14213d;
-  --popover: #ffffff;
-  --primary: #0f766e;
-  --primary-foreground: #effffd;
-  --primary-hover: #0b5e57;
-  --primary-soft: #d5f1ee;
-  --secondary: #e3eaf7;
-  --muted: #e3eaf7;
-  --muted-foreground: #53607c;
-  --accent: #7c3aed;
-  --accent-foreground: #faf6ff;
-  --accent-hover: #6527d6;
-  --accent-soft: #eadffd;
-  --border: #d4ddef;
-  --input: #d4ddef;
-  --ring: #7c3aed;
-  --sidebar: #e6edf9;
-  --sidebar-accent: #d5f1ee;
-  --sidebar-border: #d0daed;
+  --font-display: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --background: #eef2ef;
+  --foreground: #15241f;
+  --card: #fbfdfb;
+  --card-foreground: #15241f;
+  --popover: #fbfdfb;
+  --primary: #1f6a52;
+  --primary-foreground: #f1fbf6;
+  --primary-hover: #185641;
+  --primary-soft: #d6ebe2;
+  --secondary: #e2e9e5;
+  --muted: #e2e9e5;
+  --muted-foreground: #4f625b;
+  --accent: #a83a68;
+  --accent-foreground: #fff5f9;
+  --accent-hover: #8e2f57;
+  --accent-soft: #f4dde7;
+  --border: #d2ddd7;
+  --input: #d2ddd7;
+  --ring: #1f6a52;
+  --sidebar: #e5ece8;
+  --sidebar-accent: #d6ebe2;
+  --sidebar-border: #cdd9d2;
 }
 html[data-design="aurora"].dark {
-  --background: #0b1220;
-  --foreground: #e8eefc;
-  --card: #131c2e;
-  --card-foreground: #e8eefc;
-  --popover: #131c2e;
-  --primary: #2dd4bf;
-  --primary-foreground: #042a26;
-  --primary-hover: #5eead4;
-  --primary-soft: #12373a;
-  --secondary: #18233a;
-  --muted: #18233a;
-  --muted-foreground: #9aa8c6;
-  --accent: #a78bfa;
-  --accent-foreground: #1a0d3d;
-  --accent-hover: #bda8fb;
-  --accent-soft: #2c1f55;
-  --border: #25324d;
-  --input: #25324d;
-  --ring: #a78bfa;
-  --sidebar: #0e1626;
-  --sidebar-accent: #12373a;
-  --sidebar-border: #25324d;
+  --background: #0b1513;
+  --foreground: #e6f0ec;
+  --card: #12201d;
+  --card-foreground: #e6f0ec;
+  --popover: #12201d;
+  --primary: #63c9a0;
+  --primary-foreground: #06231a;
+  --primary-hover: #84d8b6;
+  --primary-soft: #173a30;
+  --secondary: #182925;
+  --muted: #182925;
+  --muted-foreground: #9db3ab;
+  --accent: #e889b0;
+  --accent-foreground: #3a0d20;
+  --accent-hover: #f0a6c4;
+  --accent-soft: #42202f;
+  --border: #253a35;
+  --input: #253a35;
+  --ring: #63c9a0;
+  --sidebar: #0f1b18;
+  --sidebar-accent: #173a30;
+  --sidebar-border: #253a35;
 }
 html[data-design="aurora"] body {
   background-image:
@@ -2544,7 +2544,7 @@ html[data-design="vibrante"] .post-card :is(button, a)[class*="rounded-full"] {
   font-weight: 800;
 }
 
-/* Aurora: vidro com brilho na cor do tipo e rótulo em degradê. */
+/* Aurora: vidro com brilho na cor do tipo; rótulo na cor do tipo, espaçado. */
 html[data-design="aurora"] .post-card {
   border: 1px solid color-mix(in srgb, var(--pt, var(--accent)) 45%, transparent) !important;
   border-radius: 1.9rem !important;
@@ -2557,14 +2557,7 @@ html[data-design="aurora"] .post-card {
   --post-fade: color-mix(in srgb, var(--card) 85%, var(--background)) !important;
 }
 html[data-design="aurora"] .post-card [style*="--pt"] {
-  background: linear-gradient(90deg, var(--pt), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
   letter-spacing: 0.14em;
-}
-html[data-design="aurora"] .post-card [style*="--pt"] svg {
-  color: var(--pt);
 }
 html[data-design="aurora"] .post-card :is(h2, h3) {
   font-weight: 600;

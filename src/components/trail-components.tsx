@@ -362,7 +362,7 @@ export function TrailHero({ variant, name }: { variant: ProfileKind; name: strin
   }
 
   return (
-    <div className="relative mb-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-500 via-indigo-500 to-sky-500 p-6 text-white shadow-xl sm:p-8">
+    <div className="relative mb-8 overflow-hidden rounded-[2rem] bg-[#2f6f8f] p-6 text-white shadow-xl sm:p-8">
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
         <div className="absolute -bottom-12 left-10 h-44 w-44 rounded-full bg-pink-400/25 blur-3xl" />

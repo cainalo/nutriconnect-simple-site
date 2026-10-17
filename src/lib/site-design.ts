@@ -88,18 +88,18 @@ export const SITE_DESIGNS: SiteDesign[] = [
     name: "Aurora",
     tagline: "Vidro e luz",
     description:
-      "Cards em vidro fosco sobre um fundo de luzes turquesa e violeta, cantos amplos e tipografia geométrica. Moderno, leve e tecnológico.",
+      "Cards em vidro fosco sobre um fundo com as luzes da aurora boreal (verde-abeto e rosa), cantos amplos e tipografia arredondada. Moderno, leve e calmo.",
     swatch: {
-      bg: "#eef3fb",
-      card: "#ffffff",
-      primary: "#0f766e",
-      accent: "#7c3aed",
-      ink: "#14213d",
-      darkBg: "#0b1220",
-      darkCard: "#131c2e",
+      bg: "#eef2ef",
+      card: "#fbfdfb",
+      primary: "#1f6a52",
+      accent: "#a83a68",
+      ink: "#15241f",
+      darkBg: "#0b1513",
+      darkCard: "#12201d",
     },
     radius: 28,
-    headingFont: "Poppins, sans-serif",
+    headingFont: "Lexend, sans-serif",
   },
 ];
 

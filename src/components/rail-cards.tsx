@@ -136,7 +136,7 @@ export function ProfileCard() {
 
   return (
     <section className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-xs">
-      <div className="h-16 bg-gradient-to-br from-primary to-accent/80" />
+      <div className="h-16 bg-primary" />
       <div className="-mt-8 px-5 pb-5">
         <Link
           to="/perfil/$userId"

@@ -140,7 +140,7 @@ export function SidebarChrome() {
             aria-label={t("nav.homeAria")}
             className="mb-5 flex items-center gap-2.5 px-2"
           >
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-primary to-accent text-lg font-black text-primary-foreground shadow-soft">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-primary text-lg font-black text-primary-foreground shadow-soft">
               N
             </span>
             <Wordmark className="text-lg" />
@@ -188,7 +188,7 @@ export function SidebarChrome() {
             triggerButton={
               <button
                 type="button"
-                className="mb-3 mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-accent px-4 py-3 text-sm font-extrabold text-primary-foreground shadow-soft transition hover:brightness-110 active:scale-[0.98]"
+                className="mb-3 mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-extrabold text-primary-foreground shadow-soft transition hover:brightness-110 active:scale-[0.98]"
               >
                 <Plus className="h-4 w-4" strokeWidth={3} />
                 {t("nav.post")}
@@ -225,7 +225,7 @@ export function SidebarChrome() {
       >
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link to="/" aria-label={t("nav.homeAria")} className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-sm font-black text-primary-foreground">
+            <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-sm font-black text-primary-foreground">
               N
             </span>
             <Wordmark className="text-base" />
@@ -277,7 +277,7 @@ export function SidebarChrome() {
               <button
                 type="button"
                 aria-label={t("nav.post")}
-                className="grid h-12 w-12 cursor-pointer place-items-center rounded-2xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-soft transition active:scale-95"
+                className="grid h-12 w-12 cursor-pointer place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft transition active:scale-95"
               >
                 <Plus className="h-6 w-6" strokeWidth={3} />
               </button>
@@ -656,7 +656,7 @@ export function FloatingChrome() {
             aria-label={t("nav.homeAria")}
             className="mr-1 flex items-center gap-2 rounded-full py-1 pl-1.5 pr-3"
           >
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-black text-primary-foreground">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-sm font-black text-primary-foreground">
               N
             </span>
             <Wordmark className="text-[15px]" />
@@ -716,7 +716,7 @@ export function FloatingChrome() {
                 triggerButton={
                   <button
                     type="button"
-                    className="ml-1 inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-gradient-to-r from-primary to-accent px-4 text-sm font-bold text-primary-foreground transition hover:brightness-110"
+                    className="ml-1 inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground transition hover:brightness-110"
                   >
                     <Plus className="h-4 w-4" strokeWidth={3} />
                     {t("nav.post")}
@@ -802,7 +802,7 @@ export function FloatingChrome() {
               <button
                 type="button"
                 aria-label={t("nav.post")}
-                className="grid h-12 w-12 cursor-pointer place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg transition active:scale-95"
+                className="grid h-12 w-12 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition active:scale-95"
               >
                 <Plus className="h-6 w-6" strokeWidth={3} />
               </button>

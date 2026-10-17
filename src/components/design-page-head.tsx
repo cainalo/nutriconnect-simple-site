@@ -301,7 +301,7 @@ export function DesignPageHead() {
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <p className="!text-left bg-gradient-to-r from-primary to-accent bg-clip-text font-display text-lg font-semibold text-transparent">
+          <p className="!text-left font-display text-lg font-semibold text-primary">
             {tr(head.title)}
           </p>
           <p className="!text-left truncate text-xs text-muted-foreground">{tr(head.text)}</p>
