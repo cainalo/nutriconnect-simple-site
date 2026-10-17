@@ -2847,15 +2847,49 @@ const MEAL_TIPS: Names[] = [
   ],
 ];
 
-/** Refeição com calma: respiração guiada e um relógio de 20 minutos. */
+const MEAL_KEY = "nc_mindful_meal";
+const BREATH_SECONDS = 60;
+/** Ciclo de respiração: 4 s inspirando, 6 s soltando o ar. */
+const INHALE = 4;
+const CYCLE = 10;
+const HUNGER_WORDS: Names[] = [
+  ["Sem fome", "Not hungry", "Sin hambre", "Pas faim"],
+  ["Pouca", "A little", "Poca", "Un peu"],
+  ["Média", "Some", "Media", "Moyenne"],
+  ["Bastante", "Quite", "Bastante", "Beaucoup"],
+  ["Muita", "Very", "Mucha", "Très"],
+];
+const FULL_WORDS: Names[] = [
+  ["Ainda com fome", "Still hungry", "Aún con hambre", "Encore faim"],
+  ["Quase", "Almost", "Casi", "Presque"],
+  ["Satisfeito(a)", "Satisfied", "Satisfecho(a)", "Rassasié(e)"],
+  ["Cheio(a)", "Full", "Lleno(a)", "Plein(e)"],
+  ["Cheio(a) demais", "Too full", "Demasiado lleno(a)", "Trop plein(e)"],
+];
+
+type MealPhase = "idle" | "breath" | "meal" | "done";
+interface MealState {
+  phase: MealPhase;
+  /** Hora (ms) de início da fase atual, se correndo. */
+  startedAt: number | null;
+  /** Segundos já passados quando pausado. */
+  elapsed: number;
+  hunger: number | null;
+  full: number | null;
+}
+const IDLE: MealState = { phase: "idle", startedAt: null, elapsed: 0, hunger: null, full: null };
+
+/** Refeição com calma: 1 minuto de respiração guiada, um relógio de 20 minutos com dicas, e a
+ *  fome antes e a saciedade depois. Continua se a página recarregar; a tela fica acesa. */
 export function MindfulMealCard() {
   const tr = useTr();
   const { user } = useAuth();
   const checkins = useCheckins(user?.id);
   const save = useSaveCheckin(user?.id);
-  const [running, setRunning] = useState(false);
-  const [seconds, setSeconds] = useState(0);
+  const [st, setSt] = useState<MealState>(IDLE);
+  const [now, setNow] = useState(() => Date.now());
   const [burst, fire] = useBurst();
+  const loaded = useRef(false);
   const GOAL = 20 * 60;
   const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
   const weekFrom = weekStartDay();
@@ -2872,23 +2906,133 @@ export function MindfulMealCard() {
   };
 
   useEffect(() => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(MEAL_KEY) ?? "null");
+      if (raw && typeof raw === "object" && raw.phase) setSt({ ...IDLE, ...raw });
+    } catch {
+      // sem armazenamento
+    }
+    loaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (!loaded.current) return;
+    try {
+      window.localStorage.setItem(MEAL_KEY, JSON.stringify(st));
+    } catch {
+      // sem armazenamento
+    }
+  }, [st]);
+
+  const running = st.startedAt !== null && (st.phase === "breath" || st.phase === "meal");
+  const secs = running ? st.elapsed + Math.floor((now - (st.startedAt ?? now)) / 1000) : st.elapsed;
+
+  useEffect(() => {
     if (!running) return;
-    const started = Date.now() - seconds * 1000;
-    const id = window.setInterval(() => {
-      const s = Math.floor((Date.now() - started) / 1000);
-      setSeconds(s);
-      if (s >= GOAL) {
-        setRunning(false);
-        fire();
-        playSound("achievement");
-        countMeal.current();
-      }
-    }, 500);
+    const id = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
-  const tip = MEAL_TIPS[Math.floor(seconds / 30) % MEAL_TIPS.length];
+  // Tela acesa enquanto o relógio corre.
+  useEffect(() => {
+    if (!running) return;
+    let lock: { release: () => Promise<void> } | null = null;
+    let cancelled = false;
+    (navigator as WakeLockNav).wakeLock
+      ?.request("screen")
+      .then((l) => (cancelled ? void l.release() : (lock = l)))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      void lock?.release().catch(() => {});
+    };
+  }, [running]);
+
+  // Fim da respiração: começa a refeição. Fim da refeição: conta o dia.
+  useEffect(() => {
+    if (st.phase === "breath" && running && secs >= BREATH_SECONDS) {
+      setSt((x) => ({ ...x, phase: "meal", startedAt: Date.now(), elapsed: 0 }));
+      playSound("success");
+    } else if (st.phase === "meal" && running && secs >= GOAL) {
+      setSt((x) => ({ ...x, phase: "done", startedAt: null, elapsed: GOAL }));
+      fire();
+      playSound("achievement");
+      countMeal.current();
+    }
+  }, [secs, st.phase, running, GOAL, fire]);
+
+  const start = (withBreath: boolean) => {
+    setNow(Date.now());
+    setSt((x) => ({
+      ...x,
+      phase: withBreath ? "breath" : "meal",
+      startedAt: Date.now(),
+      elapsed: 0,
+      full: null,
+    }));
+    playSound("click");
+  };
+  const togglePause = () =>
+    setSt((x) =>
+      x.startedAt !== null
+        ? { ...x, startedAt: null, elapsed: secs }
+        : { ...x, startedAt: Date.now() - 0, elapsed: x.elapsed },
+    );
+  const reset = () => setSt(IDLE);
+  const finishEarly = () => {
+    setSt((x) => ({ ...x, phase: "done", startedAt: null, elapsed: secs }));
+    playSound("success");
+  };
+
+  const inhaling = st.phase === "breath" && secs % CYCLE < INHALE;
+  const tip = MEAL_TIPS[Math.floor(secs / 30) % MEAL_TIPS.length];
+  const progress = st.phase === "meal" ? Math.min(1, secs / GOAL) : st.phase === "done" ? 1 : 0;
+  const r = 44;
+  const c = 2 * Math.PI * r;
+  const scale = (i: number | null, words: Names[], onPick: (n: number) => void, color: string) => (
+    <div className="grid grid-cols-5 gap-1">
+      {words.map((w, n) => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onPick(n)}
+          aria-pressed={i === n}
+          className="cursor-pointer rounded-lg border px-0.5 py-1.5 text-[10px] font-semibold leading-tight transition [overflow-wrap:anywhere]"
+          style={
+            i === n
+              ? { background: color, borderColor: color, color: "white" }
+              : { borderColor: "var(--color-border)" }
+          }
+        >
+          {tr(w)}
+        </button>
+      ))}
+    </div>
+  );
+
+  const compare = (() => {
+    if (st.hunger === null || st.full === null) return null;
+    if (st.full === 2)
+      return tr([
+        "Você parou satisfeito(a): é esse o ponto que o corpo agradece.",
+        "You stopped satisfied: that's the point your body thanks you for.",
+        "Paraste satisfecho(a): ese es el punto que el cuerpo agradece.",
+        "Vous vous êtes arrêté(e) rassasié(e) : c'est le bon point.",
+      ]);
+    if (st.full >= 3)
+      return tr([
+        "Passou um pouco do ponto, e tudo bem. Na próxima, pause no meio e confira a fome.",
+        "A bit past the point, and that's okay. Next time, pause halfway and check your hunger.",
+        "Te pasaste un poco, y está bien. La próxima vez, haz una pausa a la mitad y revisa el hambre.",
+        "Un peu au-delà, ce n'est pas grave. La prochaine fois, faites une pause à mi-repas.",
+      ]);
+    return tr([
+      "Ainda com fome? Pode comer mais, com a mesma calma.",
+      "Still hungry? You can eat more, just as calmly.",
+      "¿Todavía con hambre? Puedes comer más, con la misma calma.",
+      "Encore faim ? Vous pouvez reprendre, avec le même calme.",
+    ]);
+  })();
+
   return (
     <Panel
       title={tr([
@@ -2900,63 +3044,156 @@ export function MindfulMealCard() {
       className="relative"
     >
       <Burst id={burst} />
-      <div className="grid place-items-center py-2">
+      <div className="relative mx-auto grid h-36 w-36 place-items-center">
+        <svg viewBox="0 0 100 100" className="absolute inset-0 -rotate-90" aria-hidden="true">
+          <circle cx="50" cy="50" r={r} fill="none" strokeWidth="5" className="stroke-secondary" />
+          <circle
+            cx="50"
+            cy="50"
+            r={r}
+            fill="none"
+            strokeWidth="5"
+            strokeLinecap="round"
+            className="stroke-accent transition-[stroke-dashoffset] duration-500"
+            strokeDasharray={c}
+            strokeDashoffset={c * (1 - progress)}
+          />
+        </svg>
         <div
-          className={`grid h-20 w-20 place-items-center rounded-full bg-accent/15 text-accent ${running ? "nc-breathe" : ""}`}
+          className="grid h-20 w-20 place-items-center rounded-full bg-accent/15 text-accent"
+          style={{
+            transform: `scale(${st.phase === "breath" ? (inhaling ? 1.3 : 0.9) : 1})`,
+            transition: `transform ${inhaling ? INHALE : CYCLE - INHALE}s ease-in-out`,
+          }}
         >
           <Wind className="h-7 w-7" />
         </div>
       </div>
-      <p className="text-center text-2xl font-black tabular-nums text-foreground">{fmt(seconds)}</p>
-      <p
-        key={running ? tip[0] : "idle"}
-        className="nc-pop-in mt-1 min-h-[2.25rem] text-center text-xs text-muted-foreground"
-      >
-        {running
-          ? tr(tip)
-          : tr([
-              "Comer com calma leva cerca de 20 minutos. Vamos tentar?",
-              "A calm meal takes about 20 minutes. Shall we try?",
-              "Una comida con calma dura unos 20 minutos. ¿Probamos?",
-              "Un repas calme dure environ 20 minutes. On essaie ?",
+
+      {st.phase === "idle" && (
+        <>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            {tr([
+              "Comer com calma leva cerca de 20 minutos. Antes, como está a sua fome?",
+              "A calm meal takes about 20 minutes. First, how hungry are you?",
+              "Comer con calma lleva unos 20 minutos. Antes, ¿cómo está tu hambre?",
+              "Un repas calme dure environ 20 minutes. D'abord, quelle est votre faim ?",
             ])}
-      </p>
-      <div className="mt-2 flex justify-center gap-2">
-        <button
-          type="button"
-          className={primaryBtn}
-          onClick={() => {
-            // Depois de concluir, começar de novo é uma refeição nova.
-            if (!running && seconds >= GOAL) setSeconds(0);
-            setRunning((r) => !r);
-          }}
-        >
-          {running ? <Pause className="h-3.5 w-3.5" /> : <Timer className="h-3.5 w-3.5" />}
-          {running
-            ? tr(["Pausar", "Pause", "Pausar", "Pause"])
-            : tr(["Começar", "Start", "Empezar", "Commencer"])}
-        </button>
-        {seconds > 0 && (
-          <button
-            type="button"
-            className={iconBtn}
-            onClick={() => {
-              setRunning(false);
-              setSeconds(0);
-            }}
+          </p>
+          <div className="mt-2">
+            {scale(st.hunger, HUNGER_WORDS, (n) => setSt((x) => ({ ...x, hunger: n })), "#c58a12")}
+          </div>
+          <div className="mt-3 flex justify-center gap-2">
+            <button type="button" className={primaryBtn} onClick={() => start(true)}>
+              <Wind className="h-3.5 w-3.5" />
+              {tr([
+                "Respirar e começar",
+                "Breathe and start",
+                "Respirar y empezar",
+                "Respirer et commencer",
+              ])}
+            </button>
+            <button type="button" className={iconBtn} onClick={() => start(false)}>
+              <Timer className="h-3 w-3" />
+              {tr(["Só o relógio", "Timer only", "Solo el reloj", "Minuteur seul"])}
+            </button>
+          </div>
+        </>
+      )}
+
+      {(st.phase === "breath" || st.phase === "meal") && (
+        <>
+          <p className="mt-2 text-center text-2xl font-black tabular-nums text-foreground">
+            {st.phase === "breath" ? fmt(Math.max(0, BREATH_SECONDS - secs)) : fmt(secs)}
+          </p>
+          <p
+            key={st.phase === "breath" ? String(inhaling) : tip[0]}
+            className="nc-pop-in mt-1 min-h-[2.25rem] text-center text-xs text-muted-foreground"
           >
-            <RotateCcw className="h-3 w-3" />
-          </button>
-        )}
-      </div>
+            {st.phase === "breath"
+              ? inhaling
+                ? tr([
+                    "Inspire devagar pelo nariz…",
+                    "Breathe in slowly through your nose…",
+                    "Inspira despacio por la nariz…",
+                    "Inspirez lentement par le nez…",
+                  ])
+                : tr([
+                    "Solte o ar com calma…",
+                    "Breathe out slowly…",
+                    "Suelta el aire con calma…",
+                    "Expirez doucement…",
+                  ])
+              : tr(tip)}
+          </p>
+          <div className="mt-2 flex justify-center gap-2">
+            <button type="button" className={primaryBtn} onClick={togglePause}>
+              {running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              {running
+                ? tr(["Pausar", "Pause", "Pausar", "Pause"])
+                : tr(["Continuar", "Resume", "Continuar", "Reprendre"])}
+            </button>
+            {st.phase === "meal" && (
+              <button type="button" className={iconBtn} onClick={finishEarly}>
+                {tr(["Terminei", "I'm done", "Terminé", "J'ai fini"])}
+              </button>
+            )}
+            <button
+              type="button"
+              className={iconBtn}
+              onClick={reset}
+              aria-label={tr(["Recomeçar", "Restart", "Reiniciar", "Recommencer"])}
+            >
+              <RotateCcw className="h-3 w-3" />
+            </button>
+          </div>
+        </>
+      )}
+
+      {st.phase === "done" && (
+        <>
+          <p className="mt-2 text-center text-xs font-semibold text-foreground">
+            {tr([
+              "E agora, como está?",
+              "How do you feel now?",
+              "¿Y ahora, cómo estás?",
+              "Et maintenant ?",
+            ])}
+          </p>
+          <div className="mt-2">
+            {scale(st.full, FULL_WORDS, (n) => setSt((x) => ({ ...x, full: n })), "#4f8a4b")}
+          </div>
+          {compare && (
+            <p className="nc-pop-in mt-3 rounded-xl bg-accent-soft/60 p-3 text-left text-xs leading-relaxed text-foreground">
+              {st.hunger !== null &&
+                `${tr(["Fome antes", "Hunger before", "Hambre antes", "Faim avant"])}: ${tr(HUNGER_WORDS[st.hunger])}. `}
+              {compare}
+            </p>
+          )}
+          <div className="mt-3 flex justify-center">
+            <button type="button" className={iconBtn} onClick={reset}>
+              <RotateCcw className="h-3 w-3" />
+              {tr(["Nova refeição", "New meal", "Nueva comida", "Nouveau repas"])}
+            </button>
+          </div>
+        </>
+      )}
+
       {thisWeek > 0 && (
         <p className="mt-3 text-center text-[11px] font-semibold text-accent">
-          {tr([
-            `${thisWeek} refeição(ões) com calma nesta semana`,
-            `${thisWeek} mindful meal(s) this week`,
-            `${thisWeek} comida(s) con calma esta semana`,
-            `${thisWeek} repas en pleine conscience cette semaine`,
-          ])}
+          {thisWeek === 1
+            ? tr([
+                "1 refeição com calma nesta semana",
+                "1 mindful meal this week",
+                "1 comida con calma esta semana",
+                "1 repas en pleine conscience cette semaine",
+              ])
+            : tr([
+                `${thisWeek} refeições com calma nesta semana`,
+                `${thisWeek} mindful meals this week`,
+                `${thisWeek} comidas con calma esta semana`,
+                `${thisWeek} repas en pleine conscience cette semaine`,
+              ])}
         </p>
       )}
     </Panel>
