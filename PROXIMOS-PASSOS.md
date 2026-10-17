@@ -68,6 +68,13 @@ Lovable e para o site).
   (credencial, conta externa, decisão de produto).
 - Ele pediu para **seguir até terminar sem perguntar** a cada etapa. Um commit por item, testado,
   com push para `main`.
+- **Imagens (pedido de 17/10):** site com mais fotos e mais imersivo. Fotos sempre inteiras, com
+  fundo (nada de recorte em fundo branco). Já têm foto: faixas de título de cada área
+  (`public/images/heads`), cards da Feira (`images/season`, 40 de 45), receitas básicas da
+  Geladeira (`images/recipes`, 12 de 14), temas da Trilha (`images/trail`), atalhos da Casa e os
+  cards altos de Funções. Sem foto ainda: jabuticaba, pequi, umbu, cupuaçu, rúcula, cuscuz e
+  tapioca (o acervo aberto não tem). Daqui só se alcança o Open Images (S3/GCS, CC BY 2.0, créditos
+  obrigatórios no CREDITS.md de cada pasta); Unsplash/Wikimedia são bloqueados.
 - Textos do app nos 4 idiomas (pt-BR, en, es, fr) no padrão `tr([pt, en, es, fr])`.
 - Mensagens de commit em português, terminando com
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
