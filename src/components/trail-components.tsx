@@ -32,149 +32,6 @@ import { LEVEL_LABEL_KEYS } from "@/lib/i18n/content";
 import type { DictKey } from "@/lib/i18n";
 import { EmojiIcon } from "@/components/emoji-icon";
 
-/* ---------------------------------- XP ---------------------------------- */
-
-interface XPBarProps {
-  xp: number;
-  level: number;
-  label: string;
-  xpInLevel: number;
-  xpForNext: number;
-}
-
-export function XPBar({ xp, level, label, xpInLevel, xpForNext }: XPBarProps) {
-  const { t } = useI18n();
-  const pct = xpForNext > 0 ? Math.min(Math.round((xpInLevel / xpForNext) * 100), 100) : 100;
-  return (
-    <div className="flex items-center gap-4">
-      <div className="relative shrink-0">
-        <div className="grid h-16 w-16 place-items-center rounded-full border-b-4 border-amber-600 bg-gradient-to-b from-amber-300 to-amber-500 text-2xl font-black text-white shadow-md">
-          {level}
-        </div>
-        <div className="nc-wobble absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-white shadow-sm dark:bg-card">
-          <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-        </div>
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="mb-1.5 flex items-center justify-between text-sm font-bold">
-          <span className="truncate text-foreground">
-            {LEVEL_LABEL_KEYS[label] ? t(LEVEL_LABEL_KEYS[label]) : label}
-          </span>
-          <span className="tabular-nums text-amber-600 dark:text-amber-400">{xp} XP</span>
-        </div>
-        <div className="relative h-4 w-full overflow-hidden rounded-full border-2 border-secondary bg-secondary">
-          <div
-            className="nc-stripes absolute inset-y-0 left-0 rounded-full bg-amber-400 transition-all duration-700"
-            style={{ width: `${Math.max(pct, 4)}%` }}
-          >
-            <div className="absolute left-2 right-2 top-1 h-1 rounded-full bg-white/40" />
-          </div>
-        </div>
-        <div className="mt-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-          <span>{t("hub.level").replace("{n}", String(level))}</span>
-          <span>
-            {t("tc.missingXp").replace("{n}", String(Math.max(xpForNext - xpInLevel, 0)))}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------- Ofensiva ------------------------------- */
-
-export function StreakBadge({ streak }: { streak: number }) {
-  const { t } = useI18n();
-  const active = streak > 0;
-  return (
-    <div
-      className={`flex shrink-0 items-center gap-3 rounded-2xl border-2 px-4 py-3 ${
-        active ? "border-orange-500/25 bg-orange-500/10" : "border-border bg-secondary/40"
-      }`}
-    >
-      <div
-        className={`drop-shadow-sm ${active ? "nc-flame text-orange-500" : "text-muted-foreground opacity-50"}`}
-      >
-        <EmojiIcon emoji="🔥" className="h-8 w-8" />
-      </div>
-      <div>
-        <div
-          className={`text-lg font-black leading-none ${active ? "text-orange-500" : "text-muted-foreground"}`}
-        >
-          {streak} {streak === 1 ? t("tc.day") : t("tc.days")}
-        </div>
-        <div
-          className={`mt-0.5 text-[11px] font-bold uppercase tracking-widest ${
-            active ? "text-orange-500/70" : "text-muted-foreground"
-          }`}
-        >
-          {t("tc.streak")}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Anel com o progresso da meta diária de XP. */
-function DailyGoalRing({ xp, goal }: { xp: number; goal: number }) {
-  const { t } = useI18n();
-  const pct = Math.min(1, xp / goal);
-  const done = pct >= 1;
-  const r = 22;
-  const c = 2 * Math.PI * r;
-  return (
-    <div
-      className={`flex shrink-0 items-center gap-3 rounded-2xl border-2 px-4 py-3 ${
-        done ? "border-emerald-500/30 bg-emerald-500/10" : "border-sky-500/20 bg-sky-500/10"
-      }`}
-    >
-      <div className="relative h-12 w-12">
-        <svg viewBox="0 0 52 52" className="-rotate-90">
-          <circle
-            cx={26}
-            cy={26}
-            r={r}
-            fill="none"
-            strokeWidth={6}
-            className="stroke-black/10 dark:stroke-white/15"
-          />
-          <circle
-            cx={26}
-            cy={26}
-            r={r}
-            fill="none"
-            strokeWidth={6}
-            strokeLinecap="round"
-            stroke={done ? "#10b981" : "#0ea5e9"}
-            strokeDasharray={c}
-            strokeDashoffset={c * (1 - pct)}
-            style={{ transition: "stroke-dashoffset 0.9s ease" }}
-          />
-        </svg>
-        <span className="absolute inset-0 grid place-items-center text-lg">
-          {done ? (
-            <span className="nc-pop text-emerald-500">
-              <EmojiIcon emoji="✅" className="h-6 w-6" />
-            </span>
-          ) : (
-            <Target className="h-5 w-5 text-sky-500" />
-          )}
-        </span>
-      </div>
-      <div>
-        <div
-          className={`text-lg font-black leading-none ${done ? "text-emerald-600" : "text-sky-600"}`}
-        >
-          {Math.min(xp, goal)}/{goal}
-        </div>
-        <div className="mt-0.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-          {t("tc.dailyGoal")}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ------------------------------ Cabeçalho ------------------------------ */
 
 interface TrailHeaderProps {
@@ -217,73 +74,100 @@ export function TrailHeader(props: TrailHeaderProps) {
   const { t } = useI18n();
   const goalDone = props.dailyXP >= props.dailyGoal;
   const mood: MascotMood = goalDone ? "cheer" : "talk";
-  return (
-    <div
-      className={`relative mb-8 overflow-hidden border-2 border-border bg-card p-5 shadow-sm sm:p-7 ${
-        props.variant === "adult" ? "rounded-2xl" : "rounded-[2rem]"
-      }`}
-    >
-      <div className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full bg-amber-300/20 blur-3xl" />
-      <div className="relative flex flex-col gap-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex items-end gap-3">
-            <Mascot id="nina" mood={mood} size={72} className="shrink-0" />
-            <div
-              className={`relative mb-2 max-w-md border-2 border-border bg-secondary/50 px-4 py-2.5 text-sm text-foreground ${
-                props.variant === "adult"
-                  ? "rounded-xl rounded-bl-none font-medium"
-                  : "rounded-2xl rounded-bl-none font-semibold"
-              }`}
-            >
-              {guideMessage(props, t)}
-            </div>
-          </div>
-          {props.profileSlot}
-        </div>
+  const kid = props.variant === "kid";
+  const pct =
+    props.xpForNext > 0
+      ? Math.min(100, Math.round((props.xpInLevel / props.xpForNext) * 100))
+      : 100;
+  const levelName = LEVEL_LABEL_KEYS[props.label] ? t(LEVEL_LABEL_KEYS[props.label]) : props.label;
+  const stats: { icon: LucideIcon; label: string; value: string; on: boolean }[] = [
+    {
+      icon: Flame,
+      label: t("tc.streak"),
+      value: `${props.streak} ${props.streak === 1 ? t("tc.day") : t("tc.days")}`,
+      on: props.streak > 0,
+    },
+    {
+      icon: goalDone ? CheckCircle2 : Target,
+      label: t("tc.dailyGoal"),
+      value: `${Math.min(props.dailyXP, props.dailyGoal)}/${props.dailyGoal}`,
+      on: goalDone,
+    },
+    {
+      icon: Star,
+      label: t("tc.stars"),
+      value: `${props.stars}/${props.maxStars}`,
+      on: props.stars > 0,
+    },
+    {
+      icon: Crown,
+      label: t("tc.gold"),
+      value: `${props.goldStops}/${props.totalStops}`,
+      on: props.goldStops > 0,
+    },
+  ];
 
-        <div className="@container">
-          <div className="flex flex-col gap-5 @3xl:flex-row @3xl:items-center @3xl:gap-8">
-            <div className="min-w-0 flex-1">
-              <XPBar
-                xp={props.xp}
-                level={props.level}
-                label={props.label}
-                xpInLevel={props.xpInLevel}
-                xpForNext={props.xpForNext}
-              />
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <StreakBadge streak={props.streak} />
-              <DailyGoalRing xp={props.dailyXP} goal={props.dailyGoal} />
-              <div className="flex shrink-0 items-center gap-3 rounded-2xl border-2 border-amber-500/25 bg-amber-500/10 px-4 py-3">
-                <div className="text-amber-500 drop-shadow-sm">
-                  <EmojiIcon emoji={"⭐"} className="h-8 w-8" />
-                </div>
-                <div>
-                  <div className="text-lg font-black leading-none text-amber-600 dark:text-amber-400">
-                    {props.stars}/{props.maxStars}
-                  </div>
-                  <div className="mt-0.5 text-[11px] font-bold uppercase tracking-widest text-amber-600/70 dark:text-amber-400/70">
-                    {t("tc.stars")}
-                  </div>
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-3 rounded-2xl border-2 border-yellow-500/30 bg-yellow-400/15 px-4 py-3">
-                <Crown className="h-7 w-7 fill-yellow-400 text-yellow-500" />
-                <div>
-                  <div className="text-lg font-black leading-none text-yellow-600 dark:text-yellow-400">
-                    {props.goldStops}/{props.totalStops}
-                  </div>
-                  <div className="mt-0.5 text-[11px] font-bold uppercase tracking-widest text-yellow-600/70 dark:text-yellow-400/70">
-                    {t("tc.gold")}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+  return (
+    <section
+      className={`mb-8 border border-border bg-card p-5 shadow-sm sm:p-6 ${kid ? "rounded-[2rem]" : "rounded-2xl"}`}
+    >
+      <div className="grid gap-4 md:grid-cols-[1fr_17rem] md:items-end">
+        <div className="flex items-end gap-3">
+          <Mascot id="nina" mood={mood} size={64} className="shrink-0" />
+          <p
+            className={`mb-1 flex-1 rounded-2xl rounded-bl-none bg-secondary/60 px-4 py-2.5 text-left text-sm leading-snug text-foreground ${
+              kid ? "font-semibold" : "font-medium"
+            }`}
+          >
+            {guideMessage(props, t)}
+          </p>
         </div>
+        {props.profileSlot && (
+          <div className="[&>button]:w-full [&>button>*:last-child]:ml-auto">
+            {props.profileSlot}
+          </div>
+        )}
       </div>
-    </div>
+
+      <div className="mt-5">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="font-display text-base font-bold text-foreground">
+            {t("hub.level").replace("{n}", String(props.level))}
+            <span className="text-sm font-medium text-muted-foreground"> · {levelName}</span>
+          </p>
+          <span className="shrink-0 text-sm font-bold tabular-nums text-primary">
+            {props.xp} XP
+          </span>
+        </div>
+        <div
+          className="mt-2 h-2 w-full overflow-hidden rounded-full bg-secondary"
+          role="progressbar"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-700"
+            style={{ width: `${Math.max(pct, 2)}%` }}
+          />
+        </div>
+        <p className="mt-1.5 text-left text-xs text-muted-foreground">
+          {t("tc.missingXp").replace("{n}", String(Math.max(props.xpForNext - props.xpInLevel, 0)))}
+        </p>
+      </div>
+
+      <dl className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
+        {stats.map((st) => (
+          <div key={st.label} className="bg-card px-4 py-3">
+            <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <st.icon className={`h-3.5 w-3.5 ${st.on ? "text-accent" : ""}`} />
+              {st.label}
+            </dt>
+            <dd className="mt-1 text-lg font-bold tabular-nums text-foreground">{st.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }
 
