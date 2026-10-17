@@ -192,6 +192,17 @@ qc.setQueryData(qkFeed.list({ scope: "todos", type: "receita", limit: 60 }), [
   rec("r3", "Arroz de forno com legumes", "40 min", "Médio", ["arroz", "cenoura", "abobrinha"]),
   rec("r4", "Salada de grão-de-bico", "10 min", "Fácil", ["grão-de-bico", "tomate", "cebola"], "/images/presentation/market.jpg"),
 ]);
+// Registros do dia de exemplo (Como me sinto, Hábitos): segundas pesadas, dias bons com mais hábitos.
+if (q.get("checkins")) {
+  const rows = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const mood = d.getDay() === 1 ? 3 : i % 5 === 0 ? 2 : i % 2;
+    const habits = mood <= 1 ? ["water", "veg", "move", "sleep"].slice(0, 3 + (i % 2)) : ["water"];
+    return { user_id: "u1", day, habits, mood, pledge: false, mindful_meals: 0, quiz_best: null, updated_at: now };
+  }).reverse();
+  qc.setQueryData(["checkins", "u1"], rows);
+}
 const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
 // v=page&p=funcoes → monta o componente da rota src/routes/funcoes.tsx (Supabase simulado e vazio).
 const ROUTES = import.meta.glob("../src/routes/*.tsx");

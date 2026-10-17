@@ -2551,12 +2551,77 @@ const MOODS: { emoji: string; label: Names; reply: Names }[] = [
   },
 ];
 
+/** Padrões simples dos últimos dias (sem IA): dia da semana mais difícil e hábitos nos dias bons
+ *  e nos difíceis. Só aparecem com registros suficientes. */
+function moodInsights(
+  rows: { day: string; mood: number | null; habits: string[] }[],
+  locale: string,
+  tr: (n: Names) => string,
+): string[] {
+  const withMood = rows.filter((r) => r.mood !== null) as {
+    day: string;
+    mood: number;
+    habits: string[];
+  }[];
+  if (withMood.length < 7) return [];
+  const out: string[] = [];
+  const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+  const overall = avg(withMood.map((r) => r.mood));
+  // Dia da semana com média bem mais pesada que a geral (ao menos 2 registros).
+  const byDow = new Map<number, number[]>();
+  for (const r of withMood) {
+    const dow = new Date(r.day + "T12:00:00").getDay();
+    byDow.set(dow, [...(byDow.get(dow) ?? []), r.mood]);
+  }
+  let worst: { dow: number; m: number } | null = null;
+  for (const [dow, ms] of byDow)
+    if (
+      ms.length >= 2 &&
+      avg(ms) >= 2 &&
+      avg(ms) - overall >= 0.75 &&
+      (!worst || avg(ms) > worst.m)
+    )
+      worst = { dow, m: avg(ms) };
+  if (worst) {
+    const ref = new Date(2026, 0, 4 + worst.dow); // 4/1/2026 foi domingo
+    const name = new Intl.DateTimeFormat(locale, { weekday: "long" }).format(ref);
+    out.push(
+      tr([
+        `Os dias de ${name} têm sido mais pesados. Vale planejar algo gostoso e simples para esse dia.`,
+        `${name[0].toUpperCase() + name.slice(1)}s have felt heavier. It may help to plan something tasty and simple for that day.`,
+        `Los días de ${name} han sido más pesados. Puede ayudar planear algo rico y sencillo para ese día.`,
+        `Le ${name} a été plus difficile. Prévoir quelque chose de bon et simple ce jour-là peut aider.`,
+      ]),
+    );
+  }
+  // Hábitos marcados nos dias bons (ótima/boa) e nos difíceis (normal/pesada).
+  const good = withMood.filter((r) => r.mood <= 1).map((r) => r.habits.length);
+  const hard = withMood.filter((r) => r.mood >= 2).map((r) => r.habits.length);
+  if (good.length >= 2 && hard.length >= 2) {
+    const g = avg(good);
+    const h = avg(hard);
+    if (g - h >= 1) {
+      const f = (n: number) => n.toLocaleString(locale, { maximumFractionDigits: 1 });
+      out.push(
+        tr([
+          `Nos dias bons você marcou em média ${f(g)} hábitos; nos difíceis, ${f(h)}. Cuidar do básico parece ajudar.`,
+          `On good days you checked ${f(g)} habits on average; on hard days, ${f(h)}. The basics seem to help.`,
+          `En los días buenos marcaste en promedio ${f(g)} hábitos; en los difíciles, ${f(h)}. Cuidar lo básico parece ayudar.`,
+          `Les bons jours, vous avez coché ${f(g)} habitudes en moyenne ; les jours difficiles, ${f(h)}. Les bases semblent aider.`,
+        ]),
+      );
+    }
+  }
+  return out;
+}
+
 export function MoodCard() {
   const tr = useTr();
   const { locale } = useI18n();
   const { user } = useAuth();
   const checkins = useCheckins(user?.id);
   const save = useSaveCheckin(user?.id);
+  const [view, setView] = useState<"week" | "month">("week");
   const today = checkinDay();
   const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
   const picked = map.get(today)?.mood ?? null;
@@ -2564,6 +2629,31 @@ export function MoodCard() {
     const day = daysAgo(6 - i);
     return { day, mood: map.get(day)?.mood ?? null };
   });
+  // 5 semanas de segunda a domingo, terminando na semana atual.
+  const month = useMemo(() => {
+    const monday = new Date(weekStartDay() + "T12:00:00");
+    monday.setDate(monday.getDate() - 28);
+    return Array.from({ length: 35 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const day = checkinDay(d);
+      return { day, mood: map.get(day)?.mood ?? null, future: day > today };
+    });
+  }, [map, today]);
+  const counts = [0, 1, 2, 3].map((m) => month.filter((c) => c.mood === m).length);
+  const logged = counts.reduce((a, b) => a + b, 0);
+  const insights = useMemo(
+    () =>
+      moodInsights(
+        (checkins.data ?? []).map((c) => ({ day: c.day, mood: c.mood, habits: c.habits })),
+        locale,
+        tr,
+      ),
+    [checkins.data, locale, tr],
+  );
+  const dayLabel = (day: string) =>
+    new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(new Date(day + "T12:00:00"));
+
   return (
     <Panel
       title={tr([
@@ -2618,22 +2708,106 @@ export function MoodCard() {
           )}
         </div>
       )}
-      <div className="mt-3 grid grid-cols-7 gap-1">
-        {lastWeek.map(({ day, mood }) => (
-          <div key={day} className="grid place-items-center gap-0.5">
-            <span
-              className="h-2.5 w-2.5 rounded-full"
-              style={{ background: mood === null ? "var(--color-secondary)" : MOOD_COLORS[mood] }}
-              title={mood === null ? "—" : tr(MOODS[mood].label)}
-            />
-            <span className="text-[9px] uppercase text-muted-foreground">
-              {new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(
-                new Date(day + "T12:00:00"),
-              )}
-            </span>
-          </div>
-        ))}
+
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <span className="text-[11px] font-semibold text-muted-foreground">
+          {view === "week"
+            ? tr(["Últimos 7 dias", "Last 7 days", "Últimos 7 días", "7 derniers jours"])
+            : tr([
+                "Últimas 5 semanas",
+                "Last 5 weeks",
+                "Últimas 5 semanas",
+                "5 dernières semaines",
+              ])}
+        </span>
+        <button
+          type="button"
+          onClick={() => setView(view === "week" ? "month" : "week")}
+          className="cursor-pointer text-[11px] font-bold text-primary hover:underline"
+        >
+          {view === "week"
+            ? tr(["Ver o mês", "See the month", "Ver el mes", "Voir le mois"])
+            : tr(["Ver a semana", "See the week", "Ver la semana", "Voir la semaine"])}
+        </button>
       </div>
+      {view === "week" ? (
+        <div className="mt-2 grid grid-cols-7 gap-1">
+          {lastWeek.map(({ day, mood }) => (
+            <div key={day} className="grid place-items-center gap-0.5">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ background: mood === null ? "var(--color-secondary)" : MOOD_COLORS[mood] }}
+                title={mood === null ? "—" : tr(MOODS[mood].label)}
+              />
+              <span className="text-[9px] uppercase text-muted-foreground">{dayLabel(day)}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="mt-2 grid grid-cols-7 gap-1">
+            {month.slice(0, 7).map((c) => (
+              <span
+                key={"h" + c.day}
+                className="text-center text-[9px] font-bold uppercase text-muted-foreground"
+              >
+                {dayLabel(c.day)}
+              </span>
+            ))}
+            {month.map((c) => (
+              <span
+                key={c.day}
+                title={`${c.day.split("-").reverse().join("/")}: ${c.mood === null ? "—" : tr(MOODS[c.mood].label)}`}
+                className={`h-5 rounded-md sm:h-6 ${c.day === today ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}`}
+                style={{
+                  background: c.future
+                    ? "transparent"
+                    : c.mood === null
+                      ? "var(--color-secondary)"
+                      : MOOD_COLORS[c.mood],
+                }}
+              />
+            ))}
+          </div>
+          {logged > 0 && (
+            <>
+              <div className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-secondary">
+                {counts.map((n, i) =>
+                  n ? (
+                    <span
+                      key={i}
+                      style={{ width: `${(n / logged) * 100}%`, background: MOOD_COLORS[i] }}
+                    />
+                  ) : null,
+                )}
+              </div>
+              <dl className="mt-1.5 grid grid-cols-4 gap-1 text-center text-[10px]">
+                {MOODS.map((m, i) => (
+                  <div key={i}>
+                    <dt className="font-semibold" style={{ color: MOOD_COLORS[i] }}>
+                      {tr(m.label)}
+                    </dt>
+                    <dd className="tabular-nums text-muted-foreground">{counts[i]}</dd>
+                  </div>
+                ))}
+              </dl>
+            </>
+          )}
+        </>
+      )}
+      {insights.length > 0 && (
+        <ul className="mt-3 space-y-1.5">
+          {insights.map((t) => (
+            <li
+              key={t}
+              className="flex gap-2 rounded-xl bg-secondary/50 px-3 py-2 text-left text-[11px] leading-snug text-foreground"
+            >
+              <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+              {t}
+            </li>
+          ))}
+        </ul>
+      )}
       <p className={note}>
         {tr([
           "Registro só seu, salvo na sua conta. Nenhum profissional vê.",
