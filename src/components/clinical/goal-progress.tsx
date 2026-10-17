@@ -49,7 +49,7 @@ function useStreakText() {
         ]);
     if (forPro) return base;
     if (s.doneToday)
-      return `${base}. ${tr(["Hoje já foi! 🌱", "Done today! 🌱", "¡Hoy ya está! 🌱", "C'est fait aujourd'hui ! 🌱"])}`;
+      return `${base}. ${tr(["Hoje já foi!", "Done today!", "¡Hoy ya está!", "C'est fait aujourd'hui !"])}`;
     return `${base}. ${tr([
       "Quando der, registre o de hoje.",
       "When you can, log today's.",

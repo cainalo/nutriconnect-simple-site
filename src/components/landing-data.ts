@@ -239,10 +239,10 @@ export const COPY = {
   ] as Names,
   h1b: ["junto", "together", "juntos", "ensemble"] as Names,
   lead: [
-    "Uma comunidade acolhedora para trocar receitas e experiências, aprender com trilhas divertidas e contar com profissionais de saúde verificados — com consulta por vídeo no próprio site.",
-    "A welcoming community to share recipes and experiences, learn with fun tracks and count on verified health professionals — with video visits right on the site.",
-    "Una comunidad acogedora para compartir recetas y experiencias, aprender con rutas divertidas y contar con profesionales de la salud verificados, con consulta por video en el propio sitio.",
-    "Une communauté bienveillante pour partager recettes et expériences, apprendre avec des parcours ludiques et compter sur des professionnels de santé vérifiés — avec téléconsultation sur le site.",
+    "Aqui você troca receitas com quem cozinha de verdade, aprende sobre comida em lições curtas com a Nina e, quando precisar, marca uma consulta por vídeo com um profissional de registro conferido.",
+    "Swap recipes with people who actually cook, learn about food in short lessons with Nina and, when you need it, book a video visit with a professional whose license we checked.",
+    "Aquí intercambias recetas con quien cocina de verdad, aprendes sobre comida en lecciones cortas con Nina y, cuando lo necesites, agendas una consulta por video con un profesional de registro verificado.",
+    "Ici, on échange des recettes avec des gens qui cuisinent vraiment, on apprend sur l'alimentation en courtes leçons avec Nina et, quand il le faut, on réserve une téléconsultation avec un professionnel dont l'inscription a été vérifiée.",
   ] as Names,
   start: ["Começar grátis", "Start for free", "Empezar gratis", "Commencer gratuitement"] as Names,
   presentation: [
@@ -258,10 +258,10 @@ export const COPY = {
     "Gratuit pour participer. Vous ne payez que pour une consultation.",
   ] as Names,
   featuresTitle: [
-    "Tudo o que ajuda a mudar um hábito",
-    "Everything that helps change a habit",
-    "Todo lo que ayuda a cambiar un hábito",
-    "Tout ce qui aide à changer une habitude",
+    "O que tem aqui dentro",
+    "What's inside",
+    "Lo que hay aquí dentro",
+    "Ce qu'on trouve ici",
   ] as Names,
   howTitle: ["Como funciona", "How it works", "Cómo funciona", "Comment ça marche"] as Names,
   profBadge: [
@@ -289,10 +289,10 @@ export const COPY = {
     "Questions fréquentes",
   ] as Names,
   finalTitle: [
-    "Sua jornada começa agora",
-    "Your journey starts now",
-    "Tu camino empieza ahora",
-    "Votre parcours commence maintenant",
+    "Comece pela próxima refeição",
+    "Start with your next meal",
+    "Empieza por la próxima comida",
+    "Commencez par le prochain repas",
   ] as Names,
   finalCreate: [
     "Criar minha conta",

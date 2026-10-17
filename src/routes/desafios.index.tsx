@@ -2,7 +2,7 @@ import { td } from "@/lib/i18n/data";
 import { ProfileCard } from "@/components/rail-cards";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Award, BookOpen, Flame, Sparkles, Users } from "lucide-react";
+import { Award, BookOpen, Flame, UserRound, Users } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ChallengeCard } from "@/components/community-cards";
 import {
@@ -378,7 +378,7 @@ function DesafiosIndexPage() {
                         <ChallengeCard challenge={c} />
                         {c.createdByName && (
                           <div className="mt-2 px-2 text-[10px] text-muted-foreground flex items-center gap-1">
-                            <Sparkles className="h-3 w-3 text-accent" />
+                            <UserRound className="h-3 w-3 text-accent" />
                             {t("dz.createdBy")}{" "}
                             <span className="font-semibold text-foreground">{c.createdByName}</span>
                           </div>

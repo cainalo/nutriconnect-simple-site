@@ -99,13 +99,15 @@ function Cadastro() {
           <span className="mb-1.5 block text-xs font-semibold text-foreground">
             {t("signup.goalQuestion")}
           </span>
-          <div className="flex flex-wrap gap-1.5 rounded-xl border border-border/80 bg-secondary/30 p-1">
+          {/* 9 focos numa grade 3 × 3: simétrica e curta também no celular. */}
+          <div className="grid grid-cols-3 gap-1.5 rounded-xl border border-border/80 bg-secondary/30 p-1">
             {JOURNEY_GOALS.map((g) => (
               <button
                 key={g}
                 type="button"
                 onClick={() => setSelectedGoal(g)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition cursor-pointer ${
+                aria-pressed={selectedGoal === g}
+                className={`grid min-h-11 place-items-center rounded-xl px-1.5 py-1.5 text-center text-[11px] font-medium leading-tight transition cursor-pointer ${
                   selectedGoal === g
                     ? "bg-accent text-accent-foreground font-semibold shadow-xs"
                     : "bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"

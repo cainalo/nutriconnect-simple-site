@@ -54,6 +54,7 @@ const LEVEL_EMBLEM: Record<string, string> = {
   Mestre: "👑",
 };
 import { EmojiIcon } from "@/components/emoji-icon";
+import { vibrate } from "@/lib/native";
 
 export interface LessonModalProps {
   stop: Stop;
@@ -1095,7 +1096,7 @@ export function LessonModal({
     } else {
       setCombo(0);
       setEnemyFx((f) => ({ state: "taunt", n: f.n + 1 }));
-      navigator.vibrate?.(60);
+      vibrate(60);
       if (!isRetry) {
         setMistakes((v) => v + 1);
         setHearts((h) => h - 1);
@@ -1175,7 +1176,9 @@ export function LessonModal({
     setReward(r);
     if (r.reviewed && r.nextReview) {
       const days = Math.max(1, daysUntil(r.nextReview));
-      toast.success(t("lm.reviewDone").replace("{n}", String(days)));
+      toast.success(
+        days === 1 ? t("lm.reviewDoneOne") : t("lm.reviewDone").replace("{n}", String(days)),
+      );
     }
     const before = getUserLevel(xpBefore);
     const after = getUserLevel(xpBefore + r.totalGained);

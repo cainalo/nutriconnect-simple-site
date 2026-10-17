@@ -13,8 +13,8 @@ App nativo com Capacitor (pasta `mobile/`), ID `br.com.nutriconnect.app`, APK ge
 
 1. [x] A1 — App base: ícone, abertura, barra de status, voltar, tela sem conexão, APK de teste
 2. [ ] A2 — Notificações nativas (Firebase Cloud Messaging)
-3. [ ] A3 — Câmera e código de barras nativos (ML Kit)
-4. [ ] A4 — Compartilhar do Android, links que abrem o app, vibração
+3. [x] A3 — Câmera e código de barras nativos (ML Kit)
+4. [x] A4 — Compartilhar do Android, links que abrem o app, vibração
 5. [ ] A5 — Publicação no Google Play (assinatura, ficha da loja, segurança dos dados, teste fechado)
 
 ## Próximas funções (aprovadas em 09/10/2026, nesta ordem)
@@ -44,7 +44,6 @@ Cada item ganha o próprio commit depois de testado.
 
 ## Grupo familiar — "Minha casa" (aprovado em 13/10/2026, depois do N6 e antes do M8)
 
-
 Pessoas que moram juntas compartilham, em tempo real, o que é da casa. Nada clínico é compartilhado
 (diário, metas, peso, plano do nutricionista, check-ins). Uma casa por pessoa, até 8 adultos;
 papéis responsável e membro; convite por link/código ou entre amigos.
@@ -70,6 +69,7 @@ profissionais (não agora).
 1. [x] S1 — Estúdio de redes sociais: perfis, análise por IA, ideias, modelos, calendário e tendências
 
 ## Feito
+
 - [x] Trilha como história de RPG: capítulos, inimigos por parada, batalha durante a lição e cenas de filme (cutscenes) com música
 - [x] Página Funções em tela cheia, com cards animados e cores próprias
 - [x] Todas as migrations foram aplicadas no banco remoto com sucesso.
@@ -95,14 +95,31 @@ do admin (Design do site) escolhe qual está no ar.
 2. [x] D2 — Casca por design: Vibrante (barra lateral + dock), Editorial (capa de revista, sem barra inferior), Aurora (cápsula flutuante + dock de vidro + paleta Ctrl+K); falta conferir em prints
 3. [x] D3 — Página inicial (landing) e abertura do Espaço com composição própria por design (feed e posts intactos); colunas laterais redesenhadas em cada design (cards coloridos, colunas de jornal, vidro)
 4. [x] D4 — Estilo de post por design; cabeçalho de página por design (Comunidades, Desafios, Explorar, Notificações, Profissionais, Acompanhamento, Painel clínico, Programas, Receitas, Cardápio, Geladeira, Feira, Casa, Convites, Verificação); Funções e abas por design. O Perfil de cada pessoa segue livre (montado por ela)
-5a. [x] Colunas laterais removidas do site; cards delas ficam só em Funções ("Meus cards") e o card de nível em Desafios; páginas usam a largura toda
+       5a. [x] Colunas laterais removidas do site; cards delas ficaram em Funções ("Meus cards", removido em 17/10 a pedido do dono) e o card de nível em Desafios; páginas usam a largura toda
 5. [ ] D5 — Revisão final em prints no site logado (celular, escuro), mantendo modelos de post e regras de rolagem
 
 ### Funções e expansão
 
-6. [ ] S2 — Terminar abas Ideias, Calendário, Tendências e Perfis do estúdio no novo estilo
+6. [x] S2 — Terminar abas Ideias, Calendário, Tendências e Perfis do estúdio no novo estilo
 7. [ ] T1 — Turbinar as funções existentes, uma por commit, já no visual novo
-8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
+   - [x] T1a Hábitos do dia: catálogo de 12 hábitos, cada pessoa escolhe de 3 a 8 (fica na conta), mapa das últimas 5 semanas; relatório em PDF conta todos
+   - [x] T1b Timer de cozinha: até 6 timers com nome ao mesmo tempo, atalhos por alimento, +1 min, continuam ao recarregar, tela acesa, aviso ao terminar
+   - [x] T1c Medidas da cozinha: 19 ingredientes, copo americano, colher de sobremesa e ml, conversão nos dois sentidos, multiplicador de receita
+   - [x] T1d Quiz relâmpago: 33 perguntas (eram 8; Guia Alimentar, OMS, Anvisa), alternativas embaralhadas, perguntas não vistas primeiro
+   - [x] T1e Roleta de receitas: filtros Com o que tenho (Geladeira), Rápidas (até 30 min) e Fáceis; foto, tempo e dificuldade; não repete as últimas
+   - [x] T1f Monte seu prato: prato em fatias com a proporção do Guia (½ verduras, ¼ proteína, ¼ energia) tracejada, percentuais por grupo, 18 alimentos em fileiras por grupo
+   - [x] T1g Como me sinto: mapa das últimas 5 semanas, distribuição dos humores e padrões gentis (dia da semana mais pesado, hábitos nos dias bons e difíceis)
+   - [x] T1h Refeição com calma: 1 minuto de respiração guiada, anel dos 20 minutos, fome antes e saciedade depois com retorno, continua ao recarregar, tela acesa
+   - [x] T1i Dica do dia: 42 dicas (eram 12) com tema e ícone (cozinha, compras, rótulos, hábitos, hidratação), salvar as preferidas
+   - [x] T1j Água de hoje: sequência de dias na meta, mapa das últimas 5 semanas, litros no período, sugestão de meta pelo peso (~35 ml/kg); semana visível também em Funções
+   - [x] T1k Compromisso da semana: histórico das 4 semanas anteriores em barras e a melhor semana
+   - [x] T1l Lista de compras: vários itens de uma vez (vírgula), agrupada por seção do mercado (classificador por palavras, sem IA, src/lib/aisles.ts), progresso das compras
+   - [x] T1m Calendário da feira: busca "quando é época de…" (mostra os meses mesmo fora de época) e "pôr os do auge na lista"
+   - [x] T1n Geladeira: "Ideias de sempre" (14 receitas caseiras comparadas com o que a pessoa tem, sem IA), com o que falta e "pôr o que falta na lista"
+   - [x] T1o Cardápio da semana: "Completar sem a Nina" (receitas guardadas e pratos de sempre, priorizando o que está na Geladeira, sem repetir prato no mesmo dia; src/lib/menu-fill.ts), "Repetir a semana anterior" e "a sobra do jantar vira o almoço de amanhã" (sem duplicar na lista de compras)
+   - [x] T1p Minha casa: lista da casa agrupada por seção do mercado com progresso, "Hoje na casa" (almoço e jantar de hoje do cardápio da casa) e recados rápidos no mural (Janta pronta, Sobrou comida, Cheguei…)
+   - [x] T1q Lancheira: "Completar com ideias prontas" (seguras para idade e alergias, primeiro as que a criança gostou, sem as que não gostou nem o que ela não come), "Repetir a semana anterior" e o quadro "o que a criança achou dos lanches"
+8. [x] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração (src/lib/native.ts; falta conferir no celular com o APK de teste)
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
 10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
 11. [ ] X1 — Diário de sintomas e alimentação com correlações (para levar à consulta)

@@ -32,7 +32,7 @@ function Row({
         <p className="text-sm font-semibold text-foreground">{title}</p>
         {hint && <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>}
       </div>
-      <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} />
+      <Switch aria-label={title} checked={checked} disabled={disabled} onCheckedChange={onChange} />
     </div>
   );
 }

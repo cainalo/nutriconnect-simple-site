@@ -70,6 +70,7 @@ export function HealthConsentCard() {
           </p>
         </div>
         <Switch
+          aria-label="Consentimento para dados de saúde"
           checked={granted === true}
           disabled={granted === null || saving}
           onCheckedChange={toggle}

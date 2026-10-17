@@ -38,11 +38,11 @@ function SectionTitle({
   hint: string;
 }) {
   return (
-    <div className="flex items-center gap-2.5">
-      <span className={`grid h-9 w-9 place-items-center rounded-xl ${tone}`}>
+    <div className="flex min-w-0 items-center gap-2.5">
+      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone}`}>
         <Icon className="h-4 w-4" />
       </span>
-      <div>
+      <div className="min-w-0 break-words">
         <p className="text-sm font-bold font-display text-foreground">{title}</p>
         <p className="text-[11px] text-muted-foreground">{hint}</p>
       </div>
@@ -66,7 +66,7 @@ function LinkCard({
   return (
     <Link
       to={to}
-      className="flex items-center justify-between gap-4 rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition hover:bg-secondary/50 sm:p-6"
+      className="flex min-w-0 items-center justify-between gap-4 rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition hover:bg-secondary/50 sm:p-6"
     >
       <SectionTitle icon={icon} tone={tone} title={title} hint={hint} />
       <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />

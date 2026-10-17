@@ -44,6 +44,7 @@ import {
   type ProgramModule,
 } from "@/lib/programs";
 import { cn } from "@/lib/utils";
+import { EmojiIcon } from "@/components/emoji-icon";
 
 export const Route = createFileRoute("/painel/programas")({
   component: ProgramsPanel,
@@ -198,8 +199,8 @@ function ProgramsPanel() {
           {(programs.data ?? []).map((p) => (
             <Card key={p.id}>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-3xl" aria-hidden>
-                  {p.emoji}
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent-soft">
+                  <EmojiIcon emoji={p.emoji} tinted className="h-6 w-6" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-foreground">{p.title}</p>
@@ -372,11 +373,11 @@ function ProgramForm({
             aria-pressed={emoji === e}
             onClick={() => setEmoji(e)}
             className={cn(
-              "grid h-9 w-9 place-items-center rounded-xl border text-lg transition",
+              "grid h-9 w-9 place-items-center rounded-xl border transition",
               emoji === e ? "border-accent bg-accent-soft" : "border-border hover:bg-secondary",
             )}
           >
-            {e}
+            <EmojiIcon emoji={e} tinted className="h-5 w-5" />
           </button>
         ))}
       </div>

@@ -10,3 +10,10 @@
 
 [build.environment]
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_PROJECT_ID,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,VITE_SUPABASE_PROJECT_ID,VITE_SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_URL,VITE_VAPID_PUBLIC_KEY,VAPID_PUBLIC_KEY"
+
+# A4: verificação dos links que abrem o app Android (App Links).
+[[headers]]
+  for = "/.well-known/assetlinks.json"
+  [headers.values]
+    Content-Type = "application/json"
+    Access-Control-Allow-Origin = "*"

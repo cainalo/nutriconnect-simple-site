@@ -7,8 +7,16 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    // Arquivos gerados pela plataforma (Lovable) e Edge Functions (Deno) ficam fora do lint.
-    ignores: ["dist", ".output", ".vinxi", "src/integrations/supabase", "supabase/functions"],
+    // Arquivos gerados pela plataforma (Lovable), Edge Functions (Deno) e a bancada de prévias
+    // (.preview-harness, só para prints locais) ficam fora do lint.
+    ignores: [
+      "dist",
+      ".output",
+      ".vinxi",
+      "src/integrations/supabase",
+      "supabase/functions",
+      ".preview-harness",
+    ],
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],

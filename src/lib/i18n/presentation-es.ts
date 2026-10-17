@@ -621,7 +621,7 @@ const es: PresentationCopy = {
   },
   join: {
     eyebrow: "Únete",
-    title: "Tu camino empieza ahora",
+    title: "Empieza por la próxima comida",
     text: "Crea tu cuenta gratuita, únete a una comunidad y da el primer paso en la ruta con Nina.",
     primary: "Crear mi cuenta",
     secondary: "Ya tengo cuenta",

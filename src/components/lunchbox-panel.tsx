@@ -7,8 +7,11 @@ import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  Backpack,
+  CalendarClock,
   ChevronLeft,
   ChevronRight,
+  Heart,
   Lightbulb,
   Loader2,
   Pencil,
@@ -20,6 +23,7 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react";
+import { EmojiIcon } from "@/components/emoji-icon";
 import { Mascot } from "@/components/mascots";
 import { ShoppingSection } from "@/components/menu-panel";
 import { useTr } from "@/components/settings-ui";
@@ -32,6 +36,7 @@ import { useSeasonNow } from "@/lib/season";
 import { useHouseholdKids, useMyHousehold } from "@/lib/household";
 import { useTrailProfiles } from "@/lib/trail-profiles";
 import type { TrailProfile } from "@/lib/trail-types";
+import { EmptyPhoto } from "@/components/clinical/ui";
 import {
   AGE_NAMES,
   AGE_RANGES,
@@ -108,6 +113,53 @@ function fromIdea(idea: LunchIdea, tr: (n: Names) => string): LunchSnack {
     emojis: idea.emojis,
     source: "ideia",
   };
+}
+
+const plain = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+/**
+ * Preenche os lanches vazios só com ideias prontas e seguras (sem a Nina): primeiro as que a
+ * criança disse que gostou, nunca as que não gostou nem as que citam o que ela não come; não
+ * repete enquanto houver opção e nunca no mesmo dia.
+ */
+function fillWithIdeas(
+  snacks: LunchSnacks,
+  list: { day: number; slot: SnackSlot }[],
+  ideas: LunchIdea[],
+  liked: string[],
+  disliked: string[],
+  dislikesText: string,
+  tr: (n: Names) => string,
+): LunchSnacks {
+  const avoid = dislikesText
+    .split(/[,;\n]/)
+    .map((w) => plain(w.trim()))
+    .filter((w) => w.length >= 3);
+  const options = ideas
+    .map((i) => fromIdea(i, tr))
+    .filter(
+      (o) =>
+        !disliked.includes(o.title) &&
+        !o.items.some((it) => avoid.some((w) => plain(it).includes(w))),
+    )
+    .sort((a, b) => Number(liked.includes(b.title)) - Number(liked.includes(a.title)));
+  const next = { ...snacks };
+  const uses = new Map<string, number>();
+  for (const x of Object.values(next)) if (x) uses.set(x.title, (uses.get(x.title) ?? 0) + 1);
+  for (const { day, slot } of list) {
+    const sameDay = SNACK_SLOTS.map((sl) => next[snackKey(day, sl)]?.title).filter(Boolean);
+    const pick = options
+      .filter((o) => !sameDay.includes(o.title))
+      .sort((a, b) => (uses.get(a.title) ?? 0) - (uses.get(b.title) ?? 0))[0];
+    if (!pick) continue;
+    next[snackKey(day, slot)] = pick;
+    uses.set(pick.title, (uses.get(pick.title) ?? 0) + 1);
+  }
+  return next;
 }
 
 // ───────────────────────────── Sobre a criança ─────────────────────────────
@@ -322,7 +374,14 @@ function SnackCard({
             aria-expanded={open}
             className="mt-1 text-left text-sm font-semibold text-foreground hover:underline"
           >
-            {snack.emojis && <span className="mr-1">{snack.emojis}</span>}
+            {snack.emojis && (
+              <EmojiIcon
+                emoji={snack.emojis}
+                tinted
+                fallback={null}
+                className="mr-1 inline h-4 w-4 align-[-3px]"
+              />
+            )}
             {snack.title}
           </button>
           {snack.rating && (
@@ -397,7 +456,7 @@ function SnackCard({
           </option>
           {ideas.map((i) => (
             <option key={i.id} value={i.id}>
-              {i.emojis} {tr(i.title)}
+              {tr(i.title)}
             </option>
           ))}
         </select>
@@ -467,6 +526,7 @@ function KidWeek({ kid }: { kid: TrailProfile }) {
   const [week, setWeek] = useState(() => mondayOf());
   const profile = useLunchboxProfile(kid.id);
   const lunchbox = useLunchbox(kid.id, week);
+  const prevBox = useLunchbox(kid.id, addWeeks(week, -1));
   const save = useSaveLunchbox(kid.id, week);
   const ratings = useLunchRatings(kid.id);
   const season = useSeasonNow();
@@ -485,6 +545,10 @@ function KidWeek({ kid }: { kid: TrailProfile }) {
   const allSlots = SCHOOL_DAYS.flatMap((day) => slots.map((slot) => ({ day, slot })));
   const empty = allSlots.filter((s) => !snacks[snackKey(s.day, s.slot)]);
   const thisWeek = mondayOf();
+  const prevSnacks = (prevBox.data?.snacks ?? {}) as LunchSnacks;
+  const fromPrev = empty.filter((s) => prevSnacks[snackKey(s.day, s.slot)]);
+  const liked = ratings.data?.liked ?? [];
+  const disliked = ratings.data?.disliked ?? [];
   const dateFmt = new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit" });
 
   const persist = (next: LunchSnacks) =>
@@ -540,6 +604,26 @@ function KidWeek({ kid }: { kid: TrailProfile }) {
     } finally {
       setBusy([]);
     }
+  };
+
+  const fillReady = () => {
+    const next = fillWithIdeas(snacks, empty, ideas, liked, disliked, about?.dislikes ?? "", tr);
+    const n = Object.keys(next).length - Object.keys(snacks).length;
+    persist(next);
+    toast.success(
+      tr([
+        `${n} ${n === 1 ? "lanche preenchido" : "lanches preenchidos"} com ideias prontas e seguras.`,
+        `${n} ${n === 1 ? "snack" : "snacks"} filled with safe ready ideas.`,
+        `${n} ${n === 1 ? "merienda completada" : "meriendas completadas"} con ideas listas y seguras.`,
+        `${n} goûter${n === 1 ? "" : "s"} complété${n === 1 ? "" : "s"} avec des idées sûres.`,
+      ]),
+    );
+  };
+
+  const repeatPrev = () => {
+    const next = { ...snacks };
+    for (const s of fromPrev) next[snackKey(s.day, s.slot)] = prevSnacks[snackKey(s.day, s.slot)];
+    persist(next);
   };
 
   const setSnack = (key: string, snack: LunchSnack | null) => {
@@ -672,6 +756,38 @@ function KidWeek({ kid }: { kid: TrailProfile }) {
               {tr(["Refazer a semana", "Redo the week", "Rehacer la semana", "Refaire la semaine"])}
             </button>
           )}
+          {empty.length > 0 && ideas.length > 0 && (
+            <button
+              type="button"
+              onClick={fillReady}
+              disabled={busy.length > 0 || lunchbox.isLoading}
+              className={btnSoft}
+            >
+              <Lightbulb className="h-4 w-4" />
+              {tr([
+                `Completar com ideias prontas (${empty.length})`,
+                `Fill in with ready ideas (${empty.length})`,
+                `Completar con ideas listas (${empty.length})`,
+                `Compléter avec des idées (${empty.length})`,
+              ])}
+            </button>
+          )}
+          {fromPrev.length > 0 && (
+            <button
+              type="button"
+              onClick={repeatPrev}
+              disabled={busy.length > 0 || lunchbox.isLoading}
+              className={btnSoft}
+            >
+              <CalendarClock className="h-4 w-4" />
+              {tr([
+                `Repetir a semana anterior (${fromPrev.length})`,
+                `Repeat last week (${fromPrev.length})`,
+                `Repetir la semana anterior (${fromPrev.length})`,
+                `Reprendre la semaine précédente (${fromPrev.length})`,
+              ])}
+            </button>
+          )}
           <span className="text-[11px] text-muted-foreground">
             {used !== null &&
               `${used}/${LUNCHBOX_DAILY_LIMIT} ${tr(["hoje", "today", "hoy", "aujourd'hui"])} · `}
@@ -684,6 +800,63 @@ function KidWeek({ kid }: { kid: TrailProfile }) {
           </span>
         </div>
       </section>
+
+      {(liked.length > 0 || disliked.length > 0) && (
+        <section className={cn(card, "mt-4")}>
+          <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <Heart className="h-4 w-4 text-accent" />
+            {tr([
+              `O que ${kid.name} achou dos lanches`,
+              `What ${kid.name} thought of the snacks`,
+              `Lo que ${kid.name} opinó de las meriendas`,
+              `Ce que ${kid.name} a pensé des goûters`,
+            ])}
+          </h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {[
+              {
+                list: liked,
+                icon: ThumbsUp,
+                tone: "text-primary",
+                title: tr(["Gostou", "Liked", "Le gustó", "A aimé"]),
+              },
+              {
+                list: disliked,
+                icon: ThumbsDown,
+                tone: "text-destructive",
+                title: tr(["Não gostou", "Didn't like", "No le gustó", "N'a pas aimé"]),
+              },
+            ].map((g) => (
+              <div
+                key={g.title}
+                className="rounded-2xl border border-border/60 bg-background/60 p-3"
+              >
+                <p className={cn("flex items-center gap-1.5 text-xs font-bold", g.tone)}>
+                  <g.icon className="h-3.5 w-3.5" />
+                  {g.title} ({g.list.length})
+                </p>
+                {g.list.length ? (
+                  <ul className="mt-1.5 space-y-0.5 text-xs text-foreground">
+                    {g.list.map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-1.5 text-xs text-muted-foreground">—</p>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            {tr([
+              "As ideias prontas e a Nina dão preferência ao que agradou e deixam de fora o que não agradou.",
+              "Ready ideas and Nina favor what was liked and leave out what wasn't.",
+              "Las ideas listas y Nina prefieren lo que gustó y dejan fuera lo que no.",
+              "Les idées et Nina privilégient ce qui a plu et écartent ce qui n'a pas plu.",
+            ])}
+          </p>
+        </section>
+      )}
 
       {lunchbox.isLoading ? (
         <Loader2 className="mt-6 h-5 w-5 animate-spin text-muted-foreground" />
@@ -748,7 +921,7 @@ export function LunchboxPanel() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-extrabold font-display text-foreground">
+        <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
           {tr([
             "Lancheira da semana",
             "Weekly lunchbox",
@@ -767,7 +940,8 @@ export function LunchboxPanel() {
       </header>
 
       {!kid ? (
-        <div className={cn(card, "text-center")}>
+        <div className={cn(card, "overflow-hidden text-center")}>
+          <EmptyPhoto src="/images/social/frutas-variadas.jpg" className="-mx-5 -mt-5 mb-5" />
           <p className="text-sm text-muted-foreground">
             {tr([
               "A lancheira usa os perfis infantis da Trilha. Crie um perfil para cada criança e volte aqui.",
@@ -816,10 +990,10 @@ export function LunchboxLink() {
   return (
     <Link
       to="/lancheira"
-      className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card p-4 text-sm shadow-xs transition hover:shadow-card"
+      className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-accent-soft/40 p-4 text-sm shadow-xs transition hover:shadow-card"
     >
-      <span className="text-2xl" aria-hidden>
-        🎒
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft">
+        <Backpack className="h-5 w-5 text-accent" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-bold text-foreground">
@@ -871,7 +1045,7 @@ export function KidLunchboxToday({ profileId }: { profileId: string }) {
   };
 
   return (
-    <section className="mb-6 rounded-3xl border-2 border-accent/40 bg-gradient-to-br from-accent-soft/60 to-card p-4">
+    <section className="mb-6 rounded-3xl border-2 border-accent/40 bg-accent-soft/40 p-4">
       <h2 className="text-base font-extrabold font-display text-foreground">
         {tr([
           "Minha lancheira de hoje",
@@ -883,8 +1057,8 @@ export function KidLunchboxToday({ profileId }: { profileId: string }) {
       <ul className="mt-3 space-y-3">
         {todays.map(({ slot, key, snack }) => (
           <li key={key} className="flex flex-wrap items-center gap-3">
-            <span className="text-4xl leading-none" aria-hidden>
-              {snack!.emojis || "🍎"}
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent-soft">
+              <EmojiIcon emoji={snack!.emojis || "🍎"} tinted className="h-7 w-7" />
             </span>
             <div className="min-w-0 flex-1">
               {slots.length > 1 && (
@@ -900,21 +1074,21 @@ export function KidLunchboxToday({ profileId }: { profileId: string }) {
                 onClick={() => rate(key, "gostei")}
                 aria-pressed={snack!.rating === "gostei"}
                 className={cn(
-                  "rounded-full border-2 px-3 py-2 text-xl transition",
+                  "grid h-10 w-12 place-items-center rounded-full border-2 transition",
                   snack!.rating === "gostei"
                     ? "border-primary bg-primary/15"
                     : "border-border bg-card hover:border-primary/60",
                 )}
                 aria-label={tr(["Gostei", "I liked it", "Me gustó", "J'ai aimé"])}
               >
-                😋
+                <ThumbsUp className="h-5 w-5" />
               </button>
               <button
                 type="button"
                 onClick={() => rate(key, "nao_gostei")}
                 aria-pressed={snack!.rating === "nao_gostei"}
                 className={cn(
-                  "rounded-full border-2 px-3 py-2 text-xl transition",
+                  "grid h-10 w-12 place-items-center rounded-full border-2 transition",
                   snack!.rating === "nao_gostei"
                     ? "border-muted-foreground bg-secondary"
                     : "border-border bg-card hover:border-muted-foreground/60",
@@ -926,7 +1100,7 @@ export function KidLunchboxToday({ profileId }: { profileId: string }) {
                   "Je n'ai pas aimé",
                 ])}
               >
-                😕
+                <ThumbsDown className="h-5 w-5" />
               </button>
             </div>
           </li>

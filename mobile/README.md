@@ -10,6 +10,19 @@ loja. O site reconhece o app pelo user agent (`NutriConnectApp/…`, ver `isNati
 - Configuração: `capacitor.config.json`
 - Ícone e abertura: imagens de origem em `assets/`; para regerar, `npm run assets`.
 
+## Recursos nativos (A3/A4)
+
+O site usa os plugins pela ponte (`src/lib/native.ts`), com o equivalente do navegador fora do app:
+
+- **Código de barras** (`@capacitor-mlkit/barcode-scanning`): o leitor do Google (ML Kit), baixado
+  pelo Play Services na primeira vez; usado no leitor de rótulos.
+- **Compartilhar** (`@capacitor/share`): posts e convite da casa abrem o compartilhar do Android.
+- **Vibração** (`@capacitor/haptics`): ao ler um código, concluir lições, notificações.
+- **Links que abrem o app** (App Links): links de `nutri-connect.netlify.app` abrem o app na página
+  certa. O Android confere `public/.well-known/assetlinks.json` no site, que traz a impressão
+  digital SHA-256 da chave de TESTE (`android/app/teste.keystore`). Quando houver a chave da Play
+  Store (A5), acrescente a impressão digital dela nesse arquivo, ao lado da de teste.
+
 ## Gerar o APK de teste
 
 Não precisa instalar nada no computador: o GitHub Actions ("App Android") gera um APK a cada

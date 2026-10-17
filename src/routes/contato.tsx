@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, MapPin, Send, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import { CheckCircle2, Mail, MapPin, Send, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
@@ -81,9 +81,7 @@ function Contato() {
       <main className="flex-1">
         <section className="bg-gradient-to-b from-secondary/60 to-background py-14">
           <div className="mx-auto max-w-5xl px-4 text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft/50 px-4 py-1.5 text-xs font-semibold text-primary">
-              <Sparkles className="h-4 w-4" /> {t("contact.badge")}
-            </span>
+            <p className="!text-center text-sm font-semibold text-primary">{t("contact.badge")}</p>
             <h1 className="mt-4 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
               {t("contact.title")}
             </h1>

@@ -67,7 +67,7 @@ export function EspacoIntro({ themeTitle }: { themeTitle?: string | null }) {
 
   if (design === "vibrante") {
     return (
-      <section className="mb-6 overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary to-accent p-5 text-primary-foreground shadow-card">
+      <section className="mb-6 overflow-hidden rounded-[2rem] bg-primary p-5 text-primary-foreground shadow-card">
         <p className="!text-left font-display text-2xl font-black text-white sm:text-3xl">
           {greeting}, {name}!
         </p>

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { initials } from "@/lib/clinical/format";
 import { useClinicalI18n, type ClinicalKey } from "@/lib/clinical/i18n";
 import type { AppointmentStatus, LinkStatus, PaymentStatus } from "@/lib/clinical/api";
+import { useSitePhotos } from "@/lib/site-photos";
 
 /**
  * O app justifica textos dentro de cards (styles.css). Nas telas clínicas, cheias de rótulos
@@ -87,21 +88,52 @@ export function EmptyState({
   title,
   text,
   action,
+  photo,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   text?: string;
   action?: ReactNode;
+  /** Foto no alto do card (fotos de public/images), com o ícone sobre a borda dela. */
+  photo?: string;
 }) {
+  const photos = useSitePhotos();
+  if (!photos) photo = undefined;
   return (
-    <div className="flex flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-border/60 bg-card/30 backdrop-blur-sm px-6 py-12 text-center transition-all duration-300 hover:bg-card/50">
-      <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft/50 text-primary shadow-inner">
+    <div className="flex flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border border-dashed border-border/60 bg-card/30 backdrop-blur-sm px-6 py-12 text-center transition-all duration-300 hover:bg-card/50">
+      {photo && <EmptyPhoto src={photo} className="-mx-6 -mt-12 mb-0" />}
+      <span
+        className={cn(
+          "relative grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft/50 text-primary shadow-inner",
+          photo && "-mt-7 bg-card shadow-md ring-4 ring-card",
+        )}
+      >
         <Icon className="h-6 w-6" />
       </span>
       <p className="mt-4 font-display text-lg font-bold tracking-tight text-foreground">{title}</p>
       {text && <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">{text}</p>}
       {action && <div className="mt-6">{action}</div>}
     </div>
+  );
+}
+
+/** Faixa de foto para o alto de um card vazio; quem usa ajusta as margens ao padding do card. */
+export function EmptyPhoto({ src, className }: { src: string; className?: string }) {
+  const photos = useSitePhotos();
+  if (!photos) return null;
+  return (
+    <span
+      aria-hidden="true"
+      className={cn("block h-36 self-stretch overflow-hidden sm:h-44", className)}
+    >
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        className="nc-kenburns h-full w-full object-cover"
+      />
+    </span>
   );
 }
 
@@ -267,7 +299,7 @@ export function Tabs<T extends string>({
   items: { value: T; label: string; count?: number }[];
 }) {
   return (
-    <div className="-mx-1 mb-6 flex gap-2 overflow-x-auto px-1 pb-2 scroll-smooth">
+    <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scroll-smooth">
       {items.map((item) => (
         <button
           key={item.value}

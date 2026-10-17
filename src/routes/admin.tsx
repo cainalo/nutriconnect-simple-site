@@ -15,6 +15,9 @@ import {
 } from "@/components/admin/sections-ai-rejections";
 import { ClinicalDemoPanel, SiteFeaturesSection } from "@/components/admin/sections-site-features";
 import { SiteDesignSection } from "@/components/admin/sections-site-design";
+import { SitePhotosSection } from "@/components/admin/sections-site-photos";
+import { DocsSection } from "@/components/admin/sections-docs";
+import { QualitySection } from "@/components/admin/sections-quality";
 import { SiteNinaSection } from "@/components/admin/sections-site-nina";
 import { PresentationSection } from "@/components/admin/sections-presentation";
 import { MarketsSection } from "@/components/admin/sections-markets";
@@ -167,6 +170,8 @@ function AdminPage() {
           {section === "usuarios" && <UsersSection me={user.id} />}
           {section === "verificacoes" && <VerificationsSection user={user} />}
           {section === "contato" && <ContactSection />}
+          {section === "documentacao" && <DocsSection />}
+          {section === "qualidade" && <QualitySection />}
           {section === "posts" && <PostsSection />}
           {section === "moderacao" && <ModerationSection />}
           {section === "ia_barrados" && <AiRejectionsSection />}
@@ -182,7 +187,12 @@ function AdminPage() {
             </div>
           )}
           {section === "site_nina" && <SiteNinaSection />}
-          {section === "site_design" && <SiteDesignSection />}
+          {section === "site_design" && (
+            <div className="space-y-4">
+              <SiteDesignSection />
+              <SitePhotosSection />
+            </div>
+          )}
           {section === "financeiro" && <FinanceSection />}
           {section === "mercados" && <MarketsSection />}
           {section === "ia" && <AiSection />}

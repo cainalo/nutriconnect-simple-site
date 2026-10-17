@@ -4,11 +4,13 @@
 // quiz) fica na conta, só para ela (ver lib/checkins e water-tracker). Textos nos 4 idiomas.
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   Apple,
   Carrot,
   CheckCircle2,
   ChefHat,
+  Droplets,
   Cherry,
   Citrus,
   Heart,
@@ -29,6 +31,7 @@ import {
   RotateCcw,
   Scale,
   Search,
+  Settings2,
   Send,
   Shuffle,
   ShoppingBasket,
@@ -46,11 +49,18 @@ import {
 } from "lucide-react";
 import type { ProfessionKey } from "@/lib/clinical/professions";
 import { EmojiIcon } from "@/components/emoji-icon";
+import { HABIT_CATALOG, MAX_HABITS, MIN_HABITS, useHabitChoice } from "@/lib/habits";
+import { MORE_QUESTIONS, type QuizQuestion } from "@/lib/quiz-questions";
+import { MORE_TIPS, type TipTheme } from "@/lib/daily-tips";
+import { guessSection } from "@/lib/aisles";
+import { SECTION_NAMES } from "@/lib/menu";
+import { SECTIONS, type Section } from "@/lib/menu.functions";
 import { Panel } from "@/components/rail-cards";
 import { WaterTracker } from "@/components/water-tracker";
 import {
   useAddShoppingItems,
   useDeleteShoppingItems,
+  useFridgeItems,
   useShoppingItems,
   useUpdateShoppingItem,
 } from "@/lib/fridge";
@@ -72,6 +82,7 @@ import { td } from "@/lib/i18n/data";
 import { playSound } from "@/lib/sounds";
 import { themeText } from "@/lib/social/feed";
 import { useActiveTheme, useFeed } from "@/lib/social/feed-queries";
+import { EXPLORE_TOPICS as TOPICS } from "@/lib/explore-topics";
 
 // ───────────────────────────── Ajudantes ─────────────────────────────
 
@@ -145,6 +156,10 @@ const primaryBtn =
   "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50";
 const note = "mt-3 text-[10px] leading-snug text-muted-foreground";
 
+/** Troca {chave} pelo valor no texto. */
+const fillN = (text: string, vars: Record<string, string | number>) =>
+  text.replace(/\{(\w+)\}/g, (_, k: string) => String(vars[k] ?? ""));
+
 function Bar({ value, max }: { value: number; max: number }) {
   return (
     <div className="h-2 overflow-hidden rounded-full bg-secondary">
@@ -168,7 +183,7 @@ export function HydrationCard() {
       className="relative"
     >
       <Burst id={burst} />
-      <WaterTracker onGoalReached={fire} showWeek={false} />
+      <WaterTracker onGoalReached={fire} />
     </Panel>
   );
 }
@@ -250,25 +265,151 @@ const TIPS: Names[] = [
   ],
 ];
 
+const TIP_THEMES: Record<TipTheme, { icon: LucideIcon; color: string; name: Names }> = {
+  cozinha: { icon: ChefHat, color: "#d9692a", name: ["Cozinha", "Kitchen", "Cocina", "Cuisine"] },
+  compras: {
+    icon: ShoppingBasket,
+    color: "#3b7bbf",
+    name: ["Compras", "Shopping", "Compras", "Courses"],
+  },
+  rotulo: {
+    icon: Search,
+    color: "#8a5fb0",
+    name: ["Rótulos", "Labels", "Etiquetas", "Étiquettes"],
+  },
+  habito: { icon: Heart, color: "#4f8a4b", name: ["Hábitos", "Habits", "Hábitos", "Habitudes"] },
+  agua: {
+    icon: Droplets,
+    color: "#0f9aa8",
+    name: ["Hidratação", "Hydration", "Hidratación", "Hydratation"],
+  },
+};
+const ALL_TIPS: { theme: TipTheme; text: Names }[] = [
+  ...TIPS.map((text) => ({ theme: "habito" as const, text })),
+  ...MORE_TIPS,
+];
+const SAVED_TIPS_KEY = "nc_tips_saved";
+
+/** Uma dica por dia (a mesma o dia todo), com tema; dá para pedir outra e salvar as preferidas. */
 export function DailyTipCard() {
   const tr = useTr();
   const [shift, setShift] = useState(0);
-  const tip = TIPS[(dayNumber() + shift) % TIPS.length];
+  const [saved, setSaved] = useState<string[]>([]);
+  const [showSaved, setShowSaved] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(SAVED_TIPS_KEY) ?? "[]");
+      if (Array.isArray(raw)) setSaved(raw);
+    } catch {
+      // sem armazenamento
+    }
+  }, []);
+  const tip = ALL_TIPS[(dayNumber() * 5 + shift) % ALL_TIPS.length];
+  const theme = TIP_THEMES[tip.theme];
+  const isSaved = saved.includes(tip.text[0]);
+  const persist = (next: string[]) => {
+    setSaved(next);
+    try {
+      window.localStorage.setItem(SAVED_TIPS_KEY, JSON.stringify(next));
+    } catch {
+      // sem armazenamento
+    }
+  };
+  const toggleSave = () => {
+    persist(isSaved ? saved.filter((x) => x !== tip.text[0]) : [...saved, tip.text[0]]);
+    playSound(isSaved ? "click" : "success");
+  };
+  const savedTips = ALL_TIPS.filter((t) => saved.includes(t.text[0]));
+
   return (
     <Panel title={tr(["Dica do dia", "Tip of the day", "Consejo del día", "Astuce du jour"])}>
-      <div className="flex gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
-          <Lightbulb className="h-5 w-5" />
-        </span>
-        <p key={shift} className="nc-pop-in text-sm leading-relaxed text-foreground">
-          {tr(tip)}
-        </p>
-      </div>
-      <div className="mt-3 flex justify-end">
-        <button type="button" className={iconBtn} onClick={() => setShift((n) => n + 1)}>
-          <Shuffle className="h-3 w-3" />
-          {tr(["Outra dica", "Another tip", "Otro consejo", "Autre astuce"])}
+      {showSaved ? (
+        savedTips.length ? (
+          <ul className="space-y-2">
+            {savedTips.map((t) => {
+              const th = TIP_THEMES[t.theme];
+              return (
+                <li
+                  key={t.text[0]}
+                  className="flex gap-2 rounded-xl bg-secondary/50 p-2.5 text-left text-xs leading-snug"
+                >
+                  <th.icon className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: th.color }} />
+                  <span className="flex-1">{tr(t.text)}</span>
+                  <button
+                    type="button"
+                    onClick={() => persist(saved.filter((x) => x !== t.text[0]))}
+                    className="grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    aria-label={tr(["Remover", "Remove", "Quitar", "Supprimer"])}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-center text-xs text-muted-foreground">
+            {tr([
+              "Nenhuma dica salva ainda. Toque no coração para guardar uma.",
+              "No saved tips yet. Tap the heart to keep one.",
+              "Aún no hay consejos guardados. Toca el corazón para guardar uno.",
+              "Aucune astuce enregistrée. Touchez le cœur pour en garder une.",
+            ])}
+          </p>
+        )
+      ) : (
+        <div className="flex gap-3">
+          <span
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-white"
+            style={{ background: theme.color }}
+          >
+            <theme.icon className="h-5 w-5" />
+          </span>
+          <div key={shift} className="nc-pop-in min-w-0">
+            <p
+              className="text-[10px] font-bold uppercase tracking-wider"
+              style={{ color: theme.color }}
+            >
+              {tr(theme.name)}
+            </p>
+            <p className="mt-0.5 text-left text-sm leading-relaxed text-foreground">
+              {tr(tip.text)}
+            </p>
+          </div>
+        </div>
+      )}
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setShowSaved((v) => !v)}
+          className="cursor-pointer text-[11px] font-bold text-primary hover:underline"
+        >
+          {showSaved
+            ? tr(["Voltar à dica", "Back to the tip", "Volver al consejo", "Retour à l'astuce"])
+            : `${tr(["Salvas", "Saved", "Guardados", "Enregistrées"])} (${saved.length})`}
         </button>
+        {!showSaved && (
+          <span className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={toggleSave}
+              aria-pressed={isSaved}
+              className={`${iconBtn} ${isSaved ? "!bg-accent !text-accent-foreground" : ""}`}
+              aria-label={tr([
+                "Salvar dica",
+                "Save tip",
+                "Guardar consejo",
+                "Enregistrer l'astuce",
+              ])}
+            >
+              <Heart className={`h-3 w-3 ${isSaved ? "fill-current" : ""}`} />
+            </button>
+            <button type="button" className={iconBtn} onClick={() => setShift((n) => n + 1)}>
+              <Shuffle className="h-3 w-3" />
+              {tr(["Outra dica", "Another tip", "Otro consejo", "Autre astuce"])}
+            </button>
+          </span>
+        )}
       </div>
     </Panel>
   );
@@ -276,14 +417,9 @@ export function DailyTipCard() {
 
 // ───────────────────────────── Quiz relâmpago ─────────────────────────────
 
-interface Question {
-  q: Names;
-  options: [Names, Names, Names];
-  answer: 0 | 1 | 2;
-  why: Names;
-}
+type Question = QuizQuestion;
 
-const QUESTIONS: Question[] = [
+const BASE_QUESTIONS: Question[] = [
   {
     q: [
       "Qual destes alimentos é fonte de vitamina C?",
@@ -471,7 +607,48 @@ const QUESTIONS: Question[] = [
   },
 ];
 
+const QUESTIONS: Question[] = [...BASE_QUESTIONS, ...MORE_QUESTIONS];
 const ROUND = 5;
+const SEEN_KEY = "nc_quiz_seen";
+
+function readSeen(): string[] {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(SEEN_KEY) ?? "[]");
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Alternativas em ordem sorteada (a certa não fica sempre no mesmo lugar). */
+function shuffleOptions(q: Question): Question {
+  const order = shuffled([0, 1, 2]);
+  return {
+    ...q,
+    options: order.map((i) => q.options[i]) as Question["options"],
+    answer: order.indexOf(q.answer) as Question["answer"],
+  };
+}
+
+/** Rodada nova: primeiro as perguntas que a pessoa ainda não viu neste aparelho. */
+function newRound(): Question[] {
+  const seen = new Set(readSeen());
+  const fresh = shuffled(QUESTIONS.filter((q) => !seen.has(q.q[0])));
+  const old = shuffled(QUESTIONS.filter((q) => seen.has(q.q[0])));
+  const round = [...fresh, ...old].slice(0, ROUND);
+  try {
+    const next = [
+      ...readSeen().filter((id) => !round.some((q) => q.q[0] === id)),
+      ...round.map((q) => q.q[0]),
+    ];
+    // Quando todas já foram vistas, recomeça o ciclo guardando só a rodada atual.
+    const keep = next.length >= QUESTIONS.length ? round.map((q) => q.q[0]) : next;
+    window.localStorage.setItem(SEEN_KEY, JSON.stringify(keep));
+  } catch {
+    // sem armazenamento: sorteio simples
+  }
+  return round.map(shuffleOptions);
+}
 
 function shuffled<T>(list: T[]): T[] {
   const a = [...list];
@@ -497,7 +674,7 @@ export function QuizCard() {
   const finished = index >= ROUND;
 
   // Sorteia a rodada só no navegador (evita diferença com o HTML do servidor).
-  useEffect(() => setRound(shuffled(QUESTIONS).slice(0, ROUND)), []);
+  useEffect(() => setRound(newRound()), []);
 
   const q = round[Math.min(index, ROUND - 1)];
 
@@ -526,7 +703,7 @@ export function QuizCard() {
   };
 
   const again = () => {
-    setRound(shuffled(QUESTIONS).slice(0, ROUND));
+    setRound(newRound());
     setIndex(0);
     setPicked(null);
     setScore(0);
@@ -554,7 +731,7 @@ export function QuizCard() {
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {score >= 4
-              ? tr(["Mandou bem! 🌟", "Great job! 🌟", "¡Muy bien! 🌟", "Bravo ! 🌟"])
+              ? tr(["Mandou bem!", "Great job!", "¡Muy bien!", "Bravo !"])
               : score >= 2
                 ? tr([
                     "Quase lá! Tente de novo.",
@@ -631,20 +808,53 @@ interface Food {
 
 const FOODS: Food[] = [
   { emoji: "🥗", name: ["Salada", "Salad", "Ensalada", "Salade"], group: "veg" },
+  { emoji: "🥬", name: ["Couve", "Kale", "Col rizada", "Chou kale"], group: "veg" },
+  { emoji: "🍅", name: ["Tomate", "Tomato", "Tomate", "Tomate"], group: "veg" },
   { emoji: "🥦", name: ["Brócolis", "Broccoli", "Brócoli", "Brocoli"], group: "veg" },
   { emoji: "🥕", name: ["Cenoura", "Carrot", "Zanahoria", "Carotte"], group: "veg" },
+  { emoji: "🥒", name: ["Abobrinha", "Zucchini", "Calabacín", "Courgette"], group: "veg" },
   { emoji: "🫘", name: ["Feijão", "Beans", "Frijoles", "Haricots"], group: "protein" },
   { emoji: "🥚", name: ["Ovo", "Egg", "Huevo", "Œuf"], group: "protein" },
   { emoji: "🐟", name: ["Peixe", "Fish", "Pescado", "Poisson"], group: "protein" },
+  { emoji: "🍗", name: ["Frango", "Chicken", "Pollo", "Poulet"], group: "protein" },
+  { emoji: "🥩", name: ["Carne", "Beef", "Carne", "Bœuf"], group: "protein" },
+  { emoji: "🌰", name: ["Lentilha", "Lentils", "Lentejas", "Lentilles"], group: "protein" },
   { emoji: "🍚", name: ["Arroz", "Rice", "Arroz", "Riz"], group: "carb" },
   { emoji: "🍠", name: ["Batata-doce", "Sweet potato", "Batata", "Patate douce"], group: "carb" },
+  { emoji: "🥔", name: ["Mandioca", "Cassava", "Yuca", "Manioc"], group: "carb" },
   { emoji: "🌽", name: ["Milho", "Corn", "Maíz", "Maïs"], group: "carb" },
+  { emoji: "🍝", name: ["Macarrão", "Pasta", "Pasta", "Pâtes"], group: "carb" },
+  {
+    emoji: "🍞",
+    name: ["Pão integral", "Whole-grain bread", "Pan integral", "Pain complet"],
+    group: "carb",
+  },
 ];
 
-const MAX_ON_PLATE = 6;
+/** Porções no prato (cada toque é uma porção). */
+const MAX_ON_PLATE = 8;
 
 /** Cor de cada grupo do prato (verduras, proteínas, energia). */
 const GROUP_COLOR: Record<Group, string> = { veg: "#4f8a4b", protein: "#d9692a", carb: "#c58a12" };
+/** Parte ideal do prato para cada grupo (Guia Alimentar: metade legumes e verduras). */
+const GROUP_IDEAL: Record<Group, number> = { veg: 0.5, protein: 0.25, carb: 0.25 };
+const GROUP_NAMES: Record<Group, Names> = {
+  veg: ["Legumes e verduras", "Vegetables", "Verduras", "Légumes"],
+  protein: ["Proteínas", "Proteins", "Proteínas", "Protéines"],
+  carb: ["Energia", "Energy", "Energía", "Énergie"],
+};
+const GROUPS: Group[] = ["veg", "protein", "carb"];
+
+/** Fatia de pizza (SVG) de `from` a `to` (frações da volta), raio r, centro 50,50. */
+function slice(from: number, to: number, r: number) {
+  if (to - from >= 0.999) return `M50 ${50 - r} A${r} ${r} 0 1 1 49.99 ${50 - r} Z`;
+  const pt = (f: number) => {
+    const a = f * 2 * Math.PI - Math.PI / 2;
+    return `${(50 + r * Math.cos(a)).toFixed(2)} ${(50 + r * Math.sin(a)).toFixed(2)}`;
+  };
+  return `M50 50 L${pt(from)} A${r} ${r} 0 ${to - from > 0.5 ? 1 : 0} 1 ${pt(to)} Z`;
+}
+
 /** Cor de cada humor, do mais animado ao mais difícil. */
 const MOOD_COLORS = ["#4f8a4b", "#84a331", "#c58a12", "#d6456b"];
 
@@ -689,10 +899,10 @@ export function PlateBuilderCard() {
       ]);
     if (counts.veg * 2 >= plate.length)
       return tr([
-        "Prato colorido e equilibrado! 🌈",
-        "A colorful, balanced plate! 🌈",
-        "¡Plato colorido y equilibrado! 🌈",
-        "Une assiette colorée et équilibrée ! 🌈",
+        "Prato colorido e equilibrado!",
+        "A colorful, balanced plate!",
+        "¡Plato colorido y equilibrado!",
+        "Une assiette colorée et équilibrée !",
       ]);
     return tr([
       "Quase! Tente deixar metade do prato com legumes e verduras.",
@@ -729,46 +939,96 @@ export function PlateBuilderCard() {
         ) : undefined
       }
     >
-      <div className="mx-auto grid h-32 w-32 grid-cols-3 content-center gap-1 rounded-full border-4 border-border bg-secondary/40 p-3 shadow-inner">
-        {Array.from({ length: MAX_ON_PLATE }, (_, slot) => (
-          <button
-            key={slot}
-            type="button"
-            disabled={plate[slot] === undefined}
-            onClick={() => setPlate((p) => p.filter((_, k) => k !== slot))}
-            className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-xl transition hover:scale-110 disabled:cursor-default"
-            aria-label={plate[slot] !== undefined ? tr(FOODS[plate[slot]].name) : undefined}
-          >
-            {plate[slot] !== undefined ? (
-              <span className="nc-pop-in" style={{ color: GROUP_COLOR[FOODS[plate[slot]].group] }}>
-                <EmojiIcon emoji={FOODS[plate[slot]].emoji} className="h-5 w-5" />
-              </span>
-            ) : null}
-          </button>
-        ))}
+      <div className="relative mx-auto h-36 w-36">
+        <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
+          <circle cx="50" cy="50" r="48" className="fill-card stroke-border" strokeWidth="2" />
+          {/* Proporção ideal, tracejada: metade verduras, um quarto proteína, um quarto energia. */}
+          {[0, 0.5, 0.75].map((f) => {
+            const a = f * 2 * Math.PI - Math.PI / 2;
+            return (
+              <line
+                key={f}
+                x1="50"
+                y1="50"
+                x2={50 + 42 * Math.cos(a)}
+                y2={50 + 42 * Math.sin(a)}
+                className="stroke-border"
+                strokeWidth="1"
+                strokeDasharray="3 3"
+              />
+            );
+          })}
+          {(() => {
+            let at = 0;
+            return GROUPS.map((g) => {
+              const part = plate.length ? counts[g] / plate.length : 0;
+              const d = part > 0 ? slice(at, at + part, 40) : null;
+              at += part;
+              return d ? (
+                <path key={g} d={d} fill={GROUP_COLOR[g]} opacity={0.85} className="nc-pop-in" />
+              ) : null;
+            });
+          })()}
+          <circle cx="50" cy="50" r="40" fill="none" className="stroke-card" strokeWidth="1.5" />
+        </svg>
+        {plate.length === 0 && (
+          <span className="absolute inset-0 grid place-items-center text-[11px] font-semibold text-muted-foreground">
+            {tr(["Prato vazio", "Empty plate", "Plato vacío", "Assiette vide"])}
+          </span>
+        )}
       </div>
+      <dl className="mt-2 grid grid-cols-3 gap-1 text-center text-[10px]">
+        {GROUPS.map((g) => (
+          <div key={g}>
+            <dt className="font-semibold" style={{ color: GROUP_COLOR[g] }}>
+              {tr(GROUP_NAMES[g])}
+            </dt>
+            <dd className="tabular-nums text-muted-foreground">
+              {plate.length ? Math.round((counts[g] / plate.length) * 100) : 0}% /{" "}
+              {Math.round(GROUP_IDEAL[g] * 100)}%
+            </dd>
+          </div>
+        ))}
+      </dl>
       <p
         key={message}
         className="nc-pop-in mt-3 min-h-[2.5rem] text-center text-xs font-medium leading-snug text-foreground"
       >
         {message}
       </p>
-      <div className="mt-2 flex flex-wrap justify-center gap-1.5">
-        {FOODS.map((f, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => add(i)}
-            disabled={plate.length >= MAX_ON_PLATE}
-            className={`${iconBtn} disabled:opacity-40`}
+      {GROUPS.map((g) => (
+        <div key={g} className="mt-2">
+          <p
+            className="mb-1 text-[10px] font-bold uppercase tracking-wider"
+            style={{ color: GROUP_COLOR[g] }}
           >
-            <span style={{ color: GROUP_COLOR[f.group] }}>
-              <EmojiIcon emoji={f.emoji} className="h-4 w-4" />
-            </span>
-            {tr(f.name)}
-          </button>
-        ))}
-      </div>
+            {tr(GROUP_NAMES[g])}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {FOODS.map((f, i) =>
+              f.group === g ? (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => add(i)}
+                  disabled={plate.length >= MAX_ON_PLATE}
+                  className={`${iconBtn} disabled:opacity-40`}
+                >
+                  <span style={{ color: GROUP_COLOR[f.group] }}>
+                    <EmojiIcon emoji={f.emoji} className="h-4 w-4" />
+                  </span>
+                  {tr(f.name)}
+                </button>
+              ) : null,
+            )}
+          </div>
+        </div>
+      ))}
+      {plate.length > 0 && (
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          {plate.map((i) => tr(FOODS[i].name)).join(" · ")}
+        </p>
+      )}
       <p className={note}>
         {tr([
           "Inspirado no Guia Alimentar para a População Brasileira. Não substitui orientação profissional.",
@@ -783,35 +1043,98 @@ export function PlateBuilderCard() {
 
 // ───────────────────────────── Roleta de receitas ─────────────────────────────
 
+type RouletteFilter = "todas" | "geladeira" | "rapidas" | "faceis";
+
+/** Texto sem acento e em minúsculas, para comparar ingredientes. */
+const plain = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+/** Minutos do campo "tempo de preparo" ("30 min", "1h", "1 h 20 min"); null se não der. */
+function prepMinutes(text: string | undefined): number | null {
+  if (!text) return null;
+  const t = plain(text);
+  const h = /(\d+)\s*h/.exec(t);
+  const m = /(\d+)\s*m/.exec(t);
+  if (!h && !m) {
+    const n = /(\d+)/.exec(t);
+    return n ? Number(n[1]) : null;
+  }
+  return (h ? Number(h[1]) * 60 : 0) + (m ? Number(m[1]) : 0);
+}
+
+/** Receita da comunidade sorteada, com filtros: o que tem na Geladeira, rápidas (até 30 min) e
+ *  fáceis. Não repete as últimas sorteadas. */
 export function RecipeRouletteCard() {
   const tr = useTr();
-  const feed = useFeed({ scope: "todos", type: "receita", limit: 40 });
-  const recipes = feed.data ?? [];
-  const [shown, setShown] = useState<number | null>(null);
+  const { user } = useAuth();
+  const feed = useFeed({ scope: "todos", type: "receita", limit: 60 });
+  const fridge = useFridgeItems(user?.id);
+  const [filter, setFilter] = useState<RouletteFilter>("todas");
+  const [shownId, setShownId] = useState<string | null>(null);
   const [spinning, setSpinning] = useState(false);
+  const recent = useRef<string[]>([]);
   const timer = useRef<number | null>(null);
 
   useEffect(() => () => void (timer.current && window.clearInterval(timer.current)), []);
 
-  if (recipes.length === 0) return null;
+  const all = useMemo(() => feed.data ?? [], [feed.data]);
+  const fridgeTerms = useMemo(
+    () => fridge.items.map(plain).filter((t) => t.length >= 3),
+    [fridge.items],
+  );
+  const pool = useMemo(() => {
+    if (filter === "todas") return all;
+    return all.filter((r) => {
+      if (filter === "rapidas") {
+        const min = prepMinutes(r.recipeData?.prepTime);
+        return min !== null && min <= 30;
+      }
+      if (filter === "faceis") return r.recipeData?.difficulty === "Fácil";
+      const hay = plain([r.title ?? "", r.text, ...(r.recipeData?.ingredients ?? [])].join(" "));
+      return fridgeTerms.some((t) => hay.includes(t));
+    });
+  }, [all, filter, fridgeTerms]);
+
+  if (all.length === 0) return null;
 
   const spin = () => {
-    if (spinning) return;
+    if (spinning || pool.length === 0) return;
     setSpinning(true);
+    // Sorteia entre as que não saíram por último (se sobrar alguma).
+    const fresh = pool.filter((r) => !recent.current.includes(r.id));
+    const choices = fresh.length ? fresh : pool;
+    const final = choices[Math.floor(Math.random() * choices.length)];
     let ticks = 0;
     timer.current = window.setInterval(() => {
       ticks += 1;
-      setShown(Math.floor(Math.random() * recipes.length));
-      playSound("click");
       if (ticks >= 12) {
         if (timer.current) window.clearInterval(timer.current);
+        setShownId(final.id);
+        recent.current = [final.id, ...recent.current].slice(0, Math.min(5, pool.length - 1));
         setSpinning(false);
         playSound("success");
+      } else {
+        setShownId(pool[Math.floor(Math.random() * pool.length)].id);
+        playSound("click");
       }
     }, 90);
   };
 
-  const recipe = shown !== null ? recipes[shown] : null;
+  const recipe = all.find((r) => r.id === shownId) ?? null;
+  const filters: { id: RouletteFilter; label: Names }[] = [
+    { id: "todas", label: ["Todas", "All", "Todas", "Toutes"] },
+    {
+      id: "geladeira",
+      label: ["Com o que tenho", "With what I have", "Con lo que tengo", "Avec ce que j'ai"],
+    },
+    { id: "rapidas", label: ["Rápidas", "Quick", "Rápidas", "Rapides"] },
+    { id: "faceis", label: ["Fáceis", "Easy", "Fáciles", "Faciles"] },
+  ];
+  const minutes = prepMinutes(recipe?.recipeData?.prepTime);
+
   return (
     <Panel
       title={tr([
@@ -821,27 +1144,72 @@ export function RecipeRouletteCard() {
         "Roulette de recettes",
       ])}
     >
-      <div className="grid min-h-[5rem] place-items-center rounded-2xl bg-secondary/40 p-3 text-center">
+      <div className="mb-3 flex flex-wrap gap-1.5" role="group">
+        {filters.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            aria-pressed={filter === f.id}
+            onClick={() => {
+              setFilter(f.id);
+              setShownId(null);
+            }}
+            className={`${iconBtn} ${filter === f.id ? "!bg-primary !text-primary-foreground" : ""}`}
+          >
+            {tr(f.label)}
+          </button>
+        ))}
+      </div>
+      <div className="grid min-h-[6rem] place-items-center overflow-hidden rounded-2xl bg-secondary/40 text-center">
         {recipe ? (
-          <div className={spinning ? "opacity-60" : "nc-pop-in"}>
-            <p className="text-sm font-bold text-foreground">{recipe.title || "—"}</p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">{recipe.authorName}</p>
+          <div className={`w-full ${spinning ? "opacity-60" : "nc-pop-in"}`}>
+            {recipe.image && !spinning && (
+              <img src={recipe.image} alt="" className="h-28 w-full object-cover" loading="lazy" />
+            )}
+            <div className="p-3">
+              <p className="text-sm font-bold text-foreground">{recipe.title || "—"}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {recipe.authorName}
+                {!spinning && minutes !== null && ` · ${minutes} min`}
+                {!spinning && recipe.recipeData?.difficulty && ` · ${recipe.recipeData.difficulty}`}
+              </p>
+            </div>
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">
-            {tr([
-              "Sem ideia do que cozinhar? Gire a roleta!",
-              "No idea what to cook? Spin the roulette!",
-              "¿Sin idea de qué cocinar? ¡Gira la ruleta!",
-              "Pas d'idée de quoi cuisiner ? Tournez la roulette !",
-            ])}
+          <p className="p-3 text-xs text-muted-foreground">
+            {pool.length === 0
+              ? filter === "geladeira"
+                ? tr([
+                    "Nenhuma receita com o que está na sua Geladeira. Marque mais itens lá.",
+                    "No recipes with what's in your Fridge. Add more items there.",
+                    "Ninguna receta con lo que hay en tu Nevera. Marca más artículos allí.",
+                    "Aucune recette avec ce qu'il y a dans votre Frigo. Ajoutez des éléments.",
+                  ])
+                : tr([
+                    "Nenhuma receita com esse filtro ainda.",
+                    "No recipes with this filter yet.",
+                    "Aún no hay recetas con este filtro.",
+                    "Pas encore de recettes avec ce filtre.",
+                  ])
+              : tr([
+                  "Sem ideia do que cozinhar? Gire a roleta!",
+                  "No idea what to cook? Spin the roulette!",
+                  "¿Sin idea de qué cocinar? ¡Gira la ruleta!",
+                  "Pas d'idée de quoi cuisiner ? Tournez la roulette !",
+                ])}
           </p>
         )}
       </div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <button type="button" className={primaryBtn} onClick={spin} disabled={spinning}>
+        <button
+          type="button"
+          className={primaryBtn}
+          onClick={spin}
+          disabled={spinning || pool.length === 0}
+        >
           <Dices className={`h-3.5 w-3.5 ${spinning ? "animate-spin" : ""}`} />
           {tr(["Girar", "Spin", "Girar", "Tourner"])}
+          <span className="font-semibold opacity-80">({pool.length})</span>
         </button>
         {recipe && !spinning && (
           <Link
@@ -860,49 +1228,168 @@ export function RecipeRouletteCard() {
 
 // ───────────────────────────── Timer de cozinha ─────────────────────────────
 
-const PRESETS = [3, 5, 10, 15, 30];
-const fmt = (s: number) => `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
+const fmt = (s: number) =>
+  s >= 3600
+    ? `${Math.floor(s / 3600)}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`
+    : `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
 
+/** Atalhos por alimento (tempos usuais de cozimento; variam com a panela e o fogo). */
+const TIMER_PRESETS: { name: Names; min: number }[] = [
+  { name: ["Ovo mole", "Soft egg", "Huevo tibio", "Œuf mollet"], min: 6 },
+  { name: ["Ovo cozido", "Hard egg", "Huevo duro", "Œuf dur"], min: 10 },
+  { name: ["Macarrão", "Pasta", "Pasta", "Pâtes"], min: 10 },
+  { name: ["Arroz", "Rice", "Arroz", "Riz"], min: 18 },
+  { name: ["Legumes no vapor", "Steamed veg", "Verduras al vapor", "Légumes vapeur"], min: 12 },
+  {
+    name: [
+      "Feijão na pressão",
+      "Beans (pressure)",
+      "Frijoles (olla exprés)",
+      "Haricots (autocuiseur)",
+    ],
+    min: 30,
+  },
+  { name: ["Bolo", "Cake", "Bizcocho", "Gâteau"], min: 40 },
+];
+
+interface KitchenTimer {
+  id: string;
+  label: string;
+  total: number;
+  /** Hora (ms) em que termina, se estiver correndo. */
+  endsAt: number | null;
+  /** Segundos restantes quando pausado. */
+  left: number;
+  done: boolean;
+}
+
+const TIMERS_KEY = "nc_kitchen_timers";
+const MAX_TIMERS = 6;
+
+function loadTimers(): KitchenTimer[] {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(TIMERS_KEY) ?? "[]");
+    return Array.isArray(raw) ? (raw as KitchenTimer[]).slice(0, MAX_TIMERS) : [];
+  } catch {
+    return [];
+  }
+}
+
+const leftOf = (t: KitchenTimer, now: number) =>
+  t.endsAt ? Math.max(0, Math.round((t.endsAt - now) / 1000)) : t.left;
+
+type WakeLockNav = Navigator & {
+  wakeLock?: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> };
+};
+
+/** Vários timers ao mesmo tempo, com nome; continuam depois de recarregar a página. Ao terminar:
+ *  som, vibração e aviso do navegador (se a pessoa já permitiu avisos). A tela fica acesa
+ *  enquanto algum timer corre, quando o aparelho deixa. */
 export function CookingTimerCard() {
   const tr = useTr();
-  const [minutes, setMinutes] = useState(10);
-  const [left, setLeft] = useState(10 * 60);
-  const [running, setRunning] = useState(false);
+  const [timers, setTimers] = useState<KitchenTimer[]>([]);
+  const [now, setNow] = useState(() => Date.now());
+  const [minutes, setMinutes] = useState("10");
+  const [label, setLabel] = useState("");
   const [burst, fire] = useBurst();
-  const endsAt = useRef(0);
+  const loaded = useRef(false);
 
   useEffect(() => {
-    if (!running) return;
-    const tick = () => {
-      const remaining = Math.max(0, Math.round((endsAt.current - Date.now()) / 1000));
-      setLeft(remaining);
-      if (remaining === 0) {
-        setRunning(false);
-        fire();
-        playSound("achievement");
-      }
-    };
-    const id = window.setInterval(tick, 250);
-    return () => window.clearInterval(id);
-  }, [running, fire]);
+    setTimers(loadTimers());
+    loaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (!loaded.current) return;
+    try {
+      window.localStorage.setItem(TIMERS_KEY, JSON.stringify(timers));
+    } catch {
+      // sem armazenamento: os timers valem só nesta aba
+    }
+  }, [timers]);
 
-  const total = minutes * 60;
-  const choose = (m: number) => {
-    setRunning(false);
-    setMinutes(m);
-    setLeft(m * 60);
+  const running = timers.some((t) => t.endsAt);
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => setNow(Date.now()), 250);
+    return () => window.clearInterval(id);
+  }, [running]);
+
+  // Tela acesa enquanto algum timer corre.
+  useEffect(() => {
+    if (!running) return;
+    let lock: { release: () => Promise<void> } | null = null;
+    let cancelled = false;
+    (navigator as WakeLockNav).wakeLock
+      ?.request("screen")
+      .then((l) => (cancelled ? void l.release() : (lock = l)))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      void lock?.release().catch(() => {});
+    };
+  }, [running]);
+
+  // Timers que acabaram de chegar a zero.
+  useEffect(() => {
+    const finished = timers.filter((t) => t.endsAt && t.endsAt <= now);
+    if (finished.length === 0) return;
+    setTimers((list) =>
+      list.map((t) =>
+        finished.some((f) => f.id === t.id) ? { ...t, endsAt: null, left: 0, done: true } : t,
+      ),
+    );
+    fire();
+    playSound("achievement");
+    for (const t of finished) {
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        try {
+          new Notification(tr(["Tempo!", "Time's up!", "¡Tiempo!", "Temps écoulé !"]), {
+            body: t.label,
+            tag: "nc-timer-" + t.id,
+          });
+        } catch {
+          // alguns navegadores só mostram avisos pelo service worker
+        }
+      }
+    }
+  }, [now, timers, fire, tr]);
+
+  const add = (mins: number, name: string) => {
+    if (!(mins > 0) || timers.length >= MAX_TIMERS) return;
+    const total = Math.round(mins * 60);
+    const t: KitchenTimer = {
+      id: Math.random().toString(36).slice(2, 9),
+      label: name.trim() || `${mins} min`,
+      total,
+      endsAt: Date.now() + total * 1000,
+      left: total,
+      done: false,
+    };
+    setNow(Date.now());
+    setTimers((list) => [...list, t]);
+    setLabel("");
+    playSound("click");
   };
-  const toggle = () => {
-    if (running) return setRunning(false);
-    const from = left === 0 ? total : left;
-    setLeft(from);
-    endsAt.current = Date.now() + from * 1000;
-    setRunning(true);
-  };
+  const update = (id: string, f: (t: KitchenTimer) => KitchenTimer) =>
+    setTimers((list) => list.map((t) => (t.id === id ? f(t) : t)));
+  const toggle = (t: KitchenTimer) =>
+    update(t.id, (x) =>
+      x.endsAt
+        ? { ...x, endsAt: null, left: leftOf(x, Date.now()) }
+        : { ...x, endsAt: Date.now() + (x.done ? x.total : x.left) * 1000, done: false },
+    );
+  const plusMinute = (t: KitchenTimer) =>
+    update(t.id, (x) =>
+      x.endsAt
+        ? { ...x, endsAt: x.endsAt + 60_000, total: x.total + 60 }
+        : { ...x, left: (x.done ? 0 : x.left) + 60, total: x.total + 60, done: false },
+    );
+  const remove = (id: string) => setTimers((list) => list.filter((t) => t.id !== id));
 
   const radius = 44;
   const circ = 2 * Math.PI * radius;
-  const progress = total > 0 ? left / total : 0;
+  const field =
+    "rounded-xl border border-input bg-background px-2.5 py-2 text-xs text-foreground outline-none focus:border-accent";
 
   return (
     <Panel
@@ -915,70 +1402,161 @@ export function CookingTimerCard() {
       className="relative"
     >
       <Burst id={burst} />
-      <div className="relative mx-auto h-28 w-28">
-        <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            strokeWidth="7"
-            className="stroke-secondary"
-          />
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            strokeWidth="7"
-            strokeLinecap="round"
-            className="stroke-accent transition-[stroke-dashoffset] duration-300"
-            strokeDasharray={circ}
-            strokeDashoffset={circ * (1 - progress)}
-          />
-        </svg>
-        <div className="absolute inset-0 grid place-items-center">
-          <span
-            className={`text-xl font-black tabular-nums ${left === 0 ? "text-accent" : "text-foreground"}`}
+      {timers.length > 0 && (
+        <ul className="mb-3 space-y-2">
+          {timers.map((t) => {
+            const left = leftOf(t, now);
+            const progress = t.total > 0 ? left / t.total : 0;
+            return (
+              <li
+                key={t.id}
+                className={`flex items-center gap-3 rounded-2xl border px-3 py-2 ${
+                  t.done
+                    ? "nc-pop-in border-accent bg-accent/10"
+                    : "border-border/70 bg-secondary/30"
+                }`}
+              >
+                <svg viewBox="0 0 100 100" className="h-11 w-11 shrink-0 -rotate-90" aria-hidden>
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={radius}
+                    fill="none"
+                    strokeWidth="10"
+                    className="stroke-secondary"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={radius}
+                    fill="none"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    className="stroke-accent transition-[stroke-dashoffset] duration-300"
+                    strokeDasharray={circ}
+                    strokeDashoffset={circ * (1 - progress)}
+                  />
+                </svg>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-foreground">{t.label}</p>
+                  <p
+                    className={`text-lg font-black leading-tight tabular-nums ${t.done ? "text-accent" : "text-foreground"}`}
+                  >
+                    {t.done ? tr(["Tempo!", "Time's up!", "¡Tiempo!", "Terminé !"]) : fmt(left)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => plusMinute(t)}
+                  className={iconBtn}
+                  aria-label={tr([
+                    "Mais 1 minuto",
+                    "1 more minute",
+                    "1 minuto más",
+                    "1 minute de plus",
+                  ])}
+                >
+                  +1
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggle(t)}
+                  className="grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground transition hover:opacity-90"
+                  aria-label={
+                    t.endsAt
+                      ? tr(["Pausar", "Pause", "Pausar", "Pause"])
+                      : tr(["Continuar", "Resume", "Continuar", "Reprendre"])
+                  }
+                >
+                  {t.endsAt ? (
+                    <Pause className="h-3.5 w-3.5" />
+                  ) : t.done ? (
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  ) : (
+                    <Play className="h-3.5 w-3.5" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(t.id)}
+                  className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                  aria-label={tr(["Remover", "Remove", "Quitar", "Supprimer"])}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {timers.length < MAX_TIMERS ? (
+        <>
+          <div className="flex flex-wrap gap-1.5">
+            {TIMER_PRESETS.map((p) => (
+              <button
+                key={p.min + p.name[0]}
+                type="button"
+                onClick={() => add(p.min, tr(p.name))}
+                className={iconBtn}
+              >
+                {tr(p.name)} · {p.min} min
+              </button>
+            ))}
+          </div>
+          <form
+            className="mt-3 grid grid-cols-[4.5rem_1fr_auto] gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              add(Number(minutes.replace(",", ".")), label);
+            }}
           >
-            {fmt(left)}
-          </span>
-        </div>
-      </div>
-      <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-        {PRESETS.map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => choose(m)}
-            className={`${iconBtn} ${m === minutes ? "!bg-accent !text-accent-foreground" : ""}`}
-          >
-            {m} min
-          </button>
-        ))}
-      </div>
-      <div className="mt-3 flex justify-center gap-2">
-        <button type="button" className={primaryBtn} onClick={toggle}>
-          {running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-          {running
-            ? tr(["Pausar", "Pause", "Pausar", "Pause"])
-            : tr(["Iniciar", "Start", "Iniciar", "Démarrer"])}
-        </button>
-        <button type="button" className={iconBtn} onClick={() => choose(minutes)}>
-          <RotateCcw className="h-3 w-3" />
-          {tr(["Zerar", "Reset", "Reiniciar", "Réinit."])}
-        </button>
-      </div>
-      {left === 0 && !running && (
-        <p className="nc-pop-in mt-2 text-center text-xs font-bold text-accent">
+            <input
+              type="number"
+              min="0.5"
+              max="600"
+              step="0.5"
+              inputMode="decimal"
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              className={field}
+              aria-label={tr(["Minutos", "Minutes", "Minutos", "Minutes"])}
+            />
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              maxLength={40}
+              placeholder={tr([
+                "Nome (opcional)",
+                "Name (optional)",
+                "Nombre (opcional)",
+                "Nom (facultatif)",
+              ])}
+              className={`${field} min-w-0`}
+            />
+            <button type="submit" className={primaryBtn}>
+              <Plus className="h-3.5 w-3.5" />
+              {tr(["Iniciar", "Start", "Iniciar", "Démarrer"])}
+            </button>
+          </form>
+        </>
+      ) : (
+        <p className="text-center text-[11px] text-muted-foreground">
           {tr([
-            "Tempo! Pode tirar do fogo 🍳",
-            "Time's up! 🍳",
-            "¡Tiempo! 🍳",
-            "Temps écoulé ! 🍳",
+            "Até 6 timers ao mesmo tempo.",
+            "Up to 6 timers at once.",
+            "Hasta 6 temporizadores a la vez.",
+            "Jusqu'à 6 minuteurs à la fois.",
           ])}
         </p>
       )}
+      <p className={note}>
+        {tr([
+          "Os timers continuam se você recarregar a página. Tempos dos atalhos são aproximados.",
+          "Timers keep going if you reload the page. Shortcut times are approximate.",
+          "Los temporizadores siguen si recargas la página. Los tiempos de los atajos son aproximados.",
+          "Les minuteurs continuent si vous rechargez la page. Les durées des raccourcis sont approximatives.",
+        ])}
+      </p>
     </Panel>
   );
 }
@@ -991,6 +1569,7 @@ interface Ingredient {
   gramsPerCup: number | null;
 }
 
+// Equivalências caseiras usuais (aproximadas; variam com a marca e o jeito de medir).
 const INGREDIENTS: Ingredient[] = [
   { name: ["Água / leite", "Water / milk", "Agua / leche", "Eau / lait"], gramsPerCup: null },
   {
@@ -1001,35 +1580,101 @@ const INGREDIENTS: Ingredient[] = [
     name: ["Açúcar refinado", "Granulated sugar", "Azúcar refinada", "Sucre en poudre"],
     gramsPerCup: 180,
   },
+  {
+    name: ["Açúcar mascavo", "Brown sugar", "Azúcar mascabado", "Sucre complet"],
+    gramsPerCup: 150,
+  },
   { name: ["Arroz cru", "Raw rice", "Arroz crudo", "Riz cru"], gramsPerCup: 185 },
+  { name: ["Feijão cru", "Dry beans", "Frijoles crudos", "Haricots secs"], gramsPerCup: 190 },
   {
     name: ["Aveia em flocos", "Rolled oats", "Avena en hojuelas", "Flocons d'avoine"],
     gramsPerCup: 90,
   },
-  { name: ["Óleo", "Oil", "Aceite", "Huile"], gramsPerCup: 220 },
+  { name: ["Fubá", "Cornmeal", "Harina de maíz", "Semoule de maïs"], gramsPerCup: 120 },
+  { name: ["Amido de milho", "Cornstarch", "Maicena", "Fécule de maïs"], gramsPerCup: 150 },
+  { name: ["Polvilho", "Tapioca starch", "Almidón de yuca", "Fécule de manioc"], gramsPerCup: 150 },
+  {
+    name: ["Farinha de mandioca", "Cassava flour", "Harina de yuca", "Farine de manioc"],
+    gramsPerCup: 150,
+  },
+  { name: ["Cacau em pó", "Cocoa powder", "Cacao en polvo", "Cacao en poudre"], gramsPerCup: 90 },
+  { name: ["Leite em pó", "Powdered milk", "Leche en polvo", "Lait en poudre"], gramsPerCup: 120 },
+  {
+    name: ["Coco ralado", "Grated coconut", "Coco rallado", "Noix de coco râpée"],
+    gramsPerCup: 80,
+  },
+  { name: ["Queijo ralado", "Grated cheese", "Queso rallado", "Fromage râpé"], gramsPerCup: 80 },
+  { name: ["Manteiga", "Butter", "Mantequilla", "Beurre"], gramsPerCup: 200 },
+  { name: ["Óleo / azeite", "Oil / olive oil", "Aceite", "Huile"], gramsPerCup: 220 },
+  { name: ["Mel", "Honey", "Miel", "Miel"], gramsPerCup: 340 },
+  { name: ["Sal", "Salt", "Sal", "Sel"], gramsPerCup: 290 },
 ];
 
 // Fração de 1 xícara de chá (240 ml).
 const UNITS: { name: Names; cup: number }[] = [
   { name: ["xícara", "cup", "taza", "tasse"], cup: 1 },
+  {
+    name: ["copo americano", "small glass (190 ml)", "vaso (190 ml)", "verre (190 ml)"],
+    cup: 190 / 240,
+  },
   { name: ["colher de sopa", "tablespoon", "cucharada", "cuillère à soupe"], cup: 15 / 240 },
+  {
+    name: ["colher de sobremesa", "dessert spoon", "cuchara de postre", "cuillère à dessert"],
+    cup: 10 / 240,
+  },
   { name: ["colher de chá", "teaspoon", "cucharadita", "cuillère à café"], cup: 5 / 240 },
+  { name: ["ml", "ml", "ml", "ml"], cup: 1 / 240 },
 ];
+
+const MULTIPLIERS = [0.5, 1, 2, 3];
+
+/** Número curto: até 2 casas, sem zeros à direita, com vírgula no português/espanhol/francês. */
+function shortNumber(n: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
+    maximumFractionDigits: n < 10 ? 2 : n < 100 ? 1 : 0,
+  }).format(n);
+}
 
 export function UnitConverterCard() {
   const tr = useTr();
+  const { locale } = useI18n();
   const [amount, setAmount] = useState("1");
   const [unit, setUnit] = useState(0);
   const [ing, setIng] = useState(1);
+  const [toWeight, setToWeight] = useState(true);
+  const [times, setTimes] = useState(1);
 
-  const qty = Number(amount.replace(",", "."));
-  const cups = Number.isFinite(qty) ? qty * UNITS[unit].cup : 0;
+  const switchMode = (weightMode: boolean) => {
+    if (weightMode === toWeight) return;
+    setToWeight(weightMode);
+    setAmount(weightMode ? "1" : "100");
+  };
+
   const item = INGREDIENTS[ing];
-  const result =
-    item.gramsPerCup === null ? Math.round(cups * 240) : Math.round(cups * item.gramsPerCup);
+  const liquid = item.gramsPerCup === null;
+  const perCup = item.gramsPerCup ?? 240;
+  const qty = Number(amount.replace(",", "."));
+  const valid = Number.isFinite(qty) && qty > 0;
+  const base = valid ? qty * times : 0;
+
+  // Medida → gramas (ou ml).
+  const weight = Math.round(base * UNITS[unit].cup * perCup);
+  // Gramas (ou ml) → medidas caseiras mais úteis.
+  const cups = base / perCup;
+  const asMeasures = [
+    { name: UNITS[0].name, v: cups },
+    { name: UNITS[2].name, v: cups / UNITS[2].cup },
+    { name: UNITS[4].name, v: cups / UNITS[4].cup },
+  ];
 
   const field =
     "w-full rounded-xl border border-input bg-background px-2.5 py-2 text-xs text-foreground outline-none focus:border-accent";
+  const seg = (on: boolean) =>
+    `flex-1 cursor-pointer rounded-full px-2 py-1.5 text-[11px] font-bold transition ${
+      on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+    }`;
+  const massUnit = liquid ? "ml" : "g";
+
   return (
     <Panel
       title={tr([
@@ -1039,24 +1684,46 @@ export function UnitConverterCard() {
         "Mesures de cuisine",
       ])}
     >
+      <div className="mb-3 flex gap-1 rounded-full bg-secondary/60 p-1" role="group">
+        <button
+          type="button"
+          className={seg(toWeight)}
+          onClick={() => switchMode(true)}
+          aria-pressed={toWeight}
+        >
+          {tr(["Medida → gramas", "Measure → grams", "Medida → gramos", "Mesure → grammes"])}
+        </button>
+        <button
+          type="button"
+          className={seg(!toWeight)}
+          onClick={() => switchMode(false)}
+          aria-pressed={!toWeight}
+        >
+          {tr(["Gramas → medida", "Grams → measure", "Gramos → medida", "Grammes → mesure"])}
+        </button>
+      </div>
       <div className="grid grid-cols-[4.5rem_1fr] gap-2">
         <input
           type="number"
           min="0"
-          step="0.25"
+          step="any"
           inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           className={field}
           aria-label={tr(["Quantidade", "Amount", "Cantidad", "Quantité"])}
         />
-        <select value={unit} onChange={(e) => setUnit(Number(e.target.value))} className={field}>
-          {UNITS.map((u, i) => (
-            <option key={i} value={i}>
-              {tr(u.name)}
-            </option>
-          ))}
-        </select>
+        {toWeight ? (
+          <select value={unit} onChange={(e) => setUnit(Number(e.target.value))} className={field}>
+            {UNITS.map((u, i) => (
+              <option key={i} value={i}>
+                {tr(u.name)}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className={`${field} flex items-center font-semibold`}>{massUnit}</span>
+        )}
       </div>
       <select
         value={ing}
@@ -1069,17 +1736,46 @@ export function UnitConverterCard() {
           </option>
         ))}
       </select>
-      <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-accent-soft/60 py-3 text-foreground">
-        <Scale className="h-4 w-4 text-accent" />
-        <span className="text-lg font-black tabular-nums">≈ {result}</span>
-        <span className="text-xs font-semibold">{item.gramsPerCup === null ? "ml" : "g"}</span>
+      <div className="mt-2 flex items-center gap-1.5">
+        <span className="text-[11px] font-semibold text-muted-foreground">
+          {tr(["Receita", "Recipe", "Receta", "Recette"])}
+        </span>
+        {MULTIPLIERS.map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setTimes(m)}
+            aria-pressed={times === m}
+            className={`${iconBtn} ${times === m ? "!bg-accent !text-accent-foreground" : ""}`}
+          >
+            ×{m === 0.5 ? "½" : m}
+          </button>
+        ))}
       </div>
+      {toWeight ? (
+        <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-accent-soft/60 py-3 text-foreground">
+          <Scale className="h-4 w-4 text-accent" />
+          <span className="text-lg font-black tabular-nums">≈ {valid ? weight : 0}</span>
+          <span className="text-xs font-semibold">{massUnit}</span>
+        </div>
+      ) : (
+        <ul className="mt-3 divide-y divide-border/60 rounded-2xl bg-accent-soft/60 px-3 text-foreground">
+          {asMeasures.map((m, i) => (
+            <li key={i} className="flex items-baseline justify-between py-2">
+              <span className="text-xs font-semibold">{tr(m.name)}</span>
+              <span className="text-base font-black tabular-nums">
+                ≈ {valid ? shortNumber(m.v, locale) : 0}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
       <p className={note}>
         {tr([
-          "Valores aproximados: xícara de chá de 240 ml. Varia com a marca e com o jeito de medir.",
-          "Approximate values: 240 ml cup. They vary with brand and how you measure.",
-          "Valores aproximados: taza de 240 ml. Varían con la marca y la forma de medir.",
-          "Valeurs approximatives : tasse de 240 ml. Elles varient selon la marque et la mesure.",
+          "Valores aproximados: xícara de chá de 240 ml, copo americano de 190 ml. Varia com a marca e com o jeito de medir.",
+          "Approximate values: 240 ml cup, 190 ml glass. They vary with brand and how you measure.",
+          "Valores aproximados: taza de 240 ml, vaso de 190 ml. Varían con la marca y la forma de medir.",
+          "Valeurs approximatives : tasse de 240 ml, verre de 190 ml. Elles varient selon la marque et la mesure.",
         ])}
       </p>
     </Panel>
@@ -1116,15 +1812,24 @@ export function ShoppingListCard() {
     }
   }, [user, list.isSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Vários itens de uma vez, separados por vírgula ou ponto e vírgula.
   const add = (e: React.FormEvent) => {
     e.preventDefault();
-    const text = draft.trim().slice(0, 80);
-    if (!text || !user) return;
-    addItems.mutate({ texts: [text] });
+    const texts = draft
+      .split(/[,;\n]/)
+      .map((t) => t.trim().slice(0, 80))
+      .filter(Boolean);
+    if (!texts.length || !user) return;
+    addItems.mutate({ texts });
     setDraft("");
     playSound("click");
   };
   const done = items.filter((i) => i.done);
+  // Agrupado pela seção do mercado (a do Cardápio, ou adivinhada pelo nome do item).
+  const groups = SECTIONS.map((sec) => ({
+    sec,
+    list: items.filter((it) => ((it.section as Section | null) ?? guessSection(it.text)) === sec),
+  })).filter((g) => g.list.length > 0);
 
   return (
     <Panel
@@ -1147,10 +1852,10 @@ export function ShoppingListCard() {
           onChange={(e) => setDraft(e.target.value)}
           maxLength={80}
           placeholder={tr([
-            "Ex.: tomate, aveia…",
-            "E.g. tomato, oats…",
-            "Ej.: tomate, avena…",
-            "Ex. : tomate, avoine…",
+            "Ex.: tomate, aveia, ovos",
+            "E.g. tomato, oats, eggs",
+            "Ej.: tomate, avena, huevos",
+            "Ex. : tomate, avoine, œufs",
           ])}
           className="min-w-0 flex-1 rounded-xl border border-input bg-background px-2.5 py-2 text-xs outline-none focus:border-accent"
         />
@@ -1174,38 +1879,58 @@ export function ShoppingListCard() {
           ])}
         </p>
       ) : (
-        <ul className="mt-3 max-h-48 space-y-1 overflow-y-auto">
-          {items.map((it) => (
-            <li
-              key={it.id}
-              className="group flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-secondary/60"
-            >
-              <button
-                type="button"
-                onClick={() => update.mutate({ id: it.id, done: !it.done })}
-                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
-                aria-pressed={it.done}
-              >
-                <CheckCircle2
-                  className={`h-4 w-4 shrink-0 ${it.done ? "text-accent" : "text-muted-foreground/50"}`}
-                />
-                <span
-                  className={`truncate text-xs ${it.done ? "text-muted-foreground line-through" : "text-foreground"}`}
-                >
-                  {it.text}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => remove.mutate([it.id])}
-                className="cursor-pointer text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100 focus:opacity-100"
-                aria-label={tr(["Remover", "Remove", "Quitar", "Retirer"])}
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="mt-3 flex items-center gap-2">
+            <div className="flex-1">
+              <Bar value={done.length} max={items.length} />
+            </div>
+            <span className="text-[11px] font-bold tabular-nums text-foreground">
+              {done.length}/{items.length}
+            </span>
+          </div>
+          <div className="mt-2 max-h-64 space-y-2 overflow-y-auto pr-1">
+            {groups.map(({ sec, list: group }) => (
+              <section key={sec}>
+                <p className="mb-0.5 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {tr(SECTION_NAMES[sec])}
+                  <span className="tabular-nums">{group.filter((i) => !i.done).length}</span>
+                </p>
+                <ul className="space-y-0.5">
+                  {group.map((it) => (
+                    <li
+                      key={it.id}
+                      className="group flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-secondary/60"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => update.mutate({ id: it.id, done: !it.done })}
+                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
+                        aria-pressed={it.done}
+                      >
+                        <CheckCircle2
+                          className={`h-4 w-4 shrink-0 ${it.done ? "text-accent" : "text-muted-foreground/50"}`}
+                        />
+                        <span
+                          className={`truncate text-xs ${it.done ? "text-muted-foreground line-through" : "text-foreground"}`}
+                        >
+                          {it.text}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => remove.mutate([it.id])}
+                        className="cursor-pointer text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100 focus:opacity-100"
+                        aria-label={tr(["Remover", "Remove", "Quitar", "Retirer"])}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </>
       )}
       <div className="mt-3 flex flex-col items-start gap-1">
         <Link to="/geladeira" className="text-[11px] font-semibold text-accent hover:underline">
@@ -1231,36 +1956,46 @@ export function ShoppingListCard() {
 
 // ───────────────────────────── Hábitos do dia ─────────────────────────────
 
-const HABITS: { id: string; emoji: string; name: Names }[] = [
-  { id: "water", emoji: "💧", name: ["Bebi água", "Drank water", "Bebí agua", "J'ai bu de l'eau"] },
-  {
-    id: "veg",
-    emoji: "🥦",
-    name: ["Comi legumes ou verduras", "Ate vegetables", "Comí verduras", "J'ai mangé des légumes"],
-  },
-  { id: "move", emoji: "🚶", name: ["Me movimentei", "I got moving", "Me moví", "J'ai bougé"] },
-  { id: "sleep", emoji: "😴", name: ["Dormi bem", "Slept well", "Dormí bien", "J'ai bien dormi"] },
-];
-
-/** Hábitos do dia na conta: sequência de dias com 3 ou mais e os últimos 7 dias. */
+/** Hábitos do dia na conta: a pessoa escolhe quais acompanhar; sequência de dias com 3 ou mais,
+ *  barras dos últimos 7 dias e o mapa das últimas 5 semanas. */
 export function HabitCheckinCard() {
   const tr = useTr();
+  const { locale } = useI18n();
   const { user } = useAuth();
   const checkins = useCheckins(user?.id);
   const save = useSaveCheckin(user?.id);
+  const { chosen, ids, save: saveChoice } = useHabitChoice();
   const [burst, fire] = useBurst();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<string[]>([]);
+  const [view, setView] = useState<"week" | "month">("week");
   const today = checkinDay();
   const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
   const marked = map.get(today)?.habits ?? [];
-  const streak = streakOf(map, (c) => (c?.habits.length ?? 0) >= 3);
+  const markedChosen = marked.filter((id) => ids.includes(id));
+  const streak = streakOf(map, (c) => (c?.habits.length ?? 0) >= MIN_HABITS);
   const week = Array.from({ length: 7 }, (_, i) => map.get(daysAgo(6 - i))?.habits.length ?? 0);
+  // 5 semanas de segunda a domingo, terminando na semana atual.
+  const month = useMemo(() => {
+    const monday = new Date(weekStartDay() + "T12:00:00");
+    monday.setDate(monday.getDate() - 28);
+    return Array.from({ length: 35 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const day = checkinDay(d);
+      return { day, n: map.get(day)?.habits.length ?? 0, future: day > today };
+    });
+  }, [map, today]);
 
   const toggle = (id: string) => {
     if (!user) return;
     const has = marked.includes(id);
     const nextList = has ? marked.filter((x) => x !== id) : [...marked, id];
-    save.mutate({ day: today, patch: { habits: nextList } });
-    if (!has && nextList.length === HABITS.length) {
+    save.mutate(
+      { day: today, patch: { habits: nextList } },
+      { onError: (err) => toast.error((err as Error).message) },
+    );
+    if (!has && ids.every((h) => nextList.includes(h))) {
       fire();
       playSound("achievement");
     } else {
@@ -1268,71 +2003,213 @@ export function HabitCheckinCard() {
     }
   };
 
+  const openEditor = () => {
+    setDraft(ids);
+    setEditing(true);
+  };
+  const toggleDraft = (id: string) =>
+    setDraft((d) =>
+      d.includes(id) ? d.filter((x) => x !== id) : d.length < MAX_HABITS ? [...d, id] : d,
+    );
+  const saveDraft = () =>
+    saveChoice.mutate(draft, {
+      onSuccess: () => setEditing(false),
+      onError: (err) => toast.error((err as Error).message),
+    });
+
+  const shade = (n: number) =>
+    n >= MIN_HABITS ? "bg-accent" : n > 0 ? "bg-accent/40" : "bg-secondary";
+
   return (
     <Panel
       title={tr(["Hábitos de hoje", "Today's habits", "Hábitos de hoy", "Habitudes du jour"])}
       className="relative"
       action={
-        <span
-          className={`inline-flex items-center gap-1 text-xs font-bold ${streak > 0 ? "text-accent" : "text-muted-foreground"}`}
-        >
-          <Flame className="h-3.5 w-3.5" />
-          {streak}
+        <span className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1 text-xs font-bold ${streak > 0 ? "text-accent" : "text-muted-foreground"}`}
+          >
+            <Flame className="h-3.5 w-3.5" />
+            {streak}
+          </span>
+          {user && !editing && (
+            <button
+              type="button"
+              onClick={openEditor}
+              className="grid h-7 w-7 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              aria-label={tr([
+                "Escolher hábitos",
+                "Choose habits",
+                "Elegir hábitos",
+                "Choisir les habitudes",
+              ])}
+              title={tr([
+                "Escolher hábitos",
+                "Choose habits",
+                "Elegir hábitos",
+                "Choisir les habitudes",
+              ])}
+            >
+              <Settings2 className="h-4 w-4" />
+            </button>
+          )}
         </span>
       }
     >
       <Burst id={burst} />
-      <ul className="space-y-1.5">
-        {HABITS.map((h) => {
-          const on = marked.includes(h.id);
-          return (
-            <li key={h.id}>
-              <button
-                type="button"
-                onClick={() => toggle(h.id)}
-                aria-pressed={on}
-                className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-left text-xs font-medium transition active:scale-[0.98] ${
-                  on
-                    ? "border-accent/40 bg-accent/10 text-foreground"
-                    : "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary"
-                }`}
-              >
-                <span className="text-accent">
-                  <EmojiIcon emoji={h.emoji} className="h-5 w-5" />
-                </span>
-                <span className="flex-1">{tr(h.name)}</span>
-                <CheckCircle2
-                  className={`h-4 w-4 ${on ? "text-accent" : "text-muted-foreground/40"}`}
+      {editing ? (
+        <div>
+          <p className="mb-2 text-[11px] text-muted-foreground">
+            {fillN(
+              tr([
+                "Escolha de {min} a {max} hábitos para acompanhar ({n} escolhidos).",
+                "Pick {min} to {max} habits to track ({n} chosen).",
+                "Elige de {min} a {max} hábitos para seguir ({n} elegidos).",
+                "Choisissez de {min} à {max} habitudes à suivre ({n} choisies).",
+              ]),
+              { min: MIN_HABITS, max: MAX_HABITS, n: draft.length },
+            )}
+          </p>
+          <ul className="grid gap-1.5 sm:grid-cols-2">
+            {HABIT_CATALOG.map((h) => {
+              const on = draft.includes(h.id);
+              const full = !on && draft.length >= MAX_HABITS;
+              return (
+                <li key={h.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggleDraft(h.id)}
+                    aria-pressed={on}
+                    disabled={full}
+                    className={`flex w-full cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                      on
+                        ? "border-primary/50 bg-primary/10 text-foreground"
+                        : "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    <h.icon className={`h-4 w-4 shrink-0 ${on ? "text-primary" : ""}`} />
+                    <span className="flex-1">{tr(h.name)}</span>
+                    <CheckCircle2
+                      className={`h-4 w-4 shrink-0 ${on ? "text-primary" : "text-muted-foreground/30"}`}
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="mt-3 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-secondary"
+            >
+              {tr(["Cancelar", "Cancel", "Cancelar", "Annuler"])}
+            </button>
+            <button
+              type="button"
+              onClick={saveDraft}
+              disabled={draft.length < MIN_HABITS || saveChoice.isPending}
+              className="cursor-pointer rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {tr(["Salvar", "Save", "Guardar", "Enregistrer"])}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <ul className="space-y-1.5">
+            {chosen.map((h) => {
+              const on = marked.includes(h.id);
+              return (
+                <li key={h.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(h.id)}
+                    aria-pressed={on}
+                    className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-left text-xs font-medium transition active:scale-[0.98] ${
+                      on
+                        ? "border-accent/40 bg-accent/10 text-foreground"
+                        : "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    <h.icon className="h-5 w-5 shrink-0 text-accent" />
+                    <span className="flex-1">{tr(h.name)}</span>
+                    <CheckCircle2
+                      className={`h-4 w-4 shrink-0 ${on ? "text-accent" : "text-muted-foreground/40"}`}
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="mt-3">
+            <Bar value={markedChosen.length} max={chosen.length} />
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold text-muted-foreground">
+              {view === "week"
+                ? tr(["Últimos 7 dias", "Last 7 days", "Últimos 7 días", "7 derniers jours"])
+                : tr([
+                    "Últimas 5 semanas",
+                    "Last 5 weeks",
+                    "Últimas 5 semanas",
+                    "5 dernières semaines",
+                  ])}
+            </span>
+            <button
+              type="button"
+              onClick={() => setView(view === "week" ? "month" : "week")}
+              className="cursor-pointer text-[11px] font-bold text-primary hover:underline"
+            >
+              {view === "week"
+                ? tr(["Ver o mês", "See the month", "Ver el mes", "Voir le mois"])
+                : tr(["Ver a semana", "See the week", "Ver la semana", "Voir la semaine"])}
+            </button>
+          </div>
+          {view === "week" ? (
+            <div className="mt-2 flex items-end gap-1">
+              {week.map((n, i) => (
+                <span
+                  key={i}
+                  title={String(n)}
+                  className={`flex-1 rounded-sm ${shade(n)}`}
+                  style={{ height: `${6 + Math.min(n, MAX_HABITS) * 3}px` }}
                 />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="mt-3">
-        <Bar value={marked.length} max={HABITS.length} />
-      </div>
-      <div
-        className="mt-3 flex items-end gap-1"
-        aria-label={tr(["Últimos 7 dias", "Last 7 days", "Últimos 7 días", "7 derniers jours"])}
-      >
-        {week.map((n, i) => (
-          <span
-            key={i}
-            title={`${n}/${HABITS.length}`}
-            className={`flex-1 rounded-sm ${n >= 3 ? "bg-accent" : n > 0 ? "bg-accent/40" : "bg-secondary"}`}
-            style={{ height: `${6 + n * 4}px` }}
-          />
-        ))}
-      </div>
-      <p className={note}>
-        {tr([
-          "Marque 3 ou mais por dia para manter a sequência 🔥",
-          "Check 3 or more a day to keep your streak 🔥",
-          "Marca 3 o más al día para mantener la racha 🔥",
-          "Cochez 3 ou plus par jour pour garder votre série 🔥",
-        ])}
-      </p>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-2 grid grid-cols-7 gap-1">
+              {month.slice(0, 7).map((c) => (
+                <span
+                  key={"h" + c.day}
+                  className="text-center text-[9px] font-bold uppercase text-muted-foreground"
+                >
+                  {new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(
+                    new Date(c.day + "T12:00:00"),
+                  )}
+                </span>
+              ))}
+              {month.map((c) => (
+                <span
+                  key={c.day}
+                  title={`${c.day.split("-").reverse().join("/")}: ${c.n}`}
+                  className={`h-5 rounded-md sm:h-6 ${c.future ? "bg-transparent" : shade(c.n)} ${
+                    c.day === today ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+          <p className={note}>
+            {tr([
+              "Marque 3 ou mais por dia para manter a sequência",
+              "Check 3 or more a day to keep your streak",
+              "Marca 3 o más al día para mantener la racha",
+              "Cochez 3 ou plus par jour pour garder votre série",
+            ])}
+          </p>
+        </>
+      )}
     </Panel>
   );
 }
@@ -1373,6 +2250,21 @@ export function WeeklyPledgeCard() {
   );
 
   const title = theme.data ? themeText(theme.data, locale).title : null;
+  // Semanas anteriores (as 4 antes desta): quantos dias com o compromisso em cada uma.
+  const past = useMemo(
+    () =>
+      [4, 3, 2, 1].map((back) => {
+        const d = new Date(week + "T12:00:00");
+        d.setDate(d.getDate() - back * 7);
+        const mon = checkinDay(d);
+        return {
+          mon,
+          n: weekDays(mon).filter((day) => map.get(day)?.pledge).length,
+        };
+      }),
+    [week, map],
+  );
+  const best = Math.max(days.length, ...past.map((p) => p.n));
 
   const toggle = (i: number) => {
     if (i > todayIndex || !user) return;
@@ -1437,6 +2329,34 @@ export function WeeklyPledgeCard() {
         </div>
         <span className="text-xs font-bold text-foreground">{days.length}/7</span>
       </div>
+      {past.some((p) => p.n > 0) && (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-semibold text-muted-foreground">
+            {tr([
+              "Semanas anteriores",
+              "Previous weeks",
+              "Semanas anteriores",
+              "Semaines précédentes",
+            ])}
+            {best > 0 && ` · ${tr(["melhor", "best", "mejor", "meilleure"])}: ${best}/7`}
+          </p>
+          <div className="grid grid-cols-4 gap-1.5">
+            {past.map((p) => (
+              <div key={p.mon} className="text-center">
+                <div className="flex h-8 items-end overflow-hidden rounded-md bg-secondary/60">
+                  <div
+                    className="w-full rounded-md bg-accent/70"
+                    style={{ height: `${(p.n / 7) * 100}%` }}
+                  />
+                </div>
+                <span className="text-[9px] tabular-nums text-muted-foreground">
+                  {p.mon.slice(8, 10)}/{p.mon.slice(5, 7)} · {p.n}/7
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <Link
         to="/tema-da-semana"
         className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
@@ -1623,17 +2543,6 @@ export function IcebreakerCard() {
 }
 
 // ───────────────────────────── Explorar e profissionais ─────────────────────────────
-
-const TOPICS: Names[] = [
-  ["receitas", "recipes", "recetas", "recettes"],
-  ["café da manhã", "breakfast", "desayuno", "petit-déjeuner"],
-  ["lanche saudável", "healthy snack", "merienda saludable", "en-cas sain"],
-  ["proteína", "protein", "proteína", "protéines"],
-  ["vegetariano", "vegetarian", "vegetariano", "végétarien"],
-  ["sem glúten", "gluten free", "sin gluten", "sans gluten"],
-  ["fibras", "fiber", "fibra", "fibres"],
-  ["hidratação", "hydration", "hidratación", "hydratation"],
-];
 
 /** Atalhos de busca: preenchem o campo da página Explorar. */
 export function ExploreTopicsCard() {
@@ -1835,12 +2744,77 @@ const MOODS: { emoji: string; label: Names; reply: Names }[] = [
   },
 ];
 
+/** Padrões simples dos últimos dias (sem IA): dia da semana mais difícil e hábitos nos dias bons
+ *  e nos difíceis. Só aparecem com registros suficientes. */
+function moodInsights(
+  rows: { day: string; mood: number | null; habits: string[] }[],
+  locale: string,
+  tr: (n: Names) => string,
+): string[] {
+  const withMood = rows.filter((r) => r.mood !== null) as {
+    day: string;
+    mood: number;
+    habits: string[];
+  }[];
+  if (withMood.length < 7) return [];
+  const out: string[] = [];
+  const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+  const overall = avg(withMood.map((r) => r.mood));
+  // Dia da semana com média bem mais pesada que a geral (ao menos 2 registros).
+  const byDow = new Map<number, number[]>();
+  for (const r of withMood) {
+    const dow = new Date(r.day + "T12:00:00").getDay();
+    byDow.set(dow, [...(byDow.get(dow) ?? []), r.mood]);
+  }
+  let worst: { dow: number; m: number } | null = null;
+  for (const [dow, ms] of byDow)
+    if (
+      ms.length >= 2 &&
+      avg(ms) >= 2 &&
+      avg(ms) - overall >= 0.75 &&
+      (!worst || avg(ms) > worst.m)
+    )
+      worst = { dow, m: avg(ms) };
+  if (worst) {
+    const ref = new Date(2026, 0, 4 + worst.dow); // 4/1/2026 foi domingo
+    const name = new Intl.DateTimeFormat(locale, { weekday: "long" }).format(ref);
+    out.push(
+      tr([
+        `Os dias de ${name} têm sido mais pesados. Vale planejar algo gostoso e simples para esse dia.`,
+        `${name[0].toUpperCase() + name.slice(1)}s have felt heavier. It may help to plan something tasty and simple for that day.`,
+        `Los días de ${name} han sido más pesados. Puede ayudar planear algo rico y sencillo para ese día.`,
+        `Le ${name} a été plus difficile. Prévoir quelque chose de bon et simple ce jour-là peut aider.`,
+      ]),
+    );
+  }
+  // Hábitos marcados nos dias bons (ótima/boa) e nos difíceis (normal/pesada).
+  const good = withMood.filter((r) => r.mood <= 1).map((r) => r.habits.length);
+  const hard = withMood.filter((r) => r.mood >= 2).map((r) => r.habits.length);
+  if (good.length >= 2 && hard.length >= 2) {
+    const g = avg(good);
+    const h = avg(hard);
+    if (g - h >= 1) {
+      const f = (n: number) => n.toLocaleString(locale, { maximumFractionDigits: 1 });
+      out.push(
+        tr([
+          `Nos dias bons você marcou em média ${f(g)} hábitos; nos difíceis, ${f(h)}. Cuidar do básico parece ajudar.`,
+          `On good days you checked ${f(g)} habits on average; on hard days, ${f(h)}. The basics seem to help.`,
+          `En los días buenos marcaste en promedio ${f(g)} hábitos; en los difíciles, ${f(h)}. Cuidar lo básico parece ayudar.`,
+          `Les bons jours, vous avez coché ${f(g)} habitudes en moyenne ; les jours difficiles, ${f(h)}. Les bases semblent aider.`,
+        ]),
+      );
+    }
+  }
+  return out;
+}
+
 export function MoodCard() {
   const tr = useTr();
   const { locale } = useI18n();
   const { user } = useAuth();
   const checkins = useCheckins(user?.id);
   const save = useSaveCheckin(user?.id);
+  const [view, setView] = useState<"week" | "month">("week");
   const today = checkinDay();
   const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
   const picked = map.get(today)?.mood ?? null;
@@ -1848,6 +2822,31 @@ export function MoodCard() {
     const day = daysAgo(6 - i);
     return { day, mood: map.get(day)?.mood ?? null };
   });
+  // 5 semanas de segunda a domingo, terminando na semana atual.
+  const month = useMemo(() => {
+    const monday = new Date(weekStartDay() + "T12:00:00");
+    monday.setDate(monday.getDate() - 28);
+    return Array.from({ length: 35 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const day = checkinDay(d);
+      return { day, mood: map.get(day)?.mood ?? null, future: day > today };
+    });
+  }, [map, today]);
+  const counts = [0, 1, 2, 3].map((m) => month.filter((c) => c.mood === m).length);
+  const logged = counts.reduce((a, b) => a + b, 0);
+  const insights = useMemo(
+    () =>
+      moodInsights(
+        (checkins.data ?? []).map((c) => ({ day: c.day, mood: c.mood, habits: c.habits })),
+        locale,
+        tr,
+      ),
+    [checkins.data, locale, tr],
+  );
+  const dayLabel = (day: string) =>
+    new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(new Date(day + "T12:00:00"));
+
   return (
     <Panel
       title={tr([
@@ -1902,22 +2901,106 @@ export function MoodCard() {
           )}
         </div>
       )}
-      <div className="mt-3 grid grid-cols-7 gap-1">
-        {lastWeek.map(({ day, mood }) => (
-          <div key={day} className="grid place-items-center gap-0.5">
-            <span
-              className="h-2.5 w-2.5 rounded-full"
-              style={{ background: mood === null ? "var(--color-secondary)" : MOOD_COLORS[mood] }}
-              title={mood === null ? "—" : tr(MOODS[mood].label)}
-            />
-            <span className="text-[9px] uppercase text-muted-foreground">
-              {new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(
-                new Date(day + "T12:00:00"),
-              )}
-            </span>
-          </div>
-        ))}
+
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <span className="text-[11px] font-semibold text-muted-foreground">
+          {view === "week"
+            ? tr(["Últimos 7 dias", "Last 7 days", "Últimos 7 días", "7 derniers jours"])
+            : tr([
+                "Últimas 5 semanas",
+                "Last 5 weeks",
+                "Últimas 5 semanas",
+                "5 dernières semaines",
+              ])}
+        </span>
+        <button
+          type="button"
+          onClick={() => setView(view === "week" ? "month" : "week")}
+          className="cursor-pointer text-[11px] font-bold text-primary hover:underline"
+        >
+          {view === "week"
+            ? tr(["Ver o mês", "See the month", "Ver el mes", "Voir le mois"])
+            : tr(["Ver a semana", "See the week", "Ver la semana", "Voir la semaine"])}
+        </button>
       </div>
+      {view === "week" ? (
+        <div className="mt-2 grid grid-cols-7 gap-1">
+          {lastWeek.map(({ day, mood }) => (
+            <div key={day} className="grid place-items-center gap-0.5">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ background: mood === null ? "var(--color-secondary)" : MOOD_COLORS[mood] }}
+                title={mood === null ? "—" : tr(MOODS[mood].label)}
+              />
+              <span className="text-[9px] uppercase text-muted-foreground">{dayLabel(day)}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="mt-2 grid grid-cols-7 gap-1">
+            {month.slice(0, 7).map((c) => (
+              <span
+                key={"h" + c.day}
+                className="text-center text-[9px] font-bold uppercase text-muted-foreground"
+              >
+                {dayLabel(c.day)}
+              </span>
+            ))}
+            {month.map((c) => (
+              <span
+                key={c.day}
+                title={`${c.day.split("-").reverse().join("/")}: ${c.mood === null ? "—" : tr(MOODS[c.mood].label)}`}
+                className={`h-5 rounded-md sm:h-6 ${c.day === today ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}`}
+                style={{
+                  background: c.future
+                    ? "transparent"
+                    : c.mood === null
+                      ? "var(--color-secondary)"
+                      : MOOD_COLORS[c.mood],
+                }}
+              />
+            ))}
+          </div>
+          {logged > 0 && (
+            <>
+              <div className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-secondary">
+                {counts.map((n, i) =>
+                  n ? (
+                    <span
+                      key={i}
+                      style={{ width: `${(n / logged) * 100}%`, background: MOOD_COLORS[i] }}
+                    />
+                  ) : null,
+                )}
+              </div>
+              <dl className="mt-1.5 grid grid-cols-4 gap-1 text-center text-[10px]">
+                {MOODS.map((m, i) => (
+                  <div key={i}>
+                    <dt className="font-semibold" style={{ color: MOOD_COLORS[i] }}>
+                      {tr(m.label)}
+                    </dt>
+                    <dd className="tabular-nums text-muted-foreground">{counts[i]}</dd>
+                  </div>
+                ))}
+              </dl>
+            </>
+          )}
+        </>
+      )}
+      {insights.length > 0 && (
+        <ul className="mt-3 space-y-1.5">
+          {insights.map((t) => (
+            <li
+              key={t}
+              className="flex gap-2 rounded-xl bg-secondary/50 px-3 py-2 text-left text-[11px] leading-snug text-foreground"
+            >
+              <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+              {t}
+            </li>
+          ))}
+        </ul>
+      )}
       <p className={note}>
         {tr([
           "Registro só seu, salvo na sua conta. Nenhum profissional vê.",
@@ -1957,15 +3040,49 @@ const MEAL_TIPS: Names[] = [
   ],
 ];
 
-/** Refeição com calma: respiração guiada e um relógio de 20 minutos. */
+const MEAL_KEY = "nc_mindful_meal";
+const BREATH_SECONDS = 60;
+/** Ciclo de respiração: 4 s inspirando, 6 s soltando o ar. */
+const INHALE = 4;
+const CYCLE = 10;
+const HUNGER_WORDS: Names[] = [
+  ["Sem fome", "Not hungry", "Sin hambre", "Pas faim"],
+  ["Pouca", "A little", "Poca", "Un peu"],
+  ["Média", "Some", "Media", "Moyenne"],
+  ["Bastante", "Quite", "Bastante", "Beaucoup"],
+  ["Muita", "Very", "Mucha", "Très"],
+];
+const FULL_WORDS: Names[] = [
+  ["Ainda com fome", "Still hungry", "Aún con hambre", "Encore faim"],
+  ["Quase", "Almost", "Casi", "Presque"],
+  ["Satisfeito(a)", "Satisfied", "Satisfecho(a)", "Rassasié(e)"],
+  ["Cheio(a)", "Full", "Lleno(a)", "Plein(e)"],
+  ["Cheio(a) demais", "Too full", "Demasiado lleno(a)", "Trop plein(e)"],
+];
+
+type MealPhase = "idle" | "breath" | "meal" | "done";
+interface MealState {
+  phase: MealPhase;
+  /** Hora (ms) de início da fase atual, se correndo. */
+  startedAt: number | null;
+  /** Segundos já passados quando pausado. */
+  elapsed: number;
+  hunger: number | null;
+  full: number | null;
+}
+const IDLE: MealState = { phase: "idle", startedAt: null, elapsed: 0, hunger: null, full: null };
+
+/** Refeição com calma: 1 minuto de respiração guiada, um relógio de 20 minutos com dicas, e a
+ *  fome antes e a saciedade depois. Continua se a página recarregar; a tela fica acesa. */
 export function MindfulMealCard() {
   const tr = useTr();
   const { user } = useAuth();
   const checkins = useCheckins(user?.id);
   const save = useSaveCheckin(user?.id);
-  const [running, setRunning] = useState(false);
-  const [seconds, setSeconds] = useState(0);
+  const [st, setSt] = useState<MealState>(IDLE);
+  const [now, setNow] = useState(() => Date.now());
   const [burst, fire] = useBurst();
+  const loaded = useRef(false);
   const GOAL = 20 * 60;
   const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
   const weekFrom = weekStartDay();
@@ -1982,23 +3099,133 @@ export function MindfulMealCard() {
   };
 
   useEffect(() => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(MEAL_KEY) ?? "null");
+      if (raw && typeof raw === "object" && raw.phase) setSt({ ...IDLE, ...raw });
+    } catch {
+      // sem armazenamento
+    }
+    loaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (!loaded.current) return;
+    try {
+      window.localStorage.setItem(MEAL_KEY, JSON.stringify(st));
+    } catch {
+      // sem armazenamento
+    }
+  }, [st]);
+
+  const running = st.startedAt !== null && (st.phase === "breath" || st.phase === "meal");
+  const secs = running ? st.elapsed + Math.floor((now - (st.startedAt ?? now)) / 1000) : st.elapsed;
+
+  useEffect(() => {
     if (!running) return;
-    const started = Date.now() - seconds * 1000;
-    const id = window.setInterval(() => {
-      const s = Math.floor((Date.now() - started) / 1000);
-      setSeconds(s);
-      if (s >= GOAL) {
-        setRunning(false);
-        fire();
-        playSound("achievement");
-        countMeal.current();
-      }
-    }, 500);
+    const id = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
-  const tip = MEAL_TIPS[Math.floor(seconds / 30) % MEAL_TIPS.length];
+  // Tela acesa enquanto o relógio corre.
+  useEffect(() => {
+    if (!running) return;
+    let lock: { release: () => Promise<void> } | null = null;
+    let cancelled = false;
+    (navigator as WakeLockNav).wakeLock
+      ?.request("screen")
+      .then((l) => (cancelled ? void l.release() : (lock = l)))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      void lock?.release().catch(() => {});
+    };
+  }, [running]);
+
+  // Fim da respiração: começa a refeição. Fim da refeição: conta o dia.
+  useEffect(() => {
+    if (st.phase === "breath" && running && secs >= BREATH_SECONDS) {
+      setSt((x) => ({ ...x, phase: "meal", startedAt: Date.now(), elapsed: 0 }));
+      playSound("success");
+    } else if (st.phase === "meal" && running && secs >= GOAL) {
+      setSt((x) => ({ ...x, phase: "done", startedAt: null, elapsed: GOAL }));
+      fire();
+      playSound("achievement");
+      countMeal.current();
+    }
+  }, [secs, st.phase, running, GOAL, fire]);
+
+  const start = (withBreath: boolean) => {
+    setNow(Date.now());
+    setSt((x) => ({
+      ...x,
+      phase: withBreath ? "breath" : "meal",
+      startedAt: Date.now(),
+      elapsed: 0,
+      full: null,
+    }));
+    playSound("click");
+  };
+  const togglePause = () =>
+    setSt((x) =>
+      x.startedAt !== null
+        ? { ...x, startedAt: null, elapsed: secs }
+        : { ...x, startedAt: Date.now() - 0, elapsed: x.elapsed },
+    );
+  const reset = () => setSt(IDLE);
+  const finishEarly = () => {
+    setSt((x) => ({ ...x, phase: "done", startedAt: null, elapsed: secs }));
+    playSound("success");
+  };
+
+  const inhaling = st.phase === "breath" && secs % CYCLE < INHALE;
+  const tip = MEAL_TIPS[Math.floor(secs / 30) % MEAL_TIPS.length];
+  const progress = st.phase === "meal" ? Math.min(1, secs / GOAL) : st.phase === "done" ? 1 : 0;
+  const r = 44;
+  const c = 2 * Math.PI * r;
+  const scale = (i: number | null, words: Names[], onPick: (n: number) => void, color: string) => (
+    <div className="grid grid-cols-5 gap-1">
+      {words.map((w, n) => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onPick(n)}
+          aria-pressed={i === n}
+          className="cursor-pointer rounded-lg border px-0.5 py-1.5 text-[10px] font-semibold leading-tight transition [overflow-wrap:anywhere]"
+          style={
+            i === n
+              ? { background: color, borderColor: color, color: "white" }
+              : { borderColor: "var(--color-border)" }
+          }
+        >
+          {tr(w)}
+        </button>
+      ))}
+    </div>
+  );
+
+  const compare = (() => {
+    if (st.hunger === null || st.full === null) return null;
+    if (st.full === 2)
+      return tr([
+        "Você parou satisfeito(a): é esse o ponto que o corpo agradece.",
+        "You stopped satisfied: that's the point your body thanks you for.",
+        "Paraste satisfecho(a): ese es el punto que el cuerpo agradece.",
+        "Vous vous êtes arrêté(e) rassasié(e) : c'est le bon point.",
+      ]);
+    if (st.full >= 3)
+      return tr([
+        "Passou um pouco do ponto, e tudo bem. Na próxima, pause no meio e confira a fome.",
+        "A bit past the point, and that's okay. Next time, pause halfway and check your hunger.",
+        "Te pasaste un poco, y está bien. La próxima vez, haz una pausa a la mitad y revisa el hambre.",
+        "Un peu au-delà, ce n'est pas grave. La prochaine fois, faites une pause à mi-repas.",
+      ]);
+    return tr([
+      "Ainda com fome? Pode comer mais, com a mesma calma.",
+      "Still hungry? You can eat more, just as calmly.",
+      "¿Todavía con hambre? Puedes comer más, con la misma calma.",
+      "Encore faim ? Vous pouvez reprendre, avec le même calme.",
+    ]);
+  })();
+
   return (
     <Panel
       title={tr([
@@ -2010,63 +3237,156 @@ export function MindfulMealCard() {
       className="relative"
     >
       <Burst id={burst} />
-      <div className="grid place-items-center py-2">
+      <div className="relative mx-auto grid h-36 w-36 place-items-center">
+        <svg viewBox="0 0 100 100" className="absolute inset-0 -rotate-90" aria-hidden="true">
+          <circle cx="50" cy="50" r={r} fill="none" strokeWidth="5" className="stroke-secondary" />
+          <circle
+            cx="50"
+            cy="50"
+            r={r}
+            fill="none"
+            strokeWidth="5"
+            strokeLinecap="round"
+            className="stroke-accent transition-[stroke-dashoffset] duration-500"
+            strokeDasharray={c}
+            strokeDashoffset={c * (1 - progress)}
+          />
+        </svg>
         <div
-          className={`grid h-20 w-20 place-items-center rounded-full bg-accent/15 text-accent ${running ? "nc-breathe" : ""}`}
+          className="grid h-20 w-20 place-items-center rounded-full bg-accent/15 text-accent"
+          style={{
+            transform: `scale(${st.phase === "breath" ? (inhaling ? 1.3 : 0.9) : 1})`,
+            transition: `transform ${inhaling ? INHALE : CYCLE - INHALE}s ease-in-out`,
+          }}
         >
           <Wind className="h-7 w-7" />
         </div>
       </div>
-      <p className="text-center text-2xl font-black tabular-nums text-foreground">{fmt(seconds)}</p>
-      <p
-        key={running ? tip[0] : "idle"}
-        className="nc-pop-in mt-1 min-h-[2.25rem] text-center text-xs text-muted-foreground"
-      >
-        {running
-          ? tr(tip)
-          : tr([
-              "Comer com calma leva cerca de 20 minutos. Vamos tentar?",
-              "A calm meal takes about 20 minutes. Shall we try?",
-              "Una comida con calma dura unos 20 minutos. ¿Probamos?",
-              "Un repas calme dure environ 20 minutes. On essaie ?",
+
+      {st.phase === "idle" && (
+        <>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            {tr([
+              "Comer com calma leva cerca de 20 minutos. Antes, como está a sua fome?",
+              "A calm meal takes about 20 minutes. First, how hungry are you?",
+              "Comer con calma lleva unos 20 minutos. Antes, ¿cómo está tu hambre?",
+              "Un repas calme dure environ 20 minutes. D'abord, quelle est votre faim ?",
             ])}
-      </p>
-      <div className="mt-2 flex justify-center gap-2">
-        <button
-          type="button"
-          className={primaryBtn}
-          onClick={() => {
-            // Depois de concluir, começar de novo é uma refeição nova.
-            if (!running && seconds >= GOAL) setSeconds(0);
-            setRunning((r) => !r);
-          }}
-        >
-          {running ? <Pause className="h-3.5 w-3.5" /> : <Timer className="h-3.5 w-3.5" />}
-          {running
-            ? tr(["Pausar", "Pause", "Pausar", "Pause"])
-            : tr(["Começar", "Start", "Empezar", "Commencer"])}
-        </button>
-        {seconds > 0 && (
-          <button
-            type="button"
-            className={iconBtn}
-            onClick={() => {
-              setRunning(false);
-              setSeconds(0);
-            }}
+          </p>
+          <div className="mt-2">
+            {scale(st.hunger, HUNGER_WORDS, (n) => setSt((x) => ({ ...x, hunger: n })), "#c58a12")}
+          </div>
+          <div className="mt-3 flex justify-center gap-2">
+            <button type="button" className={primaryBtn} onClick={() => start(true)}>
+              <Wind className="h-3.5 w-3.5" />
+              {tr([
+                "Respirar e começar",
+                "Breathe and start",
+                "Respirar y empezar",
+                "Respirer et commencer",
+              ])}
+            </button>
+            <button type="button" className={iconBtn} onClick={() => start(false)}>
+              <Timer className="h-3 w-3" />
+              {tr(["Só o relógio", "Timer only", "Solo el reloj", "Minuteur seul"])}
+            </button>
+          </div>
+        </>
+      )}
+
+      {(st.phase === "breath" || st.phase === "meal") && (
+        <>
+          <p className="mt-2 text-center text-2xl font-black tabular-nums text-foreground">
+            {st.phase === "breath" ? fmt(Math.max(0, BREATH_SECONDS - secs)) : fmt(secs)}
+          </p>
+          <p
+            key={st.phase === "breath" ? String(inhaling) : tip[0]}
+            className="nc-pop-in mt-1 min-h-[2.25rem] text-center text-xs text-muted-foreground"
           >
-            <RotateCcw className="h-3 w-3" />
-          </button>
-        )}
-      </div>
+            {st.phase === "breath"
+              ? inhaling
+                ? tr([
+                    "Inspire devagar pelo nariz…",
+                    "Breathe in slowly through your nose…",
+                    "Inspira despacio por la nariz…",
+                    "Inspirez lentement par le nez…",
+                  ])
+                : tr([
+                    "Solte o ar com calma…",
+                    "Breathe out slowly…",
+                    "Suelta el aire con calma…",
+                    "Expirez doucement…",
+                  ])
+              : tr(tip)}
+          </p>
+          <div className="mt-2 flex justify-center gap-2">
+            <button type="button" className={primaryBtn} onClick={togglePause}>
+              {running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              {running
+                ? tr(["Pausar", "Pause", "Pausar", "Pause"])
+                : tr(["Continuar", "Resume", "Continuar", "Reprendre"])}
+            </button>
+            {st.phase === "meal" && (
+              <button type="button" className={iconBtn} onClick={finishEarly}>
+                {tr(["Terminei", "I'm done", "Terminé", "J'ai fini"])}
+              </button>
+            )}
+            <button
+              type="button"
+              className={iconBtn}
+              onClick={reset}
+              aria-label={tr(["Recomeçar", "Restart", "Reiniciar", "Recommencer"])}
+            >
+              <RotateCcw className="h-3 w-3" />
+            </button>
+          </div>
+        </>
+      )}
+
+      {st.phase === "done" && (
+        <>
+          <p className="mt-2 text-center text-xs font-semibold text-foreground">
+            {tr([
+              "E agora, como está?",
+              "How do you feel now?",
+              "¿Y ahora, cómo estás?",
+              "Et maintenant ?",
+            ])}
+          </p>
+          <div className="mt-2">
+            {scale(st.full, FULL_WORDS, (n) => setSt((x) => ({ ...x, full: n })), "#4f8a4b")}
+          </div>
+          {compare && (
+            <p className="nc-pop-in mt-3 rounded-xl bg-accent-soft/60 p-3 text-left text-xs leading-relaxed text-foreground">
+              {st.hunger !== null &&
+                `${tr(["Fome antes", "Hunger before", "Hambre antes", "Faim avant"])}: ${tr(HUNGER_WORDS[st.hunger])}. `}
+              {compare}
+            </p>
+          )}
+          <div className="mt-3 flex justify-center">
+            <button type="button" className={iconBtn} onClick={reset}>
+              <RotateCcw className="h-3 w-3" />
+              {tr(["Nova refeição", "New meal", "Nueva comida", "Nouveau repas"])}
+            </button>
+          </div>
+        </>
+      )}
+
       {thisWeek > 0 && (
         <p className="mt-3 text-center text-[11px] font-semibold text-accent">
-          {tr([
-            `${thisWeek} refeição(ões) com calma nesta semana`,
-            `${thisWeek} mindful meal(s) this week`,
-            `${thisWeek} comida(s) con calma esta semana`,
-            `${thisWeek} repas en pleine conscience cette semaine`,
-          ])}
+          {thisWeek === 1
+            ? tr([
+                "1 refeição com calma nesta semana",
+                "1 mindful meal this week",
+                "1 comida con calma esta semana",
+                "1 repas en pleine conscience cette semaine",
+              ])
+            : tr([
+                `${thisWeek} refeições com calma nesta semana`,
+                `${thisWeek} mindful meals this week`,
+                `${thisWeek} comidas con calma esta semana`,
+                `${thisWeek} repas en pleine conscience cette semaine`,
+              ])}
         </p>
       )}
     </Panel>

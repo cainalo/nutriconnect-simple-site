@@ -17,7 +17,6 @@ import {
   MessageCircle,
   Presentation,
   ShieldCheck,
-  Sparkles,
   Stethoscope,
   Apple,
   Users,
@@ -117,15 +116,14 @@ function LandingNatural() {
       <Section className="pt-10 lg:pt-16">
         <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent">
-              <Sparkles className="h-3.5 w-3.5" />
+            <p className="text-sm font-semibold text-accent">
               {tr([
                 "Rede social de alimentação e saúde",
                 "A food and health social network",
                 "Red social de alimentación y salud",
                 "Le réseau social de l'alimentation et de la santé",
               ])}
-            </span>
+            </p>
             <h1 className="mt-5 font-display text-4xl font-bold leading-[1.08] sm:text-5xl lg:text-6xl">
               {tr([
                 "Comer melhor é mais fácil",
@@ -137,10 +135,10 @@ function LandingNatural() {
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
               {tr([
-                "Uma comunidade acolhedora para trocar receitas e experiências, aprender com trilhas divertidas e contar com profissionais de saúde verificados — com consulta por vídeo no próprio site.",
-                "A welcoming community to share recipes and experiences, learn with fun tracks and count on verified health professionals — with video visits right on the site.",
-                "Una comunidad acogedora para compartir recetas y experiencias, aprender con rutas divertidas y contar con profesionales de la salud verificados, con consulta por video en el propio sitio.",
-                "Une communauté bienveillante pour partager recettes et expériences, apprendre avec des parcours ludiques et compter sur des professionnels de santé vérifiés — avec téléconsultation sur le site.",
+                "Aqui você troca receitas com quem cozinha de verdade, aprende sobre comida em lições curtas com a Nina e, quando precisar, marca uma consulta por vídeo com um profissional de registro conferido.",
+                "Swap recipes with people who actually cook, learn about food in short lessons with Nina and, when you need it, book a video visit with a professional whose license we checked.",
+                "Aquí intercambias recetas con quien cocina de verdad, aprendes sobre comida en lecciones cortas con Nina y, cuando lo necesites, agendas una consulta por video con un profesional de registro verificado.",
+                "Ici, on échange des recettes avec des gens qui cuisinent vraiment, on apprend sur l'alimentation en courtes leçons avec Nina et, quand il le faut, on réserve une téléconsultation avec un professionnel dont l'inscription a été vérifiée.",
               ])}
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -218,10 +216,10 @@ function LandingNatural() {
       <Section id="recursos" className="pt-4">
         <h2 className="font-display text-3xl font-bold sm:text-4xl">
           {tr([
-            "Tudo o que ajuda a mudar um hábito",
-            "Everything that helps change a habit",
-            "Todo lo que ayuda a cambiar un hábito",
-            "Tout ce qui aide à changer une habitude",
+            "O que tem aqui dentro",
+            "What's inside",
+            "Lo que hay aquí dentro",
+            "Ce qu'on trouve ici",
           ])}
         </h2>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -458,10 +456,10 @@ function LandingNatural() {
           <Mascot id="nina" mood="cheer" size={110} />
           <h2 className="font-display text-3xl font-bold sm:text-4xl">
             {tr([
-              "Sua jornada começa agora",
-              "Your journey starts now",
-              "Tu camino empieza ahora",
-              "Votre parcours commence maintenant",
+              "Comece pela próxima refeição",
+              "Start with your next meal",
+              "Empieza por la próxima comida",
+              "Commencez par le prochain repas",
             ])}
           </h2>
           <div className="flex flex-wrap justify-center gap-3">

@@ -629,7 +629,7 @@ export function PushInviteCard() {
   };
 
   return (
-    <div className="relative mb-6 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card p-5 shadow-xs">
+    <div className="relative mb-6 rounded-3xl border border-accent/30 bg-accent-soft/40 p-5 shadow-xs">
       <button
         type="button"
         onClick={dismiss}

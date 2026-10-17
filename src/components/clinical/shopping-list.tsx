@@ -126,10 +126,10 @@ export function ShoppingList({ plan }: { plan: FullMealPlan }) {
       }
       className="relative border-t-8 border-t-accent/80"
     >
+      <p className="mb-1.5 text-xs font-semibold text-muted-foreground">
+        {tr(["Quantidade para", "Amount for", "Cantidad para", "Quantité pour"])}
+      </p>
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold text-muted-foreground">
-          {tr(["Quantidade para", "Amount for", "Cantidad para", "Quantité pour"])}
-        </span>
         {DAYS.map((d) => (
           <button
             key={d}

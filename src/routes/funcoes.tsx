@@ -51,19 +51,7 @@ import { AppScreen } from "@/components/app-screen";
 import { AuthGateLoading } from "@/components/site-chrome";
 import { TileArt, type ArtData, type ArtId } from "@/components/funcoes-art";
 import { NinaLive } from "@/components/nina-live";
-import {
-  FriendsCard,
-  MyChallengesCard,
-  MyCommunitiesCard,
-  ProfessionalsCard,
-  ProfileCard,
-  SuggestedCommunitiesCard,
-  TopRecipesCard,
-  TrailCard,
-  UpcomingAppointmentsCard,
-  WeeklyThemeCard,
-  useAdultTrailProgress,
-} from "@/components/rail-cards";
+import { useAdultTrailProgress } from "@/components/rail-cards";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   CommunityRouletteCard,
@@ -89,6 +77,8 @@ import { useRequireAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import type { Names } from "@/lib/appearance-data";
 import { checkinDay, checkinsByDay, useCheckins, weekStartDay } from "@/lib/checkins";
+import { fillSpans, useGridColumns } from "@/lib/fill-grid";
+import { useHabitChoice } from "@/lib/habits";
 import { useFeatures, type FeatureKey } from "@/lib/features";
 import { getActiveStreak } from "@/lib/learning-trail";
 import { cn } from "@/lib/utils";
@@ -96,6 +86,7 @@ import { useShoppingItems } from "@/lib/fridge";
 import { themeText } from "@/lib/social/feed";
 import { useActiveTheme } from "@/lib/social/feed-queries";
 import { useWaterDays, useWaterSettings, waterDay, DEFAULT_GOAL } from "@/lib/water";
+import { useSitePhotos } from "@/lib/site-photos";
 
 export const Route = createFileRoute("/funcoes")({
   head: () => ({
@@ -161,6 +152,8 @@ interface Tile {
   art: ArtId;
   /** No mosaico: ocupa duas colunas ou duas linhas. */
   span?: "wide" | "tall";
+  /** Foto no alto do card, fundida na cor dele (só nos cards altos, que têm espaço). */
+  photo?: string;
   title: Names;
   text: Names;
   tool?: ToolId;
@@ -259,6 +252,7 @@ const SECTIONS: Section[] = [
         art: "trophy",
         color2: "#f4c84a",
         span: "tall",
+        photo: "/images/heads/desafios.jpg",
         icon: Award,
         color: "#c58a12",
         to: "/desafios",
@@ -429,6 +423,7 @@ const SECTIONS: Section[] = [
         art: "basket",
         color2: "#f6b07a",
         span: "tall",
+        photo: "/images/heads/feira.jpg",
         icon: ShoppingBasket,
         color: "#d9692a",
         tool: "compras",
@@ -786,28 +781,6 @@ function FuncoesPage() {
       <div className="@container mx-auto w-full max-w-[120rem] px-4 pb-10 pt-5 sm:px-6 lg:px-10">
         <Hero name={user.name} today={today} />
 
-        {/* Os cards que antes ficavam nas colunas laterais das páginas moram aqui. */}
-        <section
-          className="mb-8"
-          aria-label={tr(["Meus cards", "My cards", "Mis tarjetas", "Mes cartes"])}
-        >
-          <h2 className="mb-3 font-display text-lg font-bold text-foreground">
-            {tr(["Meus cards", "My cards", "Mis tarjetas", "Mes cartes"])}
-          </h2>
-          <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
-            <ProfileCard />
-            <TrailCard />
-            <MyChallengesCard />
-            <WeeklyThemeCard />
-            <MyCommunitiesCard />
-            <FriendsCard />
-            <SuggestedCommunitiesCard limit={3} />
-            <TopRecipesCard />
-            <ProfessionalsCard limit={3} />
-            <UpcomingAppointmentsCard />
-          </div>
-        </section>
-
         {SECTIONS.map((section) => {
           const tiles = section.tiles.filter(visible);
           if (tiles.length === 0) return null;
@@ -833,29 +806,18 @@ function FuncoesPage() {
                   }}
                 />
               </h2>
-              <ul
-                data-funcoes-grid
-                className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7"
-              >
-                {tiles.map((tile) => (
-                  <li
-                    key={tile.id}
-                    className={cn(
-                      tile.span === "wide" && "col-span-2",
-                      tile.span === "tall" && "@2xl:row-span-2",
-                    )}
-                  >
-                    <TileCard
-                      tile={tile}
-                      index={order++}
-                      badge={badges[tile.id]}
-                      data={art[tile.id] ?? {}}
-                      subtitle={tile.id === "tema" ? themeTitle : undefined}
-                      onOpen={() => setOpen(tile)}
-                    />
-                  </li>
-                ))}
-              </ul>
+              <TileGrid tiles={tiles}>
+                {(tile) => (
+                  <TileCard
+                    tile={tile}
+                    index={order++}
+                    badge={badges[tile.id]}
+                    data={art[tile.id] ?? {}}
+                    subtitle={tile.id === "tema" ? themeTitle : undefined}
+                    onOpen={() => setOpen(tile)}
+                  />
+                )}
+              </TileGrid>
             </section>
           );
         })}
@@ -1033,6 +995,47 @@ function Chip({
 const tileBackground = (t: Tile) =>
   `linear-gradient(140deg, color-mix(in srgb, ${t.color} 20%, var(--card)) 0%, color-mix(in srgb, ${t.color2} 34%, var(--card)) 100%)`;
 
+/** Grade de tiles de uma seção: encaixe denso e, medido o número de colunas, os últimos tiles
+ *  crescem até a seção fechar sem buracos (lib/fill-grid). */
+function TileGrid({ tiles, children }: { tiles: Tile[]; children: (tile: Tile) => ReactNode }) {
+  const ref = useRef<HTMLUListElement>(null);
+  const cols = useGridColumns(ref);
+  const spans = useMemo(
+    () =>
+      fillSpans(
+        tiles.map((t) => ({
+          w: t.span === "wide" ? 2 : 1,
+          h: t.span === "tall" && cols >= 3 ? 2 : 1,
+        })),
+        cols,
+      ),
+    [tiles, cols],
+  );
+  return (
+    <ul
+      ref={ref}
+      data-funcoes-grid
+      className="grid auto-rows-[minmax(8.75rem,auto)] grid-cols-2 gap-3 [grid-auto-flow:dense] @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 @[90rem]:grid-cols-6 @[110rem]:grid-cols-7"
+    >
+      {tiles.map((tile, i) => (
+        <li
+          key={tile.id}
+          className={
+            cols
+              ? undefined
+              : cn(tile.span === "wide" && "col-span-2", tile.span === "tall" && "@2xl:row-span-2")
+          }
+          style={
+            cols ? { gridColumn: `span ${spans[i].w}`, gridRow: `span ${spans[i].h}` } : undefined
+          }
+        >
+          {children(tile)}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 const tileClass =
   "nc-tile group relative flex h-full w-full cursor-pointer flex-col items-start gap-2 overflow-hidden rounded-[1.6rem] border p-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
@@ -1053,6 +1056,7 @@ function TileCard({
   onOpen: () => void;
 }) {
   const tr = useTr();
+  const photos = useSitePhotos();
   const ref = useRef<HTMLElement | null>(null);
   // Inclina o card na direção do mouse (só com mouse; no toque ele só afunda um pouco).
   const onMove = (e: React.PointerEvent) => {
@@ -1080,6 +1084,20 @@ function TileCard({
   };
   const body = (
     <>
+      {photos && tile.photo && (
+        <img
+          src={tile.photo}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          className="pointer-events-none absolute inset-x-0 top-0 h-2/5 w-full object-cover transition duration-700 group-hover:scale-110 @2xl:h-3/5"
+          style={{
+            maskImage: "linear-gradient(to bottom, black 35%, transparent)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent)",
+          }}
+        />
+      )}
       <TileArt id={tile.art} color={tile.color} data={data} />
       <span className="relative flex w-full items-start justify-between gap-2">
         <span
@@ -1144,6 +1162,7 @@ function useTileData(userId: string | undefined) {
   const waterSettings = useWaterSettings(userId);
   const shopping = useShoppingItems(userId);
   const trail = useAdultTrailProgress(userId);
+  const { ids: habitIds } = useHabitChoice();
 
   return useMemo(() => {
     const map = checkinsByDay(checkins.data);
@@ -1162,10 +1181,10 @@ function useTileData(userId: string | undefined) {
       ["Normal", "Okay", "Normal", "Moyenne"],
       ["Pesada", "Heavy", "Pesada", "Difficile"],
     ];
-    const habits = today?.habits.length ?? 0;
+    const habits = (today?.habits ?? []).filter((id) => habitIds.includes(id)).length;
     const badges: Record<string, string | undefined> = {
       agua: water.data ? `${glasses}/${goal}` : undefined,
-      habitos: today ? `${habits}/4` : undefined,
+      habitos: today ? `${habits}/${habitIds.length}` : undefined,
       humor: today?.mood != null ? tr(moods[today.mood]) : undefined,
       compromisso: pledged ? `${pledged}/7` : undefined,
       calma: calm ? `${calm}×` : undefined,
@@ -1174,7 +1193,7 @@ function useTileData(userId: string | undefined) {
     };
     const art: Record<string, ArtData> = {
       agua: { fill: goal ? glasses / goal : 0 },
-      habitos: { habits },
+      habitos: { habits, habitsTotal: habitIds.length },
       humor: { mood: today?.mood ?? null },
     };
     return {
@@ -1182,9 +1201,9 @@ function useTileData(userId: string | undefined) {
       art,
       today: {
         water: water.data ? `${glasses}/${goal}` : undefined,
-        habits: today ? `${habits}/4` : undefined,
+        habits: today ? `${habits}/${habitIds.length}` : undefined,
         streak: trail ? getActiveStreak(trail) : 0,
       },
     };
-  }, [checkins.data, water.data, waterSettings.data, shopping.data, trail, tr]);
+  }, [checkins.data, water.data, waterSettings.data, shopping.data, trail, tr, habitIds]);
 }

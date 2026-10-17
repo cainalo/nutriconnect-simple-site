@@ -136,7 +136,7 @@ export function ProfileCard() {
 
   return (
     <section className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-xs">
-      <div className="h-16 bg-gradient-to-br from-primary to-accent/80" />
+      <div className="h-16 bg-primary" />
       <div className="-mt-8 px-5 pb-5">
         <Link
           to="/perfil/$userId"
@@ -160,7 +160,7 @@ export function ProfileCard() {
         </div>
         <div className="mt-1.5 flex items-center justify-between text-[11px] text-muted-foreground">
           <span>
-            {lvl.xpInLevel}/{lvl.xpForNext} XP
+            {xp} XP · {t("tc.missingXp").replace("{n}", String(lvl.xpForNext - lvl.xpInLevel))}
           </span>
           <span className="inline-flex items-center gap-1 font-semibold text-accent">
             <Flame className="h-3.5 w-3.5" /> {streak} {t("hub.streakDays")}
@@ -252,7 +252,7 @@ export function TrailCard() {
 
   if (!user) return null;
   return (
-    <section className="@container relative overflow-hidden rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft via-card to-primary-soft p-5 shadow-card">
+    <section className="@container relative overflow-hidden rounded-3xl border border-accent/30 bg-accent-soft/40 p-5 shadow-card">
       <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-accent/20 blur-2xl" />
       {/* Em colunas estreitas a Nina fica em cima e o balão embaixo, com a largura toda. */}
       <div className="flex flex-col-reverse items-center gap-2 @[17rem]:flex-row @[17rem]:items-end @[17rem]:gap-3">

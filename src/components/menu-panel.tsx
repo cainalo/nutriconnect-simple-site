@@ -9,23 +9,29 @@ import {
   Backpack,
   BookOpen,
   CheckCircle2,
+  ChefHat,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Home,
   Leaf,
   Loader2,
   Pencil,
   Refrigerator,
   RefreshCw,
+  Repeat,
+  CalendarClock,
   ShoppingBasket,
   Sparkles,
   Trash2,
   X,
 } from "lucide-react";
+import { EmojiIcon } from "@/components/emoji-icon";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
+import { fillWithoutNina } from "@/lib/menu-fill";
 import { BuyAtMarket } from "@/components/buy-at-market";
 import { useMyHousehold } from "@/lib/household";
 import { useSeasonNow } from "@/lib/season";
@@ -130,6 +136,7 @@ function SlotCard({
   saved,
   onAsk,
   onSet,
+  onLeftover,
 }: {
   label: string;
   meal: MenuMeal | undefined;
@@ -138,6 +145,8 @@ function SlotCard({
   saved: SavedRecipe[];
   onAsk: () => void;
   onSet: (meal: MenuMeal | null) => void;
+  /** Jantar: a sobra vira o almoço do dia seguinte. */
+  onLeftover?: () => void;
 }) {
   const tr = useTr();
   const [open, setOpen] = useState(false);
@@ -327,6 +336,27 @@ function SlotCard({
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
+        {meal && onLeftover && (
+          <button
+            type="button"
+            onClick={onLeftover}
+            className={iconBtn}
+            title={tr([
+              "A sobra vira o almoço de amanhã",
+              "Leftovers become tomorrow's lunch",
+              "Lo que sobra es el almuerzo de mañana",
+              "Les restes deviennent le déjeuner de demain",
+            ])}
+            aria-label={tr([
+              "A sobra vira o almoço de amanhã",
+              "Leftovers become tomorrow's lunch",
+              "Lo que sobra es el almuerzo de mañana",
+              "Les restes deviennent le déjeuner de demain",
+            ])}
+          >
+            <Repeat className="h-3.5 w-3.5" />
+          </button>
+        )}
         {meal && (
           <button
             type="button"
@@ -579,6 +609,7 @@ export function MenuPanel() {
   const [week, setWeek] = useState(() => mondayOf());
   const qc = useQueryClient();
   const menu = useWeeklyMenu(user?.id, week);
+  const prevMenu = useWeeklyMenu(user?.id, addWeeks(week, -1));
   const save = useSaveMenu(user?.id, week);
   const fridge = useFridgeItems(user?.id);
   const house = useMyHousehold(user?.id);
@@ -595,6 +626,8 @@ export function MenuPanel() {
   const allSlots = [0, 1, 2, 3, 4, 5, 6].flatMap((day) => MEALS.map((meal) => ({ day, meal })));
   const empty = allSlots.filter((s) => !meals[slotKey(s.day, s.meal)]);
   const thisWeek = mondayOf();
+  const prevMeals = (prevMenu.data?.meals ?? {}) as MenuMeals;
+  const fromPrev = empty.filter((s) => prevMeals[slotKey(s.day, s.meal)]);
 
   const persist = (next: MenuMeals, nextBudget = budget) =>
     save.mutate(
@@ -647,6 +680,78 @@ export function MenuPanel() {
     void ask(allSlots);
   };
 
+  const fillLocal = () => {
+    const next = fillWithoutNina(
+      meals,
+      empty,
+      (savedRecipes.data ?? []).map(fromSaved),
+      fridge.items,
+      tr,
+    );
+    const n = Object.keys(next).length - Object.keys(meals).length;
+    persist(next);
+    toast.success(
+      tr([
+        `${n} ${n === 1 ? "refeição preenchida" : "refeições preenchidas"} com pratos de sempre e as suas receitas.`,
+        `${n} ${n === 1 ? "meal" : "meals"} filled with everyday dishes and your recipes.`,
+        `${n} ${n === 1 ? "comida completada" : "comidas completadas"} con platos de siempre y tus recetas.`,
+        `${n} repas complété${n === 1 ? "" : "s"} avec des plats de tous les jours et vos recettes.`,
+      ]),
+    );
+  };
+
+  const repeatPrev = () => {
+    const next = { ...meals };
+    for (const s of fromPrev) next[slotKey(s.day, s.meal)] = prevMeals[slotKey(s.day, s.meal)];
+    persist(next);
+  };
+
+  const leftover = (day: number) => {
+    const dinner = meals[slotKey(day, "jantar")];
+    if (!dinner || day >= 6) return;
+    const key = slotKey(day + 1, "almoco");
+    if (
+      meals[key] &&
+      !window.confirm(
+        tr([
+          `Trocar o almoço de amanhã (${meals[key]!.title}) pela sobra?`,
+          `Replace tomorrow's lunch (${meals[key]!.title}) with the leftovers?`,
+          `¿Cambiar el almuerzo de mañana (${meals[key]!.title}) por lo que sobra?`,
+          `Remplacer le déjeuner de demain (${meals[key]!.title}) par les restes ?`,
+        ]),
+      )
+    )
+      return;
+    // Sem ingredientes: a sobra não entra de novo na lista de compras.
+    setSlot(key, {
+      title: tr([
+        `Sobra: ${dinner.title}`,
+        `Leftovers: ${dinner.title}`,
+        `Sobras: ${dinner.title}`,
+        `Restes : ${dinner.title}`,
+      ]),
+      prepTime: "",
+      servings: "",
+      ingredients: [],
+      steps: [],
+      tip: tr([
+        "Faça um pouco a mais no jantar e guarde na geladeira em pote fechado; reaqueça bem antes de comer.",
+        "Cook a little extra at dinner and keep it in a closed container in the fridge; reheat well before eating.",
+        "Cocina un poco más en la cena y guárdalo en la nevera en un recipiente cerrado; recaliéntalo bien.",
+        "Préparez un peu plus au dîner et gardez-le au frigo dans une boîte fermée ; réchauffez bien.",
+      ]),
+      source: "manual",
+    });
+    toast.success(
+      tr([
+        "A sobra do jantar virou o almoço de amanhã.",
+        "Tonight's leftovers are tomorrow's lunch.",
+        "Lo que sobra de la cena es el almuerzo de mañana.",
+        "Les restes du dîner sont le déjeuner de demain.",
+      ]),
+    );
+  };
+
   const setSlot = (key: string, meal: MenuMeal | null) => {
     const next = { ...meals };
     if (meal) next[key] = meal;
@@ -666,12 +771,12 @@ export function MenuPanel() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold font-display text-foreground">
+          <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
             {tr(["Cardápio da semana", "Weekly menu", "Menú semanal", "Menu de la semaine"])}
           </h1>
-          {house.data && (
+          {house.data && !!people && (
             <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-foreground">
-              {house.data.house.emoji}{" "}
+              <EmojiIcon emoji={house.data.house.emoji} fallback={Home} className="h-3.5 w-3.5" />
               {tr([
                 `Cardápio da casa: ${people} ${people === 1 ? "porção" : "porções"} por receita, para todos verem e mudarem`,
                 `Home menu: ${people} serving${people === 1 ? "" : "s"} per recipe, shared with everyone`,
@@ -718,10 +823,10 @@ export function MenuPanel() {
       </header>
 
       <section className={card}>
+        <p className="mb-1.5 text-xs font-semibold text-foreground">
+          {tr(["Orçamento", "Budget", "Presupuesto", "Budget"])}
+        </p>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-foreground">
-            {tr(["Orçamento:", "Budget:", "Presupuesto:", "Budget :"])}
-          </span>
           {BUDGETS.map((b) => (
             <button
               key={b}
@@ -788,6 +893,38 @@ export function MenuPanel() {
               {tr(["Refazer a semana", "Redo the week", "Rehacer la semana", "Refaire la semaine"])}
             </button>
           )}
+          {empty.length > 0 && (
+            <button
+              type="button"
+              onClick={fillLocal}
+              disabled={busy.length > 0 || menu.isLoading}
+              className={btnSoft}
+            >
+              <ChefHat className="h-4 w-4" />
+              {tr([
+                `Completar sem a Nina (${empty.length})`,
+                `Fill in without Nina (${empty.length})`,
+                `Completar sin Nina (${empty.length})`,
+                `Compléter sans Nina (${empty.length})`,
+              ])}
+            </button>
+          )}
+          {fromPrev.length > 0 && (
+            <button
+              type="button"
+              onClick={repeatPrev}
+              disabled={busy.length > 0 || menu.isLoading}
+              className={btnSoft}
+            >
+              <CalendarClock className="h-4 w-4" />
+              {tr([
+                `Repetir a semana anterior (${fromPrev.length})`,
+                `Repeat last week (${fromPrev.length})`,
+                `Repetir la semana anterior (${fromPrev.length})`,
+                `Reprendre la semaine précédente (${fromPrev.length})`,
+              ])}
+            </button>
+          )}
           <span className="text-[11px] text-muted-foreground">
             {used !== null &&
               `${used}/${MENU_DAILY_LIMIT} ${tr(["hoje", "today", "hoy", "aujourd'hui"])} · `}
@@ -850,6 +987,7 @@ export function MenuPanel() {
                       saved={savedRecipes.data ?? []}
                       onAsk={() => void ask([{ day, meal }])}
                       onSet={(m) => setSlot(key, m)}
+                      onLeftover={meal === "jantar" && day < 6 ? () => leftover(day) : undefined}
                     />
                   );
                 })}

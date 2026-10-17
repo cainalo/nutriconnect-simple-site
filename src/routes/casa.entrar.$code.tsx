@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Home, Loader2, TicketX } from "lucide-react";
+import { EmojiIcon } from "@/components/emoji-icon";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useHouseholdPreview, useJoinHousehold, useMyHousehold } from "@/lib/household";
@@ -62,10 +63,10 @@ function JoinHousePage() {
           <Home className="mx-auto h-8 w-8 text-accent" />
           <p className="mt-3 text-sm text-foreground">
             {tr([
-              `Você já está na casa ${mine.data.house.emoji} ${mine.data.house.name}. Para entrar em outra, saia dela primeiro.`,
-              `You're already in ${mine.data.house.emoji} ${mine.data.house.name}. Leave it first to join another.`,
-              `Ya estás en la casa ${mine.data.house.emoji} ${mine.data.house.name}. Sal de ella para entrar en otra.`,
-              `Vous êtes déjà dans ${mine.data.house.emoji} ${mine.data.house.name}. Quittez-la d'abord.`,
+              `Você já está na casa ${mine.data.house.name}. Para entrar em outra, saia dela primeiro.`,
+              `You're already in ${mine.data.house.name}. Leave it first to join another.`,
+              `Ya estás en la casa ${mine.data.house.name}. Sal de ella para entrar en otra.`,
+              `Vous êtes déjà dans ${mine.data.house.name}. Quittez-la d'abord.`,
             ])}
           </p>
           <Link to="/casa" className={`${btnPrimary} mt-5`}>
@@ -74,8 +75,8 @@ function JoinHousePage() {
         </div>
       ) : (
         <div className={card}>
-          <span className="text-5xl" aria-hidden>
-            {house.emoji}
+          <span className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-accent-soft">
+            <EmojiIcon emoji={house.emoji} fallback={Home} tinted className="h-9 w-9" />
           </span>
           <h1 className="mt-3 text-xl font-extrabold font-display text-foreground">{house.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -96,10 +97,10 @@ function JoinHousePage() {
                   onSuccess: () => {
                     toast.success(
                       tr([
-                        "Bem-vindo(a) à casa! 🏠",
-                        "Welcome home! 🏠",
-                        "¡Bienvenido(a) a la casa! 🏠",
-                        "Bienvenue à la maison ! 🏠",
+                        "Bem-vindo(a) à casa!",
+                        "Welcome home!",
+                        "¡Bienvenido(a) a la casa!",
+                        "Bienvenue à la maison !",
                       ]),
                     );
                     void navigate({ to: "/casa" });

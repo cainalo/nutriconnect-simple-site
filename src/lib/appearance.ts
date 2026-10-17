@@ -153,8 +153,6 @@ export interface Appearance {
   scrollbars: boolean;
   /** Botão "voltar ao topo". */
   backToTop: boolean;
-  /** Quantas publicações o Espaço carrega por vez. */
-  feedPageSize: number;
 
   // ── Acessibilidade ───────────────────────────────────────────────────────
   highContrast: boolean;
@@ -276,7 +274,6 @@ export const DEFAULT_APPEARANCE: Appearance = {
   smoothScroll: false,
   scrollbars: false,
   backToTop: false,
-  feedPageSize: 20,
 
   highContrast: false,
   readableFont: false,
@@ -319,7 +316,6 @@ export const LINE_HEIGHT_RANGE = { min: 130, max: 200 } as const;
 export const COLOR_INTENSITY_RANGE = { min: 40, max: 160 } as const;
 export const WARMTH_RANGE = { min: -40, max: 40 } as const;
 export const CONTENT_MAX_RANGE = { min: 560, max: 1400 } as const;
-export const FEED_PAGE_SIZES = [10, 15, 20, 30, 40] as const;
 
 /** Rota aberta ao entrar no site, por escolha da pessoa. */
 export const HOME_ROUTES: Record<HomePageId, string> = {

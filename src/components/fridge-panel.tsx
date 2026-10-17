@@ -10,6 +10,7 @@ import {
   Camera,
   ChefHat,
   Clock,
+  Home,
   Leaf,
   Loader2,
   Plus,
@@ -48,6 +49,9 @@ import {
 } from "@/lib/fridge.functions";
 import type { Names } from "@/lib/appearance-data";
 import { useSeasonUf } from "@/lib/season";
+import { useSitePhotos } from "@/lib/site-photos";
+import { guessSection } from "@/lib/aisles";
+import { BASIC_RECIPES, type BasicRecipe } from "@/lib/basic-recipes";
 import { seasonFoods } from "@/lib/season-data";
 
 const card = "rounded-3xl border border-border/70 bg-card p-5 shadow-xs";
@@ -322,6 +326,202 @@ function CommunityList({ terms }: { terms: string[] }) {
   );
 }
 
+// ───────────────────────────── Ideias de sempre ─────────────────────────────
+
+const plainText = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+/** Receitas caseiras de sempre comparadas com o que a pessoa marcou (sem IA): mostra o que tem,
+ *  o que falta e manda o que falta para a lista de compras. */
+/** Receitas básicas com foto em public/images/recipes (Open Images/Flickr, CC BY 2.0; créditos lá). */
+const BASIC_PHOTOS = new Set([
+  "arroz-feijao",
+  "couve-refogada",
+  "escondidinho",
+  "farofa",
+  "frango-molho",
+  "macarrao-brocolis",
+  "mingau",
+  "omelete",
+  "panqueca-banana",
+  "pure",
+  "salada-grao",
+  "sopa",
+]);
+
+function BasicIdeas({ items }: { items: string[] }) {
+  const tr = useTr();
+  const { user } = useAuth();
+  const add = useAddShoppingItems(user?.id);
+  const [open, setOpen] = useState<string | null>(null);
+  const photos = useSitePhotos();
+  const have = items.map(plainText).filter((t) => t.length >= 3);
+  const hasIt = (key: string) => have.some((h) => h.includes(key) || key.includes(h));
+  const ranked = BASIC_RECIPES.map((r) => {
+    const missing = r.ingredients.filter(([key]) => !hasIt(key));
+    return { r, missing, got: r.ingredients.length - missing.length };
+  })
+    .filter((x) => x.got > 0)
+    .sort((a, b) => a.missing.length - b.missing.length || b.got - a.got)
+    .slice(0, 6);
+  if (!have.length || !ranked.length) return null;
+
+  const addMissing = (r: BasicRecipe, missing: BasicRecipe["ingredients"]) =>
+    add.mutate(
+      {
+        texts: missing.map(([, name]) => ({ text: tr(name), section: guessSection(name[0]) })),
+        source: "manual",
+      },
+      {
+        onSuccess: () =>
+          toast.success(
+            tr([
+              `O que falta para "${tr(r.title)}" foi para a lista.`,
+              `What's missing for "${tr(r.title)}" is on your list.`,
+              `Lo que falta para "${tr(r.title)}" fue a la lista.`,
+              `Ce qui manque pour « ${tr(r.title)} » est dans la liste.`,
+            ]),
+          ),
+        onError: (err) => toast.error((err as Error).message),
+      },
+    );
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-sm font-bold font-display text-foreground">
+        {tr([
+          "Ideias de sempre com o que você tem",
+          "Everyday ideas with what you have",
+          "Ideas de siempre con lo que tienes",
+          "Idées de tous les jours avec ce que vous avez",
+        ])}
+      </h2>
+      <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {ranked.map(({ r, missing, got }) => (
+          <li key={r.id} className={cn(card, "group flex flex-col overflow-hidden p-0")}>
+            <button
+              type="button"
+              onClick={() => setOpen(open === r.id ? null : r.id)}
+              aria-expanded={open === r.id}
+              className={cn(
+                "relative isolate flex text-left",
+                photos ? "h-36 items-end gap-3 p-4 text-white" : "items-start gap-3 px-4 pt-4",
+              )}
+            >
+              {!photos ? (
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
+                  <ChefHat className="h-5 w-5" />
+                </span>
+              ) : BASIC_PHOTOS.has(r.id) ? (
+                <img
+                  src={`/images/recipes/${r.id}.jpg`}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 -z-10 h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 -z-10 bg-gradient-to-br from-accent to-primary"
+                >
+                  <ChefHat className="absolute right-4 top-4 h-16 w-16 text-white/30 transition duration-500 group-hover:-rotate-6 group-hover:scale-110" />
+                </span>
+              )}
+              {photos && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/30 to-black/0"
+                />
+              )}
+              <span className="min-w-0 flex-1">
+                <span
+                  className={cn(
+                    "block font-bold",
+                    photos
+                      ? "font-display text-base text-white drop-shadow"
+                      : "text-sm text-foreground",
+                  )}
+                >
+                  {tr(r.title)}
+                </span>
+                <span
+                  className={cn(
+                    "mt-0.5 flex items-center gap-1 text-[11px]",
+                    photos ? "text-white/85" : "text-muted-foreground",
+                  )}
+                >
+                  <Clock className="h-3 w-3" /> {r.minutes} min ·{" "}
+                  {missing.length === 0
+                    ? tr(["você tem tudo", "you have everything", "tienes todo", "vous avez tout"])
+                    : tr([
+                        `você tem ${got} de ${r.ingredients.length}`,
+                        `you have ${got} of ${r.ingredients.length}`,
+                        `tienes ${got} de ${r.ingredients.length}`,
+                        `vous avez ${got} sur ${r.ingredients.length}`,
+                      ])}
+                </span>
+              </span>
+            </button>
+            <p className={cn("px-4 text-left text-xs text-foreground", photos ? "mt-3" : "mt-2")}>
+              {r.ingredients.map(([key, name], i) => (
+                <span key={key}>
+                  {i > 0 && ", "}
+                  <span
+                    className={
+                      hasIt(key) ? "" : "text-muted-foreground line-through decoration-accent/60"
+                    }
+                  >
+                    {tr(name)}
+                  </span>
+                </span>
+              ))}
+            </p>
+            {open === r.id && (
+              <ol className="mx-4 mt-2 list-decimal space-y-1 pl-4 text-left text-xs text-foreground">
+                {r.steps.map((st, i) => (
+                  <li key={i}>{tr(st)}</li>
+                ))}
+              </ol>
+            )}
+            <div className="mt-auto flex items-center justify-between gap-2 px-4 pb-4 pt-3">
+              <button
+                type="button"
+                onClick={() => setOpen(open === r.id ? null : r.id)}
+                className="text-[11px] font-semibold text-primary hover:underline"
+              >
+                {open === r.id
+                  ? tr(["Fechar", "Close", "Cerrar", "Fermer"])
+                  : tr(["Como fazer", "How to make it", "Cómo hacerla", "Comment faire"])}
+              </button>
+              {missing.length > 0 && (
+                <button
+                  type="button"
+                  disabled={!user || add.isPending}
+                  onClick={() => addMissing(r, missing)}
+                  className={btnSoft}
+                >
+                  <ShoppingBasket className="h-3.5 w-3.5" />
+                  {tr([
+                    "Pôr o que falta na lista",
+                    "Add what's missing",
+                    "Añadir lo que falta",
+                    "Ajouter ce qui manque",
+                  ])}
+                </button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 // ───────────────────────────── Minhas receitas ─────────────────────────────
 
 function SavedList() {
@@ -533,7 +733,7 @@ export function FridgePanel() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold font-display text-foreground">
+          <h1 data-page-head className="text-2xl font-extrabold font-display text-foreground">
             {tr([
               "O que tem na geladeira?",
               "What's in the fridge?",
@@ -543,7 +743,7 @@ export function FridgePanel() {
           </h1>
           {ingredients.shared && (
             <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-foreground">
-              🏠{" "}
+              <Home className="h-3.5 w-3.5" aria-hidden="true" />
               {tr([
                 "Geladeira da casa: todos que moram com você veem e mudam",
                 "Home fridge: everyone you live with sees and edits it",
@@ -630,7 +830,7 @@ export function FridgePanel() {
                     type="button"
                     onClick={() => void ingredients.remove(i).catch(onAddError)}
                     aria-label={tr(["Tirar", "Remove", "Quitar", "Retirer"])}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="-my-1.5 -mr-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -658,7 +858,7 @@ export function FridgePanel() {
                   "Ej.: calabaza, espinaca, arroz sobrante",
                   "Ex. : potiron, épinards, reste de riz",
                 ])}
-                className="min-w-0 flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                className="min-w-0 flex-1 basis-full rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground sm:basis-48"
               />
               <button type="submit" className={btnSoft} disabled={!draft.trim()}>
                 <Plus className="h-4 w-4" /> {tr(["Adicionar", "Add", "Agregar", "Ajouter"])}
@@ -704,11 +904,11 @@ export function FridgePanel() {
                 ))}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
-                <Sprout className="h-3.5 w-3.5 text-primary" />
-                {tr(["Da estação:", "In season:", "De temporada:", "De saison :"])}
-              </span>
+            <p className="mt-3 mb-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
+              <Sprout className="h-3.5 w-3.5 text-primary" />
+              {tr(["Da estação", "In season", "De temporada", "De saison"])}
+            </p>
+            <div className="flex flex-wrap items-center gap-1.5">
               {season.region ? (
                 seasonal
                   .filter((c) => !ingredients.items.includes(c))
@@ -789,6 +989,7 @@ export function FridgePanel() {
             </section>
           )}
 
+          <BasicIdeas items={ingredients.items} />
           <CommunityList terms={searched.length ? searched : ingredients.items} />
         </>
       )}

@@ -125,6 +125,14 @@ import {
   Calendar,
   CalendarDays,
   type LucideIcon,
+  Building2,
+  Cat,
+  Circle,
+  CloudRain,
+  CloudSun,
+  Dog,
+  House,
+  Popcorn,
 } from "lucide-react";
 export { splitLeadingEmoji, stripEmoji } from "@/lib/emoji";
 
@@ -261,6 +269,20 @@ const GROUPS: [string, LucideIcon][] = [
   ["🫀", HeartPulse],
   ["🌀", Wind],
   ["🍴", Utensils],
+  // Casa e lugares
+  ["🏠🏡", House],
+  ["🏢🏫", Building2],
+  ["🐱", Cat],
+  ["🐶", Dog],
+  // Tempo
+  ["🌧", CloudRain],
+  ["🌤⛅", CloudSun],
+  // Mais comidas
+  ["🍿", Popcorn],
+  ["🫓🥞🥨", Croissant],
+  ["🌯🍙", Sandwich],
+  ["🫛🫑🎃", Bean],
+  ["🟠🟤🟡🟢🟣", Circle],
 ];
 
 const MAP = new Map<string, LucideIcon>();
@@ -271,10 +293,10 @@ for (const [chars, icon] of GROUPS) {
 // Cor natural de cada emoji, para os cenários decorativos (frutas vermelhas, folhas verdes...).
 const TINTS: [string, string][] = [
   ["🍎🍓🍒🍅🌶🍉❤🐞", "#e04848"],
-  ["🍊🥕🍠🧡🔥", "#f08a2b"],
-  ["🍋🍌🌽🌻🌼⭐🌟✨☀🌞💛🏆🏅🥇👑🐝🪙💰", "#e8b21c"],
-  ["🍐🥝🍏🥦🥬🥒🌿🍃🍀🌱🌳🌲🥗💚🥑", "#4f9a4b"],
-  ["🍇🫐💜🔮", "#8a5fb0"],
+  ["🍊🥕🍠🧡🔥🎃🟠", "#f08a2b"],
+  ["🍋🍌🌽🌻🌼⭐🌟✨☀🌞💛🏆🏅🥇👑🐝🪙💰🟡", "#e8b21c"],
+  ["🍐🥝🍏🥦🥬🥒🌿🍃🍀🌱🌳🌲🥗💚🥑🫛🫑🟢", "#4f9a4b"],
+  ["🍇🫐💜🔮🟣", "#8a5fb0"],
   ["🌸🌷🌺🦋💗🍑", "#e0679b"],
   ["💧💦💙🐟🫧🧼♨🕊", "#3b8fd6"],
   ["🍳🥚🥛🧀🍚🍽🍲🥣🧺🧄", "#b98a5a"],

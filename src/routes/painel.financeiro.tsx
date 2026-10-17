@@ -184,7 +184,11 @@ function FinancePage() {
               icon={Wallet}
               label={t("finance.net")}
               value={money(summary.net)}
-              hint={t("finance.netHint", { n: summary.approved.length })}
+              hint={
+                summary.approved.length === 1
+                  ? t("finance.netHintOne")
+                  : t("finance.netHint", { n: summary.approved.length })
+              }
             />
             <Stat
               icon={CircleDollarSign}
@@ -210,7 +214,11 @@ function FinancePage() {
               icon={Clock}
               label={t("finance.receivable")}
               value={money(summary.receivableCents)}
-              hint={t("finance.receivableHint", { n: summary.receivable.length })}
+              hint={
+                summary.receivable.length === 1
+                  ? t("finance.receivableHintOne")
+                  : t("finance.receivableHint", { n: summary.receivable.length })
+              }
             />
           </div>
 

@@ -171,12 +171,58 @@
   }
   /* Textos corridos dos cards ficam justificados. Vive no layer base com :where() (especificidade
      zero) para que utilitários como text-center e text-left continuem podendo sobrescrever. */
-  /* Fora disso: colunas laterais (estreitas) e textos em destaque (curtos), onde justificar abriria
-     buracos entre as palavras. */
+  /* Fora disso: colunas laterais (estreitas), blocos centralizados (estados vazios, avisos), textos
+     em destaque (curtos) e letras miúdas de dica (text-xs e menores, quase sempre em caixas
+     estreitas), onde justificar abriria buracos entre as palavras. */
   :where(article, [class*="bg-card"]):not(footer)
-    :is(p, li, dd):not(aside *, .font-display, .font-bold, .font-semibold, .font-black, .italic) {
+    :is(p, li, dd):not(
+      aside *,
+      .text-center *,
+      .font-display,
+      .font-bold,
+      .font-semibold,
+      .font-black,
+      .italic,
+      .text-xs,
+      .text-\[11px\],
+      .text-\[10px\]
+    ) {
     text-align: justify;
     hyphens: auto;
+  }
+  /* Palavras sem espaço maiores que a linha (links, hashtags, títulos em letra grande) quebram em
+     vez de sair da caixa; nos posts, que cortam o que passa da borda, quebram em qualquer ponto. */
+  :is(p, li, dd, blockquote, h1, h2, h3, h4) {
+    overflow-wrap: break-word;
+  }
+  .post-card :is(p, li, h2, h3, a, span) {
+    overflow-wrap: anywhere;
+  }
+  /* Fileiras de pílulas que quebram linha (filtros, atalhos, etiquetas, opções): cada linha ocupa a
+     largura toda e as pílulas se esticam por igual, deixando as duas bordas alinhadas (pedido do
+     dono: nada de borda direita "torta"). Vale para 3 ou mais itens, fora de posts e cabeçalhos,
+     todos arredondados, sem largura fixa e sem padding igual nos 4 lados (bolinhas de cor e botões
+     só de ícone ficam como estão). Para manter uma fileira solta, use data-free-wrap. */
+  :where(.flex-wrap):not([data-free-wrap], .post-card *, header *):has(> :nth-child(3)):not(
+      :has(
+        > :not(li, :is(button, a, span, label)[class*="rounded"]),
+        > [class*=" w-"],
+        > [class^="w-"],
+        > [class*=" p-"],
+        > [class^="p-"],
+        > li > [class*=" w-"]
+      )
+    )
+    > * {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
+  }
+  :where(.flex-wrap):not([data-free-wrap], .post-card *, header *):has(> li:nth-child(3))
+    > li
+    > :is(button, a, span, label) {
+    width: 100%;
+    justify-content: center;
   }
   body {
     background-color: var(--color-background);
@@ -537,7 +583,6 @@ html[data-imgc="soft"] .post-image {
 html[data-cardaccent] .post-card {
   border-left: 4px solid var(--accent) !important;
 }
-
 
 /* O logo mantém a fonte original: a personalização de fontes não o afeta (só a cor, via tema). */
 .font-logo-serif {
@@ -962,6 +1007,18 @@ html[data-cardaccent] .post-card {
     transform: translateY(-14px) rotate(6deg);
   }
 }
+/* Foto das faixas de título: aproximação lenta, quase parada (efeito "Ken Burns"). */
+@keyframes nc-kenburns {
+  from {
+    transform: scale(1.02) translateX(0);
+  }
+  to {
+    transform: scale(1.12) translateX(-2%);
+  }
+}
+.nc-kenburns {
+  animation: nc-kenburns 18s ease-in-out infinite alternate;
+}
 @keyframes nc-draw {
   from {
     stroke-dashoffset: var(--nc-len, 1000);
@@ -1333,7 +1390,6 @@ html[data-cardaccent] .post-card {
 .nc-breathe {
   animation: nc-breathe 8s ease-in-out infinite;
 }
-
 
 /* Transições entre slides personalizados (escolhidas por slide no editor) */
 @keyframes nc-tr-fade {
@@ -2185,8 +2241,16 @@ html[data-design="vibrante"].dark {
 }
 html[data-design="vibrante"] body {
   background-image:
-    radial-gradient(70rem 36rem at 100% -8%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
-    radial-gradient(60rem 34rem at -10% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%);
+    radial-gradient(
+      70rem 36rem at 100% -8%,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      60rem 34rem at -10% 0%,
+      color-mix(in srgb, var(--primary) 14%, transparent),
+      transparent 60%
+    );
   background-attachment: fixed;
 }
 html[data-design="vibrante"] h1,
@@ -2303,7 +2367,8 @@ html[data-design="editorial"] h3 {
   letter-spacing: -0.01em;
 }
 /* Sem cantos arredondados: só os interruptores e os desenhos mantêm a forma. */
-html[data-design="editorial"] [class*="rounded"]:not([role="switch"], [role="switch"] *, svg, svg *, canvas) {
+html[data-design="editorial"]
+  [class*="rounded"]:not([role="switch"], [role="switch"] *, svg, svg *, canvas) {
   border-radius: 0 !important;
 }
 html[data-design="editorial"] :is(input, textarea, select, button):not([role="switch"]) {
@@ -2321,7 +2386,9 @@ html[data-design="editorial"] :is(.post-card, main, [data-landing]) img:not([dat
   filter: grayscale(1) sepia(0.4) contrast(1.08);
   mix-blend-mode: multiply;
 }
-html[data-design="editorial"].dark :is(.post-card, main, [data-landing]) img:not([data-no-engrave]) {
+html[data-design="editorial"].dark
+  :is(.post-card, main, [data-landing])
+  img:not([data-no-engrave]) {
   mix-blend-mode: normal;
   filter: grayscale(1) sepia(0.25) contrast(1.05) brightness(0.9);
 }
@@ -2394,59 +2461,71 @@ html[data-design="editorial"] .font-blackletter {
 /* ---- Aurora: vidro e luz ---------------------------------------------------------------- */
 html[data-design="aurora"] {
   --radius: 1.75rem;
-  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
-  --background: #eef3fb;
-  --foreground: #14213d;
-  --card: #ffffff;
-  --card-foreground: #14213d;
-  --popover: #ffffff;
-  --primary: #0f766e;
-  --primary-foreground: #effffd;
-  --primary-hover: #0b5e57;
-  --primary-soft: #d5f1ee;
-  --secondary: #e3eaf7;
-  --muted: #e3eaf7;
-  --muted-foreground: #53607c;
-  --accent: #7c3aed;
-  --accent-foreground: #faf6ff;
-  --accent-hover: #6527d6;
-  --accent-soft: #eadffd;
-  --border: #d4ddef;
-  --input: #d4ddef;
-  --ring: #7c3aed;
-  --sidebar: #e6edf9;
-  --sidebar-accent: #d5f1ee;
-  --sidebar-border: #d0daed;
+  --font-display: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --background: #eef2ef;
+  --foreground: #15241f;
+  --card: #fbfdfb;
+  --card-foreground: #15241f;
+  --popover: #fbfdfb;
+  --primary: #1f6a52;
+  --primary-foreground: #f1fbf6;
+  --primary-hover: #185641;
+  --primary-soft: #d6ebe2;
+  --secondary: #e2e9e5;
+  --muted: #e2e9e5;
+  --muted-foreground: #4f625b;
+  --accent: #a83a68;
+  --accent-foreground: #fff5f9;
+  --accent-hover: #8e2f57;
+  --accent-soft: #f4dde7;
+  --border: #d2ddd7;
+  --input: #d2ddd7;
+  --ring: #1f6a52;
+  --sidebar: #e5ece8;
+  --sidebar-accent: #d6ebe2;
+  --sidebar-border: #cdd9d2;
 }
 html[data-design="aurora"].dark {
-  --background: #0b1220;
-  --foreground: #e8eefc;
-  --card: #131c2e;
-  --card-foreground: #e8eefc;
-  --popover: #131c2e;
-  --primary: #2dd4bf;
-  --primary-foreground: #042a26;
-  --primary-hover: #5eead4;
-  --primary-soft: #12373a;
-  --secondary: #18233a;
-  --muted: #18233a;
-  --muted-foreground: #9aa8c6;
-  --accent: #a78bfa;
-  --accent-foreground: #1a0d3d;
-  --accent-hover: #bda8fb;
-  --accent-soft: #2c1f55;
-  --border: #25324d;
-  --input: #25324d;
-  --ring: #a78bfa;
-  --sidebar: #0e1626;
-  --sidebar-accent: #12373a;
-  --sidebar-border: #25324d;
+  --background: #0b1513;
+  --foreground: #e6f0ec;
+  --card: #12201d;
+  --card-foreground: #e6f0ec;
+  --popover: #12201d;
+  --primary: #63c9a0;
+  --primary-foreground: #06231a;
+  --primary-hover: #84d8b6;
+  --primary-soft: #173a30;
+  --secondary: #182925;
+  --muted: #182925;
+  --muted-foreground: #9db3ab;
+  --accent: #e889b0;
+  --accent-foreground: #3a0d20;
+  --accent-hover: #f0a6c4;
+  --accent-soft: #42202f;
+  --border: #253a35;
+  --input: #253a35;
+  --ring: #63c9a0;
+  --sidebar: #0f1b18;
+  --sidebar-accent: #173a30;
+  --sidebar-border: #253a35;
 }
 html[data-design="aurora"] body {
   background-image:
-    radial-gradient(46rem 30rem at 8% -6%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 62%),
-    radial-gradient(44rem 30rem at 96% 8%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%),
-    radial-gradient(40rem 28rem at 50% 108%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%);
+    radial-gradient(
+      46rem 30rem at 8% -6%,
+      color-mix(in srgb, var(--primary) 26%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      44rem 30rem at 96% 8%,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      40rem 28rem at 50% 108%,
+      color-mix(in srgb, var(--primary) 14%, transparent),
+      transparent 60%
+    );
   background-attachment: fixed;
 }
 html[data-design="aurora"] h1,
@@ -2476,6 +2555,16 @@ html[data-motion="reduce"][data-design] :is(a, button, article)[class*="bg-card"
 }
 /* Antes da hidratação o React ainda desenha o menu do design padrão; escondê-lo evita o piscar
    quando o design salvo é outro. */
+/* Quando a faixa do topo (DesignPageHead) aparece, ela já mostra o título da página: o título
+   próprio marcado com data-page-head fica só para leitores de tela. */
+body:has([data-design-head]) [data-page-head] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 html[data-design]:not([data-hydrated]) :is([data-site-header], [data-site-bottom-nav]) {
   visibility: hidden;
 }
@@ -2484,10 +2573,10 @@ html[data-design]:not([data-hydrated]) :is([data-site-header], [data-site-bottom
 /* O cartão recebe cor, borda e fundo por estilo inline (post-type.ts); aqui os designs
    sobrescrevem com !important só o que precisam. --pt é a cor do tipo do post. */
 
-/* Vibrante: cartão grande e alegre, barra grossa na cor do tipo, rótulo em pílula. */
+/* Vibrante: cartão grande e alegre, faixa no topo na cor do tipo, rótulo em pílula. */
 html[data-design="vibrante"] .post-card {
   border-width: 0 !important;
-  border-left: 9px solid var(--pt, var(--accent)) !important;
+  border-top: 7px solid var(--pt, var(--accent)) !important;
   border-radius: 2rem !important;
   background-color: var(--card) !important;
   background-image: linear-gradient(
@@ -2514,7 +2603,7 @@ html[data-design="vibrante"] .post-card :is(button, a)[class*="rounded-full"] {
   font-weight: 800;
 }
 
-/* Aurora: vidro com brilho na cor do tipo e rótulo em degradê. */
+/* Aurora: vidro com brilho na cor do tipo; rótulo na cor do tipo, espaçado. */
 html[data-design="aurora"] .post-card {
   border: 1px solid color-mix(in srgb, var(--pt, var(--accent)) 45%, transparent) !important;
   border-radius: 1.9rem !important;
@@ -2527,14 +2616,7 @@ html[data-design="aurora"] .post-card {
   --post-fade: color-mix(in srgb, var(--card) 85%, var(--background)) !important;
 }
 html[data-design="aurora"] .post-card [style*="--pt"] {
-  background: linear-gradient(90deg, var(--pt), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
   letter-spacing: 0.14em;
-}
-html[data-design="aurora"] .post-card [style*="--pt"] svg {
-  color: var(--pt);
 }
 html[data-design="aurora"] .post-card :is(h2, h3) {
   font-weight: 600;
@@ -2581,7 +2663,7 @@ html[data-design="vibrante"] [data-pagesnav] button {
   font-weight: 800;
 }
 html[data-design="vibrante"] [data-pagesnav] button[data-active="true"] {
-  background: linear-gradient(120deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: var(--primary-foreground);
 }
 html[data-design="vibrante"] [data-funcoes-hero] {
@@ -2674,7 +2756,7 @@ html[data-design="aurora"] [data-pagesnav] {
   backdrop-filter: blur(16px);
 }
 html[data-design="aurora"] [data-pagesnav] button[data-active="true"] {
-  background: linear-gradient(120deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: var(--primary-foreground);
 }
 html[data-design="aurora"] [data-funcoes-hero] {
@@ -2686,7 +2768,11 @@ html[data-design="aurora"] [data-funcoes-hero] {
 html[data-design="aurora"] .nc-tile {
   border: 1px solid color-mix(in srgb, var(--tile) 40%, transparent) !important;
   border-radius: 1.9rem !important;
-  background: color-mix(in srgb, var(--tile) 14%, color-mix(in srgb, var(--card) 55%, transparent)) !important;
+  background: color-mix(
+    in srgb,
+    var(--tile) 14%,
+    color-mix(in srgb, var(--card) 55%, transparent)
+  ) !important;
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
@@ -2821,4 +2907,396 @@ html[data-design="editorial"] .post-card {
   break-inside: auto;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+}
+
+/* ─── Site animado, como a página Funções ───────────────────────────────────────────────────
+   Os cards das páginas entram em cascata; links e botões com fundo de card sobem ao passar o
+   mouse e inclinam na direção dele (src/lib/tilt.ts); botões afundam um pouco ao toque. Usa as
+   propriedades translate/scale, que somam com as transformações próprias de cada elemento. As
+   regras de "reduzir movimento" do topo deste arquivo zeram tudo isso. */
+@keyframes nc-card-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+    scale: 0.97;
+  }
+}
+:where([data-app-main])
+  :where(article, section, li, a, div, button):where([class*="bg-card"], .post-card):not(
+    :where([class*="bg-card"], .post-card, [role="dialog"], [data-radix-popper-content-wrapper]) *
+  ) {
+  animation: nc-card-in 0.5s cubic-bezier(0.22, 1.2, 0.36, 1) backwards;
+}
+:where([data-app-main])
+  :where(article, section, li, a, div, button):where([class*="bg-card"], .post-card):nth-child(2) {
+  animation-delay: 50ms;
+}
+:where([data-app-main])
+  :where(article, section, li, a, div, button):where([class*="bg-card"], .post-card):nth-child(3) {
+  animation-delay: 100ms;
+}
+:where([data-app-main])
+  :where(article, section, li, a, div, button):where([class*="bg-card"], .post-card):nth-child(4) {
+  animation-delay: 150ms;
+}
+:where([data-app-main])
+  :where(article, section, li, a, div, button):where([class*="bg-card"], .post-card):nth-child(5) {
+  animation-delay: 200ms;
+}
+:where([data-app-main])
+  :where(article, section, li, a, div, button):where([class*="bg-card"], .post-card):nth-child(
+    n + 6
+  ) {
+  animation-delay: 250ms;
+}
+:where(a, button)[class*="bg-card"]:not(:disabled) {
+  transition:
+    translate 0.25s ease,
+    scale 0.15s ease,
+    box-shadow 0.25s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+@media (hover: hover) {
+  :where(a, button)[class*="bg-card"]:not(:disabled):hover {
+    translate: 0 -3px;
+  }
+}
+:where(a, button)[data-tilting] {
+  transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+:where(button, a[class*="rounded"]):not(:disabled):active {
+  scale: 0.97;
+}
+
+/* ─── Simetria nas grades (pedido do dono) ──────────────────────────────────────────────────
+   Um card sozinho na última linha não fica pendurado à esquerda: em 2 colunas ocupa a linha toda;
+   em 3 colunas vai para a coluna do meio. Vale em cada faixa de tela em que aquele número de
+   colunas está ativo. Para deixar uma grade livre, use data-free-grid. */
+:where(.grid-cols-2):not(
+    [data-free-grid],
+    [data-funcoes-grid],
+    [class*="sm:grid-cols"],
+    [class*="md:grid-cols"],
+    [class*="lg:grid-cols"],
+    [class*="xl:grid-cols"]
+  )
+  > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+@media (max-width: 639px) {
+  :where(.grid-cols-2):not([data-free-grid], [data-funcoes-grid]) > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  :where(.grid-cols-3):not([data-free-grid], [data-funcoes-grid])
+    > :last-child:nth-child(3n + 1):not(:first-child) {
+    grid-column: 2;
+  }
+}
+@media (min-width: 640px) {
+  :where(.sm\:grid-cols-2):not(
+      [data-free-grid],
+      [data-funcoes-grid],
+      [class*="md:grid-cols"],
+      [class*="lg:grid-cols"],
+      [class*="xl:grid-cols"]
+    )
+    > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  :where(.sm\:grid-cols-3):not(
+      [data-free-grid],
+      [data-funcoes-grid],
+      [class*="md:grid-cols"],
+      [class*="lg:grid-cols"],
+      [class*="xl:grid-cols"]
+    )
+    > :last-child:nth-child(3n + 1):not(:first-child) {
+    grid-column: 2;
+  }
+}
+@media (min-width: 768px) {
+  :where(.md\:grid-cols-2):not(
+      [data-free-grid],
+      [data-funcoes-grid],
+      [class*="lg:grid-cols"],
+      [class*="xl:grid-cols"]
+    )
+    > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  :where(.md\:grid-cols-3):not(
+      [data-free-grid],
+      [data-funcoes-grid],
+      [class*="lg:grid-cols"],
+      [class*="xl:grid-cols"]
+    )
+    > :last-child:nth-child(3n + 1):not(:first-child) {
+    grid-column: 2;
+  }
+}
+@media (min-width: 1024px) {
+  :where(.lg\:grid-cols-2):not([data-free-grid], [data-funcoes-grid], [class*="xl:grid-cols"])
+    > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  :where(.lg\:grid-cols-3):not([data-free-grid], [data-funcoes-grid], [class*="xl:grid-cols"])
+    > :last-child:nth-child(3n + 1):not(:first-child) {
+    grid-column: 2;
+  }
+}
+
+/* ───────────── Menus do NutriConnect ─────────────
+   Estilo próprio para todos os menus suspensos (conta, perfil, ⋯ do post, admin) e popovers: alça
+   colorida no topo, sombra de "adesivo" na cor do site, ícones em pastilhas que acendem e giram,
+   setinha no item ativo e entrada em cascata. Cada design tem a sua versão. */
+@keyframes nc-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.94) rotate(-1.5deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes nc-menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.nc-menu {
+  position: relative;
+  border: 1.5px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+  border-radius: 1.4rem;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0.85rem 0.45rem 0.45rem;
+  box-shadow:
+    6px 7px 0 -1px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 22px 44px -22px rgb(0 0 0 / 0.45);
+  transform-origin: var(
+    --radix-dropdown-menu-content-transform-origin,
+    var(--radix-popover-content-transform-origin, top)
+  );
+}
+.nc-menu[data-state="open"] {
+  animation: nc-menu-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.nc-menu[data-state="closed"] {
+  animation: nc-menu-in 0.14s ease-in reverse both;
+}
+/* Alça no topo, nas duas cores do site. */
+.nc-menu::before {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  left: 50%;
+  width: 2.6rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  opacity: 0.85;
+}
+.nc-menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 1px 0;
+  border-radius: 1rem;
+  padding: 0.35rem 1.9rem 0.35rem 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+  animation: nc-menu-item-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.nc-menu-item:nth-child(2) {
+  animation-delay: 25ms;
+}
+.nc-menu-item:nth-child(3) {
+  animation-delay: 50ms;
+}
+.nc-menu-item:nth-child(4) {
+  animation-delay: 75ms;
+}
+.nc-menu-item:nth-child(5) {
+  animation-delay: 100ms;
+}
+.nc-menu-item:nth-child(6) {
+  animation-delay: 125ms;
+}
+.nc-menu-item:nth-child(7) {
+  animation-delay: 150ms;
+}
+.nc-menu-item:nth-child(8) {
+  animation-delay: 175ms;
+}
+.nc-menu-item:nth-child(n + 9) {
+  animation-delay: 200ms;
+}
+/* Pastilha do ícone. */
+.nc-menu-item > svg,
+.nc-menu-item > a > svg,
+.nc-menu-item > span > svg:first-child {
+  box-sizing: border-box;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  padding: 0.48rem;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--primary) 11%, var(--card));
+  color: var(--primary);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s,
+    color 0.2s;
+}
+/* Setinha que aparece no item ativo. */
+.nc-menu-item::after {
+  content: "›";
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  font-size: 1.15rem;
+  line-height: 1;
+  opacity: 0;
+  transform: translate(-6px, -55%);
+  transition:
+    opacity 0.2s,
+    transform 0.25s;
+  color: var(--accent);
+}
+.nc-menu-item[data-highlighted],
+.nc-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--accent) 11%, var(--card));
+  color: var(--foreground);
+}
+.nc-menu-item[data-highlighted]::after {
+  opacity: 1;
+  transform: translate(0, -55%);
+}
+.nc-menu-item[data-highlighted] > svg,
+.nc-menu-item[data-highlighted] > a > svg {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  transform: rotate(-8deg) scale(1.06);
+}
+.nc-menu-item[data-disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* Ações de risco (apagar, denunciar, sair): tons de vermelho. */
+.nc-menu-item.text-destructive > svg {
+  background: color-mix(in srgb, var(--destructive) 12%, var(--card));
+  color: var(--destructive);
+}
+.nc-menu-item.text-destructive[data-highlighted] {
+  background: color-mix(in srgb, var(--destructive) 10%, var(--card));
+  color: var(--destructive);
+}
+.nc-menu-item.text-destructive[data-highlighted] > svg {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+.nc-menu-item.text-destructive::after {
+  color: var(--destructive);
+}
+.nc-menu-sep {
+  margin: 0.35rem 0.8rem;
+  height: 0;
+  border-top: 2px dotted color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+.nc-menu-label {
+  margin: 0 0.1rem 0.2rem;
+  border-radius: 1rem;
+  padding: 0.55rem 0.75rem;
+  background: color-mix(in srgb, var(--primary) 8%, var(--card));
+}
+
+/* Editorial: caixa de jornal, borda dupla, sem arredondado. */
+html[data-design="editorial"] .nc-menu {
+  border: 4px double var(--foreground);
+  border-radius: 2px;
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--foreground) 85%, transparent);
+  padding-top: 0.45rem;
+}
+html[data-design="editorial"] .nc-menu::before {
+  display: none;
+}
+html[data-design="editorial"] .nc-menu-item {
+  border-radius: 0;
+  font-family: var(--font-display, inherit);
+}
+html[data-design="editorial"] .nc-menu-item > svg {
+  border-radius: 0;
+  background: transparent;
+  border: 1px solid currentColor;
+}
+html[data-design="editorial"] .nc-menu-item[data-highlighted] {
+  background: var(--foreground);
+  color: var(--background);
+}
+html[data-design="editorial"] .nc-menu-item[data-highlighted] > svg {
+  background: var(--background);
+  color: var(--foreground);
+  transform: none;
+}
+html[data-design="editorial"] .nc-menu-sep {
+  border-top: 1px solid var(--foreground);
+  margin: 0.35rem 0;
+}
+html[data-design="editorial"] .nc-menu-label {
+  border-radius: 0;
+  border-bottom: 1px solid var(--foreground);
+  background: transparent;
+}
+
+/* Vibrante: borda forte na cor principal e sombra sólida. */
+html[data-design="vibrante"] .nc-menu {
+  border: 2.5px solid var(--primary);
+  border-radius: 1.6rem;
+  box-shadow: 6px 6px 0 var(--primary);
+}
+html[data-design="vibrante"] .nc-menu-item[data-highlighted] {
+  background: color-mix(in srgb, var(--primary) 16%, var(--card));
+}
+
+/* Aurora: vidro fosco. */
+html[data-design="aurora"] .nc-menu {
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.5);
+}
+html[data-design="aurora"] .nc-menu-item > svg {
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nc-menu[data-state],
+  .nc-menu-item {
+    animation: none;
+  }
+}
+html[data-motion="reduce"] .nc-menu[data-state],
+html[data-motion="reduce"] .nc-menu-item {
+  animation: none;
+}
+/* Popovers (seletor de perfil da trilha, ícones do perfil): mesma caixa, com mais respiro. */
+.nc-popover {
+  padding: 1.05rem 0.8rem 0.8rem;
 }

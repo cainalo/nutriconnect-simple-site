@@ -93,7 +93,7 @@ export function MonthlyReportCard({ className = "" }: { className?: string }) {
 
   return (
     <section
-      className={`rounded-3xl border border-border/70 bg-gradient-to-br from-primary-soft/60 via-card to-accent-soft/40 p-4 shadow-xs sm:p-5 ${className}`}
+      className={`rounded-3xl border border-border/70 bg-primary-soft/40 p-4 shadow-xs sm:p-5 ${className}`}
     >
       <div className="flex items-start gap-3">
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-sm">

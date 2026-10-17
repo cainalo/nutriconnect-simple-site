@@ -1,19 +1,42 @@
-// Ideias e posts do estúdio (S1): a IA cria ideias prontas (legenda, slides, roteiro, hashtags) pelo
-// objetivo escolhido; as escolhidas viram posts, que seguem ideia → rascunho → aprovado → publicado.
+// Ideias com IA no estúdio, no estilo da página de Funções: o objetivo, a rede e os formatos viram
+// tiles e pílulas; a IA devolve ideias prontas (gancho, legenda, slides, roteiro, hashtags) em cards
+// que se escolhem com um toque. As escolhidas viram posts (ideia → rascunho → aprovado → publicado);
+// embaixo ficam os posts salvos, com a miniatura da arte.
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, Search, Sparkles } from "lucide-react";
 import {
-  Badge,
-  Empty,
-  Panel,
-  QueryError,
-  btnCls,
-  btnPrimary,
-  inputCls,
-} from "@/components/admin/admin-ui";
+  BadgeCheck,
+  Check,
+  Clock,
+  Eye,
+  Hash,
+  Heart,
+  Layers,
+  Megaphone,
+  PenLine,
+  Search,
+  Sparkles,
+  TrendingUp,
+  UserPlus,
+  Users,
+  Wand2,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { EMPTY_DRAFT, type Draft } from "@/components/admin/social/use-art";
+import { EmptyState, SectionTitle, StudioCard, Tile } from "@/components/admin/social/kit";
+import {
+  FORMAT_STYLE,
+  NETWORK_STYLE,
+  STATUS_STYLE,
+  btnPrimary,
+  btnSoft,
+  field,
+  tint,
+} from "@/components/admin/social/kit-styles";
+import { Pill, PostCard } from "@/components/admin/social/post-card";
 import { useI18n } from "@/hooks/use-i18n";
+import { cn } from "@/lib/utils";
 import {
   FORMAT_LABEL,
   NETWORK_LABEL,
@@ -37,13 +60,30 @@ import {
   type PostIdea,
 } from "@/lib/social-studio.functions";
 
-const GOAL_LABEL: Record<Goal, string> = {
-  engajamento: "Engajamento",
-  alcance: "Alcance",
-  autoridade: "Autoridade",
-  conversao: "Novas contas",
-  comunidade: "Comunidade",
+const GOAL_STYLE: Record<Goal, { label: string; text: string; icon: LucideIcon; color: string }> = {
+  engajamento: {
+    label: "Engajamento",
+    text: "Comentários e salvamentos",
+    icon: Heart,
+    color: "#d6456b",
+  },
+  alcance: { label: "Alcance", text: "Chegar a gente nova", icon: Megaphone, color: "#d9692a" },
+  autoridade: {
+    label: "Autoridade",
+    text: "Mostrar quem sabe",
+    icon: BadgeCheck,
+    color: "#5b6fd6",
+  },
+  conversao: {
+    label: "Novas contas",
+    text: "Convidar para o app",
+    icon: UserPlus,
+    color: "#2f8a5b",
+  },
+  comunidade: { label: "Comunidade", text: "Conversa e vínculo", icon: Users, color: "#0f9aa8" },
 };
+
+const PURPLE = "#7a5cc4";
 
 export function IdeasTab({
   onOpen,
@@ -56,7 +96,7 @@ export function IdeasTab({
   onEditIdea?: (draft: Draft) => void;
 }) {
   return (
-    <div className="space-y-4">
+    <div className="@container min-w-0 space-y-7">
       <Generator prefill={prefill} onEditIdea={onEditIdea} />
       <PostsList onOpen={onOpen} />
     </div>
@@ -86,6 +126,13 @@ function Generator({
 
   const toggleFormat = (f: PostFormat) =>
     setFormats((l) => (l.includes(f) ? (l.length > 1 ? l.filter((x) => x !== f) : l) : [...l, f]));
+  const togglePick = (i: number) =>
+    setPicked((s) => {
+      const n = new Set(s);
+      if (n.has(i)) n.delete(i);
+      else n.add(i);
+      return n;
+    });
 
   const generate = async () => {
     setBusy(true);
@@ -108,6 +155,8 @@ function Generator({
             ? "A cota de IA de hoje acabou."
             : "A IA não conseguiu criar agora.",
         );
+      } else if (res.ideas.length === 0) {
+        toast.error("A IA não trouxe ideias desta vez. Tente outro tema.");
       } else {
         setIdeas(res.ideas);
         setPicked(new Set(res.ideas.map((_, i) => i)));
@@ -126,7 +175,11 @@ function Generator({
         .map((idea) => ideaToPost(idea, network, profileId || null)),
       {
         onSuccess: () => {
-          toast.success(`${picked.size} ideia(s) salvas.`);
+          toast.success(
+            picked.size === 1
+              ? "1 ideia salva no quadro."
+              : `${picked.size} ideias salvas no quadro.`,
+          );
           setIdeas([]);
           setPicked(new Set());
         },
@@ -134,194 +187,397 @@ function Generator({
       },
     );
 
-  return (
-    <Panel
-      title="Criar ideias com IA"
-      hint="Escolha o objetivo e os formatos. Com “usar tendências”, a IA considera o que está em alta no NutriConnect, as datas de saúde do mês e os alimentos da estação."
-    >
-      <div className="grid gap-3 md:grid-cols-4">
-        <select
-          value={profileId}
-          onChange={(e) => setProfileId(e.target.value)}
-          className={inputCls}
-          aria-label="Perfil"
-        >
-          <option value="">Sem perfil (marca geral)</option>
-          {(profiles.data ?? []).map((p) => (
-            <option key={p.id} value={p.id}>
-              {NETWORK_LABEL[p.network as Network]} · {p.handle}
-            </option>
-          ))}
-        </select>
-        <select
-          value={network}
-          onChange={(e) => setNetwork(e.target.value as Network)}
-          className={inputCls}
-          aria-label="Rede"
-        >
-          {NETWORKS.map((n) => (
-            <option key={n} value={n}>
-              {NETWORK_LABEL[n]}
-            </option>
-          ))}
-        </select>
-        <select
-          value={goal}
-          onChange={(e) => setGoal(e.target.value as Goal)}
-          className={inputCls}
-          aria-label="Objetivo"
-        >
-          {GOALS.map((g) => (
-            <option key={g} value={g}>
-              Objetivo: {GOAL_LABEL[g]}
-            </option>
-          ))}
-        </select>
-        <select
-          value={count}
-          onChange={(e) => setCount(Number(e.target.value))}
-          className={inputCls}
-          aria-label="Quantidade"
-        >
-          {[2, 4, 6, 8].map((n) => (
-            <option key={n} value={n}>
-              {n} ideias
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        {FORMATS.map((f) => (
-          <button
-            key={f}
-            type="button"
-            aria-pressed={formats.includes(f)}
-            onClick={() => toggleFormat(f)}
-            className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
-              formats.includes(f)
-                ? "border-accent bg-accent-soft text-foreground"
-                : "border-border text-muted-foreground"
-            }`}
-          >
-            {FORMAT_LABEL[f]}
-          </button>
-        ))}
-        <label className="ml-2 flex items-center gap-1.5 text-xs text-foreground">
-          <input
-            type="checkbox"
-            checked={useTrends}
-            onChange={(e) => setUseTrends(e.target.checked)}
-          />{" "}
-          usar tendências
-        </label>
-      </div>
-      <div className="mt-3 flex gap-2">
-        <input
-          value={theme}
-          maxLength={300}
-          onChange={(e) => setTheme(e.target.value)}
-          placeholder="Tema ou pedido (opcional): ex. lancheira saudável na volta às aulas, mitos do glúten, bastidores da Nina…"
-          className={inputCls}
-        />
-        <button
-          type="button"
-          className={btnPrimary}
-          disabled={busy}
-          onClick={() => void generate()}
-        >
-          <Sparkles className="h-3.5 w-3.5" /> {busy ? "Criando…" : "Criar ideias"}
-        </button>
-      </div>
+  const toDraft = (idea: PostIdea): Draft => ({
+    ...EMPTY_DRAFT,
+    title: idea.title,
+    network,
+    format: idea.format,
+    hook: idea.hook,
+    caption: idea.caption,
+    slides: idea.slides,
+    script: idea.script,
+    hashtags: idea.hashtags,
+    cta: idea.cta,
+    pillar: idea.pillar,
+    visual_idea: String(ideaToPost(idea, network, null).visual_idea ?? ""),
+    status: "ideia",
+    profile_id: profileId || null,
+    design: { ...EMPTY_DRAFT.design, kicker: idea.pillar.slice(0, 30) },
+  });
 
-      {ideas.length > 0 && (
-        <div className="mt-4 space-y-3">
-          {ideas.map((idea, i) => (
-            <label
-              key={i}
-              className={`block cursor-pointer rounded-2xl border p-3 transition ${
-                picked.has(i) ? "border-accent/60 bg-accent-soft/20" : "border-border/70"
-              }`}
-            >
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  className="mt-1"
-                  checked={picked.has(i)}
-                  onChange={() =>
-                    setPicked((s) => {
-                      const n = new Set(s);
-                      if (n.has(i)) n.delete(i);
-                      else n.add(i);
-                      return n;
-                    })
-                  }
-                />
-                <div className="min-w-0 flex-1 text-sm">
-                  <p className="flex flex-wrap items-center gap-1.5 font-semibold text-foreground">
-                    <Badge tone="info">{FORMAT_LABEL[idea.format]}</Badge> {idea.title}
-                  </p>
-                  {idea.hook && <p className="mt-1 font-medium text-accent">“{idea.hook}”</p>}
-                  <p className="mt-1 line-clamp-4 whitespace-pre-line text-foreground/85">
-                    {idea.caption}
-                  </p>
-                  {idea.slides.length > 0 && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {idea.slides.length} slides: {idea.slides.map((s) => s.title).join(" · ")}
-                    </p>
-                  )}
-                  {idea.hashtags.length > 0 && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {idea.hashtags.map((h) => `#${h}`).join(" ")}
-                    </p>
-                  )}
-                  {onEditIdea && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onEditIdea({
-                          ...EMPTY_DRAFT,
-                          title: idea.title,
-                          network,
-                          format: idea.format,
-                          hook: idea.hook,
-                          caption: idea.caption,
-                          slides: idea.slides,
-                          script: idea.script,
-                          hashtags: idea.hashtags,
-                          cta: idea.cta,
-                          pillar: idea.pillar,
-                          visual_idea: String(ideaToPost(idea, network, null).visual_idea ?? ""),
-                          status: "ideia",
-                          profile_id: profileId || null,
-                          design: { ...EMPTY_DRAFT.design, kicker: idea.pillar.slice(0, 30) },
-                        });
-                      }}
-                      className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-[11px] font-bold text-accent-foreground transition hover:-translate-y-0.5"
+  return (
+    <div className="min-w-0 space-y-4">
+      {/* Objetivo */}
+      <section className="min-w-0">
+        <SectionTitle icon={Wand2} color={PURPLE}>
+          O que o post precisa fazer?
+        </SectionTitle>
+        <ul className="grid grid-cols-2 gap-3 @2xl:grid-cols-3 @4xl:grid-cols-5">
+          {GOALS.map((g, k) => {
+            const s = GOAL_STYLE[g];
+            return (
+              <li key={g} className="min-w-0">
+                <Tile
+                  icon={s.icon}
+                  color={s.color}
+                  title={s.label}
+                  text={s.text}
+                  active={goal === g}
+                  onClick={() => setGoal(g)}
+                  delay={k * 45}
+                  compact
+                  className="min-h-[6.5rem]"
+                >
+                  {goal === g && (
+                    <span
+                      aria-hidden="true"
+                      className="nc-pop absolute right-3 top-3 grid h-5 w-5 place-items-center rounded-full text-white"
+                      style={{ background: s.color }}
                     >
-                      Editar e ver prévia →
-                    </button>
+                      <Check className="h-3 w-3" />
+                    </span>
                   )}
-                </div>
-              </div>
+                </Tile>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <StudioCard
+        icon={Sparkles}
+        color={PURPLE}
+        title="Criar ideias com IA"
+        hint="Com tendências, a IA considera o que está em alta no NutriConnect, as datas de saúde e a estação."
+        delay={120}
+      >
+        <div className="space-y-4">
+          <div className="min-w-0">
+            <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Rede
+            </p>
+            <div className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 py-0.5">
+              {NETWORKS.map((n) => (
+                <Pill
+                  key={n}
+                  icon={NETWORK_STYLE[n].icon}
+                  color={NETWORK_STYLE[n].color}
+                  active={network === n}
+                  onClick={() => setNetwork(n)}
+                >
+                  {NETWORK_LABEL[n]}
+                </Pill>
+              ))}
+            </div>
+          </div>
+
+          <div className="min-w-0">
+            <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Formatos <span className="font-medium normal-case tracking-normal">(um ou mais)</span>
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {FORMATS.map((f) => (
+                <Pill
+                  key={f}
+                  icon={FORMAT_STYLE[f].icon}
+                  color={PURPLE}
+                  active={formats.includes(f)}
+                  onClick={() => toggleFormat(f)}
+                >
+                  {FORMAT_LABEL[f]}
+                </Pill>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid min-w-0 gap-3 @2xl:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <label className="min-w-0">
+              <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Perfil
+              </span>
+              <select
+                value={profileId}
+                onChange={(e) => setProfileId(e.target.value)}
+                className={field}
+              >
+                <option value="">Sem perfil (marca geral)</option>
+                {(profiles.data ?? []).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {NETWORK_LABEL[p.network as Network]} · {p.handle}
+                  </option>
+                ))}
+              </select>
             </label>
+            <div className="min-w-0">
+              <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Quantas
+              </span>
+              <div
+                role="radiogroup"
+                aria-label="Quantidade de ideias"
+                className="inline-flex h-[2.625rem] items-center gap-1 rounded-full border border-border/70 bg-background/80 p-1"
+              >
+                {[2, 4, 6, 8].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    role="radio"
+                    aria-checked={count === n}
+                    onClick={() => setCount(n)}
+                    className={cn(
+                      "grid h-8 w-9 place-items-center rounded-full text-xs font-bold transition",
+                      count === n
+                        ? "text-white shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                    style={count === n ? { background: PURPLE } : undefined}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="min-w-0">
+              <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Tendências
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={useTrends}
+                onClick={() => setUseTrends((v) => !v)}
+                className="inline-flex h-[2.625rem] items-center gap-2 rounded-full border border-border/70 bg-background/80 pl-1.5 pr-3.5 text-xs font-semibold text-foreground transition hover:border-border"
+              >
+                <span
+                  className={cn(
+                    "relative h-6 w-10 rounded-full transition",
+                    useTrends ? "" : "bg-muted",
+                  )}
+                  style={useTrends ? { background: "#2f8a5b" } : undefined}
+                >
+                  <span
+                    className={cn(
+                      "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all",
+                      useTrends ? "left-[1.125rem]" : "left-0.5",
+                    )}
+                  />
+                </span>
+                <TrendingUp className="h-3.5 w-3.5 text-[#2f8a5b]" />
+                {useTrends ? "Usar" : "Não usar"}
+              </button>
+            </div>
+          </div>
+
+          <form
+            className="flex min-w-0 flex-col gap-2 @2xl:flex-row"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!busy) void generate();
+            }}
+          >
+            <input
+              value={theme}
+              maxLength={300}
+              onChange={(e) => setTheme(e.target.value)}
+              placeholder="Tema ou pedido (opcional): lancheira na volta às aulas, mitos do glúten…"
+              aria-label="Tema ou pedido"
+              className={field}
+            />
+            <button type="submit" className={btnPrimary} disabled={busy}>
+              <Sparkles className={cn("h-4 w-4", busy && "animate-spin")} />
+              {busy ? "Criando…" : `Criar ${count} ideias`}
+            </button>
+          </form>
+        </div>
+      </StudioCard>
+
+      {busy && (
+        <ul className="grid grid-cols-1 gap-3 @2xl:grid-cols-2 @5xl:grid-cols-3" aria-busy="true">
+          {Array.from({ length: Math.min(count, 6) }, (_, i) => (
+            <li key={i} className="st-shimmer h-56 rounded-[1.4rem] bg-secondary" />
           ))}
-          <div className="flex gap-2">
+        </ul>
+      )}
+
+      {!busy && ideas.length > 0 && (
+        <section className="min-w-0">
+          <SectionTitle
+            icon={Sparkles}
+            color={PURPLE}
+            right={
+              <button
+                type="button"
+                onClick={() =>
+                  setPicked(
+                    picked.size === ideas.length ? new Set() : new Set(ideas.map((_, i) => i)),
+                  )
+                }
+                className="text-accent hover:underline"
+              >
+                {picked.size === ideas.length ? "Desmarcar todas" : "Marcar todas"}
+              </button>
+            }
+          >
+            Ideias da IA
+          </SectionTitle>
+          <ul className="grid grid-cols-1 gap-3 @2xl:grid-cols-2 @5xl:grid-cols-3">
+            {ideas.map((idea, i) => (
+              <li key={i} className="min-w-0">
+                <IdeaCard
+                  idea={idea}
+                  picked={picked.has(i)}
+                  delay={i * 60}
+                  onToggle={() => togglePick(i)}
+                  onEdit={onEditIdea ? () => onEditIdea(toDraft(idea)) : undefined}
+                />
+              </li>
+            ))}
+          </ul>
+          <div className="st-glass sticky bottom-3 z-10 mt-4 flex flex-wrap items-center gap-2 rounded-full border border-border/60 p-1.5 pl-4 shadow-lg">
+            <p className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground">
+              {picked.size === 0
+                ? "Marque as ideias"
+                : picked.size === 1
+                  ? "1 ideia marcada"
+                  : `${picked.size} ideias marcadas`}
+            </p>
             <button
               type="button"
-              className={btnPrimary}
+              className={cn(btnSoft, "h-9 px-3 text-xs")}
+              aria-label="Descartar ideias"
+              onClick={() => {
+                setIdeas([]);
+                setPicked(new Set());
+              }}
+            >
+              <X className="h-3.5 w-3.5" /> <span className="hidden @md:inline">Descartar</span>
+            </button>
+            <button
+              type="button"
+              className={cn(btnPrimary, "h-9 px-4 text-xs")}
               disabled={!picked.size || insert.isPending}
               onClick={saveChosen}
             >
-              <Check className="h-3.5 w-3.5" /> Salvar {picked.size} ideia(s)
-            </button>
-            <button type="button" className={btnCls} onClick={() => setIdeas([])}>
-              Descartar
+              <Check className="h-3.5 w-3.5" /> Salvar no quadro
             </button>
           </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function IdeaCard({
+  idea,
+  picked,
+  delay,
+  onToggle,
+  onEdit,
+}: {
+  idea: PostIdea;
+  picked: boolean;
+  delay: number;
+  onToggle: () => void;
+  onEdit?: () => void;
+}) {
+  const Fmt = FORMAT_STYLE[idea.format]?.icon ?? Layers;
+  return (
+    <article
+      className="nc-tile-in flex h-full min-w-0 flex-col rounded-[1.4rem] border p-3.5 transition duration-300"
+      style={{
+        animationDelay: `${delay}ms`,
+        background: picked
+          ? `linear-gradient(150deg, ${tint(PURPLE, 14)}, var(--card) 65%)`
+          : "var(--card)",
+        borderColor: picked
+          ? `color-mix(in srgb, ${PURPLE} 50%, transparent)`
+          : "color-mix(in srgb, var(--border) 70%, transparent)",
+      }}
+    >
+      <header className="flex min-w-0 items-start gap-2.5">
+        <span
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white shadow-sm"
+          style={{ background: PURPLE }}
+        >
+          <Fmt className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: PURPLE }}>
+            {FORMAT_LABEL[idea.format] ?? idea.format}
+            {idea.pillar && <span className="text-muted-foreground"> · {idea.pillar}</span>}
+          </p>
+          <h3 className="line-clamp-2 text-sm font-bold leading-snug text-foreground">
+            {idea.title}
+          </h3>
+        </div>
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={picked}
+          aria-label={picked ? "Desmarcar ideia" : "Marcar ideia"}
+          onClick={onToggle}
+          className={cn(
+            "grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 transition",
+            picked ? "border-transparent text-white" : "border-border text-transparent",
+          )}
+          style={picked ? { background: PURPLE } : undefined}
+        >
+          <Check className="h-4 w-4" />
+        </button>
+      </header>
+
+      {idea.hook && (
+        <p
+          className="mt-3 rounded-xl px-3 py-2 text-[13px] font-semibold leading-snug"
+          style={{
+            background: tint(PURPLE, 10),
+            color: `color-mix(in srgb, ${PURPLE} 70%, var(--foreground))`,
+          }}
+        >
+          “{idea.hook}”
+        </p>
+      )}
+      <p className="mt-2.5 line-clamp-4 whitespace-pre-line text-xs leading-relaxed text-foreground/85">
+        {idea.caption}
+      </p>
+
+      {idea.slides.length > 0 && (
+        <ol className="mt-2.5 flex flex-wrap gap-1">
+          {idea.slides.slice(0, 6).map((s, k) => (
+            <li
+              key={k}
+              className="max-w-full truncate rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-foreground/80"
+            >
+              {k + 1}. {s.title}
+            </li>
+          ))}
+        </ol>
+      )}
+      {idea.hashtags.length > 0 && (
+        <p className="mt-2 flex min-w-0 items-start gap-1 text-[11px] text-muted-foreground">
+          <Hash className="mt-0.5 h-3 w-3 shrink-0" />
+          <span className="line-clamp-2">{idea.hashtags.map((h) => `#${h}`).join(" ")}</span>
+        </p>
+      )}
+      {idea.best_time && (
+        <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+          <Clock className="h-3 w-3 shrink-0" /> {idea.best_time}
+        </p>
+      )}
+
+      {onEdit && (
+        <div className="mt-auto pt-3">
+          <button
+            type="button"
+            onClick={onEdit}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-bold text-white shadow-sm transition hover:-translate-y-0.5"
+            style={{ background: PURPLE }}
+          >
+            <Eye className="h-3.5 w-3.5" /> Editar e ver prévia
+          </button>
         </div>
       )}
-    </Panel>
+    </article>
   );
 }
 
@@ -338,80 +594,77 @@ function PostsList({ onOpen }: { onOpen: (p: SocialPost) => void }) {
   );
 
   return (
-    <Panel
-      title="Posts"
-      hint="Clique num post para editar, criar a arte, agendar ou copiar a legenda."
-    >
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5">
-          <Search className="h-3.5 w-3.5 text-muted-foreground" />
+    <section className="min-w-0">
+      <SectionTitle icon={PenLine} color="#3b7bbf">
+        Posts salvos
+      </SectionTitle>
+      <div className="mb-3 flex min-w-0 flex-wrap items-center gap-2">
+        <label className="relative w-full @2xl:w-64">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar"
-            className="bg-transparent text-sm outline-none"
+            placeholder="Buscar posts"
+            aria-label="Buscar posts"
+            className={cn(field, "h-10 rounded-full py-0 pl-10")}
           />
-        </div>
-        {(["todos", ...STATUSES] as const).map((s) => (
-          <button
-            key={s}
-            type="button"
-            aria-pressed={status === s}
-            onClick={() => setStatus(s)}
-            className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-              status === s
-                ? "border-accent bg-accent-soft text-foreground"
-                : "border-border text-muted-foreground"
-            }`}
+        </label>
+        <div className="no-scrollbar -mx-1 flex min-w-0 flex-1 gap-1.5 overflow-x-auto px-1 py-0.5">
+          <Pill
+            color="#3f4727"
+            active={status === "todos"}
+            onClick={() => setStatus("todos")}
+            count={all.length}
           >
-            {s === "todos" ? "Todos" : STATUS_LABEL[s]} (
-            {s === "todos" ? all.length : all.filter((p) => p.status === s).length})
-          </button>
-        ))}
+            Todos
+          </Pill>
+          {STATUSES.map((s) => (
+            <Pill
+              key={s}
+              icon={STATUS_STYLE[s].icon}
+              color={STATUS_STYLE[s].color}
+              active={status === s}
+              onClick={() => setStatus(s)}
+              count={all.filter((p) => p.status === s).length}
+            >
+              {STATUS_LABEL[s]}
+            </Pill>
+          ))}
+        </div>
       </div>
-      <div className="mt-3">
-        {posts.error ? (
-          <QueryError error={posts.error} />
-        ) : list.length === 0 ? (
-          <Empty>Nenhum post aqui ainda. Crie ideias com a IA acima.</Empty>
-        ) : (
-          <ul className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/70">
-            {list.map((p) => (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => onOpen(p)}
-                  className="flex w-full flex-wrap items-center gap-2 bg-card px-4 py-3 text-left hover:bg-secondary/50"
-                >
-                  <Badge tone="info">{FORMAT_LABEL[p.format as PostFormat] ?? p.format}</Badge>
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
-                    {p.title}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {NETWORK_LABEL[p.network as Network]}
-                  </span>
-                  {p.scheduled_for && (
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(`${p.scheduled_for}T12:00:00`).toLocaleDateString("pt-BR")}
-                    </span>
-                  )}
-                  <Badge
-                    tone={
-                      p.status === "publicado"
-                        ? "good"
-                        : p.status === "aprovado" || p.status === "agendado"
-                          ? "info"
-                          : "default"
-                    }
-                  >
-                    {STATUS_LABEL[p.status as PostStatus]}
-                  </Badge>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </Panel>
+      {posts.error ? (
+        <EmptyState
+          icon={X}
+          color="#d6456b"
+          title="Não deu para carregar os posts"
+          text={(posts.error as Error).message}
+        />
+      ) : posts.isLoading ? (
+        <ul className="grid grid-cols-2 gap-3 @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-6">
+          {Array.from({ length: 6 }, (_, i) => (
+            <li key={i} className="st-shimmer aspect-[4/5] rounded-[1.25rem] bg-secondary" />
+          ))}
+        </ul>
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon={Sparkles}
+          color={PURPLE}
+          title={all.length === 0 ? "Nenhum post ainda" : "Nada com esse filtro"}
+          text={
+            all.length === 0
+              ? "Escolha o objetivo e peça ideias para a IA: as que você salvar aparecem aqui."
+              : "Troque o status ou a busca para ver outros posts."
+          }
+        />
+      ) : (
+        <ul className="grid grid-cols-2 gap-3 @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-6">
+          {list.map((p, k) => (
+            <li key={p.id} className="min-w-0">
+              <PostCard post={p} onOpen={() => onOpen(p)} delay={k * 40} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

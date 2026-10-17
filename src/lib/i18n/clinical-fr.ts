@@ -390,7 +390,7 @@ const clinical: Record<ClinicalKey, string> = {
   "notes.empty": "Aucune évolution enregistrée",
   "notes.emptyText":
     "Consignez chaque consultation au format SOAP pour suivre l'évolution du patient.",
-  "notes.privateHint": "Visible uniquement par vous — le patient ne voit pas les évolutions.",
+  "notes.privateHint": "Visible uniquement par vous. Le patient ne voit pas les évolutions.",
   "notes.appointment": "Consultation liée",
   "notes.noAppointment": "Aucune consultation liée",
   "notes.subjective": "Subjectif",
@@ -582,7 +582,8 @@ const clinical: Record<ClinicalKey, string> = {
   "patientHome.noPlanYet": "Votre professionnel n'a pas encore publié de plan alimentaire.",
   "patientHome.goalsToday": "Objectifs du jour",
   "patientHome.water": "L'eau du jour",
-  "patientHome.unread": "{n} nouveau(x) message(s) de votre professionnel",
+  "patientHome.unread": "{n} nouveaux messages de votre professionnel",
+  "patientHome.unreadOne": "1 nouveau message de votre professionnel",
   "patientPlan.title": "Mon plan alimentaire",
   "patientPlan.by": "Par {name}",
   "patientPlan.next": "Prochain repas",
@@ -620,7 +621,7 @@ const clinical: Record<ClinicalKey, string> = {
   "diary.deleteConfirm": "Supprimer cette entrée du journal ?",
   "diary.today": "Aujourd'hui",
   "diary.empty": "Aucune entrée dans le journal",
-  "diary.emptyOwner": "Commencez par noter votre prochain repas — une photo suffit.",
+  "diary.emptyOwner": "Commencez par noter votre prochain repas. Une photo suffit.",
   "diary.emptyPro": "Le patient n'a encore enregistré aucun repas.",
   "diary.commentPlaceholder": "Écrire un commentaire…",
   "diary.meal.cafe_da_manha": "Petit-déjeuner",
@@ -639,7 +640,7 @@ const clinical: Record<ClinicalKey, string> = {
   "goals.increase": "Augmenter",
   "goals.decrease": "Diminuer",
   "goals.complete": "Terminer",
-  "goals.done": "Fait aujourd'hui ! 🎉",
+  "goals.done": "Fait aujourd'hui !",
   "patientEvolution.title": "Mon évolution",
   "patientEvolution.subtitle":
     "Les mesures des consultations et le poids que vous notez à la maison.",
@@ -703,7 +704,7 @@ const clinical: Record<ClinicalKey, string> = {
   "errors.payment": "Impossible de joindre Stripe. Réessayez dans un instant.",
   "appt.cancelledRefunded": "Consultation annulée. Le remboursement a été demandé à Stripe.",
   "appt.cancelledNoRefund":
-    "Consultation annulée. Comme il restait moins de {h} heures, le montant n'est pas remboursé automatiquement — parlez-en au professionnel.",
+    "Consultation annulée. Comme il restait moins de {h} heures, le montant n'est pas remboursé automatiquement. Parlez-en au professionnel.",
   "appt.cancelledRefundFailed":
     "Consultation annulée, mais le remboursement n'a pas pu être effectué pour le moment. Le professionnel a été prévenu.",
   "appt.refundPolicyPatient":
@@ -725,13 +726,15 @@ const clinical: Record<ClinicalKey, string> = {
   "finance.prevMonth": "Mois précédent",
   "finance.nextMonth": "Mois suivant",
   "finance.net": "Reçu (net)",
-  "finance.netHint": "{n} paiement(s) approuvé(s)",
+  "finance.netHint": "{n} paiements approuvés",
+  "finance.netHintOne": "1 paiement approuvé",
   "finance.gross": "Chiffre d'affaires brut",
   "finance.ticket": "panier moyen {value}",
   "finance.fees": "Frais de la plateforme",
   "finance.refunded": "{value} remboursé(s)",
   "finance.receivable": "À encaisser",
-  "finance.receivableHint": "{n} consultation(s) non payée(s)",
+  "finance.receivableHint": "{n} consultations non payées",
+  "finance.receivableHintOne": "1 consultation non payée",
   "finance.chartTitle": "Reçu par mois (net)",
   "finance.chartHint":
     "Montants nets : paiements approuvés moins les frais de la plateforme. Les enregistrements manuels comptent intégralement.",

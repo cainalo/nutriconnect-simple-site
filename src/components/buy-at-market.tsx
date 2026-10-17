@@ -7,6 +7,7 @@ import { useTr } from "@/components/settings-ui";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { openMarket, useMarketPartners, type MarketSource } from "@/lib/markets";
 import { cn } from "@/lib/utils";
+import { EmojiIcon } from "@/components/emoji-icon";
 
 export function BuyAtMarket({
   items,
@@ -75,7 +76,7 @@ export function BuyAtMarket({
                     : "border-border text-muted-foreground hover:text-foreground",
                 )}
               >
-                <span aria-hidden>{p.emoji}</span>
+                <EmojiIcon emoji={p.emoji} fallback={ShoppingCart} className="h-4 w-4" />
                 {p.name}
               </button>
             ))}

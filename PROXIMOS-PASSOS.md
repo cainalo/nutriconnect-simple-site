@@ -1,5 +1,38 @@
 # Próximos passos (passagem de sessão — 15/10/2026)
 
+**Regra de branches (17/10, vale sempre):** trabalhe e faça push **direto na `main`** (sincroniza com o
+Lovable). A branch **`prod` é a que o Netlify publica e gasta crédito**: só leve a `main` para a `prod`
+quando o dono mandar. As permissões estão em `.claude/settings.json` (push da `main` liberado, push da
+`prod` bloqueado). D5 (17/10): parte 2, cabeçalho das landings Vibrante e Aurora cabe no celular;
+parte 3, últimos emojis da tela viraram ícones; parte 4, Configurações e Conquistas da trilha sem
+cortes, texto justificado fora de letras miúdas e blocos centralizados; parte 5, palavras longas
+(links, hashtags) quebram em vez de serem cortadas na borda do post (era o corte à direita do
+Editorial). A bancada monta qualquer página real: `v=page&p=<arquivo da rota sem .tsx>&d=<design>`
+(`&dark=1` para o escuro); páginas filhas aparecem sem o layout-pai (sem a margem lateral).
+Falta do D5: conferir no site logado de verdade (com dados) e no aparelho do dono.
+
+**Regras contra "cara de site feito por IA" (17/10, valem para tudo que for criado):** nada de
+violeta/índigo/turquesa padrão do Tailwind nem fonte Inter/Poppins como identidade; nada de texto em
+degradê nem botão em degradê de duas cores (use cor sólida); nada de selo em pílula com brilhos acima
+do título; ícone de brilhos (Sparkles) só onde a Nina (IA) age; nada de bolhas de luz desfocadas,
+listra lateral grossa em card, passos "01/02/03" nem cards iguais com ícone em cima; textos sem
+travessão no meio da frase e sem clichês ("jornada", "transforme", "tudo o que você precisa",
+tríades "Sua X. Sua Y. Sua Z."). Prefira fala concreta, do jeito que uma pessoa escreveria.
+
+**Fileiras de botões/filtros simétricas (17/10, pedido do dono):** nada de fileira de pílulas com a
+borda direita "torta". Uma regra global em `styles.css` (procure "Fileiras de pílulas") faz toda
+fileira com `flex-wrap` de 2 ou mais pílulas preencher a largura, com as duas bordas alinhadas.
+Rótulo na mesma fileira das pílulas quebra a regra: ponha o rótulo numa linha própria acima.
+`data-free-wrap` desliga a regra numa fileira específica.
+Grades: card sozinho na última linha ocupa a linha (2 colunas) ou vai ao meio (3 colunas);
+`data-free-grid` desliga. Funções fecha cada seção sem buracos (`src/lib/fill-grid.ts`).
+
+**Site animado como Funções (17/10, pedido do dono):** regras no fim de `styles.css` ("Site
+animado") fazem os cards das páginas entrarem em cascata, links/botões com fundo de card subirem
+ao passar o mouse e inclinarem na direção dele (`src/lib/tilt.ts`, ligado no `__root`) e botões
+afundarem ao toque. A faixa de título de cada página (`design-page-head.tsx`) existe em todos os
+designs, inclusive o Natural, com ícones flutuando. Tudo respeita "reduzir movimento".
+
 **Atualização de 15/10 (leia primeiro):** o rumo do projeto mudou; veja a seção "Rumo definido em
 15/10/2026" do `roadmap.md`. Feitos: D1 (seletor "Design do site" no admin, `src/lib/site-design.ts`),
 D2 (navegação própria por design em `src/components/site-chrome-designs.tsx`), D3 (landing por design
@@ -12,7 +45,7 @@ funções novas. Para ver as telas sem login: `.preview-harness` (`v=landing&d=<
 O texto abaixo é da sessão anterior (14/10).
 
 **Fechamento da etapa de designs (15/10):** colunas laterais removidas do site (cards delas só em
-Funções, "Meus cards", e o card de nível em Desafios); páginas em largura total; posts em colunas
+Funções, "Meus cards", que o dono mandou tirar em 17/10, e o card de nível em Desafios); páginas em largura total; posts em colunas
 independentes (`src/components/post-masonry.tsx`, 3 colunas, cada uma medida sozinha); Editorial como
 jornal antigo (textura, letra gótica, cor por tipo em tinta velha, matérias inteiras em colunas
 contínuas, "Ver mais" só no celular). 56 posts de exemplo gravados no banco (migrations
@@ -23,8 +56,6 @@ Pendente: D5 (revisar tudo em print no site logado, celular e modo escuro) e o c
 dono viu no Editorial pelo celular (não reproduzido na bancada; há uma trava de largura em
 `styles.css` para telas < 1024 px). Próximas etapas combinadas: S2, turbinar funções (T1), app (A3/A4),
 marketplace (P1), X1–X7, modo escola (E1) e monetização (C1).
-
-
 
 Leia este arquivo inteiro antes de mexer no projeto. Ele diz o que foi feito, o que está pendente e
 em que ordem continuar. O roadmap oficial é o `roadmap.md`; o `AGENTS.md` tem as regras do Lovable
@@ -37,6 +68,23 @@ Lovable e para o site).
   (credencial, conta externa, decisão de produto).
 - Ele pediu para **seguir até terminar sem perguntar** a cada etapa. Um commit por item, testado,
   com push para `main`.
+- **Imagens (pedido de 17/10):** site com mais fotos e mais imersivo. Fotos sempre inteiras, com
+  fundo (nada de recorte em fundo branco). Já têm foto: faixas de título de cada área
+  (`public/images/heads`), cards da Feira (`images/season`, 40 de 45), receitas básicas da
+  Geladeira (`images/recipes`, 12 de 14), temas da Trilha (`images/trail`), atalhos da Casa, os
+  cards altos de Funções e os estados vazios (`EmptyPhoto` em `components/clinical/ui.tsx`;
+  usar foto diferente da faixa de título logo acima).
+  O admin escolhe **site com fotos** ou **site anterior (menos imagens)** em Admin → Design e
+  imagens → "Imagens do site" (chave `site_photos`; `useSitePhotos()` em `lib/site-photos.ts`;
+  "Testar" vale só no navegador). Toda foto nova precisa respeitar `useSitePhotos()` e, sem ela,
+  mostrar a versão anterior. Os recortes antigos da Feira ficam em `images/season-cutout`. Sem foto ainda: jabuticaba, pequi, umbu, cupuaçu, rúcula, cuscuz e
+  tapioca (o acervo aberto não tem). Daqui só se alcança o Open Images (S3/GCS, CC BY 2.0, créditos
+  obrigatórios no CREDITS.md de cada pasta); Unsplash/Wikimedia são bloqueados.
+- **Qualidade (pedido de 17/10):** rodadas de teste em todas as páginas e funções, nota 0–10 em 12
+  critérios, até tudo chegar a 10. Processo em `docs/QUALIDADE.md`; critérios, catálogo (112 itens)
+  e notas em `src/lib/quality/`; painéis Admin → Qualidade e Admin → Documentação. Página nova =
+  item novo no catálogo. Rodada 1 (25 páginas, 87%) feita; próxima: rodada 2 nas mesmas páginas
+  (confirmar as correções) e rodada nas funções de Funções.
 - Textos do app nos 4 idiomas (pt-BR, en, es, fr) no padrão `tr([pt, en, es, fr])`.
 - Mensagens de commit em português, terminando com
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.

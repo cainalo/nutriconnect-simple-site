@@ -91,7 +91,8 @@ function PatientHome() {
                 to="/acompanhamento/mensagens"
                 className="mt-3 flex items-center gap-2 rounded-xl bg-primary-soft px-4 py-3 text-sm font-semibold text-primary hover:opacity-90"
               >
-                <MessageCircle className="h-4 w-4" /> {t("patientHome.unread", { n: unread })}
+                <MessageCircle className="h-4 w-4" />{" "}
+                {unread === 1 ? t("patientHome.unreadOne") : t("patientHome.unread", { n: unread })}
               </Link>
             )}
           </Card>

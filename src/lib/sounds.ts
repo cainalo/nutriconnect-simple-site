@@ -9,6 +9,7 @@ import {
   type SoundStyle,
   type ToneId,
 } from "./appearance";
+import { vibrate } from "@/lib/native";
 
 export type SoundKind =
   "notification" | "message" | "achievement" | "click" | "send" | "success" | "error" | "support";
@@ -111,8 +112,8 @@ export function playSound(
     if (!s.soundsOn || !s[cfg.enabled]) return;
     if (s.quietOn && inHourWindow(s.quietFrom, s.quietTo)) return;
   }
-  if (!preview && cfg.vibrate && s.vibration && "vibrate" in navigator) {
-    navigator.vibrate?.(kind === "message" ? [40] : [60, 40, 60]);
+  if (!preview && cfg.vibrate && s.vibration) {
+    vibrate(kind === "message" ? [40] : [60, 40, 60]);
   }
   const volume = (preview?.volume ?? s.soundVolume) / 100;
   if (volume <= 0) return;

@@ -138,13 +138,15 @@ function EditProfilePage() {
                 <p className="text-[11px] text-muted-foreground">{t("signup.goalQuestion")}</p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            {/* Mesma grade 3 × 3 do cadastro. */}
+            <div className="grid grid-cols-3 gap-1.5">
               {JOURNEY_GOALS.map((g) => (
                 <button
                   key={g}
                   type="button"
+                  aria-pressed={goal === g}
                   onClick={() => setGoal(g)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition cursor-pointer ${
+                  className={`grid min-h-11 place-items-center rounded-xl px-1.5 py-1.5 text-center text-[11px] font-medium leading-tight transition cursor-pointer ${
                     goal === g
                       ? "bg-accent text-accent-foreground font-semibold shadow-xs"
                       : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"

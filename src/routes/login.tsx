@@ -1,14 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-  Leaf,
-  Sparkles,
-  Users,
-  ChefHat,
-  Award,
-  Stethoscope,
-  Presentation,
-  ArrowRight,
-} from "lucide-react";
+import { Leaf, Users, ChefHat, Award, Stethoscope, Presentation, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { loginUser } from "@/lib/auth";
 import { toast } from "sonner";
@@ -138,9 +129,7 @@ export function AuthLayout({
 
         <div className="relative z-10 space-y-7">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" /> {t("auth.tagline")}
-            </span>
+            <p className="text-sm font-semibold text-white/80">{t("auth.tagline")}</p>
             <h2 className="mt-4 text-4xl font-extrabold leading-tight font-display text-primary-foreground">
               {t("auth.hero1")}
               <br />

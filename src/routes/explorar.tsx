@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Compass, Refrigerator, Search, X } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { FeedShell, type FeedShellPage } from "@/components/feed-shell";
+import { LoadMoreTrigger } from "@/components/load-more-trigger";
 import { PostTile } from "@/components/post-tile";
 import { PostModal } from "@/components/post-modal";
 import { VerifiedBadge } from "@/components/person-chip";
@@ -12,7 +13,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { initials, type Post, type PostType } from "@/lib/community";
 import { pickName, type Names } from "@/lib/appearance-data";
-import { loadAppearance } from "@/lib/appearance";
+import { EXPLORE_TOPICS } from "@/lib/explore-topics";
 import { trendingMix } from "@/lib/trending";
 import { useFeed, useFeedRealtime, usePost } from "@/lib/social/feed-queries";
 import { useSearchUsers } from "@/lib/social/queries";
@@ -55,6 +56,8 @@ const PAGE_DEFS: { id: string; type?: PostType; label: Names }[] = [
 
 const FETCH = 60;
 const PEOPLE_PAGE = 20;
+/** Posts a mais por leva da rolagem infinita. */
+const PAGE_SIZE = 20;
 const ALIASES: Record<string, string> = {
   receitas: "receita",
   experiencias: "experiencia",
@@ -183,8 +186,6 @@ function ExplorarPage() {
     ],
   );
 
-  const pageSize = useMemo(() => loadAppearance().feedPageSize || 20, []);
-
   const toolbar = (
     <label className="flex w-[min(22rem,calc(100vw-2rem))] items-center gap-2 rounded-full border border-border/60 bg-card/90 px-4 py-2 shadow-soft backdrop-blur focus-within:border-accent">
       <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -212,12 +213,15 @@ function ExplorarPage() {
     </label>
   );
 
-  const grid = (id: string, posts: Post[], loading: boolean) => {
+  const grid = (id: string, posts: Post[], loading: boolean, fetching: boolean) => {
     const limit = limitFor(id);
     return (
       <>
         {loading && posts.length === 0 ? (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" aria-hidden="true">
+          <div
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+            aria-hidden="true"
+          >
             {Array.from({ length: 9 }, (_, i) => (
               <div
                 key={i}
@@ -229,11 +233,24 @@ function ExplorarPage() {
           <div className="mx-auto max-w-md rounded-3xl border border-dashed border-border p-10 text-center">
             <Compass className="mx-auto mb-3 h-9 w-9 text-muted-foreground" />
             <p className="text-sm font-semibold text-foreground">
-              {debounced ? `${t("explore.noResults")} “${debounced}”` : t("explore.noResults")}
+              {debounced ? `${t("explore.noResults")} “${debounced}”` : t("explore.empty")}
             </p>
             {debounced && (
               <p className="mt-1 text-xs text-muted-foreground">{t("explore.noResultsHint")}</p>
             )}
+            {/* Sugestões do que buscar (as mesmas de "Temas para explorar"). */}
+            <div className="mt-4 grid grid-cols-2 gap-1.5">
+              {EXPLORE_TOPICS.map((topic) => (
+                <button
+                  key={topic[0]}
+                  type="button"
+                  onClick={() => setQuery(pickName(topic, locale))}
+                  className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-accent hover:text-accent"
+                >
+                  {pickName(topic, locale)}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
@@ -242,16 +259,19 @@ function ExplorarPage() {
             ))}
           </div>
         )}
+        {/* Rolagem infinita: chegando perto do fim, a grade busca mais. */}
         {posts.length >= limit && (
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setMore((m) => ({ ...m, [id]: (m[id] ?? 0) + pageSize }))}
-              className="cursor-pointer rounded-full border border-border bg-card px-5 py-2 text-xs font-semibold text-foreground shadow-xs transition hover:bg-secondary"
-            >
-              {t("espaco.loadMore")}
-            </button>
-          </div>
+          <LoadMoreTrigger
+            pageCount={limit}
+            onReach={() => {
+              if (!fetching) setMore((m) => ({ ...m, [id]: (m[id] ?? 0) + PAGE_SIZE }));
+            }}
+          />
+        )}
+        {fetching && posts.length > 0 && (
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            {t("espaco.loadingMore")}
+          </p>
         )}
       </>
     );
@@ -344,15 +364,13 @@ function ExplorarPage() {
         </ul>
       )}
       {peopleList.length >= PEOPLE_PAGE + (more.pessoas ?? 0) && (
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() => setMore((m) => ({ ...m, pessoas: (m.pessoas ?? 0) + PEOPLE_PAGE }))}
-            className="cursor-pointer rounded-full border border-border bg-card px-5 py-2 text-xs font-semibold text-foreground shadow-xs transition hover:bg-secondary"
-          >
-            {t("explore.people.more")}
-          </button>
-        </div>
+        <LoadMoreTrigger
+          pageCount={PEOPLE_PAGE + (more.pessoas ?? 0)}
+          onReach={() => {
+            if (!people.isFetching)
+              setMore((m) => ({ ...m, pessoas: (m.pessoas ?? 0) + PEOPLE_PAGE }));
+          }}
+        />
       )}
     </div>
   );
@@ -361,7 +379,7 @@ function ExplorarPage() {
     const label = pickName(def.label, locale);
     if (def.id === "pessoas") return { id: def.id, label, content: peoplePage };
     const key = def.id as keyof typeof feeds;
-    const content = grid(def.id, mixed[key], feeds[key].isLoading);
+    const content = grid(def.id, mixed[key], feeds[key].isLoading, feeds[key].isFetching);
     return {
       id: def.id,
       label,
@@ -371,7 +389,7 @@ function ExplorarPage() {
           <>
             <Link
               to="/geladeira"
-              className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card p-4 text-sm shadow-xs transition hover:shadow-card"
+              className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-accent-soft/40 p-4 text-sm shadow-xs transition hover:shadow-card"
             >
               <Refrigerator className="h-6 w-6 shrink-0 text-accent" />
               <span className="min-w-0 flex-1">

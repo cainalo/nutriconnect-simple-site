@@ -38,6 +38,7 @@ import {
 import { useNoNumbers } from "@/lib/no-numbers";
 import { cn } from "@/lib/utils";
 import { Card, EmptyState, buttonGhost, buttonPrimary, buttonSecondary, inputClass } from "./ui";
+import { hasNativeScanner, scanBarcodeNative, vibrate } from "@/lib/native";
 
 const scansKey = ["label-scans"] as const;
 
@@ -435,7 +436,7 @@ function CameraScanner({
           const found = await detector.detect(video.current).catch(() => []);
           const code = found.map((f) => normalizeBarcode(f.rawValue)).find(isValidBarcode);
           if (code) {
-            navigator.vibrate?.(60);
+            vibrate(60);
             onCode(code);
             return;
           }
@@ -710,6 +711,31 @@ export function LabelScanner() {
   const [selected, setSelected] = useState<string[]>([]);
   const photoInput = useRef<HTMLInputElement>(null);
   const liveCamera = hasBarcodeDetector();
+  // No app Android, o leitor do Google (ML Kit) lê mais rápido e com pouca luz (A3).
+  const nativeScan = hasNativeScanner();
+
+  const scan = async () => {
+    if (!nativeScan) return setCamera(true);
+    try {
+      const c = await scanBarcodeNative();
+      if (!c) return;
+      vibrate(60);
+      setCode(c);
+      lookup.mutate(c);
+    } catch (err) {
+      console.warn("leitor nativo", err);
+      if (liveCamera) setCamera(true);
+      else
+        toast.error(
+          tr([
+            "Não deu para abrir o leitor agora. Digite os números do código.",
+            "Couldn't open the scanner now. Type the barcode digits.",
+            "No se pudo abrir el lector ahora. Escribe los números del código.",
+            "Impossible d'ouvrir le lecteur. Saisissez les chiffres du code.",
+          ]),
+        );
+    }
+  };
 
   const lookup = useMutation({
     mutationFn: async (barcode: string) => {
@@ -811,8 +837,8 @@ export function LabelScanner() {
             />
           ) : (
             <div className="flex flex-wrap gap-2">
-              {liveCamera && (
-                <button type="button" className={buttonPrimary} onClick={() => setCamera(true)}>
+              {(liveCamera || nativeScan) && (
+                <button type="button" className={buttonPrimary} onClick={() => void scan()}>
                   <Camera className="h-4 w-4" />
                   {tr([
                     "Ler com a câmera",

@@ -9,7 +9,6 @@ import {
   Lock,
   Presentation,
   ShieldCheck,
-  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { AndroidDownloadButton } from "@/components/android-app";
@@ -23,7 +22,7 @@ import { cn } from "@/lib/utils";
 
 // ───────────────────────── Peças comuns ─────────────────────────
 
-function LangSelect() {
+function LangSelect({ show = "min-[360px]:block" }: { show?: string }) {
   const tr = useTr();
   const { locale, setLocale } = useI18n();
   return (
@@ -31,7 +30,7 @@ function LangSelect() {
       value={locale}
       onChange={(e) => isLocale(e.target.value) && setLocale(e.target.value)}
       aria-label={tr(["Idioma", "Language", "Idioma", "Langue"])}
-      className="hidden h-9 cursor-pointer rounded-full border border-border bg-card px-2 text-xs font-semibold min-[360px]:block"
+      className={`hidden h-9 shrink-0 cursor-pointer rounded-full border border-border bg-card px-2 text-xs font-semibold ${show}`}
     >
       {LOCALES.map((l) => (
         <option key={l.id} value={l.id}>
@@ -134,10 +133,10 @@ export function LandingVibrante() {
     <div className="min-h-screen bg-background text-foreground [&_p]:text-left">
       <header className="sticky top-0 z-30 px-3 pt-3">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 rounded-3xl border bg-card/90 px-3 shadow-card backdrop-blur-md sm:px-4">
-          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-primary to-accent font-black text-primary-foreground">
+          <span className="hidden h-9 w-9 shrink-0 place-items-center rounded-2xl sm:grid bg-primary font-black text-primary-foreground">
             N
           </span>
-          <Wordmark className="text-lg" />
+          <Wordmark className="shrink-0 text-base sm:text-lg" />
           <nav className="ml-4 hidden items-center gap-1 text-sm font-bold md:flex">
             {[
               ["#recursos", COPY.navFeatures],
@@ -154,16 +153,16 @@ export function LandingVibrante() {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-1.5">
-            <LangSelect />
+            <LangSelect show="min-[400px]:block" />
             <Link
               to="/login"
-              className="rounded-full px-3 py-2 text-sm font-bold hover:bg-secondary"
+              className="whitespace-nowrap rounded-full px-2 py-2 text-sm font-bold hover:bg-secondary sm:px-3"
             >
               {tr(COPY.login)}
             </Link>
             <Link
               to="/cadastro"
-              className="rounded-full bg-gradient-to-r from-primary to-accent px-4 py-2 text-sm font-extrabold text-primary-foreground shadow-soft transition hover:brightness-110"
+              className="whitespace-nowrap rounded-full bg-primary px-3 py-2 text-sm font-extrabold sm:px-4 text-primary-foreground shadow-soft transition hover:brightness-110"
             >
               {tr(COPY.signup)}
             </Link>
@@ -173,15 +172,11 @@ export function LandingVibrante() {
 
       {/* Abertura em bloco grande com degradê e tiles flutuando */}
       <section className="mx-auto mt-4 w-full max-w-6xl px-3">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary via-primary to-accent px-6 py-12 text-primary-foreground sm:px-12 sm:py-16">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-white/10" />
-          <div className="pointer-events-none absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-white/10" />
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-primary px-6 py-12 text-primary-foreground sm:px-12 sm:py-16">
           <div className="relative grid items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1.5 text-xs font-extrabold backdrop-blur">
-                <Sparkles className="h-3.5 w-3.5" /> {tr(COPY.badge)}
-              </span>
-              <h1 className="mt-5 font-display text-4xl font-black leading-[1.05] text-white sm:text-6xl">
+              <p className="text-sm font-extrabold text-white/85">{tr(COPY.badge)}</p>
+              <h1 className="mt-3 font-display text-4xl font-black leading-[1.05] text-white sm:text-6xl">
                 {tr(COPY.h1a)}{" "}
                 <span className="underline decoration-white/50 decoration-4 underline-offset-8">
                   {tr(COPY.h1b)}
@@ -264,15 +259,21 @@ export function LandingVibrante() {
       {/* Como funciona: passos em cartões lado a lado */}
       <section className="mx-auto w-full max-w-6xl px-3 pb-16">
         <h2 className="px-2 font-display text-3xl font-black sm:text-4xl">{tr(COPY.howTitle)}</h2>
-        <ol className="mt-8 grid gap-3 md:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <li key={s.title[0]} className="rounded-[2rem] border bg-card p-6 shadow-card">
-              <span className="font-display text-6xl font-black text-primary/20">0{i + 1}</span>
-              <h3 className="font-display text-lg font-extrabold">{tr(s.title)}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{tr(s.text)}</p>
-            </li>
-          ))}
-        </ol>
+        <div className="mt-8 grid overflow-hidden rounded-[2rem] border bg-card shadow-card md:grid-cols-[1fr_1.4fr]">
+          <img
+            src="/images/presentation/cooking-together.jpg"
+            alt=""
+            className="h-56 w-full object-cover md:h-full"
+          />
+          <ul className="divide-y p-2 sm:p-4">
+            {STEPS.map((s) => (
+              <li key={s.title[0]} className="p-4">
+                <h3 className="font-display text-lg font-extrabold">{tr(s.title)}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{tr(s.text)}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       {/* Profissionais */}
@@ -329,7 +330,7 @@ export function LandingVibrante() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-3 pb-16">
-        <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-gradient-to-r from-accent to-primary px-6 py-12 text-center text-white">
+        <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-accent px-6 py-12 text-center text-white">
           <Mascot id="nina" mood="cheer" size={100} />
           <h2 className="font-display text-3xl font-black text-white sm:text-4xl">
             {tr(COPY.finalTitle)}
@@ -437,7 +438,7 @@ export function LandingEditorial() {
           <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[1.02] tracking-tight sm:text-7xl">
             {tr(COPY.h1a)} <em className="text-accent">{tr(COPY.h1b)}</em>
           </h1>
-          <p className="mt-6 max-w-2xl border-l-4 border-accent pl-4 text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-6 max-w-2xl border-y border-foreground/40 py-3 text-lg leading-relaxed text-muted-foreground">
             {tr(COPY.lead)}
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -617,18 +618,9 @@ export function LandingAurora() {
   const security = SecurityItems();
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground [&_p]:text-left">
-      {/* Luzes de fundo */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[48rem]"
-        aria-hidden="true"
-      >
-        <div className="absolute -left-24 top-10 h-96 w-96 rounded-full bg-primary/30 blur-3xl" />
-        <div className="absolute right-0 top-0 h-[26rem] w-[26rem] rounded-full bg-accent/25 blur-3xl" />
-      </div>
-
       <header className="sticky top-0 z-30 px-3 pt-3">
         <Glass className="mx-auto flex h-14 max-w-4xl items-center gap-2 rounded-full px-3 sm:px-4">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-black text-primary-foreground">
+          <span className="hidden h-8 w-8 shrink-0 place-items-center rounded-full bg-primary sm:grid text-sm font-black text-primary-foreground">
             N
           </span>
           <Wordmark className="text-base" />
@@ -644,16 +636,16 @@ export function LandingAurora() {
             </a>
           </nav>
           <div className="ml-auto flex items-center gap-1.5">
-            <LangSelect />
+            <LangSelect show="min-[400px]:block" />
             <Link
               to="/login"
-              className="rounded-full px-3 py-2 text-sm font-semibold hover:bg-secondary"
+              className="whitespace-nowrap rounded-full px-2 py-2 text-sm font-semibold hover:bg-secondary sm:px-3"
             >
               {tr(COPY.login)}
             </Link>
             <Link
               to="/cadastro"
-              className="rounded-full bg-gradient-to-r from-primary to-accent px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-110"
+              className="whitespace-nowrap rounded-full bg-primary px-3 py-2 text-sm font-semibold sm:px-4 text-primary-foreground shadow-lg transition hover:brightness-110"
             >
               {tr(COPY.signup)}
             </Link>
@@ -661,49 +653,48 @@ export function LandingAurora() {
         </Glass>
       </header>
 
-      {/* Abertura centralizada */}
-      <section className="relative mx-auto w-full max-w-4xl px-4 pb-10 pt-16 text-center sm:pt-24">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-card/60 px-4 py-1.5 text-xs font-semibold backdrop-blur">
-          <Sparkles className="h-3.5 w-3.5 text-accent" /> {tr(COPY.badge)}
-        </span>
-        <h1 className="mx-auto mt-6 max-w-3xl font-display text-5xl font-semibold leading-[1.05] sm:text-7xl">
-          {tr(COPY.h1a)}{" "}
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            {tr(COPY.h1b)}
-          </span>
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl !text-center text-lg leading-relaxed text-muted-foreground">
-          {tr(COPY.lead)}
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link
-            to="/cadastro"
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-7 py-3.5 font-semibold text-primary-foreground shadow-xl transition hover:brightness-110"
-          >
-            {tr(COPY.start)} <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            to="/apresentacao"
-            className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-card/60 px-7 py-3.5 font-semibold backdrop-blur transition hover:bg-card"
-          >
-            <Presentation className="h-4 w-4" /> {tr(COPY.presentation)}
-          </Link>
+      {/* Abertura em duas colunas: texto à esquerda, fotos à direita */}
+      <section className="relative mx-auto grid w-full max-w-5xl items-center gap-10 px-4 pb-10 pt-12 sm:pt-20 lg:grid-cols-[1.1fr_1fr]">
+        <div>
+          <p className="text-sm font-medium text-accent">{tr(COPY.badge)}</p>
+          <h1 className="mt-3 max-w-xl font-display text-4xl font-semibold leading-[1.08] sm:text-6xl">
+            {tr(COPY.h1a)} <span className="text-accent">{tr(COPY.h1b)}</span>
+          </h1>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            {tr(COPY.lead)}
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              to="/cadastro"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-primary-foreground shadow-xl transition hover:brightness-110"
+            >
+              {tr(COPY.start)} <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/apresentacao"
+              className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-card/60 px-7 py-3.5 font-semibold backdrop-blur transition hover:bg-card"
+            >
+              <Presentation className="h-4 w-4" /> {tr(COPY.presentation)}
+            </Link>
+          </div>
+          <div className="mt-4">
+            <AndroidDownloadButton />
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground">{tr(COPY.freeNote)}</p>
         </div>
-        <div className="mt-4 flex justify-center">
-          <AndroidDownloadButton />
-        </div>
-        <p className="mt-4 !text-center text-xs text-muted-foreground">{tr(COPY.freeNote)}</p>
 
-        <div className="relative mx-auto mt-14 grid max-w-3xl grid-cols-3 gap-3">
-          {["market", "cooking-together", "meeting"].map((img, i) => (
+        <div className="relative grid grid-cols-[1.3fr_1fr] gap-3">
+          <img
+            src="/images/presentation/cooking-together.jpg"
+            alt=""
+            className="row-span-2 h-full min-h-72 w-full rounded-[1.75rem] object-cover ring-1 ring-foreground/10"
+          />
+          {["market", "meeting"].map((img) => (
             <img
               key={img}
               src={`/images/presentation/${img}.jpg`}
               alt=""
-              className={cn(
-                "h-44 w-full rounded-[1.75rem] object-cover shadow-2xl ring-1 ring-foreground/10 sm:h-60",
-                i === 1 && "-mt-6 sm:-mt-10",
-              )}
+              className="h-36 w-full rounded-[1.75rem] object-cover ring-1 ring-foreground/10 sm:h-44"
             />
           ))}
         </div>
@@ -711,10 +702,10 @@ export function LandingAurora() {
 
       {/* Recursos em bento */}
       <section id="recursos" className="relative mx-auto w-full max-w-5xl px-4 py-16">
-        <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">
+        <h2 className="font-display text-3xl font-semibold sm:text-4xl">
           {tr(COPY.featuresTitle)}
         </h2>
-        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f, i) => (
             <Glass
               key={f.title[0]}
@@ -724,11 +715,11 @@ export function LandingAurora() {
                 i === 3 && "lg:col-span-2",
               )}
             >
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-primary/25 to-accent/25 text-primary">
-                <f.icon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-4 font-display text-lg font-semibold">{tr(f.title)}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{tr(f.text)}</p>
+              <h3 className="flex items-center gap-2.5 font-display text-lg font-semibold">
+                <f.icon className="h-5 w-5 shrink-0 text-accent" />
+                {tr(f.title)}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tr(f.text)}</p>
             </Glass>
           ))}
         </div>
@@ -736,22 +727,19 @@ export function LandingAurora() {
 
       {/* Como funciona: linha do tempo */}
       <section className="relative mx-auto w-full max-w-3xl px-4 py-10">
-        <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">
-          {tr(COPY.howTitle)}
-        </h2>
-        <ol className="relative mt-10 space-y-4 before:absolute before:left-6 before:top-2 before:h-[calc(100%-1rem)] before:w-px before:bg-gradient-to-b before:from-primary before:to-accent">
-          {STEPS.map((s, i) => (
-            <li key={s.title[0]} className="relative pl-16">
-              <span className="absolute left-0 top-0 grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-primary to-accent font-bold text-primary-foreground shadow-lg">
-                {i + 1}
-              </span>
-              <Glass className="p-5">
-                <h3 className="font-display text-lg font-semibold">{tr(s.title)}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{tr(s.text)}</p>
-              </Glass>
-            </li>
+        <h2 className="font-display text-3xl font-semibold sm:text-4xl">{tr(COPY.howTitle)}</h2>
+        <Glass className="mt-8 divide-y divide-foreground/10">
+          {STEPS.map((s) => (
+            <div key={s.title[0]} className="p-5 sm:flex sm:gap-6">
+              <h3 className="font-display text-lg font-semibold sm:w-56 sm:shrink-0">
+                {tr(s.title)}
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:mt-0.5">
+                {tr(s.text)}
+              </p>
+            </div>
           ))}
-        </ol>
+        </Glass>
       </section>
 
       {/* Profissionais */}
@@ -764,7 +752,7 @@ export function LandingAurora() {
             <h2 className="mt-3 font-display text-3xl font-semibold">{tr(COPY.profTitle)}</h2>
             <Link
               to="/cadastro"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-6 py-3 font-semibold text-primary-foreground shadow-lg hover:brightness-110"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg hover:brightness-110"
             >
               {tr(COPY.profCta)} <ArrowRight className="h-4 w-4" />
             </Link>
@@ -796,9 +784,7 @@ export function LandingAurora() {
       </section>
 
       <section id="duvidas" className="relative mx-auto w-full max-w-3xl px-4 pb-16">
-        <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">
-          {tr(COPY.faqTitle)}
-        </h2>
+        <h2 className="font-display text-3xl font-semibold sm:text-4xl">{tr(COPY.faqTitle)}</h2>
         <Faq
           className="mt-6 space-y-2"
           itemClass="rounded-3xl border border-foreground/10 bg-card/60 backdrop-blur-xl"
@@ -806,7 +792,7 @@ export function LandingAurora() {
       </section>
 
       <section className="relative mx-auto w-full max-w-4xl px-4 pb-16">
-        <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-gradient-to-br from-primary/90 to-accent/90 px-6 py-12 text-center text-white shadow-2xl">
+        <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-primary px-6 py-12 text-center text-white shadow-2xl">
           <Mascot id="nina" mood="cheer" size={100} />
           <h2 className="font-display text-3xl font-semibold text-white sm:text-4xl">
             {tr(COPY.finalTitle)}

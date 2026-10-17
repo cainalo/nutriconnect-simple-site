@@ -77,6 +77,8 @@ export interface ArtData {
   fill?: number;
   /** Quantos de 4 hábitos foram marcados hoje. */
   habits?: number;
+  /** Hábitos escolhidos pela pessoa (bolinhas da arte). */
+  habitsTotal?: number;
   /** Humor de hoje (0 ótima … 3 pesada). */
   mood?: number | null;
 }
@@ -132,7 +134,7 @@ export function TileArt({ id, color, data }: { id: ArtId; color: string; data: A
     case "habits":
       return (
         <Big className="bottom-3 right-3 flex gap-1.5">
-          {[0, 1, 2, 3].map((i) => (
+          {Array.from({ length: data.habitsTotal ?? 4 }, (_, i) => i).map((i) => (
             <span
               key={i}
               className={`h-3 w-3 rounded-full transition ${i < (data.habits ?? 0) ? "nc-pop" : ""}`}

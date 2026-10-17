@@ -58,6 +58,15 @@ import {
 import { EmojiIcon } from "@/components/emoji-icon";
 
 const MOODS = ["😊", "😌", "😐", "😣", "😴", "😤"];
+/** Nome de cada humor para o leitor de tela (pt, en, es, fr). */
+const MOOD_NAMES: Record<string, [string, string, string, string]> = {
+  "😊": ["Feliz", "Happy", "Feliz", "Heureux"],
+  "😌": ["Tranquilo", "Calm", "Tranquilo", "Serein"],
+  "😐": ["Neutro", "Neutral", "Neutral", "Neutre"],
+  "😣": ["Desconfortável", "Uncomfortable", "Incómodo", "Mal à l'aise"],
+  "😴": ["Cansado", "Tired", "Cansado", "Fatigué"],
+  "😤": ["Irritado", "Annoyed", "Irritado", "Agacé"],
+};
 
 /** Sugere a refeição pelo horário atual. */
 function guessMeal(date: Date): MealType {
@@ -156,6 +165,7 @@ function FeelingsPicker({
 }
 
 export function DiaryComposer({ patientId }: { patientId: string }) {
+  const tr = useTr();
   const { t } = useClinicalI18n();
   const now = new Date();
   const [mealType, setMealType] = useState<MealType>(guessMeal(now));
@@ -356,6 +366,8 @@ export function DiaryComposer({ patientId }: { patientId: string }) {
                   key={m}
                   type="button"
                   aria-pressed={mood === m}
+                  aria-label={tr(MOOD_NAMES[m])}
+                  title={tr(MOOD_NAMES[m])}
                   onClick={() => setMood(mood === m ? null : m)}
                   className={cn(
                     "grid h-10 w-10 place-items-center rounded-full border-2 text-xl transition-all duration-300",

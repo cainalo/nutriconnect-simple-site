@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { MousePointerClick, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { EmojiIcon } from "@/components/emoji-icon";
 import {
   Badge,
   ConfirmDialog,
@@ -139,8 +140,11 @@ export function MarketsSection() {
               const s = (stats.data ?? []).find((x) => x.partner_id === p.id);
               return (
                 <li key={p.id} className="flex flex-wrap items-center gap-3 bg-card px-4 py-3">
-                  <span className="text-2xl" aria-hidden>
-                    {p.emoji}
+                  <span
+                    className="grid h-9 w-9 place-items-center rounded-xl bg-secondary text-primary"
+                    aria-hidden
+                  >
+                    <EmojiIcon emoji={p.emoji || "🛒"} className="h-5 w-5" />
                   </span>
                   <div className="min-w-0 flex-1 basis-56">
                     <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">

@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { adminRpc } from "@/lib/admin-api";
 
 export type SiteConfigKey =
-  "site_texts" | "site_appearance" | "site_features" | "site_nina" | "site_design";
+  "site_texts" | "site_appearance" | "site_features" | "site_nina" | "site_design" | "site_photos";
 
 const KEY = ["site-config"] as const;
 

@@ -8,6 +8,7 @@ import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useOwnedPrograms, useProgramStore } from "@/lib/programs";
 import { cardsByIds } from "@/lib/social/api";
+import { EmptyPhoto } from "@/components/clinical/ui";
 
 export const Route = createFileRoute("/programas/")({
   component: ProgramStore,
@@ -41,7 +42,10 @@ function ProgramStore() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold font-display text-foreground">
+        <h1
+          data-page-head
+          className="flex items-center gap-2 text-2xl font-extrabold font-display text-foreground"
+        >
           <ShoppingBag className="h-6 w-6 text-accent" />
           {tr(["Programas", "Programs", "Programas", "Programmes"])}
         </h1>
@@ -91,7 +95,13 @@ function ProgramStore() {
       {store.isLoading ? (
         <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" />
       ) : list.length === 0 ? (
-        <p className="rounded-3xl border border-border/70 bg-card p-6 text-center text-sm text-muted-foreground">
+        <div className="overflow-hidden rounded-3xl border border-border/70 bg-card p-6 text-center text-sm text-muted-foreground">
+          {!term && (
+            <EmptyPhoto
+              src="/images/presentation/breakfast-plate.jpg"
+              className="-mx-6 -mt-6 mb-5"
+            />
+          )}
           {term
             ? tr(["Nada encontrado.", "Nothing found.", "No se encontró nada.", "Rien trouvé."])
             : tr([
@@ -100,7 +110,7 @@ function ProgramStore() {
                 "Aún no hay programas a la venta. ¡Vuelve pronto!",
                 "Pas encore de programmes en vente. Revenez bientôt !",
               ])}
-        </p>
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((p) => (

@@ -559,7 +559,7 @@ const content: ContentOverrides = {
     question: "Environ combien de milligrammes de vitamine C contient une orange moyenne ?",
     unit: " mg",
     explanation:
-      "Une orange moyenne contient environ 70 mg de vitamine C — plus que le besoin quotidien de nombreux adultes.",
+      "Une orange moyenne contient environ 70 mg de vitamine C, plus que le besoin quotidien de nombreux adultes.",
   },
   "stop:lesson-1-3": {
     title: "Eau et Fibres",
@@ -808,7 +808,7 @@ const content: ContentOverrides = {
     question: "Environ quel pourcentage du poids corporel d'un adulte est de l'eau ?",
     unit: "%",
     explanation:
-      "En moyenne, environ 60 % du corps adulte est de l'eau — c'est pourquoi elle est si essentielle pour que tout fonctionne bien.",
+      "En moyenne, environ 60 % du corps adulte est de l'eau, c'est pourquoi elle est si essentielle pour que tout fonctionne bien.",
   },
   "trail:escolhas": {
     title: "Aliments et Choix",
@@ -912,7 +912,7 @@ const content: ContentOverrides = {
       "Nouilles instantanées",
     ],
     explanation:
-      "Les aliments transformés utilisent peu d'ingrédients et des techniques simples, comme le sel et la fermentation — contrairement aux ultra-transformés.",
+      "Les aliments transformés utilisent peu d'ingrédients et des techniques simples, comme le sel et la fermentation, contrairement aux ultra-transformés.",
   },
   "act:lesson-2-1-l1-y4": {
     prompt:
@@ -2963,7 +2963,7 @@ const content: ContentOverrides = {
       "Cela laisse au cerveau le temps d'enregistrer la satiété",
     ],
     explanation:
-      "Le cerveau met environ 20 minutes à percevoir la satiété — manger lentement suit ce rythme.",
+      "Le cerveau met environ 20 minutes à percevoir la satiété. Manger lentement suit ce rythme.",
   },
   "act:lesson-4-2-l2-x4": {
     statement: "Prêter attention au repas peut augmenter le plaisir de manger.",
@@ -3361,10 +3361,10 @@ const content: ContentOverrides = {
     title: "Chaque couleur a un super-pouvoir !",
     body: "Les fruits et légumes ont de belles couleurs, et chaque couleur aide le corps à sa manière. **Plus il y a de couleurs dans l'assiette, plus il y a de super-pouvoirs !**",
     points: [
-      "🥕 Orange : aide les yeux",
-      "🥦 Vert : rend le corps fort",
-      "🍅 Rouge : prend soin du cœur",
-      "🍇 Violet : aide le cerveau",
+      "Orange : aide les yeux",
+      "Vert : rend le corps fort",
+      "Rouge : prend soin du cœur",
+      "Violet : aide le cerveau",
     ],
     tip: "Essaie de manger 3 couleurs différentes à chaque repas !",
   },

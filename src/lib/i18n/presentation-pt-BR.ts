@@ -625,7 +625,7 @@ const ptBR: PresentationCopy = {
   },
   join: {
     eyebrow: "Faça parte",
-    title: "Sua jornada começa agora",
+    title: "Comece pela próxima refeição",
     text: "Crie sua conta gratuita, entre em uma comunidade e dê o primeiro passo na trilha com a Nina.",
     primary: "Criar minha conta",
     secondary: "Já tenho conta",

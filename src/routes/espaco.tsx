@@ -1,15 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUp, Compass, Sparkles } from "lucide-react";
+import { ArrowUp, CalendarDays, Compass, Sparkles } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { FeedShell, type FeedShellPage } from "@/components/feed-shell";
 import { useAppearance } from "@/hooks/use-appearance";
-import { loadAppearance } from "@/lib/appearance";
 import { PostCard } from "@/components/community-cards";
 import { ShareModal } from "@/components/share-modal";
 import { PostMasonry } from "@/components/post-masonry";
 import { EspacoIntro } from "@/components/espaco-intro";
+import { LoadMoreTrigger, scrollParent } from "@/components/load-more-trigger";
 import { MyChallengesCard, ProfileCard, TrailCard, WeeklyThemeCard } from "@/components/rail-cards";
 import { PushInviteCard } from "@/components/push-settings";
 import { themeText } from "@/lib/social/feed";
@@ -18,23 +18,28 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 import { useDesignId } from "@/lib/site-design";
 import type { DictKey } from "@/lib/i18n";
+import { EmptyPhoto } from "@/components/clinical/ui";
+import { useSitePhotos } from "@/lib/site-photos";
 
-// Filtros da página Geral: tudo, amigos, ou profissionais que a pessoa segue.
-type Filter = "todos" | "amigos" | "seguindo";
+// Filtros da página Geral: tudo, amigos, profissionais que a pessoa segue ou os posts que ela salvou.
+type Filter = "todos" | "amigos" | "seguindo" | "salvos";
 
 const FILTERS: { id: Filter; labelKey: DictKey }[] = [
   { id: "todos", labelKey: "espaco.filter.all" },
   { id: "amigos", labelKey: "espaco.tab.amigos" },
   { id: "seguindo", labelKey: "espaco.tab.profissionais" },
+  { id: "salvos", labelKey: "espaco.filter.saved" },
 ];
 
 const EMPTY_FILTER_KEYS: Record<Filter, DictKey> = {
   todos: "espaco.empty.geral",
   amigos: "espaco.empty.amigos",
   seguindo: "espaco.empty.profissionais",
+  salvos: "espaco.empty.salvos",
 };
 
-const DEFAULT_PAGE_SIZE = 20;
+/** Posts por leva da rolagem infinita. */
+const PAGE_SIZE = 20;
 
 export const Route = createFileRoute("/espaco")({
   head: () => ({
@@ -58,9 +63,17 @@ export const Route = createFileRoute("/espaco")({
 
 function EmptyState({ message }: { message: string }) {
   const { t } = useI18n();
+  const photos = useSitePhotos();
   return (
-    <div className="rounded-3xl border border-dashed border-border bg-card/40 p-12 text-center max-w-lg mx-auto">
-      <Compass className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-50" />
+    <div className="mx-auto max-w-lg overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-12 text-center">
+      <EmptyPhoto src="/images/heads/convites.jpg" className="-mx-12 -mt-12 mb-0" />
+      {photos ? (
+        <span className="relative mx-auto -mt-7 mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-card text-primary shadow-md ring-4 ring-card">
+          <Compass className="h-6 w-6" />
+        </span>
+      ) : (
+        <Compass className="mx-auto mb-4 h-10 w-10 text-muted-foreground opacity-50" />
+      )}
       <p className="text-base text-muted-foreground font-medium mb-6">{message}</p>
       <ShareModal
         triggerButton={
@@ -71,40 +84,6 @@ function EmptyState({ message }: { message: string }) {
       />
     </div>
   );
-}
-
-/** Contêiner que rola a página do feed (cada página do FeedShell rola por dentro). */
-function scrollParent(el: HTMLElement | null): HTMLElement | null {
-  for (let node = el?.parentElement; node; node = node.parentElement) {
-    const { overflowY } = getComputedStyle(node);
-    if (overflowY === "auto" || overflowY === "scroll") return node;
-  }
-  return null;
-}
-
-/**
- * Pede a próxima página quando o fim da lista chega perto (antes de a pessoa alcançá-lo).
- * O observador é refeito a cada página carregada: se o fim continuar à vista, pede outra.
- */
-function LoadMoreTrigger({ onReach, pageCount }: { onReach: () => void; pageCount: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const onReachRef = useRef(onReach);
-  useEffect(() => {
-    onReachRef.current = onReach;
-  }, [onReach]);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) onReachRef.current();
-      },
-      { root: scrollParent(el), rootMargin: "0px 0px 1200px 0px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [pageCount]);
-  return <div ref={ref} className="h-px" aria-hidden="true" />;
 }
 
 type InfiniteFeed = ReturnType<typeof useInfiniteFeed>;
@@ -201,14 +180,19 @@ function EspacoDeHojePage() {
   const { user } = useRequireAuth();
   const { t, locale } = useI18n();
   const [filter, setFilter] = useState<Filter>("todos");
-  const [pageSize] = useState(() => loadAppearance().feedPageSize || DEFAULT_PAGE_SIZE);
+  const pageSize = PAGE_SIZE;
   const { appearance } = useAppearance();
   const enabled = !!user;
   const [hasNew, setHasNew] = useState(false);
   const onNewPost = useCallback(() => setHasNew(true), []);
   useFeedRealtime(user?.id, onNewPost);
   // Geral, Amigos e Profissionais: na ordem do algoritmo (últimos 7 dias), depois por data.
-  const geralFeed = useInfiniteFeed({ scope: filter, limit: pageSize }, true, enabled);
+  // Salvos: por data (o algoritmo só olha os últimos 7 dias).
+  const geralFeed = useInfiniteFeed(
+    { scope: filter, limit: pageSize },
+    filter !== "salvos",
+    enabled,
+  );
   // Aba Profissionais: quem a pessoa segue; se nenhum deles publicou ainda, os profissionais em geral.
   const prosFallback =
     filter === "seguindo" && geralFeed.query.isSuccess && geralFeed.posts.length === 0;
@@ -277,9 +261,9 @@ function EspacoDeHojePage() {
       content: (
         <>
           {text ? (
-            <div className="mb-6 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card p-6 shadow-xs">
+            <div className="mb-6 rounded-3xl border border-accent/30 bg-accent-soft/40 p-6 shadow-xs">
               <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-accent">
-                <Sparkles className="h-4 w-4" /> {text.badge ?? t("weekly.badge")}
+                <CalendarDays className="h-4 w-4" /> {text.badge ?? t("weekly.badge")}
               </p>
               <h2 className="mt-2 text-xl font-extrabold font-display text-foreground">
                 {text.title}

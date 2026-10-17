@@ -44,6 +44,7 @@ import { useCommunities, useCreateCommunity } from "@/lib/social/communities-que
 import type { PostAudience } from "@/lib/social/feed";
 import { useI18n } from "@/hooks/use-i18n";
 import type { DictKey } from "@/lib/i18n";
+import { vibrate } from "@/lib/native";
 
 const THEMES = {
   accent: {
@@ -421,7 +422,7 @@ export function ShareModal({
             if (e.pointerType === "touch") {
               d.timer = window.setTimeout(() => {
                 if (drag.current !== d) return;
-                navigator.vibrate?.(15);
+                vibrate(15);
                 activateDrag(d);
                 placeDragged();
               }, LONG_PRESS_MS);

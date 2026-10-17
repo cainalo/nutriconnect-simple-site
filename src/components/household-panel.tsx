@@ -27,6 +27,7 @@ import {
   X,
 } from "lucide-react";
 import { BuyAtMarket } from "@/components/buy-at-market";
+import { EmojiIcon } from "@/components/emoji-icon";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -39,6 +40,7 @@ import {
 } from "@/lib/fridge";
 import {
   HOUSE_EMOJIS,
+  HOUSE_EMOJI_NAMES,
   MAX_MEMBERS,
   NOTE_MAX,
   countMyPersonalItems,
@@ -62,6 +64,19 @@ import {
 import type { PersonCard } from "@/lib/social/api";
 import { useFriends } from "@/lib/social/queries";
 import { cn } from "@/lib/utils";
+import type { Names } from "@/lib/appearance-data";
+import { useSitePhotos } from "@/lib/site-photos";
+import { guessSection } from "@/lib/aisles";
+import { SECTIONS, type Section } from "@/lib/menu.functions";
+import {
+  MEAL_NAMES,
+  SECTION_NAMES,
+  mondayOf,
+  slotKey,
+  useWeeklyMenu,
+  type MenuMeals,
+} from "@/lib/menu";
+import { shareContent } from "@/lib/native";
 
 const card = "rounded-3xl border border-border/70 bg-card p-5 shadow-xs";
 const btnPrimary =
@@ -98,10 +113,18 @@ export function HouseholdPanel() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-extrabold font-display text-foreground">
-          {mine.data
-            ? `${mine.data.house.emoji} ${mine.data.house.name}`
-            : tr(["Minha casa", "My home", "Mi casa", "Ma maison"])}
+        <h1
+          data-page-head={mine.data ? undefined : ""}
+          className="text-2xl font-extrabold font-display text-foreground"
+        >
+          {mine.data ? (
+            <span className="inline-flex items-center gap-2">
+              <EmojiIcon emoji={mine.data.house.emoji} fallback={Home} tinted className="h-6 w-6" />
+              {mine.data.house.name}
+            </span>
+          ) : (
+            tr(["Minha casa", "My home", "Mi casa", "Ma maison"])
+          )}
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           {tr([
@@ -143,9 +166,7 @@ function NoHouse() {
       { name: name.trim(), emoji },
       {
         onSuccess: () =>
-          toast.success(
-            tr(["Casa criada! 🏠", "Home created! 🏠", "¡Casa creada! 🏠", "Maison créée ! 🏠"]),
-          ),
+          toast.success(tr(["Casa criada!", "Home created!", "¡Casa creada!", "Maison créée !"])),
         onError,
       },
     );
@@ -185,13 +206,14 @@ function NoHouse() {
               type="button"
               role="radio"
               aria-checked={emoji === e}
+              aria-label={HOUSE_EMOJI_NAMES[e] ? tr(HOUSE_EMOJI_NAMES[e]) : undefined}
               onClick={() => setEmoji(e)}
               className={cn(
-                "grid h-9 w-9 place-items-center rounded-xl border text-lg transition",
+                "grid h-9 w-9 place-items-center rounded-xl border transition",
                 emoji === e ? "border-accent bg-accent-soft" : "border-border hover:bg-secondary",
               )}
             >
-              {e}
+              <EmojiIcon emoji={e} fallback={Home} tinted className="h-5 w-5" />
             </button>
           ))}
         </div>
@@ -294,6 +316,7 @@ function HouseView({ mine }: { mine: MyHousehold }) {
     <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
       <div className="space-y-4">
         <BringItemsPrompt houseId={mine.house.id} />
+        <HouseToday />
         <HouseShopping people={people.data} />
         <HouseKitchen />
         <HouseNotes mine={mine} people={people.data} me={user?.id} />
@@ -477,7 +500,7 @@ function HouseShopping({ people }: { people?: Map<string, PersonCard> }) {
       <button
         type="button"
         onClick={() => remove.mutate([it.id])}
-        className="text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100 focus:opacity-100"
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
         aria-label={tr(["Remover", "Remove", "Quitar", "Retirer"])}
       >
         <X className="h-4 w-4" />
@@ -541,7 +564,33 @@ function HouseShopping({ people }: { people?: Map<string, PersonCard> }) {
         </p>
       ) : (
         <>
-          <ul className="mt-3 divide-y divide-border/50">{open.map(row)}</ul>
+          <div className="mt-3 flex items-center gap-2">
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-accent transition-all duration-500"
+                style={{ width: `${Math.round((done.length / items.length) * 100)}%` }}
+              />
+            </div>
+            <span className="text-[11px] font-bold tabular-nums text-foreground">
+              {done.length}/{items.length}
+            </span>
+          </div>
+          {/* Agrupado pela seção do mercado (a do Cardápio, ou adivinhada pelo nome do item). */}
+          {SECTIONS.map((sec) => {
+            const group = open.filter(
+              (it) => ((it.section as Section | null) ?? guessSection(it.text)) === sec,
+            );
+            if (!group.length) return null;
+            return (
+              <section key={sec} className="mt-3">
+                <h3 className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {tr(SECTION_NAMES[sec])}
+                  <span className="tabular-nums">{group.length}</span>
+                </h3>
+                <ul className="divide-y divide-border/50">{group.map(row)}</ul>
+              </section>
+            );
+          })}
           {done.length > 0 && (
             <>
               <h3 className="mt-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -600,13 +649,14 @@ function EditHouse({ mine }: { mine: MyHousehold }) {
             key={e}
             type="button"
             aria-pressed={emoji === e}
+            aria-label={HOUSE_EMOJI_NAMES[e] ? tr(HOUSE_EMOJI_NAMES[e]) : undefined}
             onClick={() => setEmoji(e)}
             className={cn(
-              "grid h-8 w-8 place-items-center rounded-xl border text-base transition",
+              "grid h-8 w-8 place-items-center rounded-xl border transition",
               emoji === e ? "border-accent bg-accent-soft" : "border-border hover:bg-secondary",
             )}
           >
-            {e}
+            <EmojiIcon emoji={e} fallback={Home} tinted className="h-4 w-4" />
           </button>
         ))}
       </div>
@@ -754,11 +804,7 @@ function Invite({ mine }: { mine: MyHousehold }) {
       `Únete a nuestra casa en NutriConnect con el código ${value}:`,
       `Rejoignez notre maison sur NutriConnect avec le code ${value} :`,
     ]);
-    if (navigator.share) {
-      await navigator.share({ title: "NutriConnect", text, url: link }).catch(() => undefined);
-    } else {
-      await copy();
-    }
+    if (!(await shareContent({ title: "NutriConnect", text, url: link }))) await copy();
   };
 
   return (
@@ -901,9 +947,69 @@ function LeaveHouse() {
   );
 }
 
+/** Almoço e jantar de hoje no cardápio da casa (some se a semana ainda não tem cardápio). */
+function HouseToday() {
+  const tr = useTr();
+  const { user } = useAuth();
+  const menu = useWeeklyMenu(user?.id, mondayOf());
+  const meals = (menu.data?.meals ?? {}) as MenuMeals;
+  const day = (new Date().getDay() + 6) % 7;
+  const today = (["almoco", "jantar"] as const)
+    .map((m) => ({ m, meal: meals[slotKey(day, m)] }))
+    .filter((x) => x.meal);
+  if (!today.length) return null;
+  return (
+    <section className={card}>
+      <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+        <CalendarDays className="h-4 w-4 text-accent" />
+        {tr(["Hoje na casa", "Today at home", "Hoy en casa", "Aujourd'hui à la maison"])}
+        <Link
+          to="/cardapio"
+          className="ml-auto text-[11px] font-semibold text-accent hover:underline"
+        >
+          {tr(["Ver a semana", "See the week", "Ver la semana", "Voir la semaine"])}
+        </Link>
+      </h2>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        {today.map(({ m, meal }) => (
+          <div key={m} className="rounded-2xl border border-border/60 bg-background/60 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              {tr(MEAL_NAMES[m])}
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-foreground">{meal!.title}</p>
+            {meal!.prepTime && (
+              <p className="text-[11px] text-muted-foreground">{meal!.prepTime}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Recados prontos do mural, para mandar com um toque. */
+const QUICK_NOTES: Names[] = [
+  ["Janta pronta!", "Dinner's ready!", "¡La cena está lista!", "Le dîner est prêt !"],
+  [
+    "Sobrou comida na geladeira",
+    "There are leftovers in the fridge",
+    "Sobró comida en la nevera",
+    "Il reste à manger au frigo",
+  ],
+  ["Cheguei em casa", "I'm home", "Ya llegué a casa", "Je suis rentré(e)"],
+  ["Hoje janto fora", "Eating out tonight", "Hoy ceno fuera", "Je dîne dehors ce soir"],
+  [
+    "Vou ao mercado, precisa de algo?",
+    "Going to the store, need anything?",
+    "Voy al mercado, ¿necesitan algo?",
+    "Je vais faire les courses, besoin de quelque chose ?",
+  ],
+];
+
 /** Geladeira e cardápio, que também passam a ser da casa. */
 function HouseKitchen() {
   const tr = useTr();
+  const photos = useSitePhotos();
   const links = [
     {
       to: "/geladeira" as const,
@@ -945,14 +1051,36 @@ function HouseKitchen() {
         <Link
           key={l.to}
           to={l.to}
-          className={cn(card, "flex items-start gap-3 transition hover:bg-secondary/50")}
+          className={cn(
+            card,
+            "group flex flex-col overflow-hidden p-0 transition hover:bg-secondary/50",
+          )}
         >
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
-            <l.icon className="h-5 w-5" />
-          </span>
-          <span>
-            <span className="block text-sm font-bold text-foreground">{l.title}</span>
-            <span className="block text-xs text-muted-foreground">{l.text}</span>
+          {/* Mesma foto da faixa de título da página de destino. */}
+          {photos && (
+            <span className="relative block h-24 overflow-hidden">
+              <img
+                src={`/images/heads${l.to}.jpg`}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+              />
+            </span>
+          )}
+          <span className="flex items-start gap-3 p-4">
+            <span
+              className={cn(
+                "relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-accent",
+                photos ? "-mt-9 bg-card shadow-md ring-4 ring-card" : "bg-accent-soft",
+              )}
+            >
+              <l.icon className="h-5 w-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-bold text-foreground">{l.title}</span>
+              <span className="block text-xs text-muted-foreground">{l.text}</span>
+            </span>
           </span>
         </Link>
       ))}
@@ -1016,6 +1144,19 @@ function HouseNotes({
           <span className="sr-only">{tr(["Enviar", "Send", "Enviar", "Envoyer"])}</span>
         </button>
       </form>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {QUICK_NOTES.map((q) => (
+          <button
+            key={q[0]}
+            type="button"
+            disabled={add.isPending}
+            onClick={() => add.mutate(tr(q), { onError })}
+            className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition hover:border-accent hover:text-accent disabled:opacity-50"
+          >
+            {tr(q)}
+          </button>
+        ))}
+      </div>
       {notes.isLoading ? (
         <Loader2 className="mx-auto mt-4 h-5 w-5 animate-spin text-muted-foreground" />
       ) : (notes.data ?? []).length === 0 ? (
