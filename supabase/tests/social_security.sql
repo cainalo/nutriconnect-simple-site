@@ -1070,6 +1070,16 @@ begin
     res := res || jsonb_build_object('teste', 'NÃO altera registro do dia de outra pessoa', 'ok', (r = 'OK:0'), 'obtido', left(r, 90));
     r := pg_temp.as_user(a, 'authenticated', 'insert into public.daily_checkins (user_id, day, habits) values (auth.uid(), current_date - 1, array[''cerveja''])');
     res := res || jsonb_build_object('teste', 'NÃO aceita hábito fora da lista', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    if exists (select 1 from information_schema.columns where table_name = 'user_settings' and column_name = 'habit_choice') then
+      r := pg_temp.as_user(a, 'authenticated', 'update public.daily_checkins set habits = array[''fruit'', ''beans'', ''no_soda''] where day = current_date');
+      res := res || jsonb_build_object('teste', 'aceita hábitos novos do catálogo', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(a, 'authenticated', 'update public.user_settings set habit_choice = array[''water'', ''fruit'', ''slow'', ''outdoor''] where id = auth.uid()');
+      res := res || jsonb_build_object('teste', 'escolhe os próprios hábitos (3 a 8)', 'ok', (r = 'OK:1'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(a, 'authenticated', 'update public.user_settings set habit_choice = array[''water'', ''fruit''] where id = auth.uid()');
+      res := res || jsonb_build_object('teste', 'NÃO escolhe menos de 3 hábitos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(a, 'authenticated', 'update public.user_settings set habit_choice = array[''water'', ''fruit'', ''cerveja''] where id = auth.uid()');
+      res := res || jsonb_build_object('teste', 'NÃO escolhe hábito fora do catálogo', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    end if;
     r := pg_temp.as_user(a, 'authenticated', 'insert into public.daily_checkins (user_id, day, mood) values (auth.uid(), current_date - 30, 1)');
     res := res || jsonb_build_object('teste', 'NÃO reescreve registro de semanas atrás', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
     r := pg_temp.as_user(a, 'authenticated', 'select (public.export_my_data() -> ''registros_do_dia'') is not null');

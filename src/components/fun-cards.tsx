@@ -4,6 +4,7 @@
 // quiz) fica na conta, só para ela (ver lib/checkins e water-tracker). Textos nos 4 idiomas.
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   Apple,
   Carrot,
@@ -29,6 +30,7 @@ import {
   RotateCcw,
   Scale,
   Search,
+  Settings2,
   Send,
   Shuffle,
   ShoppingBasket,
@@ -46,6 +48,7 @@ import {
 } from "lucide-react";
 import type { ProfessionKey } from "@/lib/clinical/professions";
 import { EmojiIcon } from "@/components/emoji-icon";
+import { HABIT_CATALOG, MAX_HABITS, MIN_HABITS, useHabitChoice } from "@/lib/habits";
 import { Panel } from "@/components/rail-cards";
 import { WaterTracker } from "@/components/water-tracker";
 import {
@@ -144,6 +147,10 @@ const iconBtn =
 const primaryBtn =
   "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50";
 const note = "mt-3 text-[10px] leading-snug text-muted-foreground";
+
+/** Troca {chave} pelo valor no texto. */
+const fillN = (text: string, vars: Record<string, string | number>) =>
+  text.replace(/\{(\w+)\}/g, (_, k: string) => String(vars[k] ?? ""));
 
 function Bar({ value, max }: { value: number; max: number }) {
   return (
@@ -1226,36 +1233,46 @@ export function ShoppingListCard() {
 
 // ───────────────────────────── Hábitos do dia ─────────────────────────────
 
-const HABITS: { id: string; emoji: string; name: Names }[] = [
-  { id: "water", emoji: "💧", name: ["Bebi água", "Drank water", "Bebí agua", "J'ai bu de l'eau"] },
-  {
-    id: "veg",
-    emoji: "🥦",
-    name: ["Comi legumes ou verduras", "Ate vegetables", "Comí verduras", "J'ai mangé des légumes"],
-  },
-  { id: "move", emoji: "🚶", name: ["Me movimentei", "I got moving", "Me moví", "J'ai bougé"] },
-  { id: "sleep", emoji: "😴", name: ["Dormi bem", "Slept well", "Dormí bien", "J'ai bien dormi"] },
-];
-
-/** Hábitos do dia na conta: sequência de dias com 3 ou mais e os últimos 7 dias. */
+/** Hábitos do dia na conta: a pessoa escolhe quais acompanhar; sequência de dias com 3 ou mais,
+ *  barras dos últimos 7 dias e o mapa das últimas 5 semanas. */
 export function HabitCheckinCard() {
   const tr = useTr();
+  const { locale } = useI18n();
   const { user } = useAuth();
   const checkins = useCheckins(user?.id);
   const save = useSaveCheckin(user?.id);
+  const { chosen, ids, save: saveChoice } = useHabitChoice();
   const [burst, fire] = useBurst();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<string[]>([]);
+  const [view, setView] = useState<"week" | "month">("week");
   const today = checkinDay();
   const map = useMemo(() => checkinsByDay(checkins.data), [checkins.data]);
   const marked = map.get(today)?.habits ?? [];
-  const streak = streakOf(map, (c) => (c?.habits.length ?? 0) >= 3);
+  const markedChosen = marked.filter((id) => ids.includes(id));
+  const streak = streakOf(map, (c) => (c?.habits.length ?? 0) >= MIN_HABITS);
   const week = Array.from({ length: 7 }, (_, i) => map.get(daysAgo(6 - i))?.habits.length ?? 0);
+  // 5 semanas de segunda a domingo, terminando na semana atual.
+  const month = useMemo(() => {
+    const monday = new Date(weekStartDay() + "T12:00:00");
+    monday.setDate(monday.getDate() - 28);
+    return Array.from({ length: 35 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const day = checkinDay(d);
+      return { day, n: map.get(day)?.habits.length ?? 0, future: day > today };
+    });
+  }, [map, today]);
 
   const toggle = (id: string) => {
     if (!user) return;
     const has = marked.includes(id);
     const nextList = has ? marked.filter((x) => x !== id) : [...marked, id];
-    save.mutate({ day: today, patch: { habits: nextList } });
-    if (!has && nextList.length === HABITS.length) {
+    save.mutate(
+      { day: today, patch: { habits: nextList } },
+      { onError: (err) => toast.error((err as Error).message) },
+    );
+    if (!has && ids.every((h) => nextList.includes(h))) {
       fire();
       playSound("achievement");
     } else {
@@ -1263,71 +1280,213 @@ export function HabitCheckinCard() {
     }
   };
 
+  const openEditor = () => {
+    setDraft(ids);
+    setEditing(true);
+  };
+  const toggleDraft = (id: string) =>
+    setDraft((d) =>
+      d.includes(id) ? d.filter((x) => x !== id) : d.length < MAX_HABITS ? [...d, id] : d,
+    );
+  const saveDraft = () =>
+    saveChoice.mutate(draft, {
+      onSuccess: () => setEditing(false),
+      onError: (err) => toast.error((err as Error).message),
+    });
+
+  const shade = (n: number) =>
+    n >= MIN_HABITS ? "bg-accent" : n > 0 ? "bg-accent/40" : "bg-secondary";
+
   return (
     <Panel
       title={tr(["Hábitos de hoje", "Today's habits", "Hábitos de hoy", "Habitudes du jour"])}
       className="relative"
       action={
-        <span
-          className={`inline-flex items-center gap-1 text-xs font-bold ${streak > 0 ? "text-accent" : "text-muted-foreground"}`}
-        >
-          <Flame className="h-3.5 w-3.5" />
-          {streak}
+        <span className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1 text-xs font-bold ${streak > 0 ? "text-accent" : "text-muted-foreground"}`}
+          >
+            <Flame className="h-3.5 w-3.5" />
+            {streak}
+          </span>
+          {user && !editing && (
+            <button
+              type="button"
+              onClick={openEditor}
+              className="grid h-7 w-7 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              aria-label={tr([
+                "Escolher hábitos",
+                "Choose habits",
+                "Elegir hábitos",
+                "Choisir les habitudes",
+              ])}
+              title={tr([
+                "Escolher hábitos",
+                "Choose habits",
+                "Elegir hábitos",
+                "Choisir les habitudes",
+              ])}
+            >
+              <Settings2 className="h-4 w-4" />
+            </button>
+          )}
         </span>
       }
     >
       <Burst id={burst} />
-      <ul className="space-y-1.5">
-        {HABITS.map((h) => {
-          const on = marked.includes(h.id);
-          return (
-            <li key={h.id}>
-              <button
-                type="button"
-                onClick={() => toggle(h.id)}
-                aria-pressed={on}
-                className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-left text-xs font-medium transition active:scale-[0.98] ${
-                  on
-                    ? "border-accent/40 bg-accent/10 text-foreground"
-                    : "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary"
-                }`}
-              >
-                <span className="text-accent">
-                  <EmojiIcon emoji={h.emoji} className="h-5 w-5" />
-                </span>
-                <span className="flex-1">{tr(h.name)}</span>
-                <CheckCircle2
-                  className={`h-4 w-4 ${on ? "text-accent" : "text-muted-foreground/40"}`}
+      {editing ? (
+        <div>
+          <p className="mb-2 text-[11px] text-muted-foreground">
+            {fillN(
+              tr([
+                "Escolha de {min} a {max} hábitos para acompanhar ({n} escolhidos).",
+                "Pick {min} to {max} habits to track ({n} chosen).",
+                "Elige de {min} a {max} hábitos para seguir ({n} elegidos).",
+                "Choisissez de {min} à {max} habitudes à suivre ({n} choisies).",
+              ]),
+              { min: MIN_HABITS, max: MAX_HABITS, n: draft.length },
+            )}
+          </p>
+          <ul className="grid gap-1.5 sm:grid-cols-2">
+            {HABIT_CATALOG.map((h) => {
+              const on = draft.includes(h.id);
+              const full = !on && draft.length >= MAX_HABITS;
+              return (
+                <li key={h.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggleDraft(h.id)}
+                    aria-pressed={on}
+                    disabled={full}
+                    className={`flex w-full cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                      on
+                        ? "border-primary/50 bg-primary/10 text-foreground"
+                        : "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    <h.icon className={`h-4 w-4 shrink-0 ${on ? "text-primary" : ""}`} />
+                    <span className="flex-1">{tr(h.name)}</span>
+                    <CheckCircle2
+                      className={`h-4 w-4 shrink-0 ${on ? "text-primary" : "text-muted-foreground/30"}`}
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="mt-3 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-secondary"
+            >
+              {tr(["Cancelar", "Cancel", "Cancelar", "Annuler"])}
+            </button>
+            <button
+              type="button"
+              onClick={saveDraft}
+              disabled={draft.length < MIN_HABITS || saveChoice.isPending}
+              className="cursor-pointer rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {tr(["Salvar", "Save", "Guardar", "Enregistrer"])}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <ul className="space-y-1.5">
+            {chosen.map((h) => {
+              const on = marked.includes(h.id);
+              return (
+                <li key={h.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(h.id)}
+                    aria-pressed={on}
+                    className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-left text-xs font-medium transition active:scale-[0.98] ${
+                      on
+                        ? "border-accent/40 bg-accent/10 text-foreground"
+                        : "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    <h.icon className="h-5 w-5 shrink-0 text-accent" />
+                    <span className="flex-1">{tr(h.name)}</span>
+                    <CheckCircle2
+                      className={`h-4 w-4 shrink-0 ${on ? "text-accent" : "text-muted-foreground/40"}`}
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="mt-3">
+            <Bar value={markedChosen.length} max={chosen.length} />
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold text-muted-foreground">
+              {view === "week"
+                ? tr(["Últimos 7 dias", "Last 7 days", "Últimos 7 días", "7 derniers jours"])
+                : tr([
+                    "Últimas 5 semanas",
+                    "Last 5 weeks",
+                    "Últimas 5 semanas",
+                    "5 dernières semaines",
+                  ])}
+            </span>
+            <button
+              type="button"
+              onClick={() => setView(view === "week" ? "month" : "week")}
+              className="cursor-pointer text-[11px] font-bold text-primary hover:underline"
+            >
+              {view === "week"
+                ? tr(["Ver o mês", "See the month", "Ver el mes", "Voir le mois"])
+                : tr(["Ver a semana", "See the week", "Ver la semana", "Voir la semaine"])}
+            </button>
+          </div>
+          {view === "week" ? (
+            <div className="mt-2 flex items-end gap-1">
+              {week.map((n, i) => (
+                <span
+                  key={i}
+                  title={String(n)}
+                  className={`flex-1 rounded-sm ${shade(n)}`}
+                  style={{ height: `${6 + Math.min(n, MAX_HABITS) * 3}px` }}
                 />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="mt-3">
-        <Bar value={marked.length} max={HABITS.length} />
-      </div>
-      <div
-        className="mt-3 flex items-end gap-1"
-        aria-label={tr(["Últimos 7 dias", "Last 7 days", "Últimos 7 días", "7 derniers jours"])}
-      >
-        {week.map((n, i) => (
-          <span
-            key={i}
-            title={`${n}/${HABITS.length}`}
-            className={`flex-1 rounded-sm ${n >= 3 ? "bg-accent" : n > 0 ? "bg-accent/40" : "bg-secondary"}`}
-            style={{ height: `${6 + n * 4}px` }}
-          />
-        ))}
-      </div>
-      <p className={note}>
-        {tr([
-          "Marque 3 ou mais por dia para manter a sequência",
-          "Check 3 or more a day to keep your streak",
-          "Marca 3 o más al día para mantener la racha",
-          "Cochez 3 ou plus par jour pour garder votre série",
-        ])}
-      </p>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-2 grid grid-cols-7 gap-1">
+              {month.slice(0, 7).map((c) => (
+                <span
+                  key={"h" + c.day}
+                  className="text-center text-[9px] font-bold uppercase text-muted-foreground"
+                >
+                  {new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(
+                    new Date(c.day + "T12:00:00"),
+                  )}
+                </span>
+              ))}
+              {month.map((c) => (
+                <span
+                  key={c.day}
+                  title={`${c.day.split("-").reverse().join("/")}: ${c.n}`}
+                  className={`h-5 rounded-md sm:h-6 ${c.future ? "bg-transparent" : shade(c.n)} ${
+                    c.day === today ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+          <p className={note}>
+            {tr([
+              "Marque 3 ou mais por dia para manter a sequência",
+              "Check 3 or more a day to keep your streak",
+              "Marca 3 o más al día para mantener la racha",
+              "Cochez 3 ou plus par jour pour garder votre série",
+            ])}
+          </p>
+        </>
+      )}
     </Panel>
   );
 }

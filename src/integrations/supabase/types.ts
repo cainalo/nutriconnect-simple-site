@@ -4830,6 +4830,7 @@ export type Database = {
       user_settings: {
         Row: {
           appearance: Json | null
+          habit_choice: string[] | null
           id: string
           locale: string | null
           no_numbers: boolean
@@ -4841,6 +4842,7 @@ export type Database = {
         }
         Insert: {
           appearance?: Json | null
+          habit_choice?: string[] | null
           id: string
           locale?: string | null
           no_numbers?: boolean
@@ -4852,6 +4854,7 @@ export type Database = {
         }
         Update: {
           appearance?: Json | null
+          habit_choice?: string[] | null
           id?: string
           locale?: string | null
           no_numbers?: boolean

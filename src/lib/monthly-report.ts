@@ -8,6 +8,7 @@ import { listAppointments } from "@/lib/clinical/api";
 import { listDiary } from "@/lib/clinical/care";
 import { adherence } from "@/lib/clinical/goals";
 import { listAnthropometrics, listCheckins, listGoals } from "@/lib/clinical/records";
+import { HABIT_CATALOG } from "@/lib/habits";
 import type { Locale } from "@/lib/i18n";
 import { FEELINGS, HUNGER_WORDS, SATIETY_WORDS } from "@/lib/no-numbers";
 import type { TrailProgress } from "@/lib/trail-types";
@@ -69,7 +70,8 @@ function range(m: MonthKey) {
   };
 }
 
-export const HABIT_IDS = ["water", "veg", "move", "sleep"] as const;
+/** Hábitos do catálogo, na ordem em que aparecem no relatório (só os marcados no mês). */
+export const HABIT_IDS = HABIT_CATALOG.map((h) => h.id);
 
 export interface MonthlyReport {
   month: MonthKey;
@@ -77,7 +79,7 @@ export interface MonthlyReport {
   /** Dias do mês já vividos (o mês atual ainda não acabou). */
   counted: number;
   water: { perDay: number[]; goal: number; daysLogged: number; daysAtGoal: number };
-  habits: Record<(typeof HABIT_IDS)[number], number>;
+  habits: Record<string, number>;
   /** Dias com 3 ou mais hábitos marcados. */
   habitDays: number;
   moods: [number, number, number, number];
@@ -141,13 +143,13 @@ export async function collectMonthlyReport(
   const glassesOn = new Map(waterDays.map((d) => [d.day, d.glasses]));
   const perDay = r.dayKeys.map((d) => glassesOn.get(d) ?? 0);
 
-  const habits = { water: 0, veg: 0, move: 0, sleep: 0 };
+  const habits: Record<string, number> = Object.fromEntries(HABIT_IDS.map((id) => [id, 0]));
   const moods: [number, number, number, number] = [0, 0, 0, 0];
   let habitDays = 0;
   let mindfulMeals = 0;
   let pledgeDays = 0;
   for (const c of checkins) {
-    for (const h of c.habits) if (h in habits) habits[h as keyof typeof habits] += 1;
+    for (const h of c.habits) if (h in habits) habits[h] += 1;
     if (c.habits.length >= 3) habitDays += 1;
     if (c.mood != null && c.mood >= 0 && c.mood <= 3) moods[c.mood] += 1;
     mindfulMeals += c.mindful_meals;
@@ -250,12 +252,6 @@ const L = {
     "Eau notée {logged} jours ; objectif de {goal} verres atteint {hit} jours.",
   ),
   habits: n("Hábitos do dia", "Daily habits", "Hábitos del día", "Habitudes du jour"),
-  habitNames: {
-    water: n("Bebi água", "Drank water", "Bebí agua", "J'ai bu de l'eau"),
-    veg: n("Legumes e verduras", "Vegetables", "Verduras", "Légumes"),
-    move: n("Me movimentei", "Got moving", "Me moví", "J'ai bougé"),
-    sleep: n("Dormi bem", "Slept well", "Dormí bien", "Bien dormi"),
-  },
   habitDays: n(
     "Dias com 3 ou mais hábitos: {n}",
     "Days with 3 or more habits: {n}",
@@ -370,12 +366,6 @@ const MUTED = [109, 99, 85] as const;
 const INK = [52, 45, 36] as const;
 const SOFT = [240, 236, 226] as const;
 const WATER = [59, 123, 191] as const;
-const HABIT_COLORS = [
-  [59, 123, 191],
-  [79, 138, 75],
-  [217, 105, 42],
-  [138, 95, 176],
-] as const;
 const MOOD_COLORS = [
   [79, 138, 75],
   [125, 170, 90],
@@ -499,13 +489,13 @@ export async function exportMonthlyReportPdf(
   // Hábitos
   heading(tr(L.habits));
   if (Object.values(report.habits).some((v) => v > 0)) {
-    HABIT_IDS.forEach((id, i) =>
+    HABIT_CATALOG.filter((h) => (report.habits[h.id] ?? 0) > 0).forEach((h) =>
       hbar(
-        tr(L.habitNames[id]),
-        report.habits[id],
+        tr(h.name),
+        report.habits[h.id],
         report.counted,
-        HABIT_COLORS[i],
-        `${report.habits[id]}/${report.counted}`,
+        h.rgb,
+        `${report.habits[h.id]}/${report.counted}`,
       ),
     );
     para(fill(tr(L.habitDays), { n: report.habitDays }), 9.5, MUTED);

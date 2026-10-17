@@ -89,6 +89,7 @@ import { useRequireAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import type { Names } from "@/lib/appearance-data";
 import { checkinDay, checkinsByDay, useCheckins, weekStartDay } from "@/lib/checkins";
+import { useHabitChoice } from "@/lib/habits";
 import { useFeatures, type FeatureKey } from "@/lib/features";
 import { getActiveStreak } from "@/lib/learning-trail";
 import { cn } from "@/lib/utils";
@@ -1144,6 +1145,7 @@ function useTileData(userId: string | undefined) {
   const waterSettings = useWaterSettings(userId);
   const shopping = useShoppingItems(userId);
   const trail = useAdultTrailProgress(userId);
+  const { ids: habitIds } = useHabitChoice();
 
   return useMemo(() => {
     const map = checkinsByDay(checkins.data);
@@ -1162,10 +1164,10 @@ function useTileData(userId: string | undefined) {
       ["Normal", "Okay", "Normal", "Moyenne"],
       ["Pesada", "Heavy", "Pesada", "Difficile"],
     ];
-    const habits = today?.habits.length ?? 0;
+    const habits = (today?.habits ?? []).filter((id) => habitIds.includes(id)).length;
     const badges: Record<string, string | undefined> = {
       agua: water.data ? `${glasses}/${goal}` : undefined,
-      habitos: today ? `${habits}/4` : undefined,
+      habitos: today ? `${habits}/${habitIds.length}` : undefined,
       humor: today?.mood != null ? tr(moods[today.mood]) : undefined,
       compromisso: pledged ? `${pledged}/7` : undefined,
       calma: calm ? `${calm}×` : undefined,
@@ -1174,7 +1176,7 @@ function useTileData(userId: string | undefined) {
     };
     const art: Record<string, ArtData> = {
       agua: { fill: goal ? glasses / goal : 0 },
-      habitos: { habits },
+      habitos: { habits, habitsTotal: habitIds.length },
       humor: { mood: today?.mood ?? null },
     };
     return {
@@ -1182,9 +1184,9 @@ function useTileData(userId: string | undefined) {
       art,
       today: {
         water: water.data ? `${glasses}/${goal}` : undefined,
-        habits: today ? `${habits}/4` : undefined,
+        habits: today ? `${habits}/${habitIds.length}` : undefined,
         streak: trail ? getActiveStreak(trail) : 0,
       },
     };
-  }, [checkins.data, water.data, waterSettings.data, shopping.data, trail, tr]);
+  }, [checkins.data, water.data, waterSettings.data, shopping.data, trail, tr, habitIds]);
 }

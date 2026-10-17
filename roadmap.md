@@ -102,6 +102,7 @@ do admin (Design do site) escolhe qual está no ar.
 
 6. [x] S2 — Terminar abas Ideias, Calendário, Tendências e Perfis do estúdio no novo estilo
 7. [ ] T1 — Turbinar as funções existentes, uma por commit, já no visual novo
+   - [x] T1a Hábitos do dia: catálogo de 12 hábitos, cada pessoa escolhe de 3 a 8 (fica na conta), mapa das últimas 5 semanas; relatório em PDF conta todos
 8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
 10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)

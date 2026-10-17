@@ -193,7 +193,14 @@ function PageDemo() {
   const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: ["/"] }) });
   return <RouterProvider router={router} />;
 }
+// v=card&c=HabitCheckinCard → um card de Funções sozinho (&click=<texto do botão> para clicar).
+import * as FunCards from "@/components/fun-cards";
+function CardDemo() {
+  const Card = (FunCards as any)[q.get("c") ?? "HabitCheckinCard"];
+  return <RouterApp><div className="mx-auto max-w-md p-4">{Card ? <Card /> : "card?"}</div></RouterApp>;
+}
 function App() {
+  if (v === "card") return <CardDemo />;
   if (v === "page") return <PageDemo />;
   if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);
   if (v === "calendar") return wrap(<CalendarTab onOpen={() => {}} onNew={() => {}} />);
