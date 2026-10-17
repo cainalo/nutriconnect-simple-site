@@ -146,7 +146,9 @@ function NinaPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.rpc("ai_usage_today", { p_kind: "nina" }).then(({ data }) => setUsed(data ?? 0));
+    supabase
+      .rpc("ai_usage_today", { p_kind: "nina" })
+      .then(({ data }) => setUsed(typeof data === "number" ? data : null));
   }, [user]);
 
   const messages = history.data ?? [];

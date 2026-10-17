@@ -493,6 +493,7 @@ const es: Record<DictKey, string> = {
   "explore.experiencesFound": "Experiencias y Relatos",
   "explore.member": "miembro",
   "explore.noResults": "Ningún resultado para",
+  "explore.empty": "Busca una receta, una persona o un tema.",
   "explore.noResultsHint":
     "Prueba con términos más generales, como recetas, avena, vianda o salud.",
 

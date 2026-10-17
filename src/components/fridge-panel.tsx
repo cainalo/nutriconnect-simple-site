@@ -830,7 +830,7 @@ export function FridgePanel() {
                     type="button"
                     onClick={() => void ingredients.remove(i).catch(onAddError)}
                     aria-label={tr(["Tirar", "Remove", "Quitar", "Retirer"])}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="-my-1.5 -mr-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>

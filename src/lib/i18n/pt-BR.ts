@@ -505,6 +505,7 @@ const ptBR = {
   "explore.experiencesFound": "Experiências e Relatos",
   "explore.member": "membro",
   "explore.noResults": "Nenhum resultado para",
+  "explore.empty": "Busque uma receita, uma pessoa ou um assunto.",
   "explore.noResultsHint":
     "Tente buscar por termos mais genéricos, como receitas, aveia, marmita ou saúde.",
 

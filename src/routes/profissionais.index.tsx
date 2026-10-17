@@ -275,7 +275,7 @@ function DirectoryPage() {
               type="checkbox"
               checked={onlyAccepting}
               onChange={(e) => setOnlyAccepting(e.target.checked)}
-              className="h-4 w-4 accent-[var(--color-primary)]"
+              className="h-5 w-5 accent-[var(--color-primary)]"
             />
             {t("directory.onlyAccepting")}
           </label>

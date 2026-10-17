@@ -500,7 +500,7 @@ function HouseShopping({ people }: { people?: Map<string, PersonCard> }) {
       <button
         type="button"
         onClick={() => remove.mutate([it.id])}
-        className="text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100 focus:opacity-100"
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
         aria-label={tr(["Remover", "Remove", "Quitar", "Retirer"])}
       >
         <X className="h-4 w-4" />

@@ -232,7 +232,7 @@ function ExplorarPage() {
           <div className="mx-auto max-w-md rounded-3xl border border-dashed border-border p-10 text-center">
             <Compass className="mx-auto mb-3 h-9 w-9 text-muted-foreground" />
             <p className="text-sm font-semibold text-foreground">
-              {debounced ? `${t("explore.noResults")} “${debounced}”` : t("explore.noResults")}
+              {debounced ? `${t("explore.noResults")} “${debounced}”` : t("explore.empty")}
             </p>
             {debounced && (
               <p className="mt-1 text-xs text-muted-foreground">{t("explore.noResultsHint")}</p>
