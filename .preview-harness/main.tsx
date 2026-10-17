@@ -257,11 +257,16 @@ function PostDemo() {
   const post = { id: "p1", type: "experiencia", title: "Arroz de forno com legumes", text: "Uma receita simples para o dia a dia.", authorName: "Maria Silva", authorId: "u2", createdAt: new Date().toISOString(), comments: [], supports: ["a", "b"], likes: [], preparedBy: [], pinned: false, tags: [] };
   return <RouterApp><div className="mx-auto max-w-md p-4"><PostCard post={post as any} /></div></RouterApp>;
 }
+// v=docs / v=quality → Admin: Documentação e Qualidade, sozinhos.
+import { DocsSection } from "@/components/admin/sections-docs";
+import { QualitySection } from "@/components/admin/sections-quality";
 // v=photos → painel "Imagens do site" do admin, sozinho.
 import { SitePhotosSection } from "@/components/admin/sections-site-photos";
 function App() {
   if (v === "card") return <CardDemo />;
   if (v === "photos") return wrap(<SitePhotosSection />);
+  if (v === "docs") return <RouterApp><div className="p-4"><DocsSection /></div></RouterApp>;
+  if (v === "quality") return <RouterApp><div className="p-4"><QualitySection /></div></RouterApp>;
   if (v === "post") return <PostDemo />;
   if (v === "page") return <PageDemo />;
   if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);

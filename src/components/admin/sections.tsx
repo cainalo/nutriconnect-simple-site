@@ -1,6 +1,8 @@
 // Lista das seções do console de administração (menu lateral).
 import {
   BadgeCheck,
+  BookOpen,
+  ClipboardCheck,
   Bot,
   Banknote,
   Brain,
@@ -25,6 +27,8 @@ import {
 
 export type SectionId =
   | "visao"
+  | "documentacao"
+  | "qualidade"
   | "usuarios"
   | "verificacoes"
   | "contato"
@@ -54,6 +58,8 @@ export interface SectionDef {
 
 export const SECTIONS: SectionDef[] = [
   { id: "visao", label: "Visão geral", icon: LayoutDashboard, group: "Painel" },
+  { id: "documentacao", label: "Documentação", icon: BookOpen, group: "Painel" },
+  { id: "qualidade", label: "Qualidade", icon: ClipboardCheck, group: "Painel" },
   { id: "usuarios", label: "Pessoas", icon: Users, group: "Pessoas" },
   { id: "verificacoes", label: "Verificações", icon: BadgeCheck, group: "Pessoas" },
   { id: "contato", label: "Fale conosco", icon: Inbox, group: "Pessoas" },
