@@ -375,7 +375,7 @@ function ExplorarPage() {
           <>
             <Link
               to="/geladeira"
-              className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card p-4 text-sm shadow-xs transition hover:shadow-card"
+              className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-accent-soft/40 p-4 text-sm shadow-xs transition hover:shadow-card"
             >
               <Refrigerator className="h-6 w-6 shrink-0 text-accent" />
               <span className="min-w-0 flex-1">

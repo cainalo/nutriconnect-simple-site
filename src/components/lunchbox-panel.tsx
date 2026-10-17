@@ -825,7 +825,7 @@ export function LunchboxLink() {
   return (
     <Link
       to="/lancheira"
-      className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card p-4 text-sm shadow-xs transition hover:shadow-card"
+      className="mb-6 flex items-center gap-3 rounded-3xl border border-accent/30 bg-accent-soft/40 p-4 text-sm shadow-xs transition hover:shadow-card"
     >
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft">
         <Backpack className="h-5 w-5 text-accent" aria-hidden="true" />
@@ -880,7 +880,7 @@ export function KidLunchboxToday({ profileId }: { profileId: string }) {
   };
 
   return (
-    <section className="mb-6 rounded-3xl border-2 border-accent/40 bg-gradient-to-br from-accent-soft/60 to-card p-4">
+    <section className="mb-6 rounded-3xl border-2 border-accent/40 bg-accent-soft/40 p-4">
       <h2 className="text-base font-extrabold font-display text-foreground">
         {tr([
           "Minha lancheira de hoje",

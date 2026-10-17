@@ -7,11 +7,13 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Compass,
   HandHeart,
   MapPin,
   MessagesSquare,
   RotateCcw,
-  Sparkles,
+  Shuffle,
+  Star,
   Video,
   Wallet,
   Zap,
@@ -97,7 +99,7 @@ const STYLES: (Option<MatchStyle> & { icon: typeof HandHeart })[] = [
   },
   {
     value: "any",
-    icon: Sparkles,
+    icon: Shuffle,
     label: ["Tanto faz", "No preference", "Me da igual", "Peu importe"],
   },
 ];
@@ -195,7 +197,7 @@ export function ProMatchQuiz({ onPicked }: { onPicked?: () => void }) {
   return (
     <div className="min-w-0 rounded-3xl border border-border/70 bg-card p-4 shadow-xs sm:p-5">
       <div className="mb-3 flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-accent" />
+        <Compass className="h-4 w-4 text-accent" />
         <span className="text-xs font-black uppercase tracking-widest text-accent">
           {tr([
             "Descobrir a nutri ideal",
@@ -369,7 +371,9 @@ export function ProMatchQuiz({ onPicked }: { onPicked?: () => void }) {
                     <Avatar name={pro.name ?? ""} url={pro.avatar_url} />
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center gap-1 truncate text-sm font-bold text-foreground">
-                        {i === 0 && <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />}
+                        {i === 0 && (
+                          <Star className="h-3.5 w-3.5 shrink-0 fill-current text-accent" />
+                        )}
                         <span className="truncate">{pro.name}</span>
                         {pro.verified_at && <VerifiedBadge />}
                       </p>

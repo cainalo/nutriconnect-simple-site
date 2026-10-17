@@ -4,11 +4,11 @@ import {
   Activity,
   Apple,
   Brain,
+  Compass,
   Dumbbell,
   HeartPulse,
   MapPin,
   Search,
-  Sparkles,
   Stethoscope,
   Video,
   type LucideIcon,
@@ -134,9 +134,9 @@ function DirectoryPage() {
       <div className="mx-auto w-full max-w-[120rem] px-4 pt-6 sm:px-6 lg:px-10">
         <h1 className="sr-only">{t("directory.title")}</h1>
 
-        <div className="flex flex-col gap-3 rounded-3xl border border-accent/25 bg-gradient-to-r from-accent-soft/70 via-card to-primary-soft/50 p-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 rounded-3xl border border-accent/25 bg-accent-soft/40 p-4 sm:flex-row sm:items-center">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent text-accent-foreground shadow-sm">
-            <Sparkles className="h-5 w-5" />
+            <Compass className="h-5 w-5" />
           </span>
           <div className="min-w-0 flex-1">
             <p className="font-display text-base font-bold leading-tight text-foreground">

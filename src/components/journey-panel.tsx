@@ -3,16 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import {
-  HandHeart,
-  HeartHandshake,
-  Loader2,
-  LogOut,
-  Send,
-  Sparkles,
-  UserPlus,
-  X,
-} from "lucide-react";
+import { HandHeart, HeartHandshake, Loader2, LogOut, Send, Sun, UserPlus, X } from "lucide-react";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { SupportCard } from "@/components/no-numbers";
 import { useTr } from "@/components/settings-ui";
@@ -541,7 +532,7 @@ function MyCheckin({ mood: savedMood, note: savedNote }: { mood?: JourneyMood; n
   return (
     <form onSubmit={submit} className={card}>
       <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-        <Sparkles className="h-4 w-4 text-accent" />
+        <Sun className="h-4 w-4 text-accent" />
         {tr([
           "Como foi o seu dia?",
           "How was your day?",

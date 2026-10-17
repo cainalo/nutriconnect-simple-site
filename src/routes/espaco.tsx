@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUp, Compass, Sparkles } from "lucide-react";
+import { ArrowUp, CalendarDays, Compass, Sparkles } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { FeedShell, type FeedShellPage } from "@/components/feed-shell";
 import { useAppearance } from "@/hooks/use-appearance";
@@ -244,9 +244,9 @@ function EspacoDeHojePage() {
       content: (
         <>
           {text ? (
-            <div className="mb-6 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card p-6 shadow-xs">
+            <div className="mb-6 rounded-3xl border border-accent/30 bg-accent-soft/40 p-6 shadow-xs">
               <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-accent">
-                <Sparkles className="h-4 w-4" /> {text.badge ?? t("weekly.badge")}
+                <CalendarDays className="h-4 w-4" /> {text.badge ?? t("weekly.badge")}
               </p>
               <h2 className="mt-2 text-xl font-extrabold font-display text-foreground">
                 {text.title}

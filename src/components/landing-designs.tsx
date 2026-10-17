@@ -438,7 +438,7 @@ export function LandingEditorial() {
           <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[1.02] tracking-tight sm:text-7xl">
             {tr(COPY.h1a)} <em className="text-accent">{tr(COPY.h1b)}</em>
           </h1>
-          <p className="mt-6 max-w-2xl border-l-4 border-accent pl-4 text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-6 max-w-2xl border-y border-foreground/40 py-3 text-lg leading-relaxed text-muted-foreground">
             {tr(COPY.lead)}
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">

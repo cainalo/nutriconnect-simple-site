@@ -36,7 +36,7 @@ export function MemberPlanCard({ professionalId }: { professionalId: string }) {
   );
 
   return (
-    <section className="rounded-2xl border border-accent/30 bg-gradient-to-br from-accent-soft/60 via-card to-card p-5 shadow-xs">
+    <section className="rounded-2xl border border-accent/30 bg-accent-soft/40 p-5 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <h2 className="flex items-center gap-2 font-display text-base font-bold text-foreground">
           <Crown className="h-5 w-5 text-accent" /> {p.title}

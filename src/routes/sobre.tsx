@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-chrome";
 import { useI18n } from "@/hooks/use-i18n";
 import type { DictKey } from "@/lib/i18n";
 import { SiteFooter } from "@/components/site-footer";
-import { Heart, ShieldCheck, Zap, Users, TrendingUp, Sparkles, Globe2 } from "lucide-react";
+import { Globe2, Heart, ShieldCheck, TrendingUp, Users, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/sobre")({
   head: () => ({
@@ -41,9 +41,7 @@ function Sobre() {
         {/* HERO SECTION */}
         <section className="relative bg-gradient-to-b from-secondary/50 to-background py-16 md:py-24">
           <div className="mx-auto max-w-5xl px-4 text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft/50 px-4 py-1.5 text-xs font-semibold text-primary">
-              <Sparkles className="h-4 w-4" /> {t("about.badge")}
-            </span>
+            <p className="!text-center text-sm font-semibold text-primary">{t("about.badge")}</p>
             <h1 className="mt-6 font-display text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               {t("about.hero1")} <br />
               <span className="text-primary">{t("about.hero2")}</span>

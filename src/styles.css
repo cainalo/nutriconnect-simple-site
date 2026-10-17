@@ -2514,10 +2514,10 @@ html[data-design]:not([data-hydrated]) :is([data-site-header], [data-site-bottom
 /* O cartão recebe cor, borda e fundo por estilo inline (post-type.ts); aqui os designs
    sobrescrevem com !important só o que precisam. --pt é a cor do tipo do post. */
 
-/* Vibrante: cartão grande e alegre, barra grossa na cor do tipo, rótulo em pílula. */
+/* Vibrante: cartão grande e alegre, faixa no topo na cor do tipo, rótulo em pílula. */
 html[data-design="vibrante"] .post-card {
   border-width: 0 !important;
-  border-left: 9px solid var(--pt, var(--accent)) !important;
+  border-top: 7px solid var(--pt, var(--accent)) !important;
   border-radius: 2rem !important;
   background-color: var(--card) !important;
   background-image: linear-gradient(
@@ -2604,7 +2604,7 @@ html[data-design="vibrante"] [data-pagesnav] button {
   font-weight: 800;
 }
 html[data-design="vibrante"] [data-pagesnav] button[data-active="true"] {
-  background: linear-gradient(120deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: var(--primary-foreground);
 }
 html[data-design="vibrante"] [data-funcoes-hero] {
@@ -2697,7 +2697,7 @@ html[data-design="aurora"] [data-pagesnav] {
   backdrop-filter: blur(16px);
 }
 html[data-design="aurora"] [data-pagesnav] button[data-active="true"] {
-  background: linear-gradient(120deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: var(--primary-foreground);
 }
 html[data-design="aurora"] [data-funcoes-hero] {

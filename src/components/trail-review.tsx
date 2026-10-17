@@ -32,7 +32,7 @@ export function ReviewPanel({
     const days = Math.max(1, daysUntil(next));
     return (
       <p className="mb-6 flex items-center gap-2 rounded-2xl border border-border/70 bg-card/80 px-4 py-2.5 text-xs font-semibold text-muted-foreground">
-        <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+        <RotateCcw className="h-4 w-4 shrink-0 text-primary" />
         {tr([
           "Nenhuma revisão pendente. A próxima é em {n} dia(s).",
           "No reviews due. The next one is in {n} day(s).",

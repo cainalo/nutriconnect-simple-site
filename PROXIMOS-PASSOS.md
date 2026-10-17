@@ -11,6 +11,14 @@ Editorial). A bancada monta qualquer página real: `v=page&p=<arquivo da rota se
 (`&dark=1` para o escuro); páginas filhas aparecem sem o layout-pai (sem a margem lateral).
 Falta do D5: conferir no site logado de verdade (com dados) e no aparelho do dono.
 
+**Regras contra "cara de site feito por IA" (17/10, valem para tudo que for criado):** nada de
+violeta/índigo/turquesa padrão do Tailwind nem fonte Inter/Poppins como identidade; nada de texto em
+degradê nem botão em degradê de duas cores (use cor sólida); nada de selo em pílula com brilhos acima
+do título; ícone de brilhos (Sparkles) só onde a Nina (IA) age; nada de bolhas de luz desfocadas,
+listra lateral grossa em card, passos "01/02/03" nem cards iguais com ícone em cima; textos sem
+travessão no meio da frase e sem clichês ("jornada", "transforme", "tudo o que você precisa",
+tríades "Sua X. Sua Y. Sua Z."). Prefira fala concreta, do jeito que uma pessoa escreveria.
+
 **Atualização de 15/10 (leia primeiro):** o rumo do projeto mudou; veja a seção "Rumo definido em
 15/10/2026" do `roadmap.md`. Feitos: D1 (seletor "Design do site" no admin, `src/lib/site-design.ts`),
 D2 (navegação própria por design em `src/components/site-chrome-designs.tsx`), D3 (landing por design
