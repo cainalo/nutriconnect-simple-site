@@ -867,49 +867,168 @@ export function RecipeRouletteCard() {
 
 // ───────────────────────────── Timer de cozinha ─────────────────────────────
 
-const PRESETS = [3, 5, 10, 15, 30];
-const fmt = (s: number) => `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
+const fmt = (s: number) =>
+  s >= 3600
+    ? `${Math.floor(s / 3600)}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`
+    : `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
 
+/** Atalhos por alimento (tempos usuais de cozimento; variam com a panela e o fogo). */
+const TIMER_PRESETS: { name: Names; min: number }[] = [
+  { name: ["Ovo mole", "Soft egg", "Huevo tibio", "Œuf mollet"], min: 6 },
+  { name: ["Ovo cozido", "Hard egg", "Huevo duro", "Œuf dur"], min: 10 },
+  { name: ["Macarrão", "Pasta", "Pasta", "Pâtes"], min: 10 },
+  { name: ["Arroz", "Rice", "Arroz", "Riz"], min: 18 },
+  { name: ["Legumes no vapor", "Steamed veg", "Verduras al vapor", "Légumes vapeur"], min: 12 },
+  {
+    name: [
+      "Feijão na pressão",
+      "Beans (pressure)",
+      "Frijoles (olla exprés)",
+      "Haricots (autocuiseur)",
+    ],
+    min: 30,
+  },
+  { name: ["Bolo", "Cake", "Bizcocho", "Gâteau"], min: 40 },
+];
+
+interface KitchenTimer {
+  id: string;
+  label: string;
+  total: number;
+  /** Hora (ms) em que termina, se estiver correndo. */
+  endsAt: number | null;
+  /** Segundos restantes quando pausado. */
+  left: number;
+  done: boolean;
+}
+
+const TIMERS_KEY = "nc_kitchen_timers";
+const MAX_TIMERS = 6;
+
+function loadTimers(): KitchenTimer[] {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(TIMERS_KEY) ?? "[]");
+    return Array.isArray(raw) ? (raw as KitchenTimer[]).slice(0, MAX_TIMERS) : [];
+  } catch {
+    return [];
+  }
+}
+
+const leftOf = (t: KitchenTimer, now: number) =>
+  t.endsAt ? Math.max(0, Math.round((t.endsAt - now) / 1000)) : t.left;
+
+type WakeLockNav = Navigator & {
+  wakeLock?: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> };
+};
+
+/** Vários timers ao mesmo tempo, com nome; continuam depois de recarregar a página. Ao terminar:
+ *  som, vibração e aviso do navegador (se a pessoa já permitiu avisos). A tela fica acesa
+ *  enquanto algum timer corre, quando o aparelho deixa. */
 export function CookingTimerCard() {
   const tr = useTr();
-  const [minutes, setMinutes] = useState(10);
-  const [left, setLeft] = useState(10 * 60);
-  const [running, setRunning] = useState(false);
+  const [timers, setTimers] = useState<KitchenTimer[]>([]);
+  const [now, setNow] = useState(() => Date.now());
+  const [minutes, setMinutes] = useState("10");
+  const [label, setLabel] = useState("");
   const [burst, fire] = useBurst();
-  const endsAt = useRef(0);
+  const loaded = useRef(false);
 
   useEffect(() => {
-    if (!running) return;
-    const tick = () => {
-      const remaining = Math.max(0, Math.round((endsAt.current - Date.now()) / 1000));
-      setLeft(remaining);
-      if (remaining === 0) {
-        setRunning(false);
-        fire();
-        playSound("achievement");
-      }
-    };
-    const id = window.setInterval(tick, 250);
-    return () => window.clearInterval(id);
-  }, [running, fire]);
+    setTimers(loadTimers());
+    loaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (!loaded.current) return;
+    try {
+      window.localStorage.setItem(TIMERS_KEY, JSON.stringify(timers));
+    } catch {
+      // sem armazenamento: os timers valem só nesta aba
+    }
+  }, [timers]);
 
-  const total = minutes * 60;
-  const choose = (m: number) => {
-    setRunning(false);
-    setMinutes(m);
-    setLeft(m * 60);
+  const running = timers.some((t) => t.endsAt);
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => setNow(Date.now()), 250);
+    return () => window.clearInterval(id);
+  }, [running]);
+
+  // Tela acesa enquanto algum timer corre.
+  useEffect(() => {
+    if (!running) return;
+    let lock: { release: () => Promise<void> } | null = null;
+    let cancelled = false;
+    (navigator as WakeLockNav).wakeLock
+      ?.request("screen")
+      .then((l) => (cancelled ? void l.release() : (lock = l)))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      void lock?.release().catch(() => {});
+    };
+  }, [running]);
+
+  // Timers que acabaram de chegar a zero.
+  useEffect(() => {
+    const finished = timers.filter((t) => t.endsAt && t.endsAt <= now);
+    if (finished.length === 0) return;
+    setTimers((list) =>
+      list.map((t) =>
+        finished.some((f) => f.id === t.id) ? { ...t, endsAt: null, left: 0, done: true } : t,
+      ),
+    );
+    fire();
+    playSound("achievement");
+    for (const t of finished) {
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        try {
+          new Notification(tr(["Tempo!", "Time's up!", "¡Tiempo!", "Temps écoulé !"]), {
+            body: t.label,
+            tag: "nc-timer-" + t.id,
+          });
+        } catch {
+          // alguns navegadores só mostram avisos pelo service worker
+        }
+      }
+    }
+  }, [now, timers, fire, tr]);
+
+  const add = (mins: number, name: string) => {
+    if (!(mins > 0) || timers.length >= MAX_TIMERS) return;
+    const total = Math.round(mins * 60);
+    const t: KitchenTimer = {
+      id: Math.random().toString(36).slice(2, 9),
+      label: name.trim() || `${mins} min`,
+      total,
+      endsAt: Date.now() + total * 1000,
+      left: total,
+      done: false,
+    };
+    setNow(Date.now());
+    setTimers((list) => [...list, t]);
+    setLabel("");
+    playSound("click");
   };
-  const toggle = () => {
-    if (running) return setRunning(false);
-    const from = left === 0 ? total : left;
-    setLeft(from);
-    endsAt.current = Date.now() + from * 1000;
-    setRunning(true);
-  };
+  const update = (id: string, f: (t: KitchenTimer) => KitchenTimer) =>
+    setTimers((list) => list.map((t) => (t.id === id ? f(t) : t)));
+  const toggle = (t: KitchenTimer) =>
+    update(t.id, (x) =>
+      x.endsAt
+        ? { ...x, endsAt: null, left: leftOf(x, Date.now()) }
+        : { ...x, endsAt: Date.now() + (x.done ? x.total : x.left) * 1000, done: false },
+    );
+  const plusMinute = (t: KitchenTimer) =>
+    update(t.id, (x) =>
+      x.endsAt
+        ? { ...x, endsAt: x.endsAt + 60_000, total: x.total + 60 }
+        : { ...x, left: (x.done ? 0 : x.left) + 60, total: x.total + 60, done: false },
+    );
+  const remove = (id: string) => setTimers((list) => list.filter((t) => t.id !== id));
 
   const radius = 44;
   const circ = 2 * Math.PI * radius;
-  const progress = total > 0 ? left / total : 0;
+  const field =
+    "rounded-xl border border-input bg-background px-2.5 py-2 text-xs text-foreground outline-none focus:border-accent";
 
   return (
     <Panel
@@ -922,65 +1041,161 @@ export function CookingTimerCard() {
       className="relative"
     >
       <Burst id={burst} />
-      <div className="relative mx-auto h-28 w-28">
-        <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            strokeWidth="7"
-            className="stroke-secondary"
-          />
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            strokeWidth="7"
-            strokeLinecap="round"
-            className="stroke-accent transition-[stroke-dashoffset] duration-300"
-            strokeDasharray={circ}
-            strokeDashoffset={circ * (1 - progress)}
-          />
-        </svg>
-        <div className="absolute inset-0 grid place-items-center">
-          <span
-            className={`text-xl font-black tabular-nums ${left === 0 ? "text-accent" : "text-foreground"}`}
+      {timers.length > 0 && (
+        <ul className="mb-3 space-y-2">
+          {timers.map((t) => {
+            const left = leftOf(t, now);
+            const progress = t.total > 0 ? left / t.total : 0;
+            return (
+              <li
+                key={t.id}
+                className={`flex items-center gap-3 rounded-2xl border px-3 py-2 ${
+                  t.done
+                    ? "nc-pop-in border-accent bg-accent/10"
+                    : "border-border/70 bg-secondary/30"
+                }`}
+              >
+                <svg viewBox="0 0 100 100" className="h-11 w-11 shrink-0 -rotate-90" aria-hidden>
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={radius}
+                    fill="none"
+                    strokeWidth="10"
+                    className="stroke-secondary"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={radius}
+                    fill="none"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    className="stroke-accent transition-[stroke-dashoffset] duration-300"
+                    strokeDasharray={circ}
+                    strokeDashoffset={circ * (1 - progress)}
+                  />
+                </svg>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-foreground">{t.label}</p>
+                  <p
+                    className={`text-lg font-black leading-tight tabular-nums ${t.done ? "text-accent" : "text-foreground"}`}
+                  >
+                    {t.done ? tr(["Tempo!", "Time's up!", "¡Tiempo!", "Terminé !"]) : fmt(left)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => plusMinute(t)}
+                  className={iconBtn}
+                  aria-label={tr([
+                    "Mais 1 minuto",
+                    "1 more minute",
+                    "1 minuto más",
+                    "1 minute de plus",
+                  ])}
+                >
+                  +1
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggle(t)}
+                  className="grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground transition hover:opacity-90"
+                  aria-label={
+                    t.endsAt
+                      ? tr(["Pausar", "Pause", "Pausar", "Pause"])
+                      : tr(["Continuar", "Resume", "Continuar", "Reprendre"])
+                  }
+                >
+                  {t.endsAt ? (
+                    <Pause className="h-3.5 w-3.5" />
+                  ) : t.done ? (
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  ) : (
+                    <Play className="h-3.5 w-3.5" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(t.id)}
+                  className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                  aria-label={tr(["Remover", "Remove", "Quitar", "Supprimer"])}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {timers.length < MAX_TIMERS ? (
+        <>
+          <div className="flex flex-wrap gap-1.5">
+            {TIMER_PRESETS.map((p) => (
+              <button
+                key={p.min + p.name[0]}
+                type="button"
+                onClick={() => add(p.min, tr(p.name))}
+                className={iconBtn}
+              >
+                {tr(p.name)} · {p.min} min
+              </button>
+            ))}
+          </div>
+          <form
+            className="mt-3 grid grid-cols-[4.5rem_1fr_auto] gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              add(Number(minutes.replace(",", ".")), label);
+            }}
           >
-            {fmt(left)}
-          </span>
-        </div>
-      </div>
-      <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-        {PRESETS.map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => choose(m)}
-            className={`${iconBtn} ${m === minutes ? "!bg-accent !text-accent-foreground" : ""}`}
-          >
-            {m} min
-          </button>
-        ))}
-      </div>
-      <div className="mt-3 flex justify-center gap-2">
-        <button type="button" className={primaryBtn} onClick={toggle}>
-          {running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-          {running
-            ? tr(["Pausar", "Pause", "Pausar", "Pause"])
-            : tr(["Iniciar", "Start", "Iniciar", "Démarrer"])}
-        </button>
-        <button type="button" className={iconBtn} onClick={() => choose(minutes)}>
-          <RotateCcw className="h-3 w-3" />
-          {tr(["Zerar", "Reset", "Reiniciar", "Réinit."])}
-        </button>
-      </div>
-      {left === 0 && !running && (
-        <p className="nc-pop-in mt-2 text-center text-xs font-bold text-accent">
-          {tr(["Tempo! Pode tirar do fogo", "Time's up!", "¡Tiempo!", "Temps écoulé !"])}
+            <input
+              type="number"
+              min="0.5"
+              max="600"
+              step="0.5"
+              inputMode="decimal"
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              className={field}
+              aria-label={tr(["Minutos", "Minutes", "Minutos", "Minutes"])}
+            />
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              maxLength={40}
+              placeholder={tr([
+                "Nome (opcional)",
+                "Name (optional)",
+                "Nombre (opcional)",
+                "Nom (facultatif)",
+              ])}
+              className={`${field} min-w-0`}
+            />
+            <button type="submit" className={primaryBtn}>
+              <Plus className="h-3.5 w-3.5" />
+              {tr(["Iniciar", "Start", "Iniciar", "Démarrer"])}
+            </button>
+          </form>
+        </>
+      ) : (
+        <p className="text-center text-[11px] text-muted-foreground">
+          {tr([
+            "Até 6 timers ao mesmo tempo.",
+            "Up to 6 timers at once.",
+            "Hasta 6 temporizadores a la vez.",
+            "Jusqu'à 6 minuteurs à la fois.",
+          ])}
         </p>
       )}
+      <p className={note}>
+        {tr([
+          "Os timers continuam se você recarregar a página. Tempos dos atalhos são aproximados.",
+          "Timers keep going if you reload the page. Shortcut times are approximate.",
+          "Los temporizadores siguen si recargas la página. Los tiempos de los atajos son aproximados.",
+          "Les minuteurs continuent si vous rechargez la page. Les durées des raccourcis sont approximatives.",
+        ])}
+      </p>
     </Panel>
   );
 }
