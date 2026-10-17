@@ -23,6 +23,7 @@ import { NINA_DAILY_LIMIT, askNutriAssistant } from "@/lib/nutri-assistant.funct
 import { NINA_TOPICS } from "@/components/rail-cards";
 import { useTr } from "@/components/settings-ui";
 import { useLinks } from "@/lib/clinical/queries";
+import { EmptyPhoto } from "@/components/clinical/ui";
 import {
   dismissPrompt,
   isPromptDismissed,
@@ -412,9 +413,10 @@ function NinaPage() {
             <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
           )}
           {!history.isLoading && messages.length === 0 && !pending && (
-            <p className="m-auto max-w-sm text-center text-sm text-muted-foreground">
-              {t("nina.empty")}
-            </p>
+            <div className="m-auto w-full max-w-md overflow-hidden rounded-2xl border border-border/60 bg-background/60 text-center">
+              <EmptyPhoto src="/images/social/mesa-cafe-da-manha.jpg" />
+              <p className="px-5 py-4 text-sm text-muted-foreground">{t("nina.empty")}</p>
+            </div>
           )}
           {messages.map((m, i) => {
             // A dúvida levada à nutri é a pergunta que veio antes desta resposta.
