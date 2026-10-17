@@ -198,6 +198,30 @@
   .post-card :is(p, li, h2, h3, a, span) {
     overflow-wrap: anywhere;
   }
+  /* Fileiras de pílulas que quebram linha (filtros, atalhos, etiquetas, opções): cada linha ocupa a
+     largura toda e as pílulas se esticam por igual, deixando as duas bordas alinhadas (pedido do
+     dono: nada de borda direita "torta"). Vale para 2 ou mais itens, fora de posts e cabeçalhos,
+     todos arredondados, sem largura fixa e sem padding igual nos 4 lados (bolinhas de cor e botões
+     só de ícone ficam como estão). Para manter uma fileira solta, use data-free-wrap. */
+  :where(.flex-wrap):not([data-free-wrap], .post-card *, header *):has(> :nth-child(2)):not(
+      :has(
+          > :not(li, :is(button, a, span, label)[class*="rounded"]),
+          > [class*=" w-"],
+          > [class^="w-"],
+          > [class*=" p-"],
+          > [class^="p-"],
+          > li > [class*=" w-"]
+        )
+    )
+    > * {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
+  }
+  :where(.flex-wrap):not([data-free-wrap], .post-card *, header *):has(> li:nth-child(2)) > li > :is(button, a, span, label) {
+    width: 100%;
+    justify-content: center;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);

@@ -19,6 +19,12 @@ listra lateral grossa em card, passos "01/02/03" nem cards iguais com ícone em 
 travessão no meio da frase e sem clichês ("jornada", "transforme", "tudo o que você precisa",
 tríades "Sua X. Sua Y. Sua Z."). Prefira fala concreta, do jeito que uma pessoa escreveria.
 
+**Fileiras de botões/filtros simétricas (17/10, pedido do dono):** nada de fileira de pílulas com a
+borda direita "torta". Uma regra global em `styles.css` (procure "Fileiras de pílulas") faz toda
+fileira com `flex-wrap` de 2 ou mais pílulas preencher a largura, com as duas bordas alinhadas.
+Rótulo na mesma fileira das pílulas quebra a regra: ponha o rótulo numa linha própria acima.
+`data-free-wrap` desliga a regra numa fileira específica.
+
 **Atualização de 15/10 (leia primeiro):** o rumo do projeto mudou; veja a seção "Rumo definido em
 15/10/2026" do `roadmap.md`. Feitos: D1 (seletor "Design do site" no admin, `src/lib/site-design.ts`),
 D2 (navegação própria por design em `src/components/site-chrome-designs.tsx`), D3 (landing por design

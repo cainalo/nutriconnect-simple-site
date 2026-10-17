@@ -720,10 +720,10 @@ export function MenuPanel() {
       </header>
 
       <section className={card}>
+        <p className="mb-1.5 text-xs font-semibold text-foreground">
+          {tr(["Orçamento", "Budget", "Presupuesto", "Budget"])}
+        </p>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-foreground">
-            {tr(["Orçamento:", "Budget:", "Presupuesto:", "Budget :"])}
-          </span>
           {BUDGETS.map((b) => (
             <button
               key={b}
