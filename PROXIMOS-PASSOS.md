@@ -1,5 +1,10 @@
 # Próximos passos (passagem de sessão — 15/10/2026)
 
+**Regra de branches (17/10, vale sempre):** trabalhe e faça push **direto na `main`** (sincroniza com o
+Lovable). A branch **`prod` é a que o Netlify publica e gasta crédito**: só leve a `main` para a `prod`
+quando o dono mandar. As permissões estão em `.claude/settings.json` (push da `main` liberado, push da
+`prod` bloqueado). D5 parte 2 (17/10): cabeçalho das landings Vibrante e Aurora cabe no celular.
+
 **Atualização de 15/10 (leia primeiro):** o rumo do projeto mudou; veja a seção "Rumo definido em
 15/10/2026" do `roadmap.md`. Feitos: D1 (seletor "Design do site" no admin, `src/lib/site-design.ts`),
 D2 (navegação própria por design em `src/components/site-chrome-designs.tsx`), D3 (landing por design
@@ -23,8 +28,6 @@ Pendente: D5 (revisar tudo em print no site logado, celular e modo escuro) e o c
 dono viu no Editorial pelo celular (não reproduzido na bancada; há uma trava de largura em
 `styles.css` para telas < 1024 px). Próximas etapas combinadas: S2, turbinar funções (T1), app (A3/A4),
 marketplace (P1), X1–X7, modo escola (E1) e monetização (C1).
-
-
 
 Leia este arquivo inteiro antes de mexer no projeto. Ele diz o que foi feito, o que está pendente e
 em que ordem continuar. O roadmap oficial é o `roadmap.md`; o `AGENTS.md` tem as regras do Lovable
