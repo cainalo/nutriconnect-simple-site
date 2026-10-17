@@ -19,8 +19,8 @@ export const AREAS: Area[] = [
   },
   {
     id: "dia",
-    name: "Funções do dia",
-    text: "Ferramentas rápidas da página Funções: água, hábitos, humor, quiz, dicas e mais.",
+    name: "Ferramentas do dia a dia",
+    text: "Ferramentas rápidas para o dia (água, hábitos, humor, quiz, dicas…); a página Funções reúne atalhos para elas e para as outras funções do site.",
   },
   {
     id: "cozinha",
@@ -61,6 +61,11 @@ export const AREAS: Area[] = [
     id: "app",
     name: "App Android",
     text: "O app instalável e os recursos nativos do celular.",
+  },
+  {
+    id: "plataforma",
+    name: "Recursos da plataforma",
+    text: "O que funciona por trás de tudo: amizades, moderação, notificações, perfis infantis, idiomas e designs.",
   },
 ];
 

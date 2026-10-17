@@ -105,7 +105,7 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "convite-paciente",
-    kind: "pagina",
+    kind: "funcao",
     area: "entrada",
     title: "Convite de profissional para paciente",
     route: "/convite/$code",
@@ -127,9 +127,9 @@ export const CATALOG_A: CatalogItem[] = [
   // ───────────── Rede social ─────────────
   {
     id: "espaco",
-    kind: "pagina",
+    kind: "funcao",
     area: "social",
-    title: "Espaço de hoje (feed)",
+    title: "Feed da comunidade (Espaço de hoje)",
     route: "/espaco",
     audience: "Quem tem conta",
     summary:
@@ -152,7 +152,7 @@ export const CATALOG_A: CatalogItem[] = [
     id: "post",
     kind: "funcionalidade",
     area: "social",
-    title: "Post e menu ⋯",
+    title: "Post: conversa, apoio e menu ⋯",
     route: "/espaco",
     audience: "Quem tem conta",
     summary:
@@ -171,9 +171,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "publicar",
-    kind: "funcionalidade",
+    kind: "funcao",
     area: "social",
-    title: "Publicar (Postar)",
+    title: "Publicar receitas, experiências e perguntas",
     route: "/espaco",
     audience: "Quem tem conta",
     summary:
@@ -192,9 +192,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "explorar",
-    kind: "pagina",
+    kind: "funcao",
     area: "social",
-    title: "Explorar",
+    title: "Busca e descoberta (Explorar)",
     route: "/explorar",
     audience: "Quem tem conta",
     summary:
@@ -213,9 +213,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "comunidades",
-    kind: "pagina",
+    kind: "funcao",
     area: "social",
-    title: "Comunidades",
+    title: "Comunidades temáticas",
     route: "/comunidades",
     audience: "Quem tem conta",
     summary:
@@ -234,7 +234,7 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "comunidade",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "social",
     title: "Página da comunidade",
     route: "/comunidades/$slug",
@@ -256,9 +256,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "evento",
-    kind: "pagina",
+    kind: "funcao",
     area: "social",
-    title: "Evento ao vivo",
+    title: "Eventos ao vivo nas comunidades",
     route: "/evento/$eventId",
     audience: "Membros da comunidade (o profissional conduz)",
     summary: "Sessão de perguntas e respostas ao vivo com o profissional da comunidade.",
@@ -275,7 +275,7 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "notificacoes",
-    kind: "pagina",
+    kind: "funcao",
     area: "social",
     title: "Notificações",
     route: "/notificacoes",
@@ -296,9 +296,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "perfil",
-    kind: "pagina",
+    kind: "funcao",
     area: "social",
-    title: "Perfil",
+    title: "Perfil público",
     route: "/perfil/$userId",
     audience: "Quem tem conta",
     summary:
@@ -317,7 +317,7 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "convites",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "social",
     title: "Convites de comunidades",
     route: "/convites",
@@ -339,7 +339,7 @@ export const CATALOG_A: CatalogItem[] = [
     id: "funcoes",
     kind: "pagina",
     area: "dia",
-    title: "Funções",
+    title: "Página Funções (atalhos para as ferramentas)",
     route: "/funcoes",
     audience: "Quem tem conta",
     summary:
@@ -536,9 +536,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "casa",
-    kind: "pagina",
+    kind: "funcao",
     area: "cozinha",
-    title: "Minha casa",
+    title: "Grupo familiar (Minha casa)",
     route: "/casa",
     audience: "Quem tem conta",
     summary:
@@ -560,9 +560,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "casa-entrar",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "cozinha",
-    title: "Entrar numa casa",
+    title: "Entrar num grupo familiar por convite",
     route: "/casa/entrar/$code",
     audience: "Quem recebeu o convite da casa",
     summary: "Página aberta pelo link de convite da casa.",
@@ -571,9 +571,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "geladeira",
-    kind: "pagina",
+    kind: "funcao",
     area: "cozinha",
-    title: "O que tem na geladeira?",
+    title: "Geladeira: receitas com o que tem em casa",
     route: "/geladeira",
     audience: "Quem tem conta",
     summary:
@@ -594,7 +594,7 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "cardapio",
-    kind: "pagina",
+    kind: "funcao",
     area: "cozinha",
     title: "Cardápio da semana",
     route: "/cardapio",
@@ -618,7 +618,7 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "feira",
-    kind: "pagina",
+    kind: "funcao",
     area: "cozinha",
     title: "Calendário da feira",
     route: "/feira",
@@ -641,7 +641,7 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "lancheira",
-    kind: "pagina",
+    kind: "funcao",
     area: "cozinha",
     title: "Lancheira da semana",
     route: "/lancheira",
@@ -664,9 +664,9 @@ export const CATALOG_A: CatalogItem[] = [
   },
   {
     id: "receitas",
-    kind: "pagina",
+    kind: "funcao",
     area: "cozinha",
-    title: "Receitas",
+    title: "Receitas da comunidade",
     route: "/explorar?tipo=receita",
     audience: "Quem tem conta",
     summary: "As receitas publicadas pela comunidade, dentro do Explorar.",

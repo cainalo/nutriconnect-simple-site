@@ -16,6 +16,11 @@ sozinha.
 | Documentação do site para o dono aprender a usar | Admin → **Documentação** (lê o mesmo catálogo) |
 | Prints usados na documentação | `public/images/docs/<id do item>.jpg` |
 
+**Atenção ao que é “função”:** função é **algo que o site faz** (consulta on-line, acompanhamento,
+diário alimentar, geladeira, grupo familiar, cardápio, feed…), não a página Funções (que só reúne
+atalhos). No catálogo: `funcao` = o que o site faz; `funcionalidade` = uma parte menor de uma função
+(menu ⋯ do post, pagar a consulta); `pagina` = tela simples (login, termos, configurações).
+
 O catálogo é a **fonte única**: página nova no site = item novo no catálogo (senão ela não aparece na
 documentação nem é avaliada).
 

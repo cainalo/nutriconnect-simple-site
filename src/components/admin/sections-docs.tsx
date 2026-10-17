@@ -10,7 +10,11 @@ import type { CatalogItem, DemoId } from "@/lib/quality/catalog-types";
 import { pct, scoreTone, summarizeItem } from "@/lib/quality/score";
 import { cn } from "@/lib/utils";
 
-const KIND_NAMES = { pagina: "Página", funcao: "Função", funcionalidade: "Funcionalidade" };
+const KIND_NAMES = {
+  pagina: "Página",
+  funcao: "Função do site",
+  funcionalidade: "Parte de uma função",
+};
 
 // Os cards de Funções só são baixados quando alguém abre a demonstração.
 const DEMOS = Object.fromEntries(
@@ -177,8 +181,9 @@ function Overview({ onPick }: { onPick: (id: string) => void }) {
           Como o NutriConnect funciona
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {CATALOG.length} páginas, funções e funcionalidades, organizadas por área. Escolha uma no
-          menu ou comece por uma área abaixo.
+          Tudo o que o site faz, por área: {CATALOG.filter((i) => i.kind === "funcao").length}{" "}
+          funções (consulta, acompanhamento, diário, geladeira, grupo familiar…), com as partes de
+          cada uma e as páginas simples. Escolha no menu ou comece por uma área abaixo.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -272,8 +277,8 @@ export function DocsSection() {
                       )}
                     >
                       <span className="truncate">{i.title}</span>
-                      {i.kind !== "pagina" && (
-                        <Badge>{i.kind === "funcao" ? "função" : "recurso"}</Badge>
+                      {i.kind !== "funcao" && (
+                        <Badge>{i.kind === "pagina" ? "página" : "parte"}</Badge>
                       )}
                     </button>
                   </li>

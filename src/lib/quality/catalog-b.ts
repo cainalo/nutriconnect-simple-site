@@ -5,9 +5,9 @@ export const CATALOG_B: CatalogItem[] = [
   // ───────────── Trilha e desafios ─────────────
   {
     id: "trilha",
-    kind: "pagina",
+    kind: "funcao",
     area: "trilha",
-    title: "Trilha de aprendizado",
+    title: "Trilhas de aprendizado",
     route: "/desafios",
     audience: "Quem tem conta (também perfis infantis)",
     summary:
@@ -27,7 +27,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "desafios",
-    kind: "pagina",
+    kind: "funcao",
     area: "trilha",
     title: "Desafios em grupo",
     route: "/desafios",
@@ -42,7 +42,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "desafio",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "trilha",
     title: "Página do desafio",
     route: "/desafios/$challengeId",
@@ -58,7 +58,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "tema-semana",
-    kind: "pagina",
+    kind: "funcao",
     area: "trilha",
     title: "Tema da semana",
     route: "/tema-da-semana",
@@ -74,7 +74,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "parceiro",
-    kind: "pagina",
+    kind: "funcao",
     area: "trilha",
     title: "Parceiro de jornada",
     route: "/parceiro",
@@ -94,9 +94,9 @@ export const CATALOG_B: CatalogItem[] = [
   // ───────────── Cuidado e saúde ─────────────
   {
     id: "profissionais",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
-    title: "Encontrar profissional",
+    title: "Diretório de profissionais",
     route: "/profissionais",
     audience: "Quem tem conta",
     summary: "Diretório de profissionais de saúde verificados, com preço, modalidade e agenda.",
@@ -111,9 +111,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "profissional",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "cuidado",
-    title: "Página do profissional",
+    title: "Página do profissional e agendamento",
     route: "/profissionais/$professionalId",
     audience: "Quem tem conta",
     summary:
@@ -145,9 +145,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "assinar",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
-    title: "Virar membro de um profissional",
+    title: "Assinatura de membros de um profissional",
     route: "/assinar/$professionalId",
     audience: "Quem tem conta",
     summary:
@@ -160,7 +160,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "programas",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
     title: "Loja de programas",
     route: "/programas",
@@ -172,7 +172,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "programa",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "cuidado",
     title: "Página do programa",
     route: "/programas/$programId",
@@ -183,7 +183,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "pagamento",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "cuidado",
     title: "Pagamento da consulta",
     route: "/pagamento/$appointmentId",
@@ -194,9 +194,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "consulta",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
-    title: "Teleconsulta",
+    title: "Consulta on-line (teleconsulta)",
     route: "/consulta/$appointmentId",
     audience: "Paciente e profissional da consulta",
     summary:
@@ -214,9 +214,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "acompanhamento",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
-    title: "Meu acompanhamento (início)",
+    title: "Acompanhamento com profissional",
     route: "/acompanhamento",
     audience: "Pacientes (quem tem conta)",
     summary:
@@ -232,9 +232,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "plano",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
-    title: "Plano alimentar",
+    title: "Plano alimentar do paciente",
     route: "/acompanhamento/plano",
     audience: "Pacientes",
     summary: "O plano alimentar publicado pelo profissional, com substituições e lista de compras.",
@@ -248,7 +248,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "diario",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
     title: "Diário alimentar",
     route: "/acompanhamento/diario",
@@ -265,7 +265,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "metas",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
     title: "Minhas metas",
     route: "/acompanhamento/metas",
@@ -280,7 +280,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "rotulos",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
     title: "Leitor de rótulos",
     route: "/acompanhamento/rotulos",
@@ -302,9 +302,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "evolucao",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
-    title: "Minha evolução",
+    title: "Evolução do paciente",
     route: "/acompanhamento/evolucao",
     audience: "Pacientes",
     summary:
@@ -319,9 +319,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "relatorio",
-    kind: "funcao",
+    kind: "funcionalidade",
     area: "cuidado",
-    title: "Minha evolução (PDF)",
+    title: "Relatório do mês em PDF",
     route: "/funcoes",
     audience: "Quem tem conta",
     summary: "Relatório do mês em PDF com água, hábitos, humor e evolução, para levar à consulta.",
@@ -330,7 +330,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "consultas",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "cuidado",
     title: "Minhas consultas",
     route: "/acompanhamento/consultas",
@@ -344,9 +344,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "mensagens",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
-    title: "Mensagens com o profissional",
+    title: "Mensagens paciente ↔ profissional",
     route: "/acompanhamento/mensagens",
     audience: "Pacientes",
     summary: "Conversa com os profissionais que acompanham a pessoa.",
@@ -359,7 +359,7 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "exames",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
     title: "Exames e documentos",
     route: "/acompanhamento/exames",
@@ -373,9 +373,9 @@ export const CATALOG_B: CatalogItem[] = [
   },
   {
     id: "nina",
-    kind: "pagina",
+    kind: "funcao",
     area: "cuidado",
-    title: "Nutri Nina (IA)",
+    title: "Nina, a nutricionista guia com IA",
     route: "/nina",
     audience: "Quem tem conta",
     summary:

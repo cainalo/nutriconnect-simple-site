@@ -11,7 +11,7 @@ import { ROUNDS } from "@/lib/quality/results";
 import { itemHistory, pct, scoreTone, summarizeAll } from "@/lib/quality/score";
 import { cn } from "@/lib/utils";
 
-const KIND_NAMES = { pagina: "Página", funcao: "Função", funcionalidade: "Funcionalidade" };
+const KIND_NAMES = { pagina: "Página", funcao: "Função", funcionalidade: "Parte" };
 
 function Cell({ score }: { score: number | null }) {
   return (

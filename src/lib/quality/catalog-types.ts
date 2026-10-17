@@ -1,6 +1,11 @@
 // Tipos do catálogo do site (lib/quality/catalog.ts): cada página, função e funcionalidade, com o
 // que faz e como usar. Alimenta Admin → Documentação e Admin → Qualidade.
 
+/**
+ * funcao: algo que o site FAZ (consulta on-line, acompanhamento, diário, geladeira, grupo familiar…),
+ * não a página Funções. pagina: uma tela simples (login, termos, configurações). funcionalidade:
+ * uma parte menor de uma função (menu ⋯ do post, pagar a consulta).
+ */
 export type CatalogKind = "pagina" | "funcao" | "funcionalidade";
 
 export type AreaId =
@@ -14,7 +19,8 @@ export type AreaId =
   | "conta"
   | "admin"
   | "institucional"
-  | "app";
+  | "app"
+  | "plataforma";
 
 export interface Area {
   id: AreaId;

@@ -9,9 +9,9 @@ export const CATALOG_C: CatalogItem[] = [
   // ───────────── Painel do profissional ─────────────
   {
     id: "verificacao",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
-    title: "Verificação profissional",
+    title: "Verificação de profissional",
     route: "/verificacao",
     audience: "Quem tem conta",
     summary: "Pedido do selo de profissional verificado, com registro no conselho e documentos.",
@@ -28,9 +28,9 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "painel",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
-    title: "Painel clínico (visão geral)",
+    title: "Painel clínico do profissional",
     route: "/painel",
     audience: PRO,
     summary:
@@ -47,7 +47,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "agenda",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Agenda",
     route: "/painel/agenda",
@@ -63,7 +63,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "pacientes",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Pacientes",
     route: "/painel/pacientes",
@@ -78,7 +78,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "prontuario",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Prontuário do paciente",
     route: "/painel/pacientes/$patientId",
@@ -95,7 +95,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "plano-editor",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Editor de plano alimentar",
     route: "/painel/planos/$planId",
@@ -116,7 +116,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "adesao",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Adesão dos pacientes",
     route: "/painel/adesao",
@@ -132,7 +132,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "painel-mensagens",
-    kind: "pagina",
+    kind: "funcionalidade",
     area: "profissional",
     title: "Mensagens (profissional)",
     route: "/painel/mensagens",
@@ -143,7 +143,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "financeiro",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Financeiro",
     route: "/painel/financeiro",
@@ -158,7 +158,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "membros",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Perfil de membros",
     route: "/painel/membros",
@@ -173,7 +173,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "painel-programas",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Loja de programas (profissional)",
     route: "/painel/programas",
@@ -188,7 +188,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "atendimento",
-    kind: "pagina",
+    kind: "funcao",
     area: "profissional",
     title: "Atendimento (configurações)",
     route: "/painel/configuracoes",
@@ -218,7 +218,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "personalizacao",
-    kind: "pagina",
+    kind: "funcao",
     area: "conta",
     title: "Personalização",
     route: "/perfil/personalizacao",
@@ -574,7 +574,7 @@ export const CATALOG_C: CatalogItem[] = [
   // ───────────── App Android ─────────────
   {
     id: "app-android",
-    kind: "funcionalidade",
+    kind: "funcao",
     area: "app",
     title: "App Android",
     audience: "Quem usa Android",
@@ -592,7 +592,7 @@ export const CATALOG_C: CatalogItem[] = [
   },
   {
     id: "app-nativo",
-    kind: "funcionalidade",
+    kind: "funcao",
     area: "app",
     title: "Recursos nativos do app",
     audience: "Quem usa o app Android",
@@ -605,5 +605,108 @@ export const CATALOG_C: CatalogItem[] = [
       "Links do site abrem o app na página certa",
     ],
     howTo: ["Use o app normalmente: os recursos entram sozinhos onde fazem sentido"],
+  },
+  // ───────────── Recursos da plataforma ─────────────
+  {
+    id: "amizades",
+    kind: "funcao",
+    area: "plataforma",
+    title: "Amizades, seguir e bloquear",
+    audience: "Quem tem conta",
+    summary:
+      "A rede de relações: pedir e aceitar amizade, seguir profissionais e pessoas, e bloquear quem incomoda.",
+    features: [
+      "Pedir amizade e aceitar ou recusar (também direto nas notificações)",
+      "Seguir pessoas e profissionais; o feed tem os filtros Amigos e Profissionais",
+      "Amigos em comum nas sugestões do Explorar",
+      "Bloquear e desbloquear; lista de contas bloqueadas em Privacidade",
+      "Perfil privado: só amigos veem o conteúdo",
+    ],
+    howTo: [
+      "Abra o perfil de alguém e toque em Adicionar amigo ou Seguir",
+      "Aceite pedidos em Notificações",
+    ],
+  },
+  {
+    id: "moderacao-ia",
+    kind: "funcao",
+    area: "plataforma",
+    title: "Moderação automática e denúncias",
+    audience: "Todos (a equipe revisa no admin)",
+    summary:
+      "Toda publicação passa por uma moderação automática antes de aparecer; o que a IA barra e o que as pessoas denunciam vai para a equipe revisar.",
+    features: [
+      "Moderação por IA antes de publicar (desinformação de saúde, ofensas, spam)",
+      "Aviso ao autor quando o post fica em análise",
+      "Denúncia pelo menu ⋯ do post, de comentários e de perfis",
+      "Admin: Barrados pela IA e Moderação, com manter ou liberar",
+    ],
+    howTo: [
+      "Para denunciar, toque nos três pontinhos do post e em Denunciar",
+      "A equipe decide em Admin → Moderação",
+    ],
+  },
+  {
+    id: "push",
+    kind: "funcao",
+    area: "plataforma",
+    title: "Notificações no celular e lembretes",
+    audience: "Quem tem conta",
+    summary:
+      "Avisos no celular e no computador (push), lembretes de água, refeições e consultas, com horário de silêncio.",
+    features: [
+      "Ativar push no navegador ou no app",
+      "Escolher os tipos de aviso e o horário de silêncio",
+      "Lembretes enviados pelo servidor a cada minuto",
+      "No iPhone, funciona com o site instalado na Tela de Início",
+    ],
+    howTo: ["Abra Configurações → Notificações", "Toque em ativar e escolha os avisos"],
+  },
+  {
+    id: "perfis-infantis",
+    kind: "funcao",
+    area: "plataforma",
+    title: "Perfis infantis",
+    audience: "Responsáveis",
+    summary:
+      "Perfis para as crianças dentro da conta do responsável, com trilha própria e lancheira da semana.",
+    features: [
+      "Criar perfil para cada criança no seletor de perfil da Trilha",
+      "Aventuras infantis na Trilha (Sabores, Corpo forte)",
+      "A criança vê o lanche do dia e diz se gostou; isso orienta a Lancheira",
+      "Compartilhados com o grupo familiar",
+    ],
+    howTo: ["Abra Desafios → Minha Trilha e o seletor de perfil", "Toque em criar perfil infantil"],
+  },
+  {
+    id: "idiomas",
+    kind: "funcao",
+    area: "plataforma",
+    title: "Quatro idiomas",
+    audience: "Todos",
+    summary:
+      "O site inteiro em português, inglês, espanhol e francês, com data, hora e fuso de cada pessoa.",
+    features: [
+      "Troca de idioma no menu da página inicial e em Configurações",
+      "Conteúdos (trilhas, dicas, quiz, feira) traduzidos",
+      "Formato de data, hora e fuso horário",
+    ],
+    howTo: ["Abra Configurações → Idioma e região e escolha o idioma"],
+  },
+  {
+    id: "designs",
+    kind: "funcao",
+    area: "plataforma",
+    title: "Designs do site e aparência",
+    audience: "Todos (o admin escolhe o design; cada pessoa ajusta o seu)",
+    summary:
+      "Quatro designs completos (Natural, Vibrante, Editorial, Aurora), modo escuro, versão com ou sem fotos e a personalização de cada pessoa por cima.",
+    features: [
+      "Admin escolhe o design e a versão com fotos (testar e publicar)",
+      "Modo claro e escuro",
+      "Personalização: cores, texto, formatos, sons, layout, acessibilidade",
+      "Reduzir movimento e alto contraste",
+    ],
+    howTo: ["Admin: Design e imagens", "Cada pessoa: Configurações → Aparência (Personalização)"],
   },
 ];
