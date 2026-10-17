@@ -676,20 +676,53 @@ interface Food {
 
 const FOODS: Food[] = [
   { emoji: "🥗", name: ["Salada", "Salad", "Ensalada", "Salade"], group: "veg" },
+  { emoji: "🥬", name: ["Couve", "Kale", "Col rizada", "Chou kale"], group: "veg" },
+  { emoji: "🍅", name: ["Tomate", "Tomato", "Tomate", "Tomate"], group: "veg" },
   { emoji: "🥦", name: ["Brócolis", "Broccoli", "Brócoli", "Brocoli"], group: "veg" },
   { emoji: "🥕", name: ["Cenoura", "Carrot", "Zanahoria", "Carotte"], group: "veg" },
+  { emoji: "🥒", name: ["Abobrinha", "Zucchini", "Calabacín", "Courgette"], group: "veg" },
   { emoji: "🫘", name: ["Feijão", "Beans", "Frijoles", "Haricots"], group: "protein" },
   { emoji: "🥚", name: ["Ovo", "Egg", "Huevo", "Œuf"], group: "protein" },
   { emoji: "🐟", name: ["Peixe", "Fish", "Pescado", "Poisson"], group: "protein" },
+  { emoji: "🍗", name: ["Frango", "Chicken", "Pollo", "Poulet"], group: "protein" },
+  { emoji: "🥩", name: ["Carne", "Beef", "Carne", "Bœuf"], group: "protein" },
+  { emoji: "🌰", name: ["Lentilha", "Lentils", "Lentejas", "Lentilles"], group: "protein" },
   { emoji: "🍚", name: ["Arroz", "Rice", "Arroz", "Riz"], group: "carb" },
   { emoji: "🍠", name: ["Batata-doce", "Sweet potato", "Batata", "Patate douce"], group: "carb" },
+  { emoji: "🥔", name: ["Mandioca", "Cassava", "Yuca", "Manioc"], group: "carb" },
   { emoji: "🌽", name: ["Milho", "Corn", "Maíz", "Maïs"], group: "carb" },
+  { emoji: "🍝", name: ["Macarrão", "Pasta", "Pasta", "Pâtes"], group: "carb" },
+  {
+    emoji: "🍞",
+    name: ["Pão integral", "Whole-grain bread", "Pan integral", "Pain complet"],
+    group: "carb",
+  },
 ];
 
-const MAX_ON_PLATE = 6;
+/** Porções no prato (cada toque é uma porção). */
+const MAX_ON_PLATE = 8;
 
 /** Cor de cada grupo do prato (verduras, proteínas, energia). */
 const GROUP_COLOR: Record<Group, string> = { veg: "#4f8a4b", protein: "#d9692a", carb: "#c58a12" };
+/** Parte ideal do prato para cada grupo (Guia Alimentar: metade legumes e verduras). */
+const GROUP_IDEAL: Record<Group, number> = { veg: 0.5, protein: 0.25, carb: 0.25 };
+const GROUP_NAMES: Record<Group, Names> = {
+  veg: ["Legumes e verduras", "Vegetables", "Verduras", "Légumes"],
+  protein: ["Proteínas", "Proteins", "Proteínas", "Protéines"],
+  carb: ["Energia", "Energy", "Energía", "Énergie"],
+};
+const GROUPS: Group[] = ["veg", "protein", "carb"];
+
+/** Fatia de pizza (SVG) de `from` a `to` (frações da volta), raio r, centro 50,50. */
+function slice(from: number, to: number, r: number) {
+  if (to - from >= 0.999) return `M50 ${50 - r} A${r} ${r} 0 1 1 49.99 ${50 - r} Z`;
+  const pt = (f: number) => {
+    const a = f * 2 * Math.PI - Math.PI / 2;
+    return `${(50 + r * Math.cos(a)).toFixed(2)} ${(50 + r * Math.sin(a)).toFixed(2)}`;
+  };
+  return `M50 50 L${pt(from)} A${r} ${r} 0 ${to - from > 0.5 ? 1 : 0} 1 ${pt(to)} Z`;
+}
+
 /** Cor de cada humor, do mais animado ao mais difícil. */
 const MOOD_COLORS = ["#4f8a4b", "#84a331", "#c58a12", "#d6456b"];
 
@@ -774,46 +807,96 @@ export function PlateBuilderCard() {
         ) : undefined
       }
     >
-      <div className="mx-auto grid h-32 w-32 grid-cols-3 content-center gap-1 rounded-full border-4 border-border bg-secondary/40 p-3 shadow-inner">
-        {Array.from({ length: MAX_ON_PLATE }, (_, slot) => (
-          <button
-            key={slot}
-            type="button"
-            disabled={plate[slot] === undefined}
-            onClick={() => setPlate((p) => p.filter((_, k) => k !== slot))}
-            className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-xl transition hover:scale-110 disabled:cursor-default"
-            aria-label={plate[slot] !== undefined ? tr(FOODS[plate[slot]].name) : undefined}
-          >
-            {plate[slot] !== undefined ? (
-              <span className="nc-pop-in" style={{ color: GROUP_COLOR[FOODS[plate[slot]].group] }}>
-                <EmojiIcon emoji={FOODS[plate[slot]].emoji} className="h-5 w-5" />
-              </span>
-            ) : null}
-          </button>
-        ))}
+      <div className="relative mx-auto h-36 w-36">
+        <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
+          <circle cx="50" cy="50" r="48" className="fill-card stroke-border" strokeWidth="2" />
+          {/* Proporção ideal, tracejada: metade verduras, um quarto proteína, um quarto energia. */}
+          {[0, 0.5, 0.75].map((f) => {
+            const a = f * 2 * Math.PI - Math.PI / 2;
+            return (
+              <line
+                key={f}
+                x1="50"
+                y1="50"
+                x2={50 + 42 * Math.cos(a)}
+                y2={50 + 42 * Math.sin(a)}
+                className="stroke-border"
+                strokeWidth="1"
+                strokeDasharray="3 3"
+              />
+            );
+          })}
+          {(() => {
+            let at = 0;
+            return GROUPS.map((g) => {
+              const part = plate.length ? counts[g] / plate.length : 0;
+              const d = part > 0 ? slice(at, at + part, 40) : null;
+              at += part;
+              return d ? (
+                <path key={g} d={d} fill={GROUP_COLOR[g]} opacity={0.85} className="nc-pop-in" />
+              ) : null;
+            });
+          })()}
+          <circle cx="50" cy="50" r="40" fill="none" className="stroke-card" strokeWidth="1.5" />
+        </svg>
+        {plate.length === 0 && (
+          <span className="absolute inset-0 grid place-items-center text-[11px] font-semibold text-muted-foreground">
+            {tr(["Prato vazio", "Empty plate", "Plato vacío", "Assiette vide"])}
+          </span>
+        )}
       </div>
+      <dl className="mt-2 grid grid-cols-3 gap-1 text-center text-[10px]">
+        {GROUPS.map((g) => (
+          <div key={g}>
+            <dt className="font-semibold" style={{ color: GROUP_COLOR[g] }}>
+              {tr(GROUP_NAMES[g])}
+            </dt>
+            <dd className="tabular-nums text-muted-foreground">
+              {plate.length ? Math.round((counts[g] / plate.length) * 100) : 0}% /{" "}
+              {Math.round(GROUP_IDEAL[g] * 100)}%
+            </dd>
+          </div>
+        ))}
+      </dl>
       <p
         key={message}
         className="nc-pop-in mt-3 min-h-[2.5rem] text-center text-xs font-medium leading-snug text-foreground"
       >
         {message}
       </p>
-      <div className="mt-2 flex flex-wrap justify-center gap-1.5">
-        {FOODS.map((f, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => add(i)}
-            disabled={plate.length >= MAX_ON_PLATE}
-            className={`${iconBtn} disabled:opacity-40`}
+      {GROUPS.map((g) => (
+        <div key={g} className="mt-2">
+          <p
+            className="mb-1 text-[10px] font-bold uppercase tracking-wider"
+            style={{ color: GROUP_COLOR[g] }}
           >
-            <span style={{ color: GROUP_COLOR[f.group] }}>
-              <EmojiIcon emoji={f.emoji} className="h-4 w-4" />
-            </span>
-            {tr(f.name)}
-          </button>
-        ))}
-      </div>
+            {tr(GROUP_NAMES[g])}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {FOODS.map((f, i) =>
+              f.group === g ? (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => add(i)}
+                  disabled={plate.length >= MAX_ON_PLATE}
+                  className={`${iconBtn} disabled:opacity-40`}
+                >
+                  <span style={{ color: GROUP_COLOR[f.group] }}>
+                    <EmojiIcon emoji={f.emoji} className="h-4 w-4" />
+                  </span>
+                  {tr(f.name)}
+                </button>
+              ) : null,
+            )}
+          </div>
+        </div>
+      ))}
+      {plate.length > 0 && (
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          {plate.map((i) => tr(FOODS[i].name)).join(" · ")}
+        </p>
+      )}
       <p className={note}>
         {tr([
           "Inspirado no Guia Alimentar para a População Brasileira. Não substitui orientação profissional.",
