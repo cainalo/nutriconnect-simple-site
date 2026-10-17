@@ -528,36 +528,36 @@ const fr: Record<DictKey, string> = {
   "theme.past3.summary":
     "Pratiques de respiration et observation des signaux de satiété à table, sans écrans à proximité.",
 
-  "about.val1.title": "L'Humain d'Abord",
+  "about.val1.title": "Manger sans culpabilité",
   "about.val1.desc":
-    "Nous croyons que l'alimentation est affection, culture et habitude. Nous n'imposons pas de régimes restrictifs punitifs.",
-  "about.val2.title": "Science et Preuves",
+    "Manger, c'est de l'affection, de la culture et des habitudes. Ici, pas de régime punitif ni de remarques sur le corps des autres.",
+  "about.val2.title": "La science derrière",
   "about.val2.desc":
-    "Toutes nos recommandations et algorithmes reposent sur les lignes directrices actualisées de nutrition humaine.",
-  "about.val3.title": "Une Technologie Simple",
+    "Les leçons et conseils suivent le Guide alimentaire pour la population brésilienne, et seuls des professionnels au diplôme vérifié consultent.",
+  "about.val3.title": "Facile à utiliser",
   "about.val3.desc":
-    "Nous créons des interfaces intuitives et accessibles pour que chacun puisse les utiliser facilement.",
-  "about.val4.title": "Communauté Accueillante",
+    "Fonctionne sur mobile, en quatre langues, avec des textes plus grands et moins d'animations pour qui en a besoin.",
+  "about.val4.title": "Une communauté accueillante",
   "about.val4.desc":
-    "Nous favorisons un environnement sans jugement, où les progrès de chacun sont célébrés par tous.",
-  "about.badge": "Découvrez notre histoire",
-  "about.hero1": "Réinventer le lien entre",
-  "about.hero2": "vous et votre alimentation",
+    "Des règles claires, un signalement en deux gestes et une vraie modération. Chaque pas compte.",
+  "about.badge": "Notre histoire",
+  "about.hero1": "Mieux manger,",
+  "about.hero2": "en bonne compagnie",
   "about.heroText":
-    "NutriConnect est née de la conviction que changer ses habitudes alimentaires ne doit être ni solitaire ni compliqué. Nous associons empathie humaine et intelligence technologique pour créer le meilleur écosystème de nutrition d'Amérique latine.",
-  "about.mission": "Notre Mission",
+    "NutriConnect est né d'une idée simple : changer son alimentation est plus facile quand on n'est pas seul. Vous y trouverez des recettes, un parcours pour apprendre, des outils pour la cuisine de tous les jours et des professionnels de santé pour vous suivre.",
+  "about.mission": "Notre mission",
   "about.missionText":
     "Un endroit où parler de nourriture sans culpabilité : échanger des recettes, raconter ce qui a marché et demander de l'aide à ceux qui savent, sans jugement sur le corps.",
-  "about.vision": "Notre Vision",
+  "about.vision": "Où nous allons",
   "about.visionText":
     "Rendre le bien-manger plus simple pour ceux qui n'ont ni temps, ni argent en trop, ni diététicien dans la famille.",
-  "about.valuesTitle": "Nos Valeurs Fondamentales",
-  "about.valuesHint": "Ce qui nous guide dans chaque ligne de code et chaque décision",
+  "about.valuesTitle": "Ce en quoi nous croyons",
+  "about.valuesHint": "Quatre choses qui comptent à chaque décision",
   "about.join": "Venez cuisiner avec nous",
   "about.joinText":
     "Si vous voulez mieux manger, cuisiner davantage ou simplement trouver des gens qui pensent comme vous, créez votre compte. C'est gratuit.",
-  "about.createFree": "Créer un Compte Gratuit",
-  "about.contactUs": "Nous Contacter",
+  "about.createFree": "Créer un compte gratuit",
+  "about.contactUs": "Nous écrire",
 
   "contact.ch1.title": "E-mail d'Assistance",
   "contact.ch1.hint": "Nous répondons sous 2 heures ouvrées",

@@ -522,36 +522,36 @@ const es: Record<DictKey, string> = {
   "theme.past3.summary":
     "Prácticas de respiración y observación de señales de saciedad en la mesa, sin pantallas cerca.",
 
-  "about.val1.title": "La Humanización Primero",
+  "about.val1.title": "Comida sin culpa",
   "about.val1.desc":
-    "Creemos que la alimentación es afecto, cultura y hábito. No imponemos dietas restrictivas punitivas.",
-  "about.val2.title": "Ciencia y Evidencia",
+    "La comida es cariño, cultura y hábito. Aquí no hay dietas de castigo ni comentarios sobre el cuerpo de otros.",
+  "about.val2.title": "Ciencia detrás",
   "about.val2.desc":
-    "Todas nuestras recomendaciones y algoritmos se basan en las directrices actualizadas de nutrición humana.",
-  "about.val3.title": "Tecnología Sin Complicaciones",
+    "Las lecciones y consejos siguen la Guía Alimentaria para la Población Brasileña, y solo atienden profesionales con registro verificado.",
+  "about.val3.title": "Fácil de usar",
   "about.val3.desc":
-    "Creamos interfaces intuitivas y accesibles para que cualquier persona pueda usarlas con facilidad.",
-  "about.val4.title": "Comunidad Acogedora",
+    "Funciona en el celular, en cuatro idiomas, con letras grandes y menos movimiento para quien lo necesite.",
+  "about.val4.title": "Comunidad que acoge",
   "about.val4.desc":
-    "Promovemos un ambiente libre de juicios, donde la evolución individual es celebrada por todos.",
-  "about.badge": "Conoce nuestra historia",
-  "about.hero1": "Reinventando la conexión entre",
-  "about.hero2": "tú y tu alimentación",
+    "Reglas claras, denuncia en dos toques y moderación de verdad. Cada paso de alguien cuenta.",
+  "about.badge": "Nuestra historia",
+  "about.hero1": "Comer mejor,",
+  "about.hero2": "en compañía",
   "about.heroText":
-    "NutriConnect nació de la convicción de que cambiar hábitos alimentarios no tiene por qué ser solitario ni complicado. Combinamos empatía humana con inteligencia tecnológica para crear el mejor ecosistema de nutrición de América Latina.",
-  "about.mission": "Nuestra Misión",
+    "NutriConnect nació de una idea simple: cambiar la alimentación es más fácil cuando no estás solo. Aquí encuentras recetas, una ruta para aprender, herramientas para la cocina de casa y profesionales de salud que te acompañan.",
+  "about.mission": "Nuestra misión",
   "about.missionText":
     "Un lugar para hablar de comida sin culpa: intercambiar recetas, contar lo que funcionó y pedir ayuda a quien sabe, sin juicios sobre el cuerpo.",
-  "about.vision": "Nuestra Visión",
+  "about.vision": "Adónde queremos llegar",
   "about.visionText":
     "Que comer bien sea más fácil para quien no tiene tiempo, dinero de sobra o un nutricionista en la familia.",
-  "about.valuesTitle": "Nuestros Valores Fundamentales",
-  "about.valuesHint": "Lo que nos guía en cada línea de código y decisión",
+  "about.valuesTitle": "En qué creemos",
+  "about.valuesHint": "Cuatro cosas que pesan en cada decisión",
   "about.join": "Ven a cocinar con nosotros",
   "about.joinText":
     "Si quieres comer mejor, cocinar más en casa o simplemente encontrar gente que piensa parecido, crea tu cuenta. Es gratis.",
-  "about.createFree": "Crear Cuenta Gratuita",
-  "about.contactUs": "Ponte en Contacto",
+  "about.createFree": "Crear cuenta gratis",
+  "about.contactUs": "Hablar con nosotros",
 
   "contact.ch1.title": "Correo de Soporte",
   "contact.ch1.hint": "Respondemos en hasta 2 horas hábiles",

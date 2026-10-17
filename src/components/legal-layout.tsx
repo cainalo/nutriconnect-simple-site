@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Children, isValidElement, type CSSProperties, type ReactNode } from "react";
 import { SiteHeader } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
 import { LEGAL_UPDATED_AT } from "@/lib/legal";
@@ -25,11 +25,57 @@ export function LegalLayout({
             Última atualização: {LEGAL_UPDATED_AT}
           </p>
           {intro && <p className="mt-6 leading-relaxed text-muted-foreground">{intro}</p>}
+          <LegalIndex>{children}</LegalIndex>
           <div className="mt-8 space-y-8">{children}</div>
         </article>
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+type SectionProps = { id?: string; title: string; children: ReactNode };
+
+/** Índice das seções (as que têm id), para pular direto num texto longo. */
+function LegalIndex({ children }: { children: ReactNode }) {
+  const items = Children.toArray(children).flatMap((child) =>
+    isValidElement<SectionProps>(child) && child.type === LegalSection && child.props.id
+      ? [{ id: child.props.id, title: child.props.title }]
+      : [],
+  );
+  if (items.length < 4) return null;
+  return (
+    <nav
+      aria-label="Índice"
+      className="mt-8 rounded-2xl border border-border/70 bg-card p-4 shadow-xs sm:p-5"
+    >
+      <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        Nesta página
+      </p>
+      <ol
+        className="mt-3 grid gap-x-4 gap-y-1 sm:grid-flow-col sm:grid-cols-2 sm:[grid-template-rows:repeat(var(--rows),auto)]"
+        style={{ "--rows": Math.ceil(items.length / 2) } as CSSProperties}
+      >
+        {items.map(({ id, title }) => {
+          const m = /^(\d+)\.\s*(.*)$/.exec(title);
+          return (
+            <li key={id}>
+              <a
+                href={`#${id}`}
+                className="flex min-h-10 items-center gap-2.5 rounded-xl px-2 text-sm text-foreground transition hover:bg-secondary"
+              >
+                {m && (
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
+                    {m[1]}
+                  </span>
+                )}
+                <span className="leading-snug">{m ? m[2] : title}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }
 

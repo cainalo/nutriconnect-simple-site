@@ -125,14 +125,21 @@ function SchedulePage() {
             {days.map((d) => {
               const dayAppts = list.filter((a) => isSameDay(new Date(a.starts_at), d));
               const isToday = isSameDay(d, today);
+              // No celular, dia sem consulta vira uma linha só (a semana não fica uma coluna longa).
+              const empty = dayAppts.length === 0;
               return (
                 <div
                   key={d.toISOString()}
-                  className={cn("min-h-24 p-2 md:min-h-72", isToday && "bg-accent-soft/40")}
+                  className={cn(
+                    "p-2 md:min-h-72",
+                    empty ? "flex items-baseline gap-3 py-2.5 md:block" : "min-h-24",
+                    isToday && "bg-accent-soft/40",
+                  )}
                 >
                   <p
                     className={cn(
-                      "mb-2 text-xs font-semibold uppercase text-muted-foreground",
+                      "text-xs font-semibold uppercase text-muted-foreground",
+                      empty ? "md:mb-2" : "mb-2",
                       isToday && "text-accent",
                     )}
                   >
@@ -140,7 +147,7 @@ function SchedulePage() {
                     <span className="text-base text-foreground">{d.getDate()}</span>
                   </p>
                   <div className="space-y-1.5">
-                    {dayAppts.length === 0 && (
+                    {empty && (
                       <p className="text-[11px] text-muted-foreground/70 md:hidden">
                         {t("schedule.free")}
                       </p>

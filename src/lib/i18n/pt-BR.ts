@@ -534,36 +534,36 @@ const ptBR = {
   "theme.past3.summary":
     "Práticas de respiração e observação de sinais de saciedade à mesa sem telas por perto.",
 
-  "about.val1.title": "Humanização em Primeiro Lugar",
+  "about.val1.title": "Comida sem culpa",
   "about.val1.desc":
-    "Acreditamos que a alimentação é afeto, cultura e hábito. Não impomos dietas restritivas punitivas.",
-  "about.val2.title": "Ciência & Evidência",
+    "Comida é afeto, cultura e hábito. Aqui não tem dieta punitiva nem conversa sobre corpo dos outros.",
+  "about.val2.title": "Ciência por trás",
   "about.val2.desc":
-    "Todas as nossas recomendações e algoritmos são embasados nas diretrizes atualizadas de nutrição humana.",
-  "about.val3.title": "Tecnologia Descomplicada",
+    "As trilhas e dicas seguem o Guia Alimentar para a População Brasileira, e só profissionais com registro verificado atendem.",
+  "about.val3.title": "Fácil de usar",
   "about.val3.desc":
-    "Criamos interfaces intuitivas e acessíveis para que qualquer pessoa consiga usar com facilidade.",
-  "about.val4.title": "Comunidade Acolhedora",
+    "Funciona no celular, em quatro idiomas, com letras grandes e menos movimento para quem precisa.",
+  "about.val4.title": "Comunidade que acolhe",
   "about.val4.desc":
-    "Promovemos um ambiente livre de julgamentos, onde a evolução individual é celebrada por todos.",
-  "about.badge": "Conheça nossa história",
-  "about.hero1": "Reinventando a conexão entre",
-  "about.hero2": "você e sua alimentação",
+    "Regras claras, denúncia em dois toques e moderação de verdade. Cada passo de alguém conta.",
+  "about.badge": "Nossa história",
+  "about.hero1": "Comer melhor,",
+  "about.hero2": "com companhia",
   "about.heroText":
-    "A NutriConnect nasceu da convicção de que mudar hábitos alimentares não precisa ser solitário nem complicado. Combinamos empatia humana com inteligência tecnológica para criar o melhor ecossistema de nutrição da América Latina.",
-  "about.mission": "Nossa Missão",
+    "O NutriConnect nasceu de uma ideia simples: mudar a alimentação é mais fácil quando não se está sozinho. Aqui você acha receitas, uma trilha para aprender, ferramentas para a cozinha de casa e profissionais de saúde para acompanhar você.",
+  "about.mission": "Nossa missão",
   "about.missionText":
     "Ser um lugar onde dá para falar de comida sem culpa: trocar receitas, contar o que funcionou e pedir ajuda a quem entende, sem julgamento sobre corpo.",
-  "about.vision": "Nossa Visão",
+  "about.vision": "Aonde queremos chegar",
   "about.visionText":
     "Que comer bem fique mais fácil para quem não tem tempo, dinheiro sobrando ou um nutricionista na família.",
-  "about.valuesTitle": "Nossos Valores Fundamentais",
-  "about.valuesHint": "O que nos guia em cada linha de código e decisão",
+  "about.valuesTitle": "No que acreditamos",
+  "about.valuesHint": "Quatro coisas que pesam em cada decisão",
   "about.join": "Venha cozinhar com a gente",
   "about.joinText":
     "Se você quer comer melhor, cozinhar mais em casa ou só achar gente que pensa parecido, crie sua conta. É de graça.",
-  "about.createFree": "Criar Conta Gratuita",
-  "about.contactUs": "Entre em Contato",
+  "about.createFree": "Criar conta grátis",
+  "about.contactUs": "Falar com a gente",
 
   "contact.ch1.title": "E-mail de Suporte",
   "contact.ch1.hint": "Respondemos em até 2 horas úteis",

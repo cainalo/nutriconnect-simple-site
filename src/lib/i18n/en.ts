@@ -516,35 +516,36 @@ const en: Record<DictKey, string> = {
   "theme.past3.summary":
     "Breathing practices and observing fullness signals at the table, with no screens around.",
 
-  "about.val1.title": "Humanization First",
+  "about.val1.title": "Food without guilt",
   "about.val1.desc":
-    "We believe food is affection, culture and habit. We don't impose punitive restrictive diets.",
-  "about.val2.title": "Science & Evidence",
+    "Food is affection, culture and habit. No punishing diets here, and no talk about other people's bodies.",
+  "about.val2.title": "Science behind it",
   "about.val2.desc":
-    "All our recommendations and algorithms are based on up-to-date human nutrition guidelines.",
-  "about.val3.title": "Uncomplicated Technology",
-  "about.val3.desc": "We build intuitive, accessible interfaces so anyone can use them easily.",
-  "about.val4.title": "Welcoming Community",
+    "Lessons and tips follow the Dietary Guidelines for the Brazilian Population, and only professionals with a verified license see patients.",
+  "about.val3.title": "Easy to use",
+  "about.val3.desc":
+    "Works on your phone, in four languages, with larger text and less motion for those who need it.",
+  "about.val4.title": "A welcoming community",
   "about.val4.desc":
-    "We foster a judgment-free environment where individual progress is celebrated by all.",
-  "about.badge": "Learn our story",
-  "about.hero1": "Reinventing the connection between",
-  "about.hero2": "you and your food",
+    "Clear rules, reporting in two taps and real moderation. Every step someone takes counts.",
+  "about.badge": "Our story",
+  "about.hero1": "Eating better,",
+  "about.hero2": "with company",
   "about.heroText":
-    "NutriConnect was born from the conviction that changing eating habits doesn't have to be lonely or complicated. We combine human empathy with technological intelligence to create the best nutrition ecosystem in Latin America.",
-  "about.mission": "Our Mission",
+    "NutriConnect started from a simple idea: changing how you eat is easier when you're not alone. Here you'll find recipes, a learning path, tools for your home kitchen and health professionals to follow up with you.",
+  "about.mission": "Our mission",
   "about.missionText":
     "A place to talk about food without guilt: swap recipes, share what worked and ask people who know for help, with no judgment about bodies.",
-  "about.vision": "Our Vision",
+  "about.vision": "Where we're headed",
   "about.visionText":
     "Making eating well easier for people without spare time, spare money or a dietitian in the family.",
-  "about.valuesTitle": "Our Core Values",
-  "about.valuesHint": "What guides us in every line of code and decision",
+  "about.valuesTitle": "What we believe",
+  "about.valuesHint": "Four things that weigh on every decision",
   "about.join": "Come cook with us",
   "about.joinText":
     "If you want to eat better, cook at home more or just find like-minded people, create your account. It's free.",
-  "about.createFree": "Create a Free Account",
-  "about.contactUs": "Get in Touch",
+  "about.createFree": "Create a free account",
+  "about.contactUs": "Talk to us",
 
   "contact.ch1.title": "Support Email",
   "contact.ch1.hint": "We reply within 2 business hours",
