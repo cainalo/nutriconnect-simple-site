@@ -28,6 +28,8 @@ import { formatDate, formatMoney, formatTime } from "@/lib/clinical/format";
 import { useClinicalI18n } from "@/lib/clinical/i18n";
 import { roomState } from "@/lib/clinical/video-call";
 import { methodLabel } from "@/lib/clinical/labels";
+import { canConfirmAttendance, confirmAttendance } from "@/lib/clinical/reminders";
+import { useTr } from "@/components/settings-ui";
 import { SlotPicker } from "./slot-picker";
 import {
   AppointmentStatusBadge,
@@ -88,6 +90,15 @@ export function AppointmentCard({
 }) {
   const { t, locale } = useClinicalI18n();
   const [dialog, setDialog] = useState<null | "cancel" | "reschedule" | "manage">(null);
+  const tr = useTr();
+  const confirm = useClinicalMutation(() => confirmAttendance(appt.id), {
+    success: tr([
+      "Presença confirmada. Avisamos o profissional.",
+      "Attendance confirmed. We let the professional know.",
+      "Asistencia confirmada. Avisamos al profesional.",
+      "Présence confirmée. Le professionnel est prévenu.",
+    ]),
+  });
   const isFuture = new Date(appt.ends_at).getTime() > Date.now();
   const isActive = ACTIVE.includes(appt.status);
   const start = new Date(appt.starts_at);
@@ -161,6 +172,40 @@ export function AppointmentCard({
         <div className="flex flex-wrap items-center gap-2 @xl:justify-end">
           <AppointmentStatusBadge status={appt.status} />
           {payment && appt.price_cents > 0 && <PaymentStatusBadge status={payment.status} />}
+          {appt.patient_confirmed_at && isActive && isFuture && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {role === "patient"
+                ? tr([
+                    "Presença confirmada",
+                    "Attendance confirmed",
+                    "Asistencia confirmada",
+                    "Présence confirmée",
+                  ])
+                : tr([
+                    "Paciente confirmou presença",
+                    "Patient confirmed attendance",
+                    "Paciente confirmó asistencia",
+                    "Patient a confirmé sa présence",
+                  ])}
+            </span>
+          )}
+          {role === "patient" && canConfirmAttendance(appt) && (
+            <button
+              type="button"
+              className={buttonSecondary}
+              disabled={confirm.isPending}
+              onClick={() => confirm.mutate(undefined)}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              {tr([
+                "Confirmar presença",
+                "Confirm attendance",
+                "Confirmar asistencia",
+                "Confirmer ma présence",
+              ])}
+            </button>
+          )}
 
           {canJoin(appt) && (
             <Link

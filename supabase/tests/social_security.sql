@@ -1590,6 +1590,68 @@ begin
       'ok', (select count(*) from public.symptom_logs where patient_id = c) = 1, 'obtido', left(r, 90));
   end if;
 
+  -- ------------------------------------------------ LEMBRETES DE CONSULTA E EXAMES (X2)
+  -- C é paciente de P (acompanhamento ativo); F é estranho.
+  if to_regclass('public.exam_reminders') is not null then
+    declare
+      ap24 uuid;
+      ap1 uuid;
+      ex uuid;
+      n_before integer;
+    begin
+      update public.care_links set status = 'ativo' where patient_id = c and professional_id = p;
+      insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality, status)
+      values (p, c, now() + interval '20 hours', now() + interval '21 hours', 'presencial', 'agendada')
+      returning id into ap24;
+      insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality, status)
+      values (p, c, now() + interval '30 minutes', now() + interval '90 minutes', 'presencial', 'confirmada')
+      returning id into ap1;
+
+      perform public.send_care_reminders();
+      res := res || jsonb_build_object('teste', 'lembrete 24 h antes chega ao paciente',
+        'ok', exists (select 1 from public.notifications where user_id = c and type = 'consulta_lembrete' and entity_id = ap24::text and data ->> 'when' = '24h'),
+        'obtido', '');
+      res := res || jsonb_build_object('teste', 'lembrete 1 h antes chega a paciente e profissional',
+        'ok', (select count(*) from public.notifications where type = 'consulta_lembrete' and entity_id = ap1::text and data ->> 'when' = '1h') = 2,
+        'obtido', '');
+      select count(*) into n_before from public.notifications where type = 'consulta_lembrete';
+      perform public.send_care_reminders();
+      res := res || jsonb_build_object('teste', 'lembrete não repete',
+        'ok', (select count(*) from public.notifications where type = 'consulta_lembrete') = n_before, 'obtido', '');
+
+      r := pg_temp.as_user(f, 'authenticated', format('select public.confirm_attendance(%L)', ap24));
+      res := res || jsonb_build_object('teste', 'só o paciente confirma presença', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('select public.confirm_attendance(%L)', ap24));
+      res := res || jsonb_build_object('teste', 'paciente confirma presença e o profissional é avisado',
+        'ok', r not like 'ERRO%'
+          and (select patient_confirmed_at is not null from public.appointments where id = ap24)
+          and exists (select 1 from public.notifications where user_id = p and type = 'consulta_presenca'),
+        'obtido', left(r, 90));
+      update public.appointments set starts_at = starts_at + interval '2 days', ends_at = ends_at + interval '2 days' where id = ap24;
+      res := res || jsonb_build_object('teste', 'remarcar zera lembretes e confirmação',
+        'ok', (select reminder_24h_at is null and patient_confirmed_at is null from public.appointments where id = ap24),
+        'obtido', '');
+
+      r := pg_temp.as_user(c, 'authenticated', 'insert into public.exam_reminders (patient_id, title, due_at) values (auth.uid(), ''Hemograma'', now() + interval ''5 hours'') returning id');
+      res := res || jsonb_build_object('teste', 'paciente anota um exame', 'ok', r not like 'ERRO%', 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.exam_reminders where patient_id = %L', c));
+      res := res || jsonb_build_object('teste', 'estranho NÃO vê os exames', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.exam_reminders (patient_id, requested_by, title, due_at) values (%L, auth.uid(), ''Glicemia'', now() + interval ''3 days'')', c));
+      res := res || jsonb_build_object('teste', 'estranho NÃO pede exame', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('insert into public.exam_reminders (patient_id, title, due_at) values (%L, ''Glicemia'', now() + interval ''3 days'')', c));
+      res := res || jsonb_build_object('teste', 'profissional só cria exame como pedido dele', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('insert into public.exam_reminders (patient_id, requested_by, title, due_at) values (%L, auth.uid(), ''Glicemia_jejum'', now() + interval ''3 days'')', c));
+      res := res || jsonb_build_object('teste', 'profissional do acompanhamento pede exame e o paciente é avisado',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = c and type = 'exame_pedido'),
+        'obtido', left(r, 90));
+      perform public.send_care_reminders();
+      res := res || jsonb_build_object('teste', 'lembrete do exame nas próximas 24 h',
+        'ok', (select count(*) from public.notifications where user_id = c and type = 'exame_lembrete') = 1, 'obtido', '');
+      r := pg_temp.as_user(c, 'authenticated', 'select (public.export_my_data() -> ''exames_agendados'') is not null');
+      res := res || jsonb_build_object('teste', 'cópia dos dados (LGPD) inclui os exames', 'ok', (r = 't'), 'obtido', left(r, 90));
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

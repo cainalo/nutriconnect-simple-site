@@ -144,6 +144,36 @@ const AVISOS: Record<string, Names> = {
     "{name} reprogramó la consulta",
     "{name} a reprogrammé la consultation",
   ],
+  consulta_lembrete: [
+    "Lembrete da sua consulta com {name}",
+    "Reminder of your appointment with {name}",
+    "Recordatorio de tu consulta con {name}",
+    "Rappel de votre consultation avec {name}",
+  ],
+  consulta_presenca: [
+    "{name} confirmou presença na consulta",
+    "{name} confirmed attendance",
+    "{name} confirmó asistencia a la consulta",
+    "{name} a confirmé sa présence",
+  ],
+  consulta_avaliada: [
+    "Sua consulta recebeu uma avaliação",
+    "Your appointment received a review",
+    "Tu consulta recibió una reseña",
+    "Votre consultation a reçu un avis",
+  ],
+  exame_pedido: [
+    "{name} pediu um exame para você",
+    "{name} requested a test for you",
+    "{name} te pidió un examen",
+    "{name} vous a demandé un examen",
+  ],
+  exame_lembrete: [
+    "Lembrete: você tem exame nas próximas 24 horas",
+    "Reminder: you have a test in the next 24 hours",
+    "Recordatorio: tienes un examen en las próximas 24 horas",
+    "Rappel : vous avez un examen dans les prochaines 24 heures",
+  ],
   consulta_sala: [
     "{name} entrou na sala da consulta",
     "{name} joined the appointment room",

@@ -419,8 +419,11 @@ export type Database = {
           modality: Database["public"]["Enums"]["appointment_modality"]
           patient_id: string
           patient_joined_at: string | null
+          patient_confirmed_at: string | null
           patient_notes: string | null
           price_cents: number
+          reminder_1h_at: string | null
+          reminder_24h_at: string | null
           professional_id: string
           professional_joined_at: string | null
           starts_at: string
@@ -442,8 +445,11 @@ export type Database = {
           modality: Database["public"]["Enums"]["appointment_modality"]
           patient_id: string
           patient_joined_at?: string | null
+          patient_confirmed_at?: string | null
           patient_notes?: string | null
           price_cents?: number
+          reminder_1h_at?: string | null
+          reminder_24h_at?: string | null
           professional_id: string
           professional_joined_at?: string | null
           starts_at: string
@@ -465,8 +471,11 @@ export type Database = {
           modality?: Database["public"]["Enums"]["appointment_modality"]
           patient_id?: string
           patient_joined_at?: string | null
+          patient_confirmed_at?: string | null
           patient_notes?: string | null
           price_cents?: number
+          reminder_1h_at?: string | null
+          reminder_24h_at?: string | null
           professional_id?: string
           professional_joined_at?: string | null
           starts_at?: string
@@ -3501,6 +3510,45 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_reminders: {
+        Row: {
+          created_at: string
+          done_at: string | null
+          due_at: string
+          id: string
+          location: string | null
+          notes: string | null
+          patient_id: string
+          reminded_at: string | null
+          requested_by: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          done_at?: string | null
+          due_at: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          patient_id: string
+          reminded_at?: string | null
+          requested_by?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          done_at?: string | null
+          due_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          patient_id?: string
+          reminded_at?: string | null
+          requested_by?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       pro_programs: {
         Row: {
           active: boolean
@@ -6115,6 +6163,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      confirm_attendance: { Args: { p_appointment: string }; Returns: undefined }
       export_my_data: { Args: never; Returns: Json }
       admin_set_review_hidden: {
         Args: { p_hidden: boolean; p_review: string }

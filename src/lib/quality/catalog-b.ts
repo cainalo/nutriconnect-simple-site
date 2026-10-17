@@ -384,6 +384,8 @@ export const CATALOG_B: CatalogItem[] = [
     features: [
       "Abas Próximas e Histórico; agendar consulta",
       "Entrar na sala, pagar agora, remarcar e cancelar (com política de reembolso)",
+      "Lembretes 24 h e 1 h antes (no site e por push) e Confirmar presença nos 2 dias antes",
+      "Avaliar as consultas que já aconteceram",
     ],
     howTo: ["Abra Consultas", "Toque em Entrar na sala na hora marcada"],
   },
@@ -413,8 +415,13 @@ export const CATALOG_B: CatalogItem[] = [
     features: [
       "Enviar PDF ou imagem até 20 MB com título, tipo, data e observação",
       "Abrir e remover documentos",
+      "Próximos exames com data, local e orientações; lembrete 24 h antes; marcar como feito",
+      "O profissional do acompanhamento pede exames (o paciente é avisado na hora)",
     ],
-    howTo: ["Toque em Enviar arquivo", "Preencha os dados e envie"],
+    howTo: [
+      "Toque em Anotar exame, preencha e salve",
+      "Toque em Enviar arquivo para mandar o resultado",
+    ],
   },
   {
     id: "nina",

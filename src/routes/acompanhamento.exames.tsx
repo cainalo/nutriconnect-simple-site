@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DocumentsPanel } from "@/components/clinical/documents-panel";
+import { ExamsCard } from "@/components/clinical/exams-card";
 import { PageHeader } from "@/components/clinical/ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useClinicalI18n } from "@/lib/clinical/i18n";
@@ -15,7 +16,10 @@ function PatientDocumentsPage() {
   return (
     <>
       <PageHeader title={t("docs.title")} subtitle={t("docs.subtitle")} />
-      <DocumentsPanel patientId={user.id} meId={user.id} canUpload />
+      <div className="space-y-6">
+        <ExamsCard patientId={user.id} meId={user.id} asProfessional={false} canEdit />
+        <DocumentsPanel patientId={user.id} meId={user.id} canUpload />
+      </div>
     </>
   );
 }

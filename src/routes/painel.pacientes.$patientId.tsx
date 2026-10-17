@@ -16,6 +16,7 @@ import { NotesPanel } from "@/components/clinical/notes-panel";
 import { RecordSummary } from "@/components/clinical/record-summary";
 import { DiaryFeed } from "@/components/clinical/diary";
 import { SymptomsPanel } from "@/components/clinical/symptoms-panel";
+import { ExamsCard } from "@/components/clinical/exams-card";
 import { DocumentsPanel } from "@/components/clinical/documents-panel";
 import { AssessmentsPanel } from "@/components/clinical/assessments-panel";
 import { CarePlansPanel } from "@/components/clinical/care-plans-panel";
@@ -243,7 +244,10 @@ function PatientRecordPage() {
         </div>
       )}
       {tab === "documentos" && user && (
-        <DocumentsPanel patientId={patientId} meId={user.id} canUpload={isActive} />
+        <div className="space-y-6">
+          <ExamsCard patientId={patientId} meId={user.id} asProfessional canEdit={isActive} />
+          <DocumentsPanel patientId={patientId} meId={user.id} canUpload={isActive} />
+        </div>
       )}
       {tab === "consultas" && <PatientAppointments patientId={patientId} />}
 

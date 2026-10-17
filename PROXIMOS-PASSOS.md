@@ -261,8 +261,7 @@ seção de avaliações no perfil, página `/painel/avaliacoes` para responder, 
 (Recomendados usa média ponderada, para 1 voto 5,0 não passar todos). No modo demonstração do
 admin, o profissional de exemplo tem 3 avaliações. Harness: `?v=reviews&fx=1&owner=1` (e
 `&dialog=1`) mostra a seção com dados de exemplo.
-Pendente: o push de `consulta_avaliada` abre `/painel/agenda` (regra genérica `consulta_%` em
-`push_pending`); trocar para `/painel/avaliacoes` quando mexer nessa função.
+(O push de `consulta_avaliada` abre `/painel/avaliacoes`: ajustado no `push_claim` da migration do X2.)
 
 ## X1 — Diário de sintomas (17/10/2026)
 
@@ -276,3 +275,19 @@ por palavras no texto das refeições; para cada sintoma com 3+ anotações, mos
 entre 30 min e 24 h antes em pelo menos metade das vezes e 1,5× acima do comum nos dias de diário.
 Sempre com o aviso "pode ser coincidência; não corte alimentos por conta própria". Teste da lógica:
 script esbuild (10 casos, ver a sessão de 17/10). Resumo para a consulta: copiar/compartilhar.
+
+## X2 — Lembretes de consulta e de exames (17/10/2026)
+
+Migration `20261017140000_care_reminders.sql` (**ainda não aplicada em produção**). Função
+`send_care_reminders()` no pg_cron a cada 10 min: consulta 24 h antes (paciente, com "confirmar
+presença") e 1 h antes (paciente e profissional); exame 24 h antes. Avisos são notificações
+(`consulta_lembrete`, `consulta_presenca`, `exame_pedido`, `exame_lembrete`) e viram push pelo fluxo
+de sempre. Remarcar zera os lembretes e a confirmação. `confirm_attendance()` grava
+`appointments.patient_confirmed_at` (selo "Paciente confirmou presença" para o profissional).
+Tabela `exam_reminders`: paciente anota; o profissional com acompanhamento ativo pede (sempre como
+`requested_by` dele). A migration também refaz `export_my_data()` (LGPD) com avaliações, sintomas e
+exames, e `push_claim()` (links do push de exame e de avaliação). 13 testes (499 no total).
+**Edge Function `push-send` mudou** (textos dos avisos novos): publicar de novo junto com a subida.
+**E-mail:** o projeto não tem provedor de e-mail. Para mandar os lembretes por e-mail, criar conta
+num provedor (ex.: Resend), guardar a chave como segredo das Edge Functions e fazer uma função que
+leia as mesmas notificações.

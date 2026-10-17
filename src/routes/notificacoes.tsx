@@ -160,6 +160,7 @@ function categoryOf(type: string): CategoryId {
     return "social";
   if (
     type.startsWith("consulta_") ||
+    type.startsWith("exame_") ||
     type.startsWith("acompanhamento_") ||
     [
       "mensagem",
@@ -300,6 +301,64 @@ function describe(
         ]),
         detail: dateOf(data.starts_at, locale),
         go: { to: isPro ? "/painel/agenda" : "/acompanhamento/consultas" },
+      };
+    case "consulta_lembrete":
+      return {
+        icon: BellRing,
+        text:
+          data.when === "1h"
+            ? fill([
+                "Sua consulta com {name} começa em menos de 1 hora",
+                "Your appointment with {name} starts in less than 1 hour",
+                "Tu consulta con {name} empieza en menos de 1 hora",
+                "Votre consultation avec {name} commence dans moins d'une heure",
+              ])
+            : fill([
+                "Lembrete: amanhã tem consulta com {name}. Toque para confirmar presença",
+                "Reminder: appointment with {name} tomorrow. Tap to confirm attendance",
+                "Recordatorio: mañana tienes consulta con {name}. Toca para confirmar asistencia",
+                "Rappel : consultation avec {name} demain. Touchez pour confirmer",
+              ]),
+        detail: dateOf(data.starts_at, locale),
+        go: { to: isPro ? "/painel/agenda" : "/acompanhamento/consultas" },
+      };
+    case "consulta_presenca":
+      return {
+        icon: CalendarCheck,
+        text: fill([
+          "{name} confirmou presença na consulta",
+          "{name} confirmed attendance",
+          "{name} confirmó asistencia a la consulta",
+          "{name} a confirmé sa présence",
+        ]),
+        detail: dateOf(data.starts_at, locale),
+        go: { to: "/painel/agenda" },
+      };
+    case "exame_pedido":
+      return {
+        icon: ClipboardList,
+        text: fill([
+          "{name} pediu um exame para você",
+          "{name} requested a test for you",
+          "{name} te pidió un examen",
+          "{name} vous a demandé un examen",
+        ]),
+        detail: [str(data.title), dateOf(data.due_at, locale)].filter(Boolean).join(" · "),
+        go: { to: "/acompanhamento/exames" },
+      };
+    case "exame_lembrete":
+      return {
+        icon: BellRing,
+        text: tr([
+          "Lembrete: você tem exame nas próximas 24 horas",
+          "Reminder: you have a test in the next 24 hours",
+          "Recordatorio: tienes un examen en las próximas 24 horas",
+          "Rappel : vous avez un examen dans les prochaines 24 heures",
+        ]),
+        detail: [str(data.title), dateOf(data.due_at, locale), str(data.location)]
+          .filter(Boolean)
+          .join(" · "),
+        go: { to: "/acompanhamento/exames" },
       };
     case "consulta_cancelada":
       return {
