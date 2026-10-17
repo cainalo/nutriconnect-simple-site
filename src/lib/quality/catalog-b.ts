@@ -288,6 +288,27 @@ export const CATALOG_B: CatalogItem[] = [
     shot: true,
   },
   {
+    id: "sintomas",
+    kind: "funcionalidade",
+    area: "cuidado",
+    title: "Diário de sintomas",
+    route: "/acompanhamento/diario?aba=sintomas",
+    audience: "Pacientes (o profissional do acompanhamento lê)",
+    summary:
+      "Anotar o que sentiu (12 sintomas, intensidade e hora) e ver relações possíveis com o que comeu nas 24 h antes, para levar à consulta.",
+    features: [
+      "12 sintomas em grade, intensidade leve/médio/forte, agora ou há 1, 3, 6 h ou outro horário",
+      "Relações possíveis: grupo de alimento que aparece antes do sintoma bem mais que o comum (sem IA, src/lib/clinical/symptoms.ts)",
+      "Resumo para a consulta: contagem por sintoma e relações; copiar ou compartilhar",
+      "O profissional vê os sintomas e as relações na aba Diário do paciente",
+    ],
+    howTo: [
+      "Abra Diário → Sintomas",
+      "Toque no sintoma, escolha a intensidade e quando, e toque em Anotar",
+      "Antes da consulta, toque em Copiar resumo",
+    ],
+  },
+  {
     id: "metas",
     kind: "funcao",
     area: "cuidado",

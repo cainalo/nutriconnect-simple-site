@@ -314,10 +314,11 @@ createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={qc}><App /></QueryClientProvider>,
 );
 const click = q.get("click");
-if (click) setTimeout(() => {
-  const b = [...document.querySelectorAll("button")].find((x) => x.textContent?.trim() === click);
+// &click=A|B clica em sequência (um botão por vez, pelo texto).
+if (click) click.split("|").forEach((label, i) => setTimeout(() => {
+  const b = [...document.querySelectorAll("button")].find((x) => x.textContent?.trim() === label);
   b?.click();
-}, 1200);
+}, 1200 + i * 700));
 if (q.get("dbg")) setTimeout(() => {
   const w = innerWidth; const out: string[] = ["vw=" + w + " docW=" + document.documentElement.scrollWidth];
   document.querySelectorAll("body *").forEach((el) => {

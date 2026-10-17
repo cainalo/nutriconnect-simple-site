@@ -263,3 +263,16 @@ admin, o profissional de exemplo tem 3 avaliações. Harness: `?v=reviews&fx=1&o
 `&dialog=1`) mostra a seção com dados de exemplo.
 Pendente: o push de `consulta_avaliada` abre `/painel/agenda` (regra genérica `consulta_%` em
 `push_pending`); trocar para `/painel/avaliacoes` quando mexer nessa função.
+
+## X1 — Diário de sintomas (17/10/2026)
+
+Aba **Sintomas** no Diário (`/acompanhamento/diario?aba=sintomas`) e no Diário do paciente no
+painel (só leitura). Migration `20261017130000_symptom_logs.sql` (**ainda não aplicada em
+produção**; sem ela a aba fica vazia e anotar dá erro): 12 sintomas fixos, intensidade 1–3, hora
+(não aceita futuro), nota; mesmas regras do diário alimentar (paciente escreve; profissional com
+acompanhamento ativo lê). 7 testes no `social_security.sql` (486 no total, 0 falhas).
+Relações (`findRelations` em `src/lib/clinical/symptoms.ts`, sem IA): grupos de alimentos achados
+por palavras no texto das refeições; para cada sintoma com 3+ anotações, mostra o grupo comido
+entre 30 min e 24 h antes em pelo menos metade das vezes e 1,5× acima do comum nos dias de diário.
+Sempre com o aviso "pode ser coincidência; não corte alimentos por conta própria". Teste da lógica:
+script esbuild (10 casos, ver a sessão de 17/10). Resumo para a consulta: copiar/compartilhar.

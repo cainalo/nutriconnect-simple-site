@@ -1569,6 +1569,27 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ DIÁRIO DE SINTOMAS (X1)
+  -- C é paciente de P (acompanhamento ativo); F é estranho.
+  if to_regclass('public.symptom_logs') is not null then
+    update public.care_links set status = 'ativo' where patient_id = c and professional_id = p;
+    r := pg_temp.as_user(c, 'authenticated', 'insert into public.symptom_logs (patient_id, symptom, intensity) values (auth.uid(), ''azia'', 2)');
+    res := res || jsonb_build_object('teste', 'paciente anota um sintoma', 'ok', r not like 'ERRO%', 'obtido', left(r, 90));
+    r := pg_temp.as_user(c, 'authenticated', format('insert into public.symptom_logs (patient_id, symptom, intensity) values (%L, ''azia'', 2)', b));
+    res := res || jsonb_build_object('teste', 'NÃO anota sintoma em nome de outra pessoa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(c, 'authenticated', 'insert into public.symptom_logs (patient_id, symptom, intensity) values (auth.uid(), ''febre_alta'', 2)');
+    res := res || jsonb_build_object('teste', 'sintoma só da lista', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(c, 'authenticated', 'insert into public.symptom_logs (patient_id, symptom, intensity, felt_at) values (auth.uid(), ''gases'', 1, now() + interval ''2 days'')');
+    res := res || jsonb_build_object('teste', 'sintoma no futuro é recusado', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.symptom_logs where patient_id = %L', c));
+    res := res || jsonb_build_object('teste', 'estranho NÃO vê os sintomas', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(p, 'authenticated', format('select count(*) from public.symptom_logs where patient_id = %L', c));
+    res := res || jsonb_build_object('teste', 'profissional com acompanhamento ativo vê os sintomas', 'ok', (r = '1'), 'obtido', r);
+    r := pg_temp.as_user(p, 'authenticated', format('delete from public.symptom_logs where patient_id = %L', c));
+    res := res || jsonb_build_object('teste', 'profissional NÃO apaga sintomas do paciente',
+      'ok', (select count(*) from public.symptom_logs where patient_id = c) = 1, 'obtido', left(r, 90));
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end
