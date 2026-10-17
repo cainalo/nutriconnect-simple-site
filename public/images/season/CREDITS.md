@@ -1,36 +1,46 @@
 # Fotos do Calendário da feira
 
-Fotos do conjunto **Fruits-360**, de Mihai Oltean (2017-), https://github.com/fruits-360,
-sob a licença [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+Fotos do conjunto Open Images (Google), publicadas no Flickr pelos autores abaixo sob a licença
+[Creative Commons Atribuição 2.0](https://creativecommons.org/licenses/by/2.0/). Foram recortadas e
+reduzidas para os cards. Alimento — título original, autor, página da foto.
 
-Alterações feitas aqui: recorte do fundo branco em volta, centralização num quadrado branco com margem e
-redimensionamento. Estas versões alteradas seguem sob a mesma licença CC BY-SA 4.0.
-
-| Arquivo | Classe no Fruits-360 | Original |
-| --- | --- | --- |
-| abacate.jpg | Avocado Green 1 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Avocado%20Green%201/r0_106.jpg) |
-| abacaxi.jpg | Pineapple 1 | [104_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Pineapple%201/104_100.jpg) |
-| abobrinha.jpg | Zucchini 1 | [r0_105_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Zucchini%201/r0_105_100.jpg) |
-| banana.jpg | Banana 3 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Banana%203/r0_106.jpg) |
-| batata-doce.jpg | Potato Sweet 1 | [109_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Potato%20Sweet%201/109_100.jpg) |
-| berinjela.jpg | eggplant_long_1 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/eggplant_long_1/r0_106.jpg) |
-| beterraba.jpg | Beetroot 1 | [104_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Beetroot%201/104_100.jpg) |
-| caqui.jpg | Kaki 1 | [105_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Kaki%201/105_100.jpg) |
-| cenoura.jpg | Carrot 1 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Carrot%201/r0_106.jpg) |
-| couve-flor.jpg | Cauliflower 1 | [104_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Cauliflower%201/104_100.jpg) |
-| goiaba.jpg | Guava 1 | [116_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Guava%201/116_100.jpg) |
-| laranja.jpg | Orange 2 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Orange%202/r0_106.jpg) |
-| limao.jpg | Limes 1 | [104_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Limes%201/104_100.jpg) |
-| maca.jpg | apple_red_1 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/apple_red_1/r0_106.jpg) |
-| mamao.jpg | Papaya 2 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Papaya%202/r0_106.jpg) |
-| manga.jpg | Mango 1 | [105_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Mango%201/105_100.jpg) |
-| maracuja.jpg | Passion Fruit 1 | [104_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Passion%20Fruit%201/104_100.jpg) |
-| melancia.jpg | Watermelon 1 | [104_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Watermelon%201/104_100.jpg) |
-| milho.jpg | Corn 1 | [107_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Corn%201/107_100.jpg) |
-| morango.jpg | Strawberry 2 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Strawberry%202/r0_106.jpg) |
-| pepino.jpg | Cucumber 1 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Cucumber%201/r0_106.jpg) |
-| pessego.jpg | Peach 1 | [104_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Peach%201/104_100.jpg) |
-| pimentao.jpg | Pepper Red 3 | [r1_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Pepper%20Red%203/r1_106.jpg) |
-| repolho.jpg | cabbage_white_1 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/cabbage_white_1/r0_106.jpg) |
-| tangerina.jpg | Mandarine 1 | [104_100.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-100x100/main/Training/Mandarine%201/104_100.jpg) |
-| tomate.jpg | Tomato 1 | [r0_106.jpg](https://raw.githubusercontent.com/fruits-360/fruits-360-original-size/main/Training/Tomato%201/r0_106.jpg) |
+- **abacate** — “Avocado 4”, HarmonyRae — https://www.flickr.com/photos/harmonyraelingen/3665955599
+- **abacaxi** — “Puras piñas”, Mauro Parra-Miranda — https://www.flickr.com/photos/mauropm/11879524916
+- **abobora** — “India - Koyambedu Market - Pumpkins 01”, McKay Savage — https://www.flickr.com/photos/mckaysavage/3987053474
+- **abobrinha** — “SM farmers market: squash”, Matthew Robinson — https://www.flickr.com/photos/noisecollusion/232474017
+- **acai** — “Açaí, água de coco, café 😃👍 #aguadecoco #acai #cafe #padaria #saopaulo #cafedamanha”, Mark Hillary — https://www.flickr.com/photos/markhillary/19316637462
+- **acerola** — “Acerolas”, Andréia Bohner — https://www.flickr.com/photos/deia/6582630265
+- **alface** — “Alface hidropônica II”, Eliane Kobayakawa — https://www.flickr.com/photos/elicrisko/10947313
+- **banana** — “Banana”, david_17in — https://www.flickr.com/photos/thaveedu/4457710794/
+- **batata-doce** — “Sweet Potatoes”, Mike Licht — https://www.flickr.com/photos/notionscapital/10894990276
+- **berinjela** — “Aubergine”, Håvar og Solveig — https://www.flickr.com/photos/seenful/3826712768
+- **beterraba** — “beet!”, RBerteig — https://www.flickr.com/photos/rberteig/7271149440
+- **brocolis** — “Brocolli”, Jeremy Keith — https://www.flickr.com/photos/adactio/4701218202
+- **caju** — “Anacardium occidentale L.”, Alex Popovkin, Bahia, Brazil — https://www.flickr.com/photos/plants_of_russian_in_brazil/2270600853
+- **caqui** — “Untitled”, Janey — https://www.flickr.com/photos/lotuspilgrim/8747041130
+- **cenoura** — “Untitled”, Neil Conway — https://www.flickr.com/photos/neilconway/8289031621
+- **chuchu** — “Chayote”, Leslie Seaton — https://www.flickr.com/photos/lacatholique/5194455316
+- **couve** — “Week 4 baskets”, twistedstringknits — https://www.flickr.com/photos/twisted-string/6968002626
+- **couve-flor** — “Cauliflower”, Amy — https://www.flickr.com/photos/amylovesyah/3965832937
+- **espinafre** — “White Chicken Alfredo Lasagna”, Anna B — https://www.flickr.com/photos/annas_bananas/8039953648
+- **goiaba** — “Jambu Kluthuk”, Baggor XIV — https://www.flickr.com/photos/96850579@N03/10883999335
+- **inhame** — “Dioscorea esculenta (Lour.) Burkill”, Ahmad Fuad Morad — https://www.flickr.com/photos/adaduitokla/6288529908
+- **laranja** — “Oranges”, V Smoothe — https://www.flickr.com/photos/vsmoothe/174982538
+- **limao** — “Limão”, Wesley Alcoforado — https://www.flickr.com/photos/wesleyjefferson/7789519704
+- **maca** — “Windfall apples”, didyoueverstoptothink — https://www.flickr.com/photos/77260775@N06/15767317142
+- **mamao** — “papaya”, Janine — https://www.flickr.com/photos/geishabot/3450345363
+- **mandioca** — “markets108”, Guy Evans — https://www.flickr.com/photos/birminghamculture/8164358142
+- **manga** — “マンゴーのむき方は船長だった祖父直伝 :-)”, akipponn — https://www.flickr.com/photos/akipponn/5043376004
+- **maracuja** — “Bogota-450”, CucombreLibre — https://www.flickr.com/photos/33200530@N04/15455141043
+- **melancia** — “Produce Market, Airline Dr., Houston, Texas 0811091704”, Patrick Feller — https://www.flickr.com/photos/nakrnsm/3815441094
+- **milho** — “_KJL5762”, Kareem Jujumediazone — https://www.flickr.com/photos/jujumediazone/14825024705
+- **morango** — “냉장고에 딸기있네. 잘 먹을께 고마워...”, Channy Yun — https://www.flickr.com/photos/seokchanyun/6568681133
+- **pepino** — “DSC07425 Cucumbers HAFA FARM”, Media Mike Hazard — https://www.flickr.com/photos/88709139@N08/19849782670
+- **pessego** — “Peaches”, Molly — https://www.flickr.com/photos/maulleigh/561432017
+- **pimentao** — “Colombo, Sri Lanka”, Patty Ho — https://www.flickr.com/photos/patio/8512524073
+- **quiabo** — “India - Koyambedu Market - Ladies Finger 01”, McKay Savage — https://www.flickr.com/photos/mckaysavage/3986240771
+- **repolho** — “India - Koyambedu Market - Cabbage 03”, McKay Savage — https://www.flickr.com/photos/mckaysavage/3986948592
+- **tangerina** — “Leckere Orangen”, leolumix — https://www.flickr.com/photos/leolumix/3115712227
+- **tomate** — “Brussels 165”, Ravi Sarma — https://www.flickr.com/photos/ravisarma/15359082491
+- **uva** — “Frutas #grape #uva #grappette”, @admatooth — https://www.flickr.com/photos/adirparaagir/8293690521
+- **vagem** — “Green Beans”, Stephen Harlan — https://www.flickr.com/photos/gogostevie/541577334

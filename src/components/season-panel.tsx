@@ -38,24 +38,34 @@ const PHASE_NAMES: Record<SeasonPhase, Names> = {
   terminando: ["Últimas semanas", "Last weeks", "Últimas semanas", "Fin de saison"],
   "ano-todo": ["O ano todo", "All year", "Todo el año", "Toute l'année"],
 };
-/** Rótulo para quem buscou um alimento fora da época. */
-/** Alimentos com foto em public/images/season (Fruits-360, CC BY-SA 4.0; créditos lá). */
+/** Alimentos com foto em public/images/season (Open Images/Flickr, CC BY 2.0; créditos lá). */
 const SEASON_PHOTOS = new Set([
   "abacate",
   "abacaxi",
+  "abobora",
   "abobrinha",
+  "acai",
+  "acerola",
+  "alface",
   "banana",
   "batata-doce",
   "berinjela",
   "beterraba",
+  "brocolis",
+  "caju",
   "caqui",
   "cenoura",
+  "chuchu",
+  "couve",
   "couve-flor",
+  "espinafre",
   "goiaba",
+  "inhame",
   "laranja",
   "limao",
   "maca",
   "mamao",
+  "mandioca",
   "manga",
   "maracuja",
   "melancia",
@@ -64,17 +74,21 @@ const SEASON_PHOTOS = new Set([
   "pepino",
   "pessego",
   "pimentao",
+  "quiabo",
   "repolho",
   "tangerina",
   "tomate",
+  "uva",
+  "vagem",
 ]);
+/** Rótulo para quem buscou um alimento fora da época. */
 const OFF_SEASON: Names = ["Fora de época", "Out of season", "Fuera de temporada", "Hors saison"];
 const plainText = (t: string) =>
   t
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
-/** Selo da fase por cima da foto (cores sólidas, legíveis sobre o branco). */
+/** Selo da fase por cima da foto (cores sólidas, legíveis sobre qualquer foto). */
 const PHASE_BADGE: Record<SeasonPhase, string> = {
   auge: "bg-primary text-primary-foreground",
   comecando: "bg-accent text-accent-foreground",
@@ -120,16 +134,16 @@ function MonthsBar({ food, region }: { food: SeasonFood; region: Region }) {
   const tr = useTr();
   const months = monthsIn(food, region);
   return (
-    <div className="mt-3 grid grid-cols-12 gap-0.5" aria-hidden>
+    <div className="mt-2 grid grid-cols-12 gap-0.5" aria-hidden>
       {MONTH_NAMES.map((m, i) => (
         <div key={i} className="text-center">
           <div
             className={cn(
               "h-1.5 rounded-full",
-              months.includes(i + 1) ? "bg-primary" : "bg-secondary",
+              months.includes(i + 1) ? "bg-white" : "bg-white/25",
             )}
           />
-          <span className="text-[8px] text-muted-foreground">{tr(m).slice(0, 1)}</span>
+          <span className="text-[8px] text-white/75">{tr(m).slice(0, 1)}</span>
         </div>
       ))}
     </div>
@@ -155,73 +169,76 @@ function FoodCard({
     .map((m) => tr(MONTH_NAMES[m - 1]));
 
   return (
-    <li className={cn(card, "group flex flex-col overflow-hidden p-0")}>
+    <li className="group relative isolate flex min-h-72 flex-col overflow-hidden rounded-3xl border border-border/70 bg-primary text-white shadow-xs">
+      {/* A foto do alimento é o fundo do card inteiro; o escuro de baixo deixa o texto legível. */}
+      {SEASON_PHOTOS.has(food.id) ? (
+        <img
+          src={`/images/season/${food.id}.jpg`}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 -z-10 h-full w-full object-cover transition duration-700 group-hover:scale-110"
+        />
+      ) : (
+        <span className="absolute inset-x-0 top-6 -z-10 grid place-items-center">
+          <EmojiIcon
+            emoji={food.emoji}
+            className="h-20 w-20 transition duration-500 group-hover:scale-110 group-hover:-rotate-6"
+          />
+        </span>
+      )}
+      <span
+        aria-hidden="true"
+        className={cn(
+          "absolute inset-0 -z-10 bg-gradient-to-t transition-colors duration-500",
+          open ? "from-black/90 via-black/75 to-black/30" : "from-black/85 via-black/45 to-black/0",
+        )}
+      />
+      <span
+        className={cn(
+          "absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-xs",
+          phase ? PHASE_BADGE[phase] : "bg-foreground/60 text-background",
+        )}
+      >
+        {tr(phase ? PHASE_NAMES[phase] : OFF_SEASON)}
+      </span>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="relative block text-left"
+        aria-label={tr(food.name)}
+        className="flex flex-1 flex-col justify-end px-4 pt-32 text-left"
       >
-        {/* Foto do alimento (fundo branco, como vitrine de feira); sem foto, o ícone grande. */}
-        <span
-          className={cn(
-            "relative grid h-36 place-items-center overflow-hidden",
-            SEASON_PHOTOS.has(food.id) ? "bg-white" : "bg-accent-soft/70",
-          )}
-        >
-          {SEASON_PHOTOS.has(food.id) ? (
-            <img
-              src={`/images/season/${food.id}.jpg`}
-              alt={tr(food.name)}
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-contain p-2 transition duration-500 group-hover:scale-110"
-            />
-          ) : (
-            <EmojiIcon
-              emoji={food.emoji}
-              tinted
-              className="h-16 w-16 transition duration-500 group-hover:scale-110 group-hover:-rotate-6"
-            />
-          )}
-          <span
-            className={cn(
-              "absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-xs",
-              phase ? PHASE_BADGE[phase] : "bg-foreground/60 text-background",
-            )}
-          >
-            {tr(phase ? PHASE_NAMES[phase] : OFF_SEASON)}
-          </span>
-        </span>
-        <span className="block px-4 pt-3 font-display text-base font-bold text-foreground">
+        <span className="block font-display text-lg font-bold text-white drop-shadow">
           {tr(food.name)}
         </span>
       </button>
-      <div className="flex flex-1 flex-col px-4 pb-4">
+      <div className="flex flex-col px-4 pb-4">
         <MonthsBar food={food} region={region} />
         <p className="sr-only">
           {tr(["Safra:", "Season:", "Temporada:", "Saison :"])} {months.join(", ")}
         </p>
         {open && (
-          <dl className="mt-3 space-y-2 text-xs text-foreground">
+          <dl className="mt-3 space-y-2 text-xs text-white/95">
             <div>
-              <dt className="font-bold text-muted-foreground">
+              <dt className="font-bold text-white/70">
                 {tr(["Como escolher", "How to choose", "Cómo elegir", "Comment choisir"])}
               </dt>
               <dd>{tr(food.choose)}</dd>
             </div>
             <div>
-              <dt className="font-bold text-muted-foreground">
+              <dt className="font-bold text-white/70">
                 {tr(["Como conservar", "How to store", "Cómo conservar", "Comment conserver"])}
               </dt>
               <dd>{tr(food.keep)}</dd>
             </div>
-            <dd className="flex gap-1.5 rounded-xl bg-accent-soft/50 px-2 py-1.5">
-              <Leaf className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+            <dd className="flex gap-1.5 rounded-xl bg-white/15 px-2 py-1.5 backdrop-blur-sm">
+              <Leaf className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white" />
               {tr(food.tip)}
             </dd>
           </dl>
         )}
-        <div className="mt-auto pt-3">
+        <div className="pt-3">
           <button
             type="button"
             disabled={!user || add.isPending}
@@ -249,7 +266,7 @@ function FoodCard({
                 },
               )
             }
-            className={btnSoft}
+            className={cn(btnSoft, "border-white/40 bg-white/90 text-neutral-900 hover:bg-white")}
           >
             <ShoppingBasket className="h-3.5 w-3.5" />
             {tr(["Pôr na lista", "Add to list", "Añadir a la lista", "Ajouter à la liste"])}
