@@ -44,7 +44,6 @@ Cada item ganha o próprio commit depois de testado.
 
 ## Grupo familiar — "Minha casa" (aprovado em 13/10/2026, depois do N6 e antes do M8)
 
-
 Pessoas que moram juntas compartilham, em tempo real, o que é da casa. Nada clínico é compartilhado
 (diário, metas, peso, plano do nutricionista, check-ins). Uma casa por pessoa, até 8 adultos;
 papéis responsável e membro; convite por link/código ou entre amigos.
@@ -70,6 +69,7 @@ profissionais (não agora).
 1. [x] S1 — Estúdio de redes sociais: perfis, análise por IA, ideias, modelos, calendário e tendências
 
 ## Feito
+
 - [x] Trilha como história de RPG: capítulos, inimigos por parada, batalha durante a lição e cenas de filme (cutscenes) com música
 - [x] Página Funções em tela cheia, com cards animados e cores próprias
 - [x] Todas as migrations foram aplicadas no banco remoto com sucesso.
@@ -95,7 +95,7 @@ do admin (Design do site) escolhe qual está no ar.
 2. [x] D2 — Casca por design: Vibrante (barra lateral + dock), Editorial (capa de revista, sem barra inferior), Aurora (cápsula flutuante + dock de vidro + paleta Ctrl+K); falta conferir em prints
 3. [x] D3 — Página inicial (landing) e abertura do Espaço com composição própria por design (feed e posts intactos); colunas laterais redesenhadas em cada design (cards coloridos, colunas de jornal, vidro)
 4. [x] D4 — Estilo de post por design; cabeçalho de página por design (Comunidades, Desafios, Explorar, Notificações, Profissionais, Acompanhamento, Painel clínico, Programas, Receitas, Cardápio, Geladeira, Feira, Casa, Convites, Verificação); Funções e abas por design. O Perfil de cada pessoa segue livre (montado por ela)
-5a. [x] Colunas laterais removidas do site; cards delas ficam só em Funções ("Meus cards") e o card de nível em Desafios; páginas usam a largura toda
+       5a. [x] Colunas laterais removidas do site; cards delas ficaram em Funções ("Meus cards", removido em 17/10 a pedido do dono) e o card de nível em Desafios; páginas usam a largura toda
 5. [ ] D5 — Revisão final em prints no site logado (celular, escuro), mantendo modelos de post e regras de rolagem
 
 ### Funções e expansão

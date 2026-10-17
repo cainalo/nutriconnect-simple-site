@@ -51,19 +51,7 @@ import { AppScreen } from "@/components/app-screen";
 import { AuthGateLoading } from "@/components/site-chrome";
 import { TileArt, type ArtData, type ArtId } from "@/components/funcoes-art";
 import { NinaLive } from "@/components/nina-live";
-import {
-  FriendsCard,
-  MyChallengesCard,
-  MyCommunitiesCard,
-  ProfessionalsCard,
-  ProfileCard,
-  SuggestedCommunitiesCard,
-  TopRecipesCard,
-  TrailCard,
-  UpcomingAppointmentsCard,
-  WeeklyThemeCard,
-  useAdultTrailProgress,
-} from "@/components/rail-cards";
+import { useAdultTrailProgress } from "@/components/rail-cards";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   CommunityRouletteCard,
@@ -787,29 +775,6 @@ function FuncoesPage() {
       {/* Sem colunas laterais: os cards usam a largura toda da tela (ver rails-pages). */}
       <div className="@container mx-auto w-full max-w-[120rem] px-4 pb-10 pt-5 sm:px-6 lg:px-10">
         <Hero name={user.name} today={today} />
-
-        {/* Os cards que antes ficavam nas colunas laterais das páginas moram aqui. */}
-        <section
-          className="mb-8"
-          aria-label={tr(["Meus cards", "My cards", "Mis tarjetas", "Mes cartes"])}
-        >
-          <h2 className="mb-3 font-display text-lg font-bold text-foreground">
-            {tr(["Meus cards", "My cards", "Mis tarjetas", "Mes cartes"])}
-          </h2>
-          {/* Cada linha se completa sozinha (a quantidade de cards varia): bordas sempre alinhadas. */}
-          <div className="flex flex-wrap gap-4 [&>*]:min-w-0 [&>*]:flex-[1_1_17rem]">
-            <ProfileCard />
-            <TrailCard />
-            <MyChallengesCard />
-            <WeeklyThemeCard />
-            <MyCommunitiesCard />
-            <FriendsCard />
-            <SuggestedCommunitiesCard limit={3} />
-            <TopRecipesCard />
-            <ProfessionalsCard limit={3} />
-            <UpcomingAppointmentsCard />
-          </div>
-        </section>
 
         {SECTIONS.map((section) => {
           const tiles = section.tiles.filter(visible);

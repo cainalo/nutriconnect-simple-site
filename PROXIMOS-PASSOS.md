@@ -45,7 +45,7 @@ funções novas. Para ver as telas sem login: `.preview-harness` (`v=landing&d=<
 O texto abaixo é da sessão anterior (14/10).
 
 **Fechamento da etapa de designs (15/10):** colunas laterais removidas do site (cards delas só em
-Funções, "Meus cards", e o card de nível em Desafios); páginas em largura total; posts em colunas
+Funções, "Meus cards", que o dono mandou tirar em 17/10, e o card de nível em Desafios); páginas em largura total; posts em colunas
 independentes (`src/components/post-masonry.tsx`, 3 colunas, cada uma medida sozinha); Editorial como
 jornal antigo (textura, letra gótica, cor por tipo em tinta velha, matérias inteiras em colunas
 contínuas, "Ver mais" só no celular). 56 posts de exemplo gravados no banco (migrations
