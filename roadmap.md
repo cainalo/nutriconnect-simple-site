@@ -118,6 +118,7 @@ do admin (Design do site) escolhe qual está no ar.
    - [x] T1n Geladeira: "Ideias de sempre" (14 receitas caseiras comparadas com o que a pessoa tem, sem IA), com o que falta e "pôr o que falta na lista"
    - [x] T1o Cardápio da semana: "Completar sem a Nina" (receitas guardadas e pratos de sempre, priorizando o que está na Geladeira, sem repetir prato no mesmo dia; src/lib/menu-fill.ts), "Repetir a semana anterior" e "a sobra do jantar vira o almoço de amanhã" (sem duplicar na lista de compras)
    - [x] T1p Minha casa: lista da casa agrupada por seção do mercado com progresso, "Hoje na casa" (almoço e jantar de hoje do cardápio da casa) e recados rápidos no mural (Janta pronta, Sobrou comida, Cheguei…)
+   - [x] T1q Lancheira: "Completar com ideias prontas" (seguras para idade e alergias, primeiro as que a criança gostou, sem as que não gostou nem o que ela não come), "Repetir a semana anterior" e o quadro "o que a criança achou dos lanches"
 8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
 10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
