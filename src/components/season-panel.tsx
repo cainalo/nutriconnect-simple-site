@@ -39,12 +39,48 @@ const PHASE_NAMES: Record<SeasonPhase, Names> = {
   "ano-todo": ["O ano todo", "All year", "Todo el año", "Toute l'année"],
 };
 /** Rótulo para quem buscou um alimento fora da época. */
+/** Alimentos com foto em public/images/season (Fruits-360, CC BY-SA 4.0; créditos lá). */
+const SEASON_PHOTOS = new Set([
+  "abacate",
+  "abacaxi",
+  "abobrinha",
+  "banana",
+  "batata-doce",
+  "berinjela",
+  "beterraba",
+  "caqui",
+  "cenoura",
+  "couve-flor",
+  "goiaba",
+  "laranja",
+  "limao",
+  "maca",
+  "mamao",
+  "manga",
+  "maracuja",
+  "melancia",
+  "milho",
+  "morango",
+  "pepino",
+  "pessego",
+  "pimentao",
+  "repolho",
+  "tangerina",
+  "tomate",
+]);
 const OFF_SEASON: Names = ["Fora de época", "Out of season", "Fuera de temporada", "Hors saison"];
 const plainText = (t: string) =>
   t
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
+/** Selo da fase por cima da foto (cores sólidas, legíveis sobre o branco). */
+const PHASE_BADGE: Record<SeasonPhase, string> = {
+  auge: "bg-primary text-primary-foreground",
+  comecando: "bg-accent text-accent-foreground",
+  terminando: "bg-foreground/75 text-background",
+  "ano-todo": "bg-foreground/60 text-background",
+};
 const PHASE_STYLE: Record<SeasonPhase, string> = {
   auge: "bg-primary/15 text-primary",
   comecando: "bg-accent-soft text-accent",
@@ -119,85 +155,106 @@ function FoodCard({
     .map((m) => tr(MONTH_NAMES[m - 1]));
 
   return (
-    <li className={cn(card, "flex flex-col p-4")}>
+    <li className={cn(card, "group flex flex-col overflow-hidden p-0")}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex items-start gap-3 text-left"
+        className="relative block text-left"
       >
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-soft">
-          <EmojiIcon emoji={food.emoji} tinted className="h-6 w-6" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-bold text-foreground">{tr(food.name)}</span>
+        {/* Foto do alimento (fundo branco, como vitrine de feira); sem foto, o ícone grande. */}
+        <span
+          className={cn(
+            "relative grid h-36 place-items-center overflow-hidden",
+            SEASON_PHOTOS.has(food.id) ? "bg-white" : "bg-accent-soft/70",
+          )}
+        >
+          {SEASON_PHOTOS.has(food.id) ? (
+            <img
+              src={`/images/season/${food.id}.jpg`}
+              alt={tr(food.name)}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-contain p-2 transition duration-500 group-hover:scale-110"
+            />
+          ) : (
+            <EmojiIcon
+              emoji={food.emoji}
+              tinted
+              className="h-16 w-16 transition duration-500 group-hover:scale-110 group-hover:-rotate-6"
+            />
+          )}
           <span
             className={cn(
-              "mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold",
-              phase ? PHASE_STYLE[phase] : "bg-secondary text-muted-foreground",
+              "absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-xs",
+              phase ? PHASE_BADGE[phase] : "bg-foreground/60 text-background",
             )}
           >
             {tr(phase ? PHASE_NAMES[phase] : OFF_SEASON)}
           </span>
         </span>
+        <span className="block px-4 pt-3 font-display text-base font-bold text-foreground">
+          {tr(food.name)}
+        </span>
       </button>
-      <MonthsBar food={food} region={region} />
-      <p className="sr-only">
-        {tr(["Safra:", "Season:", "Temporada:", "Saison :"])} {months.join(", ")}
-      </p>
-      {open && (
-        <dl className="mt-3 space-y-2 text-xs text-foreground">
-          <div>
-            <dt className="font-bold text-muted-foreground">
-              {tr(["Como escolher", "How to choose", "Cómo elegir", "Comment choisir"])}
-            </dt>
-            <dd>{tr(food.choose)}</dd>
-          </div>
-          <div>
-            <dt className="font-bold text-muted-foreground">
-              {tr(["Como conservar", "How to store", "Cómo conservar", "Comment conserver"])}
-            </dt>
-            <dd>{tr(food.keep)}</dd>
-          </div>
-          <dd className="flex gap-1.5 rounded-xl bg-accent-soft/50 px-2 py-1.5">
-            <Leaf className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
-            {tr(food.tip)}
-          </dd>
-        </dl>
-      )}
-      <div className="mt-auto pt-3">
-        <button
-          type="button"
-          disabled={!user || add.isPending}
-          onClick={() =>
-            add.mutate(
-              { texts: [{ text: tr(food.name), section: "hortifruti" }], source: "manual" },
-              {
-                onSuccess: (n) =>
-                  toast.success(
-                    n
-                      ? tr([
-                          "Na sua lista de compras.",
-                          "On your shopping list.",
-                          "En tu lista de compras.",
-                          "Dans votre liste de courses.",
-                        ])
-                      : tr([
-                          "Já estava na lista.",
-                          "Already on the list.",
-                          "Ya estaba en la lista.",
-                          "Déjà dans la liste.",
-                        ]),
-                  ),
-                onError: (err) => toast.error((err as Error).message),
-              },
-            )
-          }
-          className={btnSoft}
-        >
-          <ShoppingBasket className="h-3.5 w-3.5" />
-          {tr(["Pôr na lista", "Add to list", "Añadir a la lista", "Ajouter à la liste"])}
-        </button>
+      <div className="flex flex-1 flex-col px-4 pb-4">
+        <MonthsBar food={food} region={region} />
+        <p className="sr-only">
+          {tr(["Safra:", "Season:", "Temporada:", "Saison :"])} {months.join(", ")}
+        </p>
+        {open && (
+          <dl className="mt-3 space-y-2 text-xs text-foreground">
+            <div>
+              <dt className="font-bold text-muted-foreground">
+                {tr(["Como escolher", "How to choose", "Cómo elegir", "Comment choisir"])}
+              </dt>
+              <dd>{tr(food.choose)}</dd>
+            </div>
+            <div>
+              <dt className="font-bold text-muted-foreground">
+                {tr(["Como conservar", "How to store", "Cómo conservar", "Comment conserver"])}
+              </dt>
+              <dd>{tr(food.keep)}</dd>
+            </div>
+            <dd className="flex gap-1.5 rounded-xl bg-accent-soft/50 px-2 py-1.5">
+              <Leaf className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+              {tr(food.tip)}
+            </dd>
+          </dl>
+        )}
+        <div className="mt-auto pt-3">
+          <button
+            type="button"
+            disabled={!user || add.isPending}
+            onClick={() =>
+              add.mutate(
+                { texts: [{ text: tr(food.name), section: "hortifruti" }], source: "manual" },
+                {
+                  onSuccess: (n) =>
+                    toast.success(
+                      n
+                        ? tr([
+                            "Na sua lista de compras.",
+                            "On your shopping list.",
+                            "En tu lista de compras.",
+                            "Dans votre liste de courses.",
+                          ])
+                        : tr([
+                            "Já estava na lista.",
+                            "Already on the list.",
+                            "Ya estaba en la lista.",
+                            "Déjà dans la liste.",
+                          ]),
+                    ),
+                  onError: (err) => toast.error((err as Error).message),
+                },
+              )
+            }
+            className={btnSoft}
+          >
+            <ShoppingBasket className="h-3.5 w-3.5" />
+            {tr(["Pôr na lista", "Add to list", "Añadir a la lista", "Ajouter à la liste"])}
+          </button>
+        </div>
       </div>
     </li>
   );
