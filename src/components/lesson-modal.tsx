@@ -54,6 +54,7 @@ const LEVEL_EMBLEM: Record<string, string> = {
   Mestre: "👑",
 };
 import { EmojiIcon } from "@/components/emoji-icon";
+import { vibrate } from "@/lib/native";
 
 export interface LessonModalProps {
   stop: Stop;
@@ -1095,7 +1096,7 @@ export function LessonModal({
     } else {
       setCombo(0);
       setEnemyFx((f) => ({ state: "taunt", n: f.n + 1 }));
-      navigator.vibrate?.(60);
+      vibrate(60);
       if (!isRetry) {
         setMistakes((v) => v + 1);
         setHearts((h) => h - 1);

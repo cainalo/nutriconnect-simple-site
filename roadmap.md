@@ -13,8 +13,8 @@ App nativo com Capacitor (pasta `mobile/`), ID `br.com.nutriconnect.app`, APK ge
 
 1. [x] A1 — App base: ícone, abertura, barra de status, voltar, tela sem conexão, APK de teste
 2. [ ] A2 — Notificações nativas (Firebase Cloud Messaging)
-3. [ ] A3 — Câmera e código de barras nativos (ML Kit)
-4. [ ] A4 — Compartilhar do Android, links que abrem o app, vibração
+3. [x] A3 — Câmera e código de barras nativos (ML Kit)
+4. [x] A4 — Compartilhar do Android, links que abrem o app, vibração
 5. [ ] A5 — Publicação no Google Play (assinatura, ficha da loja, segurança dos dados, teste fechado)
 
 ## Próximas funções (aprovadas em 09/10/2026, nesta ordem)
@@ -119,7 +119,7 @@ do admin (Design do site) escolhe qual está no ar.
    - [x] T1o Cardápio da semana: "Completar sem a Nina" (receitas guardadas e pratos de sempre, priorizando o que está na Geladeira, sem repetir prato no mesmo dia; src/lib/menu-fill.ts), "Repetir a semana anterior" e "a sobra do jantar vira o almoço de amanhã" (sem duplicar na lista de compras)
    - [x] T1p Minha casa: lista da casa agrupada por seção do mercado com progresso, "Hoje na casa" (almoço e jantar de hoje do cardápio da casa) e recados rápidos no mural (Janta pronta, Sobrou comida, Cheguei…)
    - [x] T1q Lancheira: "Completar com ideias prontas" (seguras para idade e alergias, primeiro as que a criança gostou, sem as que não gostou nem o que ela não come), "Repetir a semana anterior" e o quadro "o que a criança achou dos lanches"
-8. [ ] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração
+8. [x] A3 — App: câmera e código de barras nativos; A4 — compartilhar, links que abrem o app, vibração (src/lib/native.ts; falta conferir no celular com o APK de teste)
 9. [ ] A2 / A5 — dependem de Firebase e da conta do Google Play
 10. [ ] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento)
 11. [ ] X1 — Diário de sintomas e alimentação com correlações (para levar à consulta)

@@ -25,6 +25,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { APPEARANCE_INIT_SCRIPT, initAppearance } from "../lib/appearance";
 import { DESIGN_INIT_SCRIPT, useSiteDesign } from "../lib/site-design";
 import { LANG_INIT_SCRIPT, initI18n } from "../lib/i18n";
+import { listenAppLinks } from "@/lib/native";
 
 function NotFoundComponent() {
   return (
@@ -165,9 +166,12 @@ function SiteDesignSync() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
 
   useEffect(() => initAppearance(), []);
   useEffect(() => installTilt(), []);
+  // App Android: um link do site que abriu o app leva para a página certa (A4).
+  useEffect(() => listenAppLinks((path) => void router.history.push(path)), [router]);
   useEffect(() => initI18n(), []);
   useAppearanceSync();
   useAppSounds();

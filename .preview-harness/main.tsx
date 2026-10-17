@@ -251,11 +251,18 @@ function CardDemo() {
   const Card = (FunCards as any)[q.get("c") ?? "HabitCheckinCard"];
   return <RouterApp><div className="mx-auto max-w-md p-4">{Card ? <Card /> : "card?"}</div></RouterApp>;
 }
+// v=post → um PostCard real (fileira de ações: conversa, apoiar, compartilhar…).
+import { PostCard } from "@/components/community-cards";
+function PostDemo() {
+  const post = { id: "p1", type: "experiencia", title: "Arroz de forno com legumes", text: "Uma receita simples para o dia a dia.", authorName: "Maria Silva", authorId: "u2", createdAt: new Date().toISOString(), comments: [], supports: ["a", "b"], likes: [], preparedBy: [], pinned: false, tags: [] };
+  return <RouterApp><div className="mx-auto max-w-md p-4"><PostCard post={post as any} /></div></RouterApp>;
+}
 // v=photos → painel "Imagens do site" do admin, sozinho.
 import { SitePhotosSection } from "@/components/admin/sections-site-photos";
 function App() {
   if (v === "card") return <CardDemo />;
   if (v === "photos") return wrap(<SitePhotosSection />);
+  if (v === "post") return <PostDemo />;
   if (v === "page") return <PageDemo />;
   if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);
   if (v === "calendar") return wrap(<CalendarTab onOpen={() => {}} onNew={() => {}} />);

@@ -12,6 +12,7 @@ import {
   Award,
   Trash2,
   Lock,
+  Share2,
 } from "lucide-react";
 import { Fragment, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -52,6 +53,8 @@ import {
 } from "@/lib/community";
 import { BuyAtMarket } from "@/components/buy-at-market";
 import { EmojiIcon } from "@/components/emoji-icon";
+import { shareContent } from "@/lib/native";
+import { useTr } from "@/components/settings-ui";
 
 interface PostCardProps {
   post: Post;
@@ -60,6 +63,19 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const { user } = useAuth();
   const { t } = useI18n();
+  const tr = useTr();
+  // Compartilhar do sistema (no app Android, o nativo); sem ele, copia o link do post.
+  const sharePost = async () => {
+    const url = `${window.location.origin}/explorar?post=${post.id}`;
+    const title = (post.title || post.text || "NutriConnect").slice(0, 120);
+    if (await shareContent({ title, text: title, url })) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(tr(["Link copiado!", "Link copied!", "¡Enlace copiado!", "Lien copié !"]));
+    } catch {
+      toast.error(url);
+    }
+  };
   const professionals = useProfessionalMap(!post.authorRole);
   // Comunidade do post (link no cabeçalho): do banco.
   const communitiesQuery = useCommunities(false, !!user && !!post.communityId);
@@ -314,7 +330,7 @@ export function PostCard({ post }: PostCardProps) {
     // Rótulos fixos: só o ícone muda de estado, para nada se mover ao clicar.
     const action = (opts: {
       label: string;
-      count: number;
+      count?: number;
       icon: React.ReactNode;
       onClick: () => void;
       active?: boolean;
@@ -339,7 +355,7 @@ export function PostCard({ post }: PostCardProps) {
         </button>
         <span className="whitespace-nowrap text-[10px] leading-none tabular-nums text-muted-foreground">
           {opts.label}
-          <span className="stat-count"> {opts.count}</span>
+          {opts.count !== undefined && <span className="stat-count"> {opts.count}</span>}
         </span>
       </div>
     );
@@ -374,6 +390,13 @@ export function PostCard({ post }: PostCardProps) {
             active: hasSupported,
             activeClass: "bg-accent-soft text-accent",
           })}
+
+        {action({
+          label: tr(["Compartilhar", "Share", "Compartir", "Partager"]),
+          icon: <Share2 className="h-4 w-4" />,
+          onClick: () => void sharePost(),
+          activeClass: "",
+        })}
 
         {user && !isOwnPost && (
           <ReportButton targetType="post" targetId={post.id} className="mt-2" />

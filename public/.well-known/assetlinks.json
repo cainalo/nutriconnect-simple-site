@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "br.com.nutriconnect.app",
+      "sha256_cert_fingerprints": [
+        "E9:6A:33:10:C1:47:4D:4B:08:01:8F:43:1A:40:B7:58:9B:03:AE:7D:04:4C:46:2B:2A:2A:15:94:D2:FD:E6:3A"
+      ]
+    }
+  }
+]

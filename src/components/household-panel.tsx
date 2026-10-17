@@ -76,6 +76,7 @@ import {
   useWeeklyMenu,
   type MenuMeals,
 } from "@/lib/menu";
+import { shareContent } from "@/lib/native";
 
 const card = "rounded-3xl border border-border/70 bg-card p-5 shadow-xs";
 const btnPrimary =
@@ -803,11 +804,7 @@ function Invite({ mine }: { mine: MyHousehold }) {
       `Únete a nuestra casa en NutriConnect con el código ${value}:`,
       `Rejoignez notre maison sur NutriConnect avec le code ${value} :`,
     ]);
-    if (navigator.share) {
-      await navigator.share({ title: "NutriConnect", text, url: link }).catch(() => undefined);
-    } else {
-      await copy();
-    }
+    if (!(await shareContent({ title: "NutriConnect", text, url: link }))) await copy();
   };
 
   return (

@@ -18,7 +18,18 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- A4: links do site abrem o app (App Links; verificado por
+                 public/.well-known/assetlinks.json no site). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="nutri-connect.netlify.app" />
+            </intent-filter>
         </activity>
+
+        <!-- A3: leitor de código de barras do Google (ML Kit), baixado pelo Play Services. -->
+        <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode_ui" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -38,4 +49,6 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- A4: vibração ao ler um código, concluir uma lição etc. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 </manifest>
