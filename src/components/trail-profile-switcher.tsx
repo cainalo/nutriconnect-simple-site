@@ -51,30 +51,12 @@ export function ProfileSwitcher({
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [name, setName] = useState("");
-  const [avatar, setAvatar] = useState<CharacterId>("lipe");
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const kids = profiles.filter((p) => p.kind === "kid");
 
   const reset = () => {
     setAdding(false);
-    setName("");
-    setAvatar("lipe");
     setConfirmId(null);
-  };
-
-  const create = () => {
-    if (!name.trim()) {
-      toast.error(t("ps.enterName"));
-      return;
-    }
-    try {
-      onAddKid(name, avatar);
-      toast.success(t("ps.created").replace("{name}", name.trim()));
-      reset();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : t("ps.createError"));
-    }
   };
 
   return (
@@ -165,61 +147,13 @@ export function ProfileSwitcher({
 
         <div className="mt-2 border-t border-border pt-2">
           {adding ? (
-            <div className="space-y-3 rounded-xl bg-secondary/40 p-3">
-              <label className="block">
-                <span className="mb-1 block text-xs font-bold text-foreground">
-                  {t("ps.kidName")}
-                </span>
-                <input
-                  autoFocus
-                  value={name}
-                  maxLength={24}
-                  onChange={(e) => setName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && create()}
-                  placeholder={t("ps.kidNamePh")}
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                />
-              </label>
-              <div>
-                <span className="mb-1.5 block text-xs font-bold text-foreground">
-                  {t("ps.pickFriend")}
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {KID_AVATARS.map((id) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => setAvatar(id)}
-                      aria-label={CHARACTERS[id].name}
-                      aria-pressed={avatar === id}
-                      className={`grid h-12 w-12 cursor-pointer place-items-center overflow-hidden rounded-xl border-2 bg-card transition ${
-                        avatar === id
-                          ? "border-primary shadow-md"
-                          : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      <Mascot id={id} size={42} style={{ animation: "none" }} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={create}
-                  className="flex-1 cursor-pointer rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground transition hover:brightness-110"
-                >
-                  {t("ps.create")}
-                </button>
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary"
-                >
-                  {t("common.cancel")}
-                </button>
-              </div>
-            </div>
+            <KidProfileForm
+              onCreate={(n, a) => {
+                onAddKid(n, a);
+                reset();
+              }}
+              onCancel={reset}
+            />
           ) : (
             <button
               type="button"
@@ -241,5 +175,86 @@ export function ProfileSwitcher({
         </p>
       </PopoverContent>
     </Popover>
+  );
+}
+
+/** Formulário de novo perfil infantil (nome e personagem). Usado na Trilha e na Lancheira. */
+export function KidProfileForm({
+  onCreate,
+  onCancel,
+}: {
+  onCreate: (name: string, avatar: CharacterId) => void;
+  onCancel?: () => void;
+}) {
+  const { t } = useI18n();
+  const [name, setName] = useState("");
+  const [avatar, setAvatar] = useState<CharacterId>("lipe");
+
+  const create = () => {
+    if (!name.trim()) {
+      toast.error(t("ps.enterName"));
+      return;
+    }
+    try {
+      onCreate(name, avatar);
+      toast.success(t("ps.created").replace("{name}", name.trim()));
+      setName("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("ps.createError"));
+    }
+  };
+
+  return (
+    <div className="space-y-3 rounded-xl bg-secondary/40 p-3">
+      <label className="block">
+        <span className="mb-1 block text-xs font-bold text-foreground">{t("ps.kidName")}</span>
+        <input
+          autoFocus
+          value={name}
+          maxLength={24}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && create()}
+          placeholder={t("ps.kidNamePh")}
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
+        />
+      </label>
+      <div>
+        <span className="mb-1.5 block text-xs font-bold text-foreground">{t("ps.pickFriend")}</span>
+        <div className="flex flex-wrap gap-2">
+          {KID_AVATARS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setAvatar(id)}
+              aria-label={CHARACTERS[id].name}
+              aria-pressed={avatar === id}
+              className={`grid h-12 w-12 cursor-pointer place-items-center overflow-hidden rounded-xl border-2 bg-card transition ${
+                avatar === id ? "border-primary shadow-md" : "border-border hover:border-primary/40"
+              }`}
+            >
+              <Mascot id={id} size={42} style={{ animation: "none" }} />
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={create}
+          className="flex-1 cursor-pointer rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground transition hover:brightness-110"
+        >
+          {t("ps.create")}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary"
+          >
+            {t("common.cancel")}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

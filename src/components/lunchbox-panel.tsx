@@ -35,6 +35,7 @@ import { addWeeks, dayDate, DAY_NAMES, mondayOf } from "@/lib/menu";
 import { useSeasonNow } from "@/lib/season";
 import { useHouseholdKids, useMyHousehold } from "@/lib/household";
 import { useTrailProfiles } from "@/lib/trail-profiles";
+import { KidProfileForm } from "@/components/trail-profile-switcher";
 import type { TrailProfile } from "@/lib/trail-types";
 import { EmptyPhoto } from "@/components/clinical/ui";
 import {
@@ -902,7 +903,7 @@ function KidWeek({ kid }: { kid: TrailProfile }) {
 export function LunchboxPanel() {
   const tr = useTr();
   const { user } = useAuth();
-  const { profiles } = useTrailProfiles(user?.id ?? "guest", "");
+  const { profiles, addKid } = useTrailProfiles(user?.id ?? "guest", "");
   const house = useMyHousehold(user?.id);
   const houseKids = useHouseholdKids(house.data?.house.id);
   // As próprias crianças e, para quem mora numa casa, as dos outros adultos da casa.
@@ -944,15 +945,21 @@ export function LunchboxPanel() {
           <EmptyPhoto src="/images/social/frutas-variadas.jpg" className="-mx-5 -mt-5 mb-5" />
           <p className="text-sm text-muted-foreground">
             {tr([
-              "A lancheira usa os perfis infantis da Trilha. Crie um perfil para cada criança e volte aqui.",
-              "The lunchbox uses the kids' profiles from the Trail. Create a profile for each child and come back.",
-              "La lonchera usa los perfiles infantiles de la Ruta. Crea un perfil para cada niño y vuelve aquí.",
-              "La boîte à goûter utilise les profils enfants du Parcours. Créez un profil par enfant et revenez.",
+              "Crie um perfil para cada criança. Ele também vale na Trilha, onde ela vê o lanche do dia.",
+              "Create a profile for each child. It also works on the Trail, where they see the day's snack.",
+              "Crea un perfil para cada niño. También sirve en la Ruta, donde ve la merienda del día.",
+              "Créez un profil par enfant. Il sert aussi dans le Parcours, où l'enfant voit son goûter du jour.",
             ])}
           </p>
-          <Link to="/desafios" className={cn(btnPrimary, "mt-4")}>
-            {tr(["Ir para a Trilha", "Go to the Trail", "Ir a la Ruta", "Aller au Parcours"])}
-          </Link>
+          {user ? (
+            <div className="mx-auto mt-4 max-w-sm text-left">
+              <KidProfileForm onCreate={addKid} />
+            </div>
+          ) : (
+            <Link to="/login" className={cn(btnPrimary, "mt-4")}>
+              {tr(["Entrar", "Log in", "Entrar", "Se connecter"])}
+            </Link>
+          )}
         </div>
       ) : (
         <>
