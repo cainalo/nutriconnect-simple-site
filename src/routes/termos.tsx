@@ -29,7 +29,7 @@ function Termos() {
           {COMPANY.cnpj && <> (CNPJ {COMPANY.cnpj})</>}, é uma rede social sobre alimentação, com
           receitas, comunidades, desafios, uma trilha de aprendizado e ferramentas para que usuários
           e profissionais de saúde (nutrição, medicina, psicologia, educação física, fisioterapia e
-          enfermagem) se encontrem, façam consultas — inclusive por vídeo, no próprio site — e
+          enfermagem) se encontrem, façam consultas (inclusive por vídeo, no próprio site) e
           acompanhem os atendimentos.
         </p>
         <p>

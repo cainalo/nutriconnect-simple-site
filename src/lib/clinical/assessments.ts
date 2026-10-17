@@ -97,10 +97,10 @@ export const INSTRUMENTS: Instrument[] = [
     name: ["Sinais vitais", "Vital signs", "Signos vitales", "Signes vitaux"],
     short: "SV",
     about: [
-      "Pressão, frequência cardíaca, temperatura, saturação e glicemia — medidos pelo paciente em casa.",
-      "Blood pressure, heart rate, temperature, saturation and glucose — measured by the patient at home.",
-      "Presión, frecuencia cardíaca, temperatura, saturación y glucemia — medidos por el paciente en casa.",
-      "Tension, fréquence cardiaque, température, saturation et glycémie — mesurées par le patient chez lui.",
+      "Pressão, frequência cardíaca, temperatura, saturação e glicemia, medidos pelo paciente em casa.",
+      "Blood pressure, heart rate, temperature, saturation and glucose, measured by the patient at home.",
+      "Presión, frecuencia cardíaca, temperatura, saturación y glucemia, medidos por el paciente en casa.",
+      "Tension, fréquence cardiaque, température, saturation et glycémie, mesurées par le patient chez lui.",
     ],
     patientCanAnswer: true,
     fields: [

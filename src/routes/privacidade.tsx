@@ -57,7 +57,7 @@ function Privacidade() {
             </>,
             <>
               <strong>Dados de saúde (sensíveis):</strong> quando você usa o acompanhamento com
-              um(a) profissional — diário alimentar e fotos, metas, medidas, anamnese, avaliações
+              um(a) profissional: diário alimentar e fotos, metas, medidas, anamnese, avaliações
               (como sinais vitais, dor e questionários de rastreio), evolução, planos alimentares e
               planos de cuidado (treinos, exercícios, tarefas, medicações em uso), exames e
               documentos enviados, imagens capturadas durante a consulta com a sua autorização,
@@ -96,34 +96,34 @@ function Privacidade() {
           items={[
             <>
               <strong>Criar e manter sua conta, entregar a rede social</strong> (publicar, comentar,
-              participar de comunidades e desafios) — execução do contrato (art. 7º, V).
+              participar de comunidades e desafios): execução do contrato (art. 7º, V).
             </>,
             <>
               <strong>Acompanhamento com profissionais de saúde</strong> (nutrição, medicina,
               psicologia, educação física, fisioterapia e enfermagem), agendamento e realização de
-              consultas, inclusive por vídeo — execução do contrato e tutela da saúde, em
+              consultas, inclusive por vídeo: execução do contrato e tutela da saúde, em
               procedimento realizado por profissionais de saúde (art. 7º, V, e art. 11, II, “f”).
             </>,
             <>
-              <strong>Tratar seus dados de saúde</strong> na plataforma — seu consentimento
+              <strong>Tratar seus dados de saúde</strong> na plataforma: seu consentimento
               específico e destacado (art. 11, I), que você pode revogar a qualquer momento em
               Configurações → Privacidade.
             </>,
             <>
-              <strong>Pagamentos e estornos</strong> — execução do contrato e cumprimento de
+              <strong>Pagamentos e estornos</strong>: execução do contrato e cumprimento de
               obrigação legal e fiscal.
             </>,
             <>
               <strong>Moderação e segurança</strong> (detectar spam, golpes, desinformação perigosa,
-              assédio, fraudes e abusos) — legítimo interesse (art. 7º, IX) e cumprimento de
+              assédio, fraudes e abusos): legítimo interesse (art. 7º, IX) e cumprimento de
               obrigação legal.
             </>,
             <>
-              <strong>Responder pedidos, dúvidas e denúncias</strong> — execução do contrato e
+              <strong>Responder pedidos, dúvidas e denúncias</strong>: execução do contrato e
               cumprimento de obrigação legal.
             </>,
             <>
-              <strong>Registros de acesso</strong> — obrigação legal (Marco Civil da Internet, art.
+              <strong>Registros de acesso</strong>: obrigação legal (Marco Civil da Internet, art.
               15).
             </>,
           ]}
@@ -165,7 +165,7 @@ function Privacidade() {
               armazenamento de arquivos (Supabase); hospedagem do site; provedor de pagamento
               (Stripe); provedor de inteligência artificial (gateway Lovable AI, que roda modelos do
               Google Gemini); e retransmissão da videoconsulta (Cloudflare), usada só quando os dois
-              aparelhos não conseguem se conectar diretamente — o áudio e o vídeo continuam
+              aparelhos não conseguem se conectar diretamente; o áudio e o vídeo continuam
               criptografados de ponta a ponta e a Cloudflare não tem acesso ao conteúdo.
             </>,
             <>
@@ -176,7 +176,7 @@ function Privacidade() {
         <p>
           Ao usar a IA, enviamos apenas o texto necessário: sua pergunta e o histórico recente da
           conversa com a Nina; o texto de publicações e comentários e as imagens públicas (fotos de
-          posts, de perfil e capas de comunidades) para moderação — as fotos privadas do diário, os
+          posts, de perfil e capas de comunidades) para moderação. As fotos privadas do diário, os
           exames e os anexos do chat <strong>nunca</strong> são enviados à IA; e, no resumo clínico,
           os registros do paciente <strong>sem nome, e-mail ou telefone</strong>; nas ferramentas de
           rascunho do(a) profissional, o texto das anotações que ele(a) cola e as últimas mensagens
@@ -264,7 +264,7 @@ function Privacidade() {
           <strong>perfis infantis</strong> na trilha de aprendizado de alimentação. Esses perfis
           usam a conta do responsável,{" "}
           <strong>não têm rede social, mensagens nem perfil público</strong> e guardam apenas nome
-          do perfil, avatar e progresso no próprio navegador do dispositivo — não enviamos esses
+          do perfil, avatar e progresso no próprio navegador do dispositivo e não enviamos esses
           dados aos nossos servidores. Se você identificar uma conta de menor de idade, avise-nos
           pelo Fale conosco para que ela seja removida.
         </p>

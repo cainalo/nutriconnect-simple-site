@@ -622,7 +622,7 @@ const fr: PresentationCopy = {
   },
   join: {
     eyebrow: "Rejoignez-nous",
-    title: "Votre parcours commence maintenant",
+    title: "Commencez par le prochain repas",
     text: "Créez votre compte gratuit, rejoignez une communauté et faites le premier pas sur le parcours avec Nina.",
     primary: "Créer mon compte",
     secondary: "J'ai déjà un compte",

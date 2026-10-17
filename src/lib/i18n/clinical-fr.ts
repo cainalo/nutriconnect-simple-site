@@ -390,7 +390,7 @@ const clinical: Record<ClinicalKey, string> = {
   "notes.empty": "Aucune évolution enregistrée",
   "notes.emptyText":
     "Consignez chaque consultation au format SOAP pour suivre l'évolution du patient.",
-  "notes.privateHint": "Visible uniquement par vous — le patient ne voit pas les évolutions.",
+  "notes.privateHint": "Visible uniquement par vous. Le patient ne voit pas les évolutions.",
   "notes.appointment": "Consultation liée",
   "notes.noAppointment": "Aucune consultation liée",
   "notes.subjective": "Subjectif",
@@ -621,7 +621,7 @@ const clinical: Record<ClinicalKey, string> = {
   "diary.deleteConfirm": "Supprimer cette entrée du journal ?",
   "diary.today": "Aujourd'hui",
   "diary.empty": "Aucune entrée dans le journal",
-  "diary.emptyOwner": "Commencez par noter votre prochain repas — une photo suffit.",
+  "diary.emptyOwner": "Commencez par noter votre prochain repas. Une photo suffit.",
   "diary.emptyPro": "Le patient n'a encore enregistré aucun repas.",
   "diary.commentPlaceholder": "Écrire un commentaire…",
   "diary.meal.cafe_da_manha": "Petit-déjeuner",
@@ -704,7 +704,7 @@ const clinical: Record<ClinicalKey, string> = {
   "errors.payment": "Impossible de joindre Stripe. Réessayez dans un instant.",
   "appt.cancelledRefunded": "Consultation annulée. Le remboursement a été demandé à Stripe.",
   "appt.cancelledNoRefund":
-    "Consultation annulée. Comme il restait moins de {h} heures, le montant n'est pas remboursé automatiquement — parlez-en au professionnel.",
+    "Consultation annulée. Comme il restait moins de {h} heures, le montant n'est pas remboursé automatiquement. Parlez-en au professionnel.",
   "appt.cancelledRefundFailed":
     "Consultation annulée, mais le remboursement n'a pas pu être effectué pour le moment. Le professionnel a été prévenu.",
   "appt.refundPolicyPatient":

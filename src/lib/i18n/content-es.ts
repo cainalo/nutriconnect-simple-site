@@ -563,7 +563,7 @@ const content: ContentOverrides = {
     question: "¿Aproximadamente cuántos miligramos de vitamina C tiene una naranja mediana?",
     unit: " mg",
     explanation:
-      "Una naranja mediana tiene cerca de 70 mg de vitamina C — más que la necesidad diaria de muchos adultos.",
+      "Una naranja mediana tiene cerca de 70 mg de vitamina C, más que la necesidad diaria de muchos adultos.",
   },
   "stop:lesson-1-3": {
     title: "Agua y Fibras",
@@ -812,7 +812,7 @@ const content: ContentOverrides = {
     question: "¿Aproximadamente qué porcentaje del peso corporal de un adulto es agua?",
     unit: "%",
     explanation:
-      "En promedio, cerca del 60% del cuerpo adulto es agua — por eso es tan esencial para que todo funcione bien.",
+      "En promedio, cerca del 60% del cuerpo adulto es agua, por eso es tan esencial para que todo funcione bien.",
   },
   "trail:escolhas": {
     title: "Alimentos y Elecciones",
@@ -914,7 +914,7 @@ const content: ContentOverrides = {
       "Fideos instantáneos",
     ],
     explanation:
-      "Los procesados usan pocos ingredientes y técnicas simples, como la sal y la fermentación — a diferencia de los ultraprocesados.",
+      "Los procesados usan pocos ingredientes y técnicas simples, como la sal y la fermentación, a diferencia de los ultraprocesados.",
   },
   "act:lesson-2-1-l1-y4": {
     prompt:
@@ -2900,7 +2900,7 @@ const content: ContentOverrides = {
       "Da tiempo al cerebro para registrar la saciedad",
     ],
     explanation:
-      "El cerebro tarda unos 20 minutos en percibir la saciedad — comer despacio acompaña ese ritmo.",
+      "El cerebro tarda unos 20 minutos en percibir la saciedad. Comer despacio acompaña ese ritmo.",
   },
   "act:lesson-4-2-l2-x4": {
     statement: "Prestar atención a la comida puede aumentar el placer de comer.",

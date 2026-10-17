@@ -142,7 +142,7 @@ export function ConsentGate() {
             onClick={() => void signOut()}
             className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-secondary"
           >
-            Não aceito — sair
+            Não aceito, sair
           </button>
           <button
             type="button"

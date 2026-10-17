@@ -358,10 +358,10 @@ export function CarePlansPanel({
           icon={ClipboardList}
           title={tr(["Nenhum plano ainda", "No plans yet", "Ningún plan aún", "Aucun plan"])}
           text={tr([
-            "Treino, exercícios em casa, tarefas entre sessões, cuidados ou medicações — o paciente acompanha e marca o que fez.",
-            "Workouts, home exercises, between-session tasks, care or medications — the patient follows and checks them off.",
-            "Entrenamiento, ejercicios, tareas, cuidados o medicaciones — el paciente sigue y marca lo hecho.",
-            "Entraînement, exercices, tâches, soins ou médicaments — le patient suit et coche ce qu'il a fait.",
+            "Treino, exercícios em casa, tarefas entre sessões, cuidados ou medicações. O paciente acompanha e marca o que fez.",
+            "Workouts, home exercises, between-session tasks, care or medications. The patient follows and checks them off.",
+            "Entrenamiento, ejercicios, tareas, cuidados o medicaciones. El paciente sigue y marca lo hecho.",
+            "Entraînement, exercices, tâches, soins ou médicaments. Le patient suit et coche ce qu'il a fait.",
           ])}
         />
       )}

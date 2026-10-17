@@ -542,7 +542,7 @@ const content: ContentOverrides = {
     question: "Approximately how many milligrams of vitamin C does a medium orange have?",
     unit: " mg",
     explanation:
-      "A medium orange has about 70 mg of vitamin C — more than the daily need of many adults.",
+      "A medium orange has about 70 mg of vitamin C, more than the daily need of many adults.",
   },
   "stop:lesson-1-3": {
     title: "Water and Fiber",
@@ -785,7 +785,7 @@ const content: ContentOverrides = {
     question: "About what percentage of an adult's body weight is water?",
     unit: "%",
     explanation:
-      "On average, about 60% of the adult body is water — that's why it's so essential for everything to work well.",
+      "On average, about 60% of the adult body is water, which is why it's so essential for everything to work well.",
   },
   "trail:escolhas": {
     title: "Foods and Choices",
@@ -879,7 +879,7 @@ const content: ContentOverrides = {
       "Instant noodles",
     ],
     explanation:
-      "Processed foods use few ingredients and simple techniques, like salt and fermentation — unlike ultra-processed ones.",
+      "Processed foods use few ingredients and simple techniques, like salt and fermentation, unlike ultra-processed ones.",
   },
   "act:lesson-2-1-l1-y4": {
     prompt:
@@ -2797,7 +2797,7 @@ const content: ContentOverrides = {
       "It gives the brain time to register fullness",
     ],
     explanation:
-      "The brain takes about 20 minutes to notice fullness — eating slowly keeps pace with that.",
+      "The brain takes about 20 minutes to notice fullness. Eating slowly keeps pace with that.",
   },
   "act:lesson-4-2-l2-x4": {
     statement: "Paying attention to the meal can increase the pleasure of eating.",

@@ -427,7 +427,7 @@ const clinicalPtBR = {
   "notes.empty": "Nenhuma evolução registrada",
   "notes.emptyText":
     "Registre cada consulta no formato SOAP para acompanhar a evolução do paciente.",
-  "notes.privateHint": "Visível apenas para você — o paciente não vê as evoluções.",
+  "notes.privateHint": "Visível apenas para você. O paciente não vê as evoluções.",
   "notes.appointment": "Consulta relacionada",
   "notes.noAppointment": "Sem consulta vinculada",
   "notes.subjective": "Subjetivo",
@@ -737,7 +737,7 @@ const clinicalPtBR = {
   "errors.payment": "Não foi possível falar com o Stripe. Tente novamente em instantes.",
   "appt.cancelledRefunded": "Consulta cancelada. O estorno foi solicitado ao Stripe.",
   "appt.cancelledNoRefund":
-    "Consulta cancelada. Como faltavam menos de {h} horas, o valor não é estornado automaticamente — fale com o profissional.",
+    "Consulta cancelada. Como faltavam menos de {h} horas, o valor não é estornado automaticamente. Fale com o profissional.",
   "appt.cancelledRefundFailed":
     "Consulta cancelada, mas o estorno não pôde ser feito agora. O profissional foi avisado para resolver.",
   "appt.refundPolicyPatient":

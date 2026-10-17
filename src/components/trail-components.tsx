@@ -8,7 +8,6 @@ import {
   Flame,
   Lock,
   ShoppingBasket,
-  Sparkles,
   Star,
   Target,
   Users,
@@ -379,10 +378,9 @@ export function TrailHero({ variant, name }: { variant: ProfileKind; name: strin
 
       <div className="relative flex flex-col items-center justify-between gap-6 lg:flex-row">
         <div className="max-w-xl space-y-2 text-center lg:text-left">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-widest backdrop-blur-sm">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+          <p className="text-base font-extrabold text-white/90">
             {t("tc.kid.hello").replace("{name}", name)}
-          </span>
+          </p>
           <h2 className="font-display text-3xl font-black text-white drop-shadow-sm sm:text-4xl">
             {t("tc.kid.title")}
           </h2>

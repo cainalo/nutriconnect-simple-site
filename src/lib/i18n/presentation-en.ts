@@ -618,7 +618,7 @@ const en: PresentationCopy = {
   },
   join: {
     eyebrow: "Join us",
-    title: "Your journey starts now",
+    title: "Start with your next meal",
     text: "Create your free account, join a community and take the first step on the trail with Nina.",
     primary: "Create my account",
     secondary: "I already have an account",

@@ -5,7 +5,7 @@ import {
   ChefHat,
   MessageSquare,
   Clock,
-  Sparkles,
+  CalendarDays,
   ArrowRight,
   Send,
   HelpCircle,
@@ -485,7 +485,7 @@ export function PostCard({ post }: PostCardProps) {
           className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider"
           style={{ color: "var(--pt)" }}
         >
-          <Sparkles className="h-4 w-4" /> {t("postcard.communityStory")}
+          <Heart className="h-4 w-4" /> {t("postcard.communityStory")}
         </div>
 
         {renderAuthorInfo()}
@@ -592,7 +592,7 @@ export function WeeklyThemeCard({ theme, compact = false }: WeeklyThemeCardProps
       <div className="p-6 sm:p-8 bg-gradient-to-br from-card via-card to-accent-soft/30">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground tracking-wide uppercase">
-            <Sparkles className="h-3.5 w-3.5" /> {text.badge || t("weekly.badge")}
+            <CalendarDays className="h-3.5 w-3.5" /> {text.badge || t("weekly.badge")}
           </span>
           <span className="text-xs font-medium text-muted-foreground">{weekLabel}</span>
         </div>

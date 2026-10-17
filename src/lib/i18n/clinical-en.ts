@@ -387,7 +387,7 @@ const clinical: Record<ClinicalKey, string> = {
   "notes.deleteConfirm": "Delete this progress note? This can't be undone.",
   "notes.empty": "No progress notes",
   "notes.emptyText": "Record each appointment in SOAP format to follow the patient's progress.",
-  "notes.privateHint": "Visible only to you — the patient doesn't see progress notes.",
+  "notes.privateHint": "Visible only to you. The patient doesn't see progress notes.",
   "notes.appointment": "Related appointment",
   "notes.noAppointment": "No linked appointment",
   "notes.subjective": "Subjective",
@@ -613,7 +613,7 @@ const clinical: Record<ClinicalKey, string> = {
   "diary.deleteConfirm": "Delete this diary entry?",
   "diary.today": "Today",
   "diary.empty": "No diary entries",
-  "diary.emptyOwner": "Start by recording your next meal — a photo is enough.",
+  "diary.emptyOwner": "Start by recording your next meal. A photo is enough.",
   "diary.emptyPro": "The patient hasn't recorded any meals yet.",
   "diary.commentPlaceholder": "Write a comment…",
   "diary.meal.cafe_da_manha": "Breakfast",
@@ -693,7 +693,7 @@ const clinical: Record<ClinicalKey, string> = {
   "errors.payment": "We couldn't reach Stripe. Please try again in a moment.",
   "appt.cancelledRefunded": "Appointment cancelled. The refund was requested from Stripe.",
   "appt.cancelledNoRefund":
-    "Appointment cancelled. Since it was less than {h} hours away, the amount isn't refunded automatically — please talk to your professional.",
+    "Appointment cancelled. Since it was less than {h} hours away, the amount isn't refunded automatically. Please talk to your professional.",
   "appt.cancelledRefundFailed":
     "Appointment cancelled, but the refund couldn't be processed right now. The professional has been notified.",
   "appt.refundPolicyPatient":
