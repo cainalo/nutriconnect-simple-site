@@ -287,6 +287,7 @@ function DirectoryPage() {
           ) : filtered.length === 0 ? (
             <EmptyState
               icon={Stethoscope}
+              photo="/images/presentation/jar-salad.jpg"
               title={t("directory.emptyTitle")}
               text={t("directory.emptyText")}
             />

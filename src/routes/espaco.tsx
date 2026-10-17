@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 import { useDesignId } from "@/lib/site-design";
 import type { DictKey } from "@/lib/i18n";
+import { EmptyPhoto } from "@/components/clinical/ui";
 
 // Filtros da página Geral: tudo, amigos, ou profissionais que a pessoa segue.
 type Filter = "todos" | "amigos" | "seguindo";
@@ -60,8 +61,11 @@ export const Route = createFileRoute("/espaco")({
 function EmptyState({ message }: { message: string }) {
   const { t } = useI18n();
   return (
-    <div className="rounded-3xl border border-dashed border-border bg-card/40 p-12 text-center max-w-lg mx-auto">
-      <Compass className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-50" />
+    <div className="mx-auto max-w-lg overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-12 text-center">
+      <EmptyPhoto src="/images/heads/convites.jpg" className="-mx-12 -mt-12 mb-0" />
+      <span className="relative mx-auto -mt-7 mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-card text-primary shadow-md ring-4 ring-card">
+        <Compass className="h-6 w-6" />
+      </span>
       <p className="text-base text-muted-foreground font-medium mb-6">{message}</p>
       <ShareModal
         triggerButton={
