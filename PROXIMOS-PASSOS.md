@@ -80,6 +80,11 @@ Lovable e para o site).
   mostrar a versão anterior. Os recortes antigos da Feira ficam em `images/season-cutout`. Sem foto ainda: jabuticaba, pequi, umbu, cupuaçu, rúcula, cuscuz e
   tapioca (o acervo aberto não tem). Daqui só se alcança o Open Images (S3/GCS, CC BY 2.0, créditos
   obrigatórios no CREDITS.md de cada pasta); Unsplash/Wikimedia são bloqueados.
+- **Qualidade (pedido de 17/10):** rodadas de teste em todas as páginas e funções, nota 0–10 em 12
+  critérios, até tudo chegar a 10. Processo em `docs/QUALIDADE.md`; critérios, catálogo (112 itens)
+  e notas em `src/lib/quality/`; painéis Admin → Qualidade e Admin → Documentação. Página nova =
+  item novo no catálogo. Rodada 1 (25 páginas, 87%) feita; próxima: rodada 2 nas mesmas páginas
+  (confirmar as correções) e rodada nas funções de Funções.
 - Textos do app nos 4 idiomas (pt-BR, en, es, fr) no padrão `tr([pt, en, es, fr])`.
 - Mensagens de commit em português, terminando com
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
