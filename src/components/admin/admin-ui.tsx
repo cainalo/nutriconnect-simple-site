@@ -91,6 +91,7 @@ export function StatCard({
   icon: Icon,
   tone = "default",
   onClick,
+  compact = false,
 }: {
   label: string;
   value: ReactNode;
@@ -98,6 +99,8 @@ export function StatCard({
   icon: LucideIcon;
   tone?: "default" | "alert" | "good";
   onClick?: () => void;
+  /** Em grade de 2 colunas no celular: ícone em cima e número menor até o sm. */
+  compact?: boolean;
 }) {
   // Cores do design escolhido (nada de cor fixa).
   const color =
@@ -109,16 +112,18 @@ export function StatCard({
       onClick={onClick}
       className={`flex items-start gap-3 rounded-3xl border border-border/80 bg-card p-4 text-left shadow-xs transition ${
         onClick ? "cursor-pointer hover:shadow-soft" : ""
-      }`}
+      } ${compact ? "flex-col gap-2 p-3.5 sm:flex-row sm:gap-3 sm:p-4" : ""}`}
     >
       <span
-        className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl"
+        className={`grid shrink-0 place-items-center rounded-2xl ${compact ? "h-9 w-9 sm:h-11 sm:w-11" : "h-11 w-11"}`}
         style={{ background: `color-mix(in srgb, ${color} 15%, transparent)`, color }}
       >
         <Icon className="h-5 w-5" />
       </span>
-      <span className="min-w-0">
-        <span className="block font-display text-2xl font-bold leading-none text-foreground">
+      <span className="min-w-0 max-w-full">
+        <span
+          className={`block font-display font-bold leading-none text-foreground ${compact ? "break-words text-xl sm:text-2xl" : "text-2xl"}`}
+        >
           {value}
         </span>
         <span className="mt-1 block text-xs font-medium text-muted-foreground">{label}</span>
