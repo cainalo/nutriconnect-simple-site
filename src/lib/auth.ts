@@ -189,6 +189,32 @@ export async function loginUser(email: string, password?: string): Promise<AuthU
   return user;
 }
 
+/** Entrar sem senha: manda um link (e um código de 6 dígitos) para o e-mail de quem já tem conta. */
+export async function requestLoginEmail(email: string, redirectPath = "/espaco") {
+  const { error } = await supabase.auth.signInWithOtp({
+    email: email.toLowerCase().trim(),
+    options: {
+      shouldCreateUser: false,
+      emailRedirectTo:
+        typeof window !== "undefined" ? `${location.origin}${redirectPath}` : undefined,
+    },
+  });
+  if (error) throw new Error(translateAuthError(error.message));
+}
+
+/** Confirma o código de 6 dígitos do e-mail de entrada. */
+export async function verifyLoginCode(email: string, code: string): Promise<AuthUser> {
+  const { error } = await supabase.auth.verifyOtp({
+    email: email.toLowerCase().trim(),
+    token: code.trim(),
+    type: "email",
+  });
+  if (error) throw new Error(t("reset.invalidCode"));
+  const user = await refreshUser();
+  if (!user) throw new Error(t("auth.loginError"));
+  return user;
+}
+
 export async function signOut() {
   const previousId = currentUser?.id;
   await supabase.auth.signOut();

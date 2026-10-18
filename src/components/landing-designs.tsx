@@ -334,7 +334,9 @@ export function LandingVibrante() {
       <section className="mx-auto w-full max-w-6xl px-3 pb-16">
         <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-accent px-6 py-12 text-center text-accent-foreground">
           <Mascot id="nina" mood="cheer" size={100} />
-          <h2 className="font-display text-3xl font-black sm:text-4xl">{tr(COPY.finalTitle)}</h2>
+          <h2 className="font-display text-3xl font-black text-accent-foreground sm:text-4xl">
+            {tr(COPY.finalTitle)}
+          </h2>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               to="/cadastro"
@@ -794,7 +796,9 @@ export function LandingAurora() {
       <section className="relative mx-auto w-full max-w-4xl px-4 pb-16">
         <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-primary px-6 py-12 text-center text-primary-foreground shadow-2xl">
           <Mascot id="nina" mood="cheer" size={100} />
-          <h2 className="font-display text-3xl font-semibold sm:text-4xl">{tr(COPY.finalTitle)}</h2>
+          <h2 className="font-display text-3xl font-semibold text-primary-foreground sm:text-4xl">
+            {tr(COPY.finalTitle)}
+          </h2>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               to="/cadastro"

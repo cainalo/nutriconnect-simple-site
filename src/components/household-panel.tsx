@@ -114,10 +114,10 @@ export function HouseholdPanel() {
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <header className="mb-6">
         <h1
-          data-page-head={mine.data ? undefined : ""}
+          data-page-head={mine.data?.house?.name ? undefined : ""}
           className="text-2xl font-extrabold font-display text-foreground"
         >
-          {mine.data ? (
+          {mine.data?.house?.name ? (
             <span className="inline-flex items-center gap-2">
               <EmojiIcon emoji={mine.data.house.emoji} fallback={Home} tinted className="h-6 w-6" />
               {mine.data.house.name}

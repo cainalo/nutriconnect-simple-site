@@ -625,7 +625,7 @@ const clinicalPtBR = {
   "patientPlan.next": "Próxima refeição",
   "patientPlan.empty": "Você ainda não tem um plano alimentar",
   "patientPlan.emptyText":
-    "Depois da consulta, o plano publicado pelo seu profissional aparece aqui.",
+    "Depois da consulta, o plano do seu profissional aparece aqui: as refeições do dia com quantidades, opções de substituição e orientações. Dá para baixar em PDF e marcar o que você seguiu.",
   "patientPlan.archivedNotice": "Esta é uma versão anterior do seu plano, guardada para consulta.",
   "patientPlan.history": "Versões do plano",
   "diary.title": "Diário alimentar",

@@ -589,7 +589,7 @@ const clinical: Record<ClinicalKey, string> = {
   "patientPlan.next": "Prochain repas",
   "patientPlan.empty": "Vous n'avez pas encore de plan alimentaire",
   "patientPlan.emptyText":
-    "Après la consultation, le plan publié par votre professionnel apparaît ici.",
+    "Après la consultation, le plan de votre professionnel s'affiche ici : les repas du jour avec les quantités, des alternatives et des conseils. Vous pouvez le télécharger en PDF et cocher ce que vous avez suivi.",
   "patientPlan.archivedNotice":
     "Ceci est une version précédente de votre plan, conservée pour consultation.",
   "patientPlan.history": "Versions du plan",

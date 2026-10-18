@@ -6,6 +6,7 @@ import { registerUser } from "@/lib/auth";
 import { JOURNEY_GOALS } from "@/lib/community";
 import { AuthLayout, Field, safeRedirect } from "./login";
 import { useI18n } from "@/hooks/use-i18n";
+import { useTr } from "@/components/settings-ui";
 import { isAdult, MIN_AGE } from "@/lib/legal";
 
 export const Route = createFileRoute("/cadastro")({
@@ -20,6 +21,7 @@ function Cadastro() {
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
   const { t } = useI18n();
+  const tr = useTr();
   const [form, setForm] = useState({
     nome: "",
     cpf: "",
@@ -48,11 +50,33 @@ function Cadastro() {
     if (!cleanNome) return toast.error(t("signup.fillName"));
     if (!cleanEmail) return toast.error(t("auth.fillEmail"));
     if (!/\S+@\S+\.\S+/.test(cleanEmail)) return toast.error(t("signup.invalidEmail"));
-    if (!cleanTel) return toast.error(t("signup.fillPhone"));
-    if (!form.nasc) return toast.error("Informe sua data de nascimento.");
+    if (!form.nasc)
+      return toast.error(
+        tr([
+          "Informe sua data de nascimento.",
+          "Enter your date of birth.",
+          "Indica tu fecha de nacimiento.",
+          "Indiquez votre date de naissance.",
+        ]),
+      );
     if (!isAdult(form.nasc))
-      return toast.error(`O NutriConnect é para maiores de ${MIN_AGE} anos.`);
-    if (!accepted) return toast.error("Aceite os Termos de Uso e a Política de Privacidade.");
+      return toast.error(
+        tr([
+          `O NutriConnect é para maiores de ${MIN_AGE} anos.`,
+          `NutriConnect is for people aged ${MIN_AGE} and over.`,
+          `NutriConnect es para mayores de ${MIN_AGE} años.`,
+          `NutriConnect est réservé aux plus de ${MIN_AGE} ans.`,
+        ]),
+      );
+    if (!accepted)
+      return toast.error(
+        tr([
+          "Aceite os Termos de Uso e a Política de Privacidade.",
+          "Accept the Terms of Use and the Privacy Policy.",
+          "Acepta los Términos de Uso y la Política de Privacidad.",
+          "Acceptez les Conditions d'utilisation et la Politique de confidentialité.",
+        ]),
+      );
     if (!cleanSenha) return toast.error(t("auth.fillPassword"));
     if (cleanSenha.length < 6) return toast.error(t("signup.shortPassword"));
     if (cleanSenha !== cleanConf) return toast.error(t("signup.mismatch"));
@@ -119,27 +143,46 @@ function Cadastro() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label={`${t("settings.account.cpf")} (${t("common.optional")})`}>
-            <input
-              className="input"
-              value={form.cpf}
-              onChange={upd("cpf")}
-              placeholder="000.000.000-00"
-            />
-          </Field>
-          <Field label={t("signup.birthDate")}>
-            <input type="date" className="input" value={form.nasc} onChange={upd("nasc")} />
-          </Field>
-        </div>
-        <Field label={t("signup.phone")}>
-          <input
-            className="input"
-            value={form.tel}
-            onChange={upd("tel")}
-            placeholder="(11) 99999-9999"
-          />
+        <Field label={t("signup.birthDate")}>
+          <input type="date" className="input" value={form.nasc} onChange={upd("nasc")} />
         </Field>
+        {/* CPF e telefone são opcionais e podem ficar para depois (Configurações → Conta). */}
+        <details className="group rounded-xl border border-border/70 bg-secondary/30 px-3 py-2">
+          <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between text-sm font-medium text-foreground">
+            {tr([
+              "Telefone e CPF (opcional)",
+              "Phone and tax ID (optional)",
+              "Teléfono y documento (opcional)",
+              "Téléphone et numéro fiscal (facultatif)",
+            ])}
+            <span className="text-xs text-muted-foreground group-open:hidden">
+              {tr([
+                "dá para preencher depois",
+                "you can add later",
+                "puedes completarlo después",
+                "plus tard possible",
+              ])}
+            </span>
+          </summary>
+          <div className="mt-2 grid grid-cols-1 gap-3 pb-1 sm:grid-cols-2">
+            <Field label={t("signup.phone")}>
+              <input
+                className="input"
+                value={form.tel}
+                onChange={upd("tel")}
+                placeholder="(11) 99999-9999"
+              />
+            </Field>
+            <Field label={t("settings.account.cpf")}>
+              <input
+                className="input"
+                value={form.cpf}
+                onChange={upd("cpf")}
+                placeholder="000.000.000-00"
+              />
+            </Field>
+          </div>
+        </details>
         <Field label={t("auth.email")}>
           <input
             type="email"

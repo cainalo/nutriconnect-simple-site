@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Leaf, Users, ChefHat, Award, Stethoscope, Presentation, ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { loginUser } from "@/lib/auth";
+import { loginUser, requestLoginEmail, verifyLoginCode } from "@/lib/auth";
+import { useTr } from "@/components/settings-ui";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import type { DictKey } from "@/lib/i18n";
@@ -29,6 +30,46 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
+  // Entrar sem senha: "pedir" mostra o campo do código depois de mandar o e-mail.
+  const [codeSent, setCodeSent] = useState(false);
+  const [code, setCode] = useState("");
+  const tr = useTr();
+
+  const sendLink = async () => {
+    const cleanEmail = email.trim();
+    if (!cleanEmail) return toast.error(t("auth.fillEmail"));
+    setSubmitting(true);
+    try {
+      await requestLoginEmail(cleanEmail, redirect ?? "/espaco");
+      setCodeSent(true);
+      toast.success(
+        tr([
+          "Enviamos um link e um código para o seu e-mail.",
+          "We sent a link and a code to your e-mail.",
+          "Enviamos un enlace y un código a tu correo.",
+          "Nous avons envoyé un lien et un code à votre e-mail.",
+        ]),
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("auth.loginError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const confirmCode = async () => {
+    if (code.trim().length < 6) return toast.error(t("reset.enterCode"));
+    setSubmitting(true);
+    try {
+      await verifyLoginCode(email.trim(), code);
+      toast.success(t("auth.loginWelcome"));
+      navigate({ to: (redirect ?? "/") as "/espaco" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("auth.loginError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +115,58 @@ function Login() {
         >
           {t("auth.loginSubmit")}
         </button>
+        <div className="relative text-center text-xs text-muted-foreground before:absolute before:inset-x-0 before:top-1/2 before:h-px before:bg-border">
+          <span className="relative bg-card px-3">{tr(["ou", "or", "o", "ou"])}</span>
+        </div>
+        {codeSent ? (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              {tr([
+                "Abra o link do e-mail neste aparelho ou digite o código de 6 dígitos:",
+                "Open the e-mail link on this device or type the 6-digit code:",
+                "Abre el enlace del correo en este dispositivo o escribe el código de 6 dígitos:",
+                "Ouvrez le lien de l'e-mail sur cet appareil ou saisissez le code à 6 chiffres :",
+              ])}
+            </p>
+            <input
+              className="input text-center font-mono text-lg tracking-[0.4em]"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+              aria-label={t("reset.code6")}
+              placeholder="000000"
+            />
+            <button
+              type="button"
+              disabled={submitting}
+              onClick={confirmCode}
+              className="w-full rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:opacity-60"
+            >
+              {tr([
+                "Entrar com o código",
+                "Log in with the code",
+                "Entrar con el código",
+                "Se connecter avec le code",
+              ])}
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            disabled={submitting}
+            onClick={sendLink}
+            className="w-full rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:opacity-60"
+          >
+            {tr([
+              "Entrar sem senha (link no e-mail)",
+              "Log in without a password (e-mail link)",
+              "Entrar sin contraseña (enlace al correo)",
+              "Se connecter sans mot de passe (lien par e-mail)",
+            ])}
+          </button>
+        )}
         <div className="flex items-center justify-between text-sm">
           <Link to="/recuperar-senha" className="text-accent hover:underline">
             {t("auth.forgot")}
@@ -104,6 +197,7 @@ export function AuthLayout({
   children: React.ReactNode;
 }) {
   const { t } = useI18n();
+  const tr = useTr();
   return (
     <div className="flex min-h-screen bg-secondary/40">
       {/* Landing — apresentação da rede (metade esquerda) */}
@@ -185,16 +279,16 @@ export function AuthLayout({
           </Link>
           <nav className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <Link to="/termos" className="hover:text-foreground hover:underline">
-              Termos de Uso
+              {tr(["Termos de Uso", "Terms of Use", "Términos de Uso", "Conditions d'utilisation"])}
             </Link>
             <Link to="/privacidade" className="hover:text-foreground hover:underline">
-              Privacidade
+              {tr(["Privacidade", "Privacy", "Privacidad", "Confidentialité"])}
             </Link>
             <Link to="/diretrizes" className="hover:text-foreground hover:underline">
-              Diretrizes
+              {tr(["Diretrizes", "Guidelines", "Normas", "Règles"])}
             </Link>
             <Link to="/contato" className="hover:text-foreground hover:underline">
-              Fale conosco
+              {tr(["Fale conosco", "Contact us", "Contáctanos", "Nous contacter"])}
             </Link>
           </nav>
         </div>

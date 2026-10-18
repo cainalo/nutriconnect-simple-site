@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { useConversations, useLinks, usePeople } from "@/lib/clinical/queries";
@@ -5,7 +6,7 @@ import { formatDate, formatTime, isSameDay } from "@/lib/clinical/format";
 import { useClinicalI18n } from "@/lib/clinical/i18n";
 import { cn } from "@/lib/utils";
 import { ChatThread } from "./chat";
-import { Avatar, EmptyState, Loading, buttonGhost } from "./ui";
+import { Avatar, EmptyState, Loading, buttonGhost, buttonPrimary } from "./ui";
 
 interface Contact {
   otherId: string;
@@ -81,6 +82,17 @@ export function Conversations({
         icon={MessageCircle}
         title={t("chat.noContacts")}
         text={role === "patient" ? t("chat.noContactsPatient") : t("chat.noContactsPro")}
+        action={
+          role === "patient" ? (
+            <Link to="/profissionais" className={buttonPrimary}>
+              {t("patientNav.findProfessional")}
+            </Link>
+          ) : (
+            <Link to="/painel/pacientes" className={buttonPrimary}>
+              {t("panelNav.patients")}
+            </Link>
+          )
+        }
       />
     );
   }

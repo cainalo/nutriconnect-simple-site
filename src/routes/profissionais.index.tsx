@@ -245,7 +245,7 @@ function DirectoryPage() {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           <button
             type="button"
             aria-pressed={profession === null}
@@ -254,7 +254,7 @@ function DirectoryPage() {
               setSpecialty(null);
             }}
             className={cn(
-              "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
+              "col-span-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
               profession === null
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-card text-foreground hover:bg-secondary",
@@ -277,7 +277,7 @@ function DirectoryPage() {
                 setSpecialty(null);
               }}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
+                "inline-flex items-center justify-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
                 profession === key
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-card text-foreground hover:bg-secondary",

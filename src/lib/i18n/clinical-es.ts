@@ -582,7 +582,7 @@ const clinical: Record<ClinicalKey, string> = {
   "patientPlan.next": "Próxima comida",
   "patientPlan.empty": "Todavía no tienes un plan alimentario",
   "patientPlan.emptyText":
-    "Después de la consulta, el plan publicado por tu profesional aparece aquí.",
+    "Después de la consulta, el plan de tu profesional aparece aquí: las comidas del día con cantidades, opciones de sustitución e indicaciones. Puedes descargarlo en PDF y marcar lo que seguiste.",
   "patientPlan.archivedNotice": "Esta es una versión anterior de tu plan, guardada para consulta.",
   "patientPlan.history": "Versiones del plan",
   "diary.title": "Diario alimentario",

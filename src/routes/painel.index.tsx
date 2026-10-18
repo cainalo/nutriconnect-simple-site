@@ -139,6 +139,7 @@ function PanelOverview() {
       done: (rules.data?.length ?? 0) > 0,
       label: t("overview.setupHours"),
       to: "/painel/agenda" as const,
+      hash: "horarios",
     },
     {
       done:
@@ -146,11 +147,13 @@ function PanelOverview() {
         (pro.data.consultation_price_cents > 0 || !!pro.data.address || !!pro.data.headline),
       label: t("overview.setupSettings"),
       to: "/painel/configuracoes" as const,
+      hash: undefined,
     },
     {
       done: activePatients > 0,
       label: t("overview.setupPatients"),
       to: "/painel/pacientes" as const,
+      hash: undefined,
     },
   ];
   const setupDone = setup.every((s) => s.done);
@@ -187,7 +190,11 @@ function PanelOverview() {
           <ul className="space-y-2">
             {setup.map((s) => (
               <li key={s.label}>
-                <Link to={s.to} className="flex items-center gap-2 text-sm hover:underline">
+                <Link
+                  to={s.to}
+                  hash={s.hash}
+                  className="flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm transition hover:bg-secondary"
+                >
                   {s.done ? (
                     <CheckCircle2 className="h-4 w-4 text-primary" />
                   ) : (
