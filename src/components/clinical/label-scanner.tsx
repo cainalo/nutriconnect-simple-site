@@ -13,6 +13,7 @@ import {
   Search,
   Trash2,
   X,
+  Scale,
 } from "lucide-react";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
@@ -938,7 +939,18 @@ export function LabelScanner() {
       <Card
         title={tr(["Histórico", "History", "Historial", "Historique"])}
         action={
-          selected.length > 0 ? (
+          selected.length === 0 ? (
+            // Sem nada marcado, o atalho deixa claro que dá para comparar dois produtos.
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+              <Scale className="h-3.5 w-3.5" />
+              {tr([
+                "Marque 2 para comparar",
+                "Tick 2 to compare",
+                "Marca 2 para comparar",
+                "Cochez-en 2 pour comparer",
+              ])}
+            </span>
+          ) : selected.length > 0 ? (
             <span className="text-[11px] text-muted-foreground">
               {selected.length === 1
                 ? tr([

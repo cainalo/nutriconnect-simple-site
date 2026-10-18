@@ -51,6 +51,54 @@ function MembersPanel() {
         title={tr(["Perfil de membros", "Members profile", "Perfil de miembros", "Profil membres"])}
         levelCode="destaque"
         status={status.data}
+        preview={
+          <div className="rounded-2xl border border-border/70 bg-card p-4">
+            <p className="flex items-center gap-2 text-sm font-bold text-foreground">
+              <Crown className="h-4 w-4 text-amber-500" />
+              {tr(["Clube da marmita", "Meal prep club", "Club de la vianda", "Club des repas"])}
+              <span className="ml-auto text-xs font-semibold text-muted-foreground">
+                R$ 19,90/{tr(["mês", "month", "mes", "mois"])}
+              </span>
+            </p>
+            <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+              <li className="flex items-center gap-1.5">
+                <Lock className="h-3 w-3 shrink-0" />
+                {tr([
+                  "Cardápio da semana com lista de compras",
+                  "Weekly menu with shopping list",
+                  "Menú semanal con lista de compras",
+                  "Menu de la semaine avec liste de courses",
+                ])}
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Lock className="h-3 w-3 shrink-0" />
+                {tr([
+                  "Vídeo: 5 marmitas em 1 hora",
+                  "Video: 5 meal preps in 1 hour",
+                  "Video: 5 viandas en 1 hora",
+                  "Vidéo : 5 repas en 1 heure",
+                ])}
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Lock className="h-3 w-3 shrink-0" />
+                {tr([
+                  "Live mensal de perguntas",
+                  "Monthly Q&A live",
+                  "Directo mensual de preguntas",
+                  "Live mensuel de questions",
+                ])}
+              </li>
+            </ul>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              {tr([
+                "24 assinantes · você recebe R$ 17,91 por assinatura",
+                "24 subscribers · you receive R$ 17.91 each",
+                "24 suscriptores · recibes R$ 17,91 por suscripción",
+                "24 abonnés · vous recevez 17,91 R$ par abonnement",
+              ])}
+            </p>
+          </div>
+        }
         intro={[
           "Com o perfil de membros, quem gosta do seu trabalho paga uma mensalidade para ver conteúdo só para assinantes.",
           "With a members profile, people who like your work pay a monthly fee to see subscriber-only content.",

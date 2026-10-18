@@ -82,6 +82,38 @@ function ProgramsPanel() {
         levelCode="destaque"
         status={status.data}
         pendingSetup={pendingSetup}
+        preview={
+          <div className="rounded-2xl border border-border/70 bg-card p-4">
+            <p className="flex items-center gap-2 text-sm font-bold text-foreground">
+              <EmojiIcon emoji="🥗" className="h-4 w-4 text-primary" />
+              {tr([
+                "4 semanas de lanches sem ultraprocessados",
+                "4 weeks of snacks without ultra-processed food",
+                "4 semanas de meriendas sin ultraprocesados",
+                "4 semaines de collations sans ultra-transformés",
+              ])}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {tr([
+                "8 módulos · pagamento único · R$ 49,00",
+                "8 modules · one-time · R$ 49.00",
+                "8 módulos · pago único · R$ 49,00",
+                "8 modules · paiement unique · 49,00 R$",
+              ])}
+            </p>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
+              <div className="h-full w-2/3 rounded-full bg-primary" />
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {tr([
+                "12 vendas neste mês",
+                "12 sales this month",
+                "12 ventas este mes",
+                "12 ventes ce mois-ci",
+              ])}
+            </p>
+          </div>
+        }
         intro={[
           "Na loja você vende programas prontos (por exemplo, 4 semanas de marmitas) com pagamento único.",
           "In the store you sell ready-made programs (for example, 4 weeks of meal prep) for a one-time price.",

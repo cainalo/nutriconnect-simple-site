@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Download } from "lucide-react";
+import { Download, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { LEGAL_VERSION } from "@/lib/legal";
+import { buildDataSummaryHtml, openDataSummary } from "@/lib/data-summary";
 import { useTr } from "@/components/settings-ui";
 
 /** Direitos do titular (LGPD): consentimento de saúde, cópia dos dados e exclusão da conta. */
@@ -90,6 +91,52 @@ export function HealthConsentCard() {
     URL.revokeObjectURL(url);
   };
 
+  // Mesma cópia, em versão legível para imprimir ou salvar em PDF.
+  const printSummary = async () => {
+    setExporting(true);
+    const { data, error } = await supabase.rpc("export_my_data");
+    setExporting(false);
+    if (error || !data)
+      return void toast.error(
+        tr([
+          "Não foi possível gerar o resumo agora.",
+          "Could not create the summary right now.",
+          "No se pudo generar el resumen ahora.",
+          "Impossible de créer le résumé pour le moment.",
+        ]),
+      );
+    const html = buildDataSummaryHtml(data as Record<string, unknown>, {
+      title: tr([
+        "Meus dados no NutriConnect",
+        "My data on NutriConnect",
+        "Mis datos en NutriConnect",
+        "Mes données sur NutriConnect",
+      ]),
+      intro: tr([
+        "Cópia de tudo o que o NutriConnect guarda sobre você (LGPD, art. 18). Para salvar em PDF, escolha “Salvar como PDF” na impressão.",
+        "A copy of everything NutriConnect keeps about you (LGPD, art. 18). To save as PDF, choose “Save as PDF” when printing.",
+        "Copia de todo lo que NutriConnect guarda sobre ti (LGPD, art. 18). Para guardar en PDF, elige “Guardar como PDF” al imprimir.",
+        "Copie de tout ce que NutriConnect conserve sur vous (LGPD, art. 18). Pour un PDF, choisissez « Enregistrer au format PDF » à l'impression.",
+      ]),
+      empty: tr([
+        "Nada registrado.",
+        "Nothing recorded.",
+        "Nada registrado.",
+        "Rien d'enregistré.",
+      ]),
+      generated: new Date().toLocaleString(),
+    });
+    if (!openDataSummary(html))
+      toast.error(
+        tr([
+          "O navegador bloqueou a nova aba. Permita pop-ups e tente de novo.",
+          "The browser blocked the new tab. Allow pop-ups and try again.",
+          "El navegador bloqueó la pestaña. Permite ventanas emergentes e inténtalo de nuevo.",
+          "Le navigateur a bloqué l'onglet. Autorisez les fenêtres et réessayez.",
+        ]),
+      );
+  };
+
   const consentLabel = tr([
     "Consentimento para dados de saúde",
     "Consent for health data",
@@ -137,6 +184,20 @@ export function HealthConsentCard() {
                 "Descargar mis datos (JSON)",
                 "Télécharger mes données (JSON)",
               ])}
+        </button>
+        <button
+          type="button"
+          onClick={printSummary}
+          disabled={exporting}
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/40 px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-secondary disabled:opacity-60"
+        >
+          <Printer className="h-3.5 w-3.5" />
+          {tr([
+            "Resumo para ler (PDF)",
+            "Readable summary (PDF)",
+            "Resumen para leer (PDF)",
+            "Résumé lisible (PDF)",
+          ])}
         </button>
         <Link
           to="/perfil/configuracoes/conta"

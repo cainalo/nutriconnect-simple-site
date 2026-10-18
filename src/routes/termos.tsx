@@ -16,12 +16,40 @@ export const Route = createFileRoute("/termos")({
   component: Termos,
 });
 
+const SUMMARY = {
+  en: [
+    "NutriConnect is a social network about food with tools to meet health professionals; it does not provide health care itself.",
+    "Content and Nina (AI) are educational and do not replace a professional. In an emergency, call SAMU (192) or CVV (188).",
+    "Accounts are for people aged 18+; children only use the learning path through an adult's account.",
+    "Your posts stay yours; respect the Community Guidelines or content may be removed.",
+    "Professionals must have an active council registration; appointments, payments and refunds follow the rules in sections 7 and 8.",
+    "You can close your account at any time.",
+  ],
+  es: [
+    "NutriConnect es una red social sobre alimentación con herramientas para encontrar profesionales de salud; no presta servicios de salud.",
+    "El contenido y Nina (IA) son educativos y no sustituyen a un profesional. En una emergencia, llama al SAMU (192) o al CVV (188).",
+    "Las cuentas son para mayores de 18 años; los niños solo usan la ruta de aprendizaje con la cuenta de un adulto.",
+    "Lo que publicas sigue siendo tuyo; respeta las Normas de la Comunidad o el contenido puede retirarse.",
+    "Los profesionales deben tener registro activo en su consejo; consultas, pagos y reembolsos siguen las secciones 7 y 8.",
+    "Puedes cerrar tu cuenta cuando quieras.",
+  ],
+  fr: [
+    "NutriConnect est un réseau social sur l'alimentation avec des outils pour trouver des professionnels de santé ; il ne fournit pas lui-même de soins.",
+    "Les contenus et Nina (IA) sont éducatifs et ne remplacent pas un professionnel. En cas d'urgence, appelez le SAMU (192) ou le CVV (188).",
+    "Les comptes sont réservés aux plus de 18 ans ; les enfants utilisent seulement le parcours via le compte d'un adulte.",
+    "Vos publications restent les vôtres ; respectez les Règles de la communauté, sinon le contenu peut être retiré.",
+    "Les professionnels doivent être inscrits à leur ordre ; consultations, paiements et remboursements suivent les sections 7 et 8.",
+    "Vous pouvez fermer votre compte à tout moment.",
+  ],
+};
+
 function Termos() {
   const operator = COMPANY.legalName || COMPANY.name;
   return (
     <LegalLayout
       title="Termos de Uso"
       intro="Ao criar uma conta ou usar o NutriConnect, você concorda com estes Termos e com a Política de Privacidade. Leia com atenção. Se não concordar, não use a plataforma."
+      summary={SUMMARY}
     >
       <LegalSection id="servico" title="1. O que é o NutriConnect">
         <p>

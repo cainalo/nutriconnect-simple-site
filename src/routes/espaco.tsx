@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUp, CalendarDays, Compass, Sparkles } from "lucide-react";
+import { ArrowUp, CalendarDays, Compass, Sparkles, UserPlus, Users } from "lucide-react";
+import { useTr } from "@/components/settings-ui";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { FeedShell, type FeedShellPage } from "@/components/feed-shell";
 import { useAppearance } from "@/hooks/use-appearance";
@@ -63,6 +64,7 @@ export const Route = createFileRoute("/espaco")({
 
 function EmptyState({ message }: { message: string }) {
   const { t } = useI18n();
+  const tr = useTr();
   const photos = useSitePhotos();
   return (
     <div className="mx-auto max-w-lg overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-12 text-center">
@@ -77,11 +79,28 @@ function EmptyState({ message }: { message: string }) {
       <p className="text-base text-muted-foreground font-medium mb-6">{message}</p>
       <ShareModal
         triggerButton={
-          <button className="rounded-full bg-secondary border border-border px-6 py-2.5 text-sm font-bold text-foreground hover:bg-muted transition">
+          <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground transition hover:brightness-110">
             {t("espaco.firstPost")}
           </button>
         }
       />
+      {/* Feed vazio também mostra onde achar gente e conversas para seguir. */}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Link
+          to="/explorar"
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground transition hover:bg-secondary"
+        >
+          <UserPlus className="h-4 w-4" />
+          {tr(["Encontrar pessoas", "Find people", "Encontrar personas", "Trouver des personnes"])}
+        </Link>
+        <Link
+          to="/comunidades"
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground transition hover:bg-secondary"
+        >
+          <Users className="h-4 w-4" />
+          {tr(["Ver comunidades", "See communities", "Ver comunidades", "Voir les communautés"])}
+        </Link>
+      </div>
     </div>
   );
 }

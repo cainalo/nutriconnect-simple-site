@@ -16,12 +16,40 @@ export const Route = createFileRoute("/privacidade")({
   component: Privacidade,
 });
 
+const SUMMARY = {
+  en: [
+    "We collect only what the service needs: account, profile, what you post and, with your consent, health data for follow-up with professionals.",
+    "Health data is seen only by you and the professionals you choose; you can withdraw consent at any time.",
+    "We use AI for Nina and to moderate content; important decisions are reviewed by people.",
+    "We do not sell your data. We share it only with service providers (hosting, payments, e-mail) under contract.",
+    "You can download a copy of your data, correct it or delete your account in Settings (LGPD rights).",
+    "Children's profiles are kept inside the adult's account and have no social features.",
+  ],
+  es: [
+    "Recogemos solo lo necesario: cuenta, perfil, lo que publicas y, con tu consentimiento, datos de salud para el seguimiento con profesionales.",
+    "Los datos de salud solo los ves tú y los profesionales que elijas; puedes retirar el consentimiento cuando quieras.",
+    "Usamos IA en Nina y para moderar contenido; las decisiones importantes las revisan personas.",
+    "No vendemos tus datos. Solo los compartimos con proveedores del servicio (alojamiento, pagos, correo) bajo contrato.",
+    "Puedes descargar una copia de tus datos, corregirlos o eliminar tu cuenta en Configuración (derechos de la LGPD).",
+    "Los perfiles infantiles quedan dentro de la cuenta del adulto y no tienen red social.",
+  ],
+  fr: [
+    "Nous collectons seulement le nécessaire : compte, profil, vos publications et, avec votre accord, des données de santé pour le suivi avec des professionnels.",
+    "Les données de santé ne sont vues que par vous et les professionnels que vous choisissez ; vous pouvez retirer votre accord à tout moment.",
+    "Nous utilisons l'IA pour Nina et la modération ; les décisions importantes sont revues par des personnes.",
+    "Nous ne vendons pas vos données. Nous les partageons seulement avec des prestataires (hébergement, paiements, e-mail) sous contrat.",
+    "Vous pouvez télécharger une copie de vos données, les corriger ou supprimer votre compte dans Paramètres (droits LGPD).",
+    "Les profils enfants restent dans le compte de l'adulte et n'ont pas de fonctions sociales.",
+  ],
+};
+
 function Privacidade() {
   const controller = COMPANY.legalName || COMPANY.name;
   return (
     <LegalLayout
       title="Política de Privacidade"
       intro="Esta política explica, em linguagem simples, quais dados pessoais o NutriConnect trata, para que usamos cada um, com quem compartilhamos e como você exerce os direitos previstos na Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD)."
+      summary={SUMMARY}
     >
       <LegalSection id="controlador" title="1. Quem é o responsável pelos seus dados">
         <p>

@@ -20,6 +20,7 @@ export function LockedFeature({
   perks,
   status,
   pendingSetup = false,
+  preview,
 }: {
   title: string;
   /** Nível em que a função abre (código de PRO_LEVEL_NAMES). */
@@ -29,6 +30,8 @@ export function LockedFeature({
   perks: LockedPerk[];
   status?: ProStatus | null;
   pendingSetup?: boolean;
+  /** Exemplo de como fica a função depois de liberada (esmaecido, marcado como exemplo). */
+  preview?: React.ReactNode;
 }) {
   const tr = useTr();
   const level = tr(PRO_LEVEL_NAMES[levelCode] ?? [levelCode, levelCode, levelCode, levelCode]);
@@ -86,6 +89,15 @@ export function LockedFeature({
             </div>
           ))}
         </div>
+
+        {preview && (
+          <div className="relative mt-5" aria-hidden>
+            <span className="absolute right-2 top-2 z-10 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              {tr(["Exemplo", "Example", "Ejemplo", "Exemple"])}
+            </span>
+            <div className="pointer-events-none select-none opacity-60">{preview}</div>
+          </div>
+        )}
 
         {!pendingSetup && (
           <div className="mt-5 border-t border-border/60 pt-4">

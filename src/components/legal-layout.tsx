@@ -1,5 +1,6 @@
 import { Children, isValidElement, type CSSProperties, type ReactNode } from "react";
 import { SiteHeader } from "@/components/site-chrome";
+import { useI18n } from "@/hooks/use-i18n";
 import { SiteFooter } from "@/components/site-footer";
 import { LEGAL_UPDATED_AT } from "@/lib/legal";
 
@@ -7,12 +8,17 @@ import { LEGAL_UPDATED_AT } from "@/lib/legal";
 export function LegalLayout({
   title,
   intro,
+  summary,
   children,
 }: {
   title: string;
   intro?: string;
+  /** Resumo nos outros idiomas (o texto jurídico vale em português, pela lei brasileira). */
+  summary?: { en: string[]; es: string[]; fr: string[] };
   children: ReactNode;
 }) {
+  const { locale } = useI18n();
+  const lines = locale === "pt-BR" ? undefined : summary?.[locale as "en" | "es" | "fr"];
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
@@ -24,6 +30,19 @@ export function LegalLayout({
           <p className="mt-2 text-xs text-muted-foreground">
             Última atualização: {LEGAL_UPDATED_AT}
           </p>
+          {lines && (
+            <aside
+              lang={locale}
+              className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-4 text-sm text-foreground"
+            >
+              <p className="font-semibold">{SUMMARY_HEAD[locale as "en" | "es" | "fr"]}</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {lines.map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
+            </aside>
+          )}
           {intro && <p className="mt-6 leading-relaxed text-muted-foreground">{intro}</p>}
           <LegalIndex>{children}</LegalIndex>
           <div className="mt-8 space-y-8">{children}</div>
@@ -33,6 +52,12 @@ export function LegalLayout({
     </div>
   );
 }
+
+const SUMMARY_HEAD = {
+  en: "Summary in English. The legally binding text below is in Portuguese (Brazilian law).",
+  es: "Resumen en español. El texto válido, abajo, está en portugués (ley brasileña).",
+  fr: "Résumé en français. Le texte qui fait foi, ci-dessous, est en portugais (droit brésilien).",
+};
 
 type SectionProps = { id?: string; title: string; children: ReactNode };
 
