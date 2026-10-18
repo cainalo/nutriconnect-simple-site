@@ -118,7 +118,7 @@ function PatientEvolutionPage() {
                 <span className="absolute right-3 top-3 z-10 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                   {tr(["Exemplo", "Example", "Ejemplo", "Exemple"])}
                 </span>
-                <div className="pointer-events-none select-none opacity-50 grayscale-[30%]">
+                <div className="pointer-events-none select-none opacity-75 grayscale-[30%]">
                   <EvolutionCharts rows={SAMPLE_ROWS} />
                 </div>
               </div>

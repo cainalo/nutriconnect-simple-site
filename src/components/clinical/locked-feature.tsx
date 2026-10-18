@@ -95,7 +95,7 @@ export function LockedFeature({
             <span className="absolute right-2 top-2 z-10 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               {tr(["Exemplo", "Example", "Ejemplo", "Exemple"])}
             </span>
-            <div className="pointer-events-none select-none opacity-60">{preview}</div>
+            <div className="pointer-events-none select-none opacity-75">{preview}</div>
           </div>
         )}
 
