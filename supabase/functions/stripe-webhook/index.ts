@@ -88,11 +88,20 @@ serve(async (req) => {
       p_program: paid.metadata.program_id,
       p_buyer: paid.metadata.buyer_id,
       p_amount_cents: amount,
-      p_fee_cents: Math.round((amount * feePercent) / 100),
+      // Com desconto de recompensa, a taxa já vem reduzida (fee_cents); sem ele, a conta de sempre.
+      p_fee_cents: paid.metadata.fee_cents
+        ? Number(paid.metadata.fee_cents)
+        : Math.round((amount * feePercent) / 100),
       p_fee_percent: feePercent,
       p_stripe_session: paid.id ?? null,
       p_payment_intent: paid.payment_intent ?? null,
     });
+    if (paid.metadata.redemption_id) {
+      await db.rpc("use_reward_redemption", {
+        p_redemption: paid.metadata.redemption_id,
+        p_ref: `programa:${paid.metadata.program_id}`,
+      });
+    }
     return json({ ok: true, program: true });
   }
 

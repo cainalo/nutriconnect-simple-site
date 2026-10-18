@@ -304,3 +304,20 @@ semana), `respond_friend_challenge`, `my_friend_challenges` (placar), `cheer_fri
 `user_settings.league_visible`; quem tem 0 ponto não aparece para os outros). Avisos
 `desafio_amigo_convite`, `desafio_amigo_aceito`, `desafio_forca` (categoria social; push abre a aba).
 16 testes (515 no total). Harness: `?v=page&p=desafios.index&fx=1&click=Com amigos`.
+
+## X4 — Pontos e recompensas (18/10/2026)
+
+Página `/recompensas` (no menu do site e no cartão da liga) e Admin → **Recompensas**. Migration
+`20261018100000_reward_points.sql` (**ainda não aplicada em produção**): `reward_points` (livro de
+pontos, sem duplicar: `unique (user_id, reason, ref)`), `rewards` (cadastro da equipe) e
+`reward_redemptions` (códigos `NC-XXXXXXXX` com validade). `award_weekly_points()` no pg_cron toda
+segunda 6h UTC: 10 pontos por dia da liga da semana anterior + 50 por desafio com amigos cumprido;
+aviso `pontos_semana` (conquistas). `redeem_reward()` trava o saldo da pessoa, desconta e gera o
+código. Recompensa inicial: 10% de desconto num programa por 600 pontos (a equipe muda no admin).
+**Desconto de programa:** a Edge Function `program-checkout` aceita `redemptionId`; o desconto é
+`min(preço × %, taxa da plataforma)` e sai só da taxa (o profissional recebe o mesmo). O
+`stripe-webhook` grava a taxa real (`fee_cents`) e marca o código como usado. **As duas Edge
+Functions mudaram: publicar de novo junto com a subida.** Limite conhecido: dois pagamentos abertos ao
+mesmo tempo com o mesmo código passam os dois (o segundo não marca o código); perda pequena.
+A migration também refaz `notification_category()` e `export_my_data()` (LGPD: desafios, pontos e
+recompensas). 14 testes (529 no total). Harness: `?v=page&p=recompensas&fx=1`.

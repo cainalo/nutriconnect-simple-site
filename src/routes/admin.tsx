@@ -21,6 +21,7 @@ import { QualitySection } from "@/components/admin/sections-quality";
 import { SiteNinaSection } from "@/components/admin/sections-site-nina";
 import { PresentationSection } from "@/components/admin/sections-presentation";
 import { MarketsSection } from "@/components/admin/sections-markets";
+import { RewardsSection } from "@/components/admin/sections-rewards";
 import { SocialStudioSection } from "@/components/admin/social/studio";
 import {
   AnnouncementsSection,
@@ -195,6 +196,7 @@ function AdminPage() {
           )}
           {section === "financeiro" && <FinanceSection />}
           {section === "mercados" && <MarketsSection />}
+          {section === "recompensas" && <RewardsSection />}
           {section === "ia" && <AiSection />}
           {section === "config" && <SettingsSection />}
           {section === "auditoria" && <AuditSection />}

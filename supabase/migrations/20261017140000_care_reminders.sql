@@ -408,6 +408,7 @@ begin
         when r.type = 'avaliacao_registrada' then '/acompanhamento/evolucao'
         when r.type like 'exame_%' then '/acompanhamento/exames'
         when r.type like 'desafio\_%' then '/desafios?aba=amigos'
+        when r.type = 'pontos_semana' then '/recompensas'
         when r.type = 'diario_comentario' then '/acompanhamento/diario'
         when r.type = 'acompanhamento_pedido' then '/convites'
         when r.type = 'convite_aceito' then '/painel/pacientes'

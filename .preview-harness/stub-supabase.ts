@@ -28,6 +28,25 @@ const FIXTURES: Record<string, unknown> = fx
           { user_id: "f3", name: "Ana Costa", avatar_url: null, status: "aceito", days: 1, is_me: false },
         ] },
       ],
+      reward_balance: 480,
+      reward_week_preview: 120,
+    }
+  : {};
+// Tabelas com dados de exemplo (&fx=1).
+const TABLES: Record<string, unknown> = fx
+  ? {
+      rewards: [
+        { id: "rw1", kind: "desconto_programa", title: "10% de desconto num programa da Loja", description: "Vale para um programa de qualquer profissional. O desconto sai da taxa do NutriConnect: o profissional recebe o mesmo valor.", cost: 600, discount_percent: 10, partner_id: null, stock: null, valid_days: 60, active: true, position: 0, created_at: "2026-10-18T00:00:00Z" },
+        { id: "rw2", kind: "brinde_parceiro", title: "Kit de temperos do Empório", description: "Retire na loja parceira com o código.", cost: 400, discount_percent: null, partner_id: null, stock: 12, valid_days: 30, active: true, position: 1, created_at: "2026-10-18T00:00:00Z" },
+      ],
+      reward_redemptions: [
+        { id: "rd1", user_id: "u1", reward_id: "rw2", cost: 400, code: "NC-7F3A9C21", status: "ativo", used_at: null, used_ref: null, expires_at: "2099-11-17T00:00:00Z", created_at: "2026-10-12T00:00:00Z", rewards: { title: "Kit de temperos do Empório", kind: "brinde_parceiro", discount_percent: null, description: "" } },
+      ],
+      reward_points: [
+        { id: 3, user_id: "u1", delta: -400, reason: "resgate", ref: "rd1", note: null, created_at: "2026-10-12T00:00:00Z" },
+        { id: 2, user_id: "u1", delta: 50, reason: "desafio", ref: "c1", note: null, created_at: "2026-10-12T00:00:00Z" },
+        { id: 1, user_id: "u1", delta: 830, reason: "semana", ref: "2026-10-05", note: null, created_at: "2026-10-12T00:00:00Z" },
+      ],
     }
   : {};
 
@@ -45,6 +64,8 @@ export const supabase: any = new Proxy(function () {}, {
       ? undefined
       : p === "rpc"
         ? (name: string) => make(name in FIXTURES ? FIXTURES[name] : [])
-        : empty[p as any],
+        : p === "from"
+          ? (name: string) => make(name in TABLES ? TABLES[name] : [])
+          : empty[p as any],
   apply: () => empty,
 });

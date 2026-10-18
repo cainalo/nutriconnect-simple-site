@@ -3549,6 +3549,128 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_points: {
+        Row: {
+          created_at: string
+          delta: number
+          id: number
+          note: string | null
+          reason: string
+          ref: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: number
+          note?: string | null
+          reason: string
+          ref: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: number
+          note?: string | null
+          reason?: string
+          ref?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reward_redemptions: {
+        Row: {
+          code: string
+          cost: number
+          created_at: string
+          expires_at: string
+          id: string
+          reward_id: string
+          status: string
+          used_at: string | null
+          used_ref: string | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          cost: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          reward_id: string
+          status?: string
+          used_at?: string | null
+          used_ref?: string | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          cost?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          reward_id?: string
+          status?: string
+          used_at?: string | null
+          used_ref?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rewards: {
+        Row: {
+          active: boolean
+          cost: number
+          created_at: string
+          description: string
+          discount_percent: number | null
+          id: string
+          kind: string
+          partner_id: string | null
+          position: number
+          stock: number | null
+          title: string
+          valid_days: number
+        }
+        Insert: {
+          active?: boolean
+          cost: number
+          created_at?: string
+          description?: string
+          discount_percent?: number | null
+          id?: string
+          kind: string
+          partner_id?: string | null
+          position?: number
+          stock?: number | null
+          title: string
+          valid_days?: number
+        }
+        Update: {
+          active?: boolean
+          cost?: number
+          created_at?: string
+          description?: string
+          discount_percent?: number | null
+          id?: string
+          kind?: string
+          partner_id?: string | null
+          position?: number
+          stock?: number | null
+          title?: string
+          valid_days?: number
+        }
+        Relationships: []
+      }
       pro_programs: {
         Row: {
           active: boolean
@@ -6215,6 +6337,13 @@ export type Database = {
         Returns: undefined
       }
       set_league_visible: { Args: { p_visible: boolean }; Returns: undefined }
+      admin_set_redemption: {
+        Args: { p_action: string; p_redemption: string }
+        Returns: undefined
+      }
+      redeem_reward: { Args: { p_reward: string }; Returns: string }
+      reward_balance: { Args: { p_user?: string }; Returns: number }
+      reward_week_preview: { Args: never; Returns: number }
       export_my_data: { Args: never; Returns: Json }
       admin_set_review_hidden: {
         Args: { p_hidden: boolean; p_review: string }

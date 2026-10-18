@@ -8,6 +8,7 @@ import {
   Brain,
   CalendarDays,
   Flag,
+  Gift,
   FileText,
   History,
   Inbox,
@@ -29,6 +30,7 @@ export type SectionId =
   | "visao"
   | "documentacao"
   | "qualidade"
+  | "recompensas"
   | "usuarios"
   | "verificacoes"
   | "contato"
@@ -76,6 +78,7 @@ export const SECTIONS: SectionDef[] = [
   { id: "site_design", label: "Design e imagens", icon: Palette, group: "Site" },
   { id: "financeiro", label: "Financeiro", icon: Banknote, group: "Negócio" },
   { id: "mercados", label: "Mercados parceiros", icon: ShoppingCart, group: "Negócio" },
+  { id: "recompensas", label: "Recompensas", icon: Gift, group: "Negócio" },
   { id: "ia", label: "Inteligência artificial", icon: Brain, group: "Sistema" },
   { id: "config", label: "Configurações", icon: Settings, group: "Sistema" },
   { id: "auditoria", label: "Auditoria", icon: History, group: "Sistema" },

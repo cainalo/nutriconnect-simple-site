@@ -1705,6 +1705,59 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ PONTOS E RECOMPENSAS (X4)
+  -- C ganha pontos pela semana passada; F é estranho; G é admin.
+  if to_regclass('public.reward_points') is not null then
+    declare
+      prev date := public.current_week_start() - 7;
+      rw uuid;
+      new_code text;
+      red uuid;
+    begin
+      insert into public.water_days (user_id, day, glasses, goal) values
+        (c, prev, 8, 8), (c, prev + 1, 8, 8), (c, prev + 2, 3, 8)
+      on conflict (user_id, day) do update set glasses = excluded.glasses, goal = excluded.goal;
+      perform public.award_weekly_points(prev);
+      r := pg_temp.as_user(c, 'authenticated', 'select public.reward_balance()');
+      res := res || jsonb_build_object('teste', 'semana com 2 dias de água na meta vale 20 pontos', 'ok', (r::integer >= 20), 'obtido', r);
+      perform public.award_weekly_points(prev);
+      res := res || jsonb_build_object('teste', 'creditar a semana de novo NÃO duplica',
+        'ok', (select count(*) from public.reward_points where user_id = c and reason = 'semana' and ref = prev::text) = 1, 'obtido', '');
+      res := res || jsonb_build_object('teste', 'aviso de pontos da semana',
+        'ok', exists (select 1 from public.notifications where user_id = c and type = 'pontos_semana'), 'obtido', '');
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.reward_points where user_id = %L', c));
+      res := res || jsonb_build_object('teste', 'estranho NÃO vê os pontos', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', 'insert into public.reward_points (user_id, delta, reason, ref) values (auth.uid(), 9999, ''ajuste'', ''x'')');
+      res := res || jsonb_build_object('teste', 'NÃO dá para se dar pontos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'insert into public.rewards (kind, title, cost, discount_percent) values (''desconto_programa'', ''Cupom_falso'', 50, 50)');
+      res := res || jsonb_build_object('teste', 'só a administração cria recompensa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+
+      select id into rw from public.rewards where kind = 'desconto_programa' and active order by position limit 1;
+      r := pg_temp.as_user(c, 'authenticated', format('select public.redeem_reward(%L)', rw));
+      res := res || jsonb_build_object('teste', 'sem pontos suficientes NÃO resgata', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      insert into public.reward_points (user_id, delta, reason, ref) values (c, 1000, 'ajuste', 'teste');
+      r := pg_temp.as_user(c, 'authenticated', format('select public.redeem_reward(%L)', rw));
+      res := res || jsonb_build_object('teste', 'resgata a recompensa e recebe um código', 'ok', (r like 'NC-%'), 'obtido', left(r, 90));
+      new_code := r;
+      select id into red from public.reward_redemptions where reward_redemptions.code = new_code;
+      r := pg_temp.as_user(c, 'authenticated', 'select public.reward_balance()');
+      res := res || jsonb_build_object('teste', 'resgate desconta os pontos',
+        'ok', r::integer = public.reward_balance(c) and public.reward_balance(c) < 1000, 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', format('update public.reward_redemptions set status = ''ativo'', expires_at = now() + interval ''10 years'' where id = %L', red));
+      res := res || jsonb_build_object('teste', 'NÃO altera o próprio código',
+        'ok', (select expires_at < now() + interval '1 year' from public.reward_redemptions where id = red), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('select public.use_reward_redemption(%L, ''x'')', red));
+      res := res || jsonb_build_object('teste', 'pessoa NÃO marca o código como usado sozinha', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('select public.admin_set_redemption(%L, ''devolver'')', red));
+      res := res || jsonb_build_object('teste', 'só a administração devolve pontos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', format('select public.admin_set_redemption(%L, ''devolver'')', red));
+      res := res || jsonb_build_object('teste', 'administração devolve os pontos do código',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.reward_points where user_id = c and reason = 'estorno'), 'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', 'código usado pelo webhook só uma vez',
+        'ok', public.use_reward_redemption(red, 'compra') = false, 'obtido', '');
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

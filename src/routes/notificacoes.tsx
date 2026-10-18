@@ -34,6 +34,7 @@ import {
   ChefHat,
   Video,
   Star,
+  Gift,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -177,7 +178,8 @@ function categoryOf(type: string): CategoryId {
   ) {
     return "clinical";
   }
-  if (type === "conquista" || type.startsWith("tema_")) return "achievements";
+  if (type === "conquista" || type === "pontos_semana" || type.startsWith("tema_"))
+    return "achievements";
   if (
     type === "conteudo_oculto" ||
     type === "conteudo_liberado" ||
@@ -627,6 +629,17 @@ function describe(
         ),
         detail: str(data.title),
         go: { to: "/tema-da-semana" },
+      };
+    case "pontos_semana":
+      return {
+        icon: Gift,
+        text: tr([
+          "Seus pontos da semana chegaram: +{n}",
+          "Your points for the week are in: +{n}",
+          "Llegaron tus puntos de la semana: +{n}",
+          "Vos points de la semaine sont arrivés : +{n}",
+        ]).replace("{n}", String(data.points ?? "")),
+        go: { to: "/recompensas" },
       };
     case "conquista":
       return {

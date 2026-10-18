@@ -63,6 +63,28 @@ export const CATALOG_B: CatalogItem[] = [
     ],
   },
   {
+    id: "recompensas",
+    kind: "funcao",
+    area: "social",
+    title: "Pontos e recompensas",
+    route: "/recompensas",
+    audience: "Quem tem conta",
+    summary:
+      "Pontos pela semana cuidando de si (10 por dia da liga, +50 por desafio com amigos cumprido), trocados por recompensas.",
+    features: [
+      "Saldo, prévia da semana e histórico de pontos",
+      "Recompensas cadastradas pela equipe: desconto num programa da Loja ou brinde de parceiro",
+      "Troca com confirmação e código NC-XXXXXXXX com validade",
+      "Cupom aparece na compra do programa; o desconto sai da taxa da plataforma",
+      "Admin → Recompensas: criar, editar, ver códigos, marcar brinde entregue, devolver pontos",
+    ],
+    howTo: [
+      "Abra Pontos e recompensas no menu",
+      "Toque em Trocar numa recompensa e confirme",
+      "Use o código na compra do programa ou com o parceiro",
+    ],
+  },
+  {
     id: "desafio",
     kind: "funcionalidade",
     area: "trilha",

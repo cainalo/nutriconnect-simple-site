@@ -1,16 +1,19 @@
 // Cria o Checkout (pagamento único) de um programa da loja de um profissional. O valor vai para a
 // conta Stripe do profissional (Connect) e a plataforma retém a parte do nível dele — a mesma taxa
 // das assinaturas de membros (pro_membership_fee_percent). A compra é gravada pelo stripe-webhook.
-// Entrada: { programId, origin }. Saída: { clientSecret, publishableKey }.
+// Desconto de recompensa (X4): com `redemptionId`, um código ativo de "desconto_programa" da pessoa
+// tira até a taxa inteira da plataforma — o profissional recebe sempre a parte dele.
+// Entrada: { programId, origin, redemptionId? }. Saída: { clientSecret, publishableKey }.
 import { HttpError, env, json, serve } from "../_shared/http.ts";
 import { createCheckoutSession } from "../_shared/stripe.ts";
 import { adminClient, requireUser } from "../_shared/supabase.ts";
 
 serve(async (req) => {
   const user = await requireUser(req);
-  const { programId, origin } = (await req.json().catch(() => ({}))) as {
+  const { programId, origin, redemptionId } = (await req.json().catch(() => ({}))) as {
     programId?: string;
     origin?: string;
+    redemptionId?: string;
   };
   if (!programId || !/^[0-9a-f-]{36}$/i.test(programId)) throw new HttpError(400, "Programa não informado.");
   const appUrl = Deno.env.get("APP_URL") ?? (origin && /^https?:\/\//.test(origin) ? origin : "");
@@ -40,7 +43,33 @@ serve(async (req) => {
   const { data: feeRaw } = await db.rpc("pro_membership_fee_percent", { p_pro: pro });
   const feePercent = Number(feeRaw ?? 20);
   const price = Number(program.price_cents);
-  const feeCents = Math.round((price * feePercent) / 100);
+  const fullFeeCents = Math.round((price * feePercent) / 100);
+
+  // Código de desconto (opcional): só da própria pessoa, ativo, dentro da validade.
+  let discountCents = 0;
+  if (redemptionId) {
+    if (!/^[0-9a-f-]{36}$/i.test(redemptionId)) throw new HttpError(400, "Código inválido.");
+    const { data: red } = await db
+      .from("reward_redemptions")
+      .select("id, user_id, status, expires_at, rewards(kind, discount_percent)")
+      .eq("id", redemptionId)
+      .maybeSingle();
+    const reward = (red?.rewards ?? null) as { kind?: string; discount_percent?: number } | null;
+    if (
+      !red ||
+      red.user_id !== user.id ||
+      red.status !== "ativo" ||
+      new Date(red.expires_at as string).getTime() < Date.now() ||
+      reward?.kind !== "desconto_programa"
+    ) {
+      throw new HttpError(409, "Este código não vale mais.");
+    }
+    discountCents = Math.min(
+      Math.round((price * Number(reward.discount_percent ?? 0)) / 100),
+      fullFeeCents,
+    );
+  }
+  const feeCents = fullFeeCents - discountCents;
   const { data: proProfile } = await db.from("profiles").select("name").eq("id", pro).single();
   const meta = {
     kind: "program",
@@ -48,6 +77,8 @@ serve(async (req) => {
     buyer_id: user.id,
     professional_id: pro,
     fee_percent: String(feePercent),
+    fee_cents: String(feeCents),
+    ...(discountCents > 0 ? { redemption_id: redemptionId!, discount_cents: String(discountCents) } : {}),
   };
 
   const session = await createCheckoutSession({
@@ -67,7 +98,7 @@ serve(async (req) => {
         quantity: 1,
         price_data: {
           currency: "brl",
-          unit_amount: price,
+          unit_amount: price - discountCents,
           product_data: { name: `${program.title} — ${proProfile?.name ?? "profissional"}` },
         },
       },

@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Check, Crown, HandHeart, Loader2, Plus, Trophy, Users, X } from "lucide-react";
+import { Check, Crown, Gift, HandHeart, Loader2, Plus, Trophy, Users, X } from "lucide-react";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { useTr } from "@/components/settings-ui";
 import { Switch } from "@/components/ui/switch";
@@ -327,6 +327,18 @@ function MyBreakdown({ row }: { row: LeagueRow }) {
           </div>
         ))}
       </div>
+      <Link
+        to="/recompensas"
+        className="mt-3 flex items-center justify-center gap-1.5 rounded-2xl bg-amber-500/10 px-3 py-2.5 text-xs font-semibold text-foreground transition hover:bg-amber-500/20"
+      >
+        <Gift className="h-4 w-4 text-amber-500" />
+        {tr([
+          "Cada dia vale 10 pontos para trocar por recompensas",
+          "Each day is worth 10 points to trade for rewards",
+          "Cada día vale 10 puntos para cambiar por recompensas",
+          "Chaque jour vaut 10 points à échanger contre des récompenses",
+        ])}
+      </Link>
     </div>
   );
 }

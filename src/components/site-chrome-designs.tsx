@@ -521,6 +521,15 @@ const PALETTE_PAGES: { to: string; label: [string, string, string, string] }[] =
   },
   { to: "/programas", label: ["Programas", "Programs", "Programas", "Programmes"] },
   {
+    to: "/recompensas",
+    label: [
+      "Pontos e recompensas",
+      "Points and rewards",
+      "Puntos y recompensas",
+      "Points et récompenses",
+    ],
+  },
+  {
     to: "/acompanhamento",
     label: ["Meu acompanhamento", "My care", "Mi seguimiento", "Mon suivi"],
   },
