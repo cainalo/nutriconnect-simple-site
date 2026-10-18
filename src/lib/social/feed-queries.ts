@@ -196,13 +196,24 @@ export function useDeletePost() {
 export function useAddComment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ postId, text }: { postId: string; text: string }) =>
-      feed.addComment(postId, text),
+    mutationFn: ({ postId, text, replyTo }: { postId: string; text: string; replyTo?: string }) =>
+      feed.addComment(postId, text, replyTo),
     onSuccess: (_result, { postId }) => {
       void invalidateLists(qc);
       void refreshPosts(qc, [postId]);
+      void qc.invalidateQueries({ queryKey: ["comment-replies", postId] });
     },
     onError: showError,
+  });
+}
+
+/** Fios de resposta dos comentários de um post (só quando a conversa está aberta). */
+export function useCommentReplies(postId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["comment-replies", postId],
+    queryFn: () => feed.listCommentReplies(postId),
+    enabled,
+    staleTime: 30_000,
   });
 }
 

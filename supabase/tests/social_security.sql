@@ -1758,6 +1758,36 @@ begin
     end;
   end if;
 
+  -- Respostas em fio nos comentários (reply_to, um nível).
+  if to_regclass('public.comments') is not null
+     and exists (select 1 from information_schema.columns
+                  where table_schema = 'public' and table_name = 'comments' and column_name = 'reply_to') then
+    declare
+      cm_c uuid;
+      cm_a uuid;
+    begin
+      select id into cm_c from public.comments where post_id = post_f and author_id = c limit 1;
+      -- Aprovações da IA (o gatilho exige uma para cada comentário).
+      insert into public.content_approvals (user_id, kind, post_id, body) values
+        (a, 'comment', post_f, 'resposta da Ana'), (a, 'comment', post_p, 'fora'),
+        (b, 'comment', post_f, 'resposta da resposta');
+      r := pg_temp.as_user(a, 'authenticated',
+        format('insert into public.comments (post_id, author_id, body, reply_to) values (%L, %L, ''resposta da Ana'', %L)', post_f, a, cm_c));
+      res := res || jsonb_build_object('teste', 'responde a um comentário do post', 'ok', (r = 'OK:1'), 'obtido', left(r, 100));
+      select id into cm_a from public.comments where post_id = post_f and author_id = a and reply_to = cm_c limit 1;
+      res := res || jsonb_build_object('teste', 'quem foi respondido recebe aviso',
+        'ok', exists (select 1 from public.notifications where user_id = c and type = 'comentario' and actor_id = a and (data ->> 'reply')::boolean),
+        'obtido', '');
+      r := pg_temp.as_user(a, 'authenticated',
+        format('insert into public.comments (post_id, author_id, body, reply_to) values (%L, %L, ''fora'', %L)', post_p, a, cm_c));
+      res := res || jsonb_build_object('teste', 'NÃO responde a comentário de outro post', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
+      r := pg_temp.as_user(b, 'authenticated',
+        format('insert into public.comments (post_id, author_id, body, reply_to) values (%L, %L, ''resposta da resposta'', %L)', post_f, b, cm_a));
+      res := res || jsonb_build_object('teste', 'resposta a resposta fica no mesmo fio',
+        'ok', exists (select 1 from public.comments where author_id = b and post_id = post_f and reply_to = cm_c), 'obtido', left(r, 100));
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

@@ -1241,6 +1241,7 @@ export type Database = {
           id: string
           pending_review: boolean
           post_id: string
+          reply_to: string | null
         }
         Insert: {
           author_id: string
@@ -1250,6 +1251,7 @@ export type Database = {
           id?: string
           pending_review?: boolean
           post_id: string
+          reply_to?: string | null
         }
         Update: {
           author_id?: string
@@ -1259,6 +1261,7 @@ export type Database = {
           id?: string
           pending_review?: boolean
           post_id?: string
+          reply_to?: string | null
         }
         Relationships: [
           {

@@ -257,7 +257,11 @@ function CardDemo() {
 // v=post → um PostCard real (fileira de ações: conversa, apoiar, compartilhar…).
 import { PostCard } from "@/components/community-cards";
 function PostDemo() {
-  const post = { id: "p1", type: "experiencia", title: "Arroz de forno com legumes", text: "Uma receita simples para o dia a dia.", authorName: "Maria Silva", authorId: "u2", createdAt: new Date().toISOString(), comments: [], supports: ["a", "b"], likes: [], preparedBy: [], pinned: false, tags: [] };
+  const post = { id: "p1", type: "experiencia", title: "Arroz de forno com legumes", text: "Uma receita simples para o dia a dia.", authorName: "Maria Silva", authorId: "u2", createdAt: new Date().toISOString(), comments: q.get("comments") ? [
+    { id: "c1", postId: "p1", authorId: "u3", authorName: "Juliana Prado", text: "Fiz ontem e ficou ótimo! Troquei a abobrinha por berinjela.", createdAt: new Date().toISOString() },
+    { id: "c2", postId: "p1", authorId: "u1", authorName: "Maria Silva", text: "Que bom! Vou testar com berinjela também.", createdAt: new Date().toISOString(), replyTo: "c1" },
+    { id: "c3", postId: "p1", authorId: "u4", authorName: "Marcos Lima", text: "Quanto tempo de forno?", createdAt: new Date().toISOString() },
+  ] : [], supports: ["a", "b"], likes: [], preparedBy: [], pinned: false, tags: [] };
   return <RouterApp><div className="mx-auto max-w-md p-4"><PostCard post={post as any} /></div></RouterApp>;
 }
 // v=docs / v=quality → Admin: Documentação e Qualidade, sozinhos.

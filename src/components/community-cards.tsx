@@ -18,8 +18,11 @@ import {
   BookmarkCheck,
   Flag,
   Link as LinkIcon,
+  UserRound,
+  Reply,
 } from "lucide-react";
-import { Fragment, useState, type ReactNode } from "react";
+import { ConfirmAction } from "@/components/confirm-action";
+import { Fragment, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { playSound } from "@/lib/sounds";
 import { VerifiedBadge } from "@/components/person-chip";
@@ -44,11 +47,13 @@ import { formatWeekStart, localizeTheme, type RemoteTheme } from "@/lib/social/t
 import { useJoinChallenge, useLeaveChallenge } from "@/lib/social/challenges-queries";
 import {
   useAddComment,
+  useCommentReplies,
   useDeleteComment,
   useDeletePost,
   useToggleReaction,
 } from "@/lib/social/feed-queries";
 import {
+  type Comment,
   type Post,
   type PostBlock,
   normalizeBlockOrder,
@@ -99,6 +104,10 @@ export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyName, setReplyName] = useState("");
+  const commentInput = useRef<HTMLInputElement>(null);
   const [reporting, setReporting] = useState(false);
   const toggleSaved = useToggleSaved();
 
@@ -106,6 +115,7 @@ export function PostCard({ post }: PostCardProps) {
   const addRemoteComment = useAddComment();
   const deleteRemoteComment = useDeleteComment();
   const deleteRemotePost = useDeletePost();
+  const commentReplies = useCommentReplies(post.id, showComments && !!user);
 
   const currentUserId = user?.id || "guest";
   const isOwnPost = !!user && post.authorId === user.id;
@@ -155,8 +165,13 @@ export function PostCard({ post }: PostCardProps) {
     if (!trimmed) return;
 
     try {
-      await addRemoteComment.mutateAsync({ postId: post.id, text: trimmed });
+      await addRemoteComment.mutateAsync({
+        postId: post.id,
+        text: trimmed,
+        replyTo: replyTo ?? undefined,
+      });
       setCommentText("");
+      setReplyTo(null);
       toast.success(t("postcard.commentPublished"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("postcard.commentError"));
@@ -235,30 +250,12 @@ export function PostCard({ post }: PostCardProps) {
             {t("postcard.fromCommunity")} <span className="text-accent">{community.name}</span>
           </Link>
         )}
-        {confirmDelete ? (
-          <span className="flex items-center gap-1.5 text-[11px]">
-            <button
-              type="button"
-              disabled={deleteRemotePost.isPending}
-              onClick={() => deleteRemotePost.mutate(post.id)}
-              className="rounded-full bg-destructive px-2.5 py-1 font-semibold text-white disabled:opacity-60 cursor-pointer"
-            >
-              {t("cf.removePost")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmDelete(false)}
-              className="rounded-full border border-border px-2.5 py-1 font-semibold text-foreground cursor-pointer"
-            >
-              {t("common.cancel")}
-            </button>
-          </span>
-        ) : (
+        {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={tr(["Mais opções", "More options", "Más opciones", "Plus d'options"])}
               title={tr(["Mais opções", "More options", "Más opciones", "Plus d'options"])}
-              className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-muted-foreground outline-none transition hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="grid h-10 w-10 cursor-pointer place-items-center rounded-full text-muted-foreground outline-none transition hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
@@ -290,6 +287,19 @@ export function PostCard({ post }: PostCardProps) {
                 <LinkIcon className="h-4 w-4" />
                 {tr(["Copiar link", "Copy link", "Copiar enlace", "Copier le lien"])}
               </DropdownMenuItem>
+              {!isOwnPost && (
+                <DropdownMenuItem asChild>
+                  <Link to="/perfil/$userId" params={{ userId: post.authorId }}>
+                    <UserRound className="h-4 w-4" />
+                    {tr([
+                      "Ver perfil do autor",
+                      "See author's profile",
+                      "Ver perfil del autor",
+                      "Voir le profil de l'auteur",
+                    ])}
+                  </Link>
+                </DropdownMenuItem>
+              )}
               {(isOwnPost || (user && !isOwnPost)) && <DropdownMenuSeparator />}
               {isOwnPost && (
                 <DropdownMenuItem
@@ -311,8 +321,26 @@ export function PostCard({ post }: PostCardProps) {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        }
       </div>
+      <ConfirmAction
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={tr([
+          "Apagar este post?",
+          "Delete this post?",
+          "¿Borrar este post?",
+          "Supprimer ce post ?",
+        ])}
+        description={tr([
+          "O post, os comentários e as reações somem para todos. Não dá para desfazer.",
+          "The post, comments and reactions disappear for everyone. This can't be undone.",
+          "El post, los comentarios y las reacciones desaparecen para todos. No se puede deshacer.",
+          "Le post, les commentaires et les réactions disparaissent pour tous. Action définitive.",
+        ])}
+        confirmLabel={t("cf.removePost")}
+        onConfirm={() => deleteRemotePost.mutate(post.id)}
+      />
       <ReportDialog
         targetType="post"
         targetId={post.id}
@@ -322,8 +350,99 @@ export function PostCard({ post }: PostCardProps) {
     </div>
   );
 
+  // Fios: respostas ficam embaixo do comentário de origem (um nível).
+  const replyMap = commentReplies.data ?? {};
+  const allComments = post.comments ?? [];
+  const parentOf = (c: Comment) => c.replyTo ?? replyMap[c.id];
+  const rootComments = allComments.filter(
+    (c) => !parentOf(c) || !allComments.some((x) => x.id === parentOf(c)),
+  );
+  const repliesOf = (id: string) => allComments.filter((c) => parentOf(c) === id);
+
+  const renderComment = (c: Comment, isReply = false) => {
+    const avatar = getAvatarSrc(c.authorId, c.authorAvatar);
+    const canDelete = !!user && (c.authorId === user.id || isOwnPost);
+    return (
+      <div
+        key={c.id}
+        className={`flex gap-2.5 rounded-2xl p-3 text-sm ${isReply ? "bg-secondary/25" : "bg-secondary/40"}`}
+      >
+        <Link
+          to="/perfil/$userId"
+          params={{ userId: c.authorId }}
+          onClick={() => setShowComments(false)}
+          className="avatar-shape grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-primary-soft text-[11px] font-bold text-primary transition hover:opacity-80"
+          aria-label={c.authorName}
+        >
+          {avatar ? (
+            <img src={avatar} alt="" className="h-full w-full object-cover" />
+          ) : (
+            initials(c.authorName)
+          )}
+        </Link>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-2">
+            <Link
+              to="/perfil/$userId"
+              params={{ userId: c.authorId }}
+              onClick={() => setShowComments(false)}
+              className="truncate text-xs font-bold text-foreground hover:underline"
+            >
+              {c.authorName}
+            </Link>
+            <span className="shrink-0 text-[10px] text-muted-foreground">
+              {formatDate(c.createdAt)}
+            </span>
+          </div>
+          <p className="mt-0.5 text-left text-xs leading-relaxed text-foreground/90">{c.text}</p>
+          <div className="-ml-2 mt-1 flex flex-wrap items-center">
+            {user && (
+              <button
+                type="button"
+                onClick={() => {
+                  setReplyTo(isReply ? (parentOf(c) ?? c.id) : c.id);
+                  setReplyName(c.authorName);
+                  commentInput.current?.focus();
+                }}
+                className="inline-flex min-h-10 items-center gap-1 rounded-full px-2 text-[11px] font-semibold text-muted-foreground transition hover:text-foreground"
+              >
+                <Reply className="h-3.5 w-3.5" aria-hidden />
+                {tr(["Responder", "Reply", "Responder", "Répondre"])}
+              </button>
+            )}
+            {canDelete && (
+              <button
+                type="button"
+                disabled={deleteRemoteComment.isPending}
+                onClick={() => setCommentToDelete(c.id)}
+                aria-label={t("cf.removeComment")}
+                title={t("cf.removeComment")}
+                className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-destructive cursor-pointer"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+            {user && c.authorId !== user.id && (
+              <ReportButton
+                targetType="comment"
+                targetId={c.id}
+                className="min-h-10 rounded-full px-2"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderCommentsDialog = () => (
-    <Dialog open={showComments} onOpenChange={setShowComments}>
+    <Dialog
+      open={showComments}
+      onOpenChange={(o) => {
+        setShowComments(o);
+        if (!o) setReplyTo(null);
+      }}
+    >
       <DialogContent className="flex max-h-[85dvh] w-[calc(100vw-2rem)] max-w-lg flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:rounded-2xl">
         <DialogHeader className="shrink-0 space-y-1 border-b border-border/60 px-5 py-4 pr-12 text-left">
           <DialogTitle className="text-base font-bold font-display">
@@ -336,32 +455,14 @@ export function PostCard({ post }: PostCardProps) {
         </DialogHeader>
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
-          {post.comments && post.comments.length > 0 ? (
-            post.comments.map((c) => (
-              <div key={c.id} className="rounded-2xl bg-secondary/40 p-3.5 text-sm">
-                <div className="mb-1.5 flex items-center justify-between">
-                  <span className="flex items-center gap-1 text-xs font-bold text-foreground">
-                    {c.authorName}
-                  </span>
-                  <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                    {formatDate(c.createdAt)}
-                    {user && (c.authorId === user.id || isOwnPost) && (
-                      <button
-                        type="button"
-                        disabled={deleteRemoteComment.isPending}
-                        onClick={() => deleteRemoteComment.mutate(c.id)}
-                        aria-label={t("cf.removeComment")}
-                        title={t("cf.removeComment")}
-                        className="text-muted-foreground transition hover:text-destructive cursor-pointer"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                  </span>
-                </div>
-                <p className="text-xs leading-relaxed text-foreground/90">{c.text}</p>
-                {user && c.authorId !== user.id && (
-                  <ReportButton targetType="comment" targetId={c.id} className="mt-2" />
+          {rootComments.length > 0 ? (
+            rootComments.map((c) => (
+              <div key={c.id} className="space-y-2">
+                {renderComment(c)}
+                {repliesOf(c.id).length > 0 && (
+                  <div className="ml-6 space-y-2 border-l-2 border-border/60 pl-3">
+                    {repliesOf(c.id).map((r) => renderComment(r, true))}
+                  </div>
                 )}
               </div>
             ))
@@ -372,26 +473,63 @@ export function PostCard({ post }: PostCardProps) {
           )}
         </div>
 
-        <form
-          onSubmit={handleAddComment}
-          className="flex shrink-0 gap-2 border-t border-border/60 px-5 py-3"
-        >
-          <input
-            type="text"
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            placeholder={t("postcard.commentPlaceholder")}
-            className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-sm outline-none transition-colors focus:border-accent"
-          />
-          <button
-            type="submit"
-            disabled={!commentText.trim()}
-            aria-label={t("postcard.sendComment")}
-            className="rounded-full bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-sm transition hover:bg-accent/90 disabled:opacity-50"
-          >
-            <Send className="h-4 w-4" />
-          </button>
+        <form onSubmit={handleAddComment} className="shrink-0 border-t border-border/60 px-5 py-3">
+          {replyTo && (
+            <p className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span className="flex min-w-0 items-center gap-1">
+                <Reply className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <span className="truncate">
+                  {tr(["Respondendo a", "Replying to", "Respondiendo a", "Réponse à"])}{" "}
+                  <strong className="text-foreground">{replyName}</strong>
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setReplyTo(null)}
+                className="min-h-10 shrink-0 rounded-full px-2 font-semibold hover:text-foreground"
+              >
+                {tr(["Cancelar", "Cancel", "Cancelar", "Annuler"])}
+              </button>
+            </p>
+          )}
+          <div className="flex gap-2">
+            <input
+              ref={commentInput}
+              type="text"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder={t("postcard.commentPlaceholder")}
+              aria-label={t("postcard.commentPlaceholder")}
+              className="min-w-0 flex-1 rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-sm outline-none transition-colors focus:border-accent"
+            />
+            <button
+              type="submit"
+              disabled={!commentText.trim()}
+              aria-label={t("postcard.sendComment")}
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground shadow-sm transition hover:bg-accent/90 disabled:opacity-50"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
         </form>
+        <ConfirmAction
+          open={!!commentToDelete}
+          onOpenChange={(o) => !o && setCommentToDelete(null)}
+          title={tr([
+            "Apagar este comentário?",
+            "Delete this comment?",
+            "¿Borrar este comentario?",
+            "Supprimer ce commentaire ?",
+          ])}
+          description={tr([
+            "Ele some da conversa para todos, com as respostas. Não dá para desfazer.",
+            "It disappears from the conversation for everyone, with its replies. This can't be undone.",
+            "Desaparece de la conversación para todos, con sus respuestas. No se puede deshacer.",
+            "Il disparaît de la conversation pour tous, avec ses réponses. Action définitive.",
+          ])}
+          confirmLabel={t("cf.removeComment")}
+          onConfirm={() => commentToDelete && deleteRemoteComment.mutate(commentToDelete)}
+        />
       </DialogContent>
     </Dialog>
   );
@@ -415,7 +553,7 @@ export function PostCard({ post }: PostCardProps) {
           aria-label={opts.label}
           aria-pressed={opts.active}
           title={opts.title}
-          className={`grid h-8 w-8 place-items-center rounded-full transition ${
+          className={`grid h-10 w-10 place-items-center rounded-full transition ${
             opts.active
               ? opts.activeClass
               : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -505,9 +643,7 @@ export function PostCard({ post }: PostCardProps) {
             </h3>
           ),
           text: (
-            <p className="text-sm text-foreground/85 leading-relaxed text-justify hyphens-auto mb-5">
-              {post.text}
-            </p>
+            <p className="text-sm text-foreground/85 leading-relaxed text-left mb-5">{post.text}</p>
           ),
           recipe: post.recipeData && (
             <div className="rounded-2xl border border-border bg-secondary/30 p-5 mb-2">
@@ -586,7 +722,7 @@ export function PostCard({ post }: PostCardProps) {
             </h3>
           ),
           text: (
-            <p className="mb-4 text-sm text-foreground/90 leading-relaxed text-justify hyphens-auto whitespace-pre-line">
+            <p className="mb-4 text-sm text-foreground/90 leading-relaxed text-left whitespace-pre-line">
               {post.text}
             </p>
           ),
@@ -622,9 +758,7 @@ export function PostCard({ post }: PostCardProps) {
             </h3>
           ),
           text: post.title && (
-            <p className="mb-4 text-sm text-foreground/85 leading-relaxed text-justify hyphens-auto">
-              {post.text}
-            </p>
+            <p className="mb-4 text-sm text-foreground/85 leading-relaxed text-left">{post.text}</p>
           ),
         })}
       </PostCardFrame>
@@ -649,7 +783,7 @@ export function PostCard({ post }: PostCardProps) {
           </h3>
         ),
         text: (
-          <p className="mb-4 text-sm text-foreground/90 leading-relaxed text-justify hyphens-auto whitespace-pre-line">
+          <p className="mb-4 text-sm text-foreground/90 leading-relaxed text-left whitespace-pre-line">
             {post.text}
           </p>
         ),

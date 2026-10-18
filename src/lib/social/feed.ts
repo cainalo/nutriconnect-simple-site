@@ -76,6 +76,8 @@ interface CommentJson {
   id: string;
   author_id: string;
   author_name: string;
+  author_avatar?: string | null;
+  reply_to?: string | null;
   body: string;
   created_at: string;
 }
@@ -87,6 +89,8 @@ function toComments(postId: string, raw: Json): Comment[] {
     postId,
     authorId: c.author_id,
     authorName: c.author_name,
+    authorAvatar: c.author_avatar ?? undefined,
+    replyTo: c.reply_to ?? undefined,
     text: c.body,
     createdAt: c.created_at,
   }));
@@ -337,16 +341,32 @@ export async function setReaction(postId: string, kind: ReactionKind, on: boolea
   }
 }
 
-export async function addComment(postId: string, text: string): Promise<void> {
+export async function addComment(postId: string, text: string, replyTo?: string): Promise<void> {
   const me = await currentUserId();
   const body = text.trim();
   if (!body) throw new Error("Escreva um comentário.");
   // A IA confere o comentário antes de ele ser salvo.
   const approved = await checkContent({ kind: "comment", postId, body });
-  const { error } = await supabase
-    .from("comments")
-    .insert({ post_id: postId, author_id: me, body: approved.body });
+  const { error } = await supabase.from("comments").insert({
+    post_id: postId,
+    author_id: me,
+    body: approved.body,
+    ...(replyTo ? { reply_to: replyTo } : {}),
+  });
   fail(error);
+}
+
+/** A que comentário cada resposta do post responde (id → reply_to), para montar os fios. */
+export async function listCommentReplies(postId: string): Promise<Record<string, string>> {
+  const { data, error } = await supabase
+    .from("comments")
+    .select("id, reply_to")
+    .eq("post_id", postId)
+    .not("reply_to", "is", null);
+  fail(error);
+  const map: Record<string, string> = {};
+  for (const r of data ?? []) if (r.reply_to) map[r.id] = r.reply_to;
+  return map;
 }
 
 export async function deleteComment(commentId: string): Promise<void> {
