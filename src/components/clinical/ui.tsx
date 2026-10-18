@@ -294,31 +294,57 @@ export function Tabs<T extends string>({
   value,
   onChange,
   items,
+  label,
+  className,
 }: {
   value: T;
   onChange: (v: T) => void;
   items: { value: T; label: string; count?: number }[];
+  /** Nome do grupo de abas para leitor de tela. */
+  label?: string;
+  className?: string;
 }) {
+  // Padrão de abas acessível: setas esquerda/direita, Home e End trocam de aba.
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const i = items.findIndex((it) => it.value === value);
+    let next = -1;
+    if (e.key === "ArrowRight") next = (i + 1) % items.length;
+    else if (e.key === "ArrowLeft") next = (i - 1 + items.length) % items.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = items.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    onChange(items[next].value);
+    const tabs = e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    tabs[next]?.focus();
+  };
   return (
-    <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scroll-smooth">
+    <div
+      role="tablist"
+      aria-label={label}
+      onKeyDown={onKeyDown}
+      className={cn("mb-6 flex gap-1.5 overflow-x-auto pb-2 scroll-smooth sm:gap-2", className)}
+    >
       {items.map((item) => (
         <button
           key={item.value}
           type="button"
+          role="tab"
           onClick={() => onChange(item.value)}
-          aria-pressed={value === item.value}
+          aria-selected={value === item.value}
+          tabIndex={value === item.value ? 0 : -1}
           className={cn(
-            "relative shrink-0 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300",
+            "relative min-h-10 shrink-0 rounded-full px-3.5 py-2 text-sm font-bold transition-all duration-300 sm:px-5 sm:py-2.5",
             value === item.value
-              ? "bg-accent text-accent-foreground shadow-md scale-105"
-              : "bg-secondary/80 text-muted-foreground hover:bg-secondary hover:text-foreground hover:scale-[1.02]",
+              ? "bg-accent text-accent-foreground shadow-md"
+              : "bg-secondary/80 text-muted-foreground hover:bg-secondary hover:text-foreground",
           )}
         >
           {item.label}
           {item.count !== undefined && (
             <span
               className={cn(
-                "ml-2 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-black",
+                "ml-1.5 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-black sm:ml-2",
                 value === item.value
                   ? "bg-accent-foreground/20 text-accent-foreground"
                   : "bg-muted text-muted-foreground",

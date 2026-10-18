@@ -2,11 +2,13 @@ import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   CalendarClock,
+  CalendarPlus,
   CheckCircle2,
   CreditCard,
   ExternalLink,
   FileText,
   MapPin,
+  MessageCircle,
   UserX,
   Video,
   XCircle,
@@ -29,6 +31,7 @@ import { useClinicalI18n } from "@/lib/clinical/i18n";
 import { roomState } from "@/lib/clinical/video-call";
 import { methodLabel } from "@/lib/clinical/labels";
 import { canConfirmAttendance, confirmAttendance } from "@/lib/clinical/reminders";
+import { appointmentIcs, downloadIcs } from "@/lib/clinical/ics";
 import { useTr } from "@/components/settings-ui";
 import { SlotPicker } from "./slot-picker";
 import {
@@ -102,6 +105,30 @@ export function AppointmentCard({
   const isFuture = new Date(appt.ends_at).getTime() > Date.now();
   const isActive = ACTIVE.includes(appt.status);
   const start = new Date(appt.starts_at);
+
+  // Salva a consulta na agenda do celular/computador (arquivo .ics).
+  const saveToCalendar = () => {
+    const who = person?.name ?? "";
+    const title =
+      role === "patient"
+        ? tr([
+            `Consulta com ${who}`,
+            `Appointment with ${who}`,
+            `Consulta con ${who}`,
+            `Rendez-vous avec ${who}`,
+          ])
+        : tr([
+            `Consulta: ${who}`,
+            `Appointment: ${who}`,
+            `Consulta: ${who}`,
+            `Rendez-vous : ${who}`,
+          ]);
+    const desc = `${t(`modality.${appt.modality}`)} · NutriConnect`;
+    downloadIcs(
+      appointmentIcs(appt, title.trim(), desc),
+      `consulta-${start.toISOString().slice(0, 10)}.ics`,
+    );
+  };
 
   return (
     <article
@@ -238,6 +265,35 @@ export function AppointmentCard({
                 <XCircle className="h-4 w-4" /> {t("common.cancel")}
               </button>
             </>
+          )}
+
+          {isActive && isFuture && (
+            <button type="button" className={buttonGhost} onClick={saveToCalendar}>
+              <CalendarPlus className="h-4 w-4" />
+              {tr([
+                "Salvar na agenda",
+                "Add to calendar",
+                "Guardar en la agenda",
+                "Ajouter à l’agenda",
+              ])}
+            </button>
+          )}
+
+          {role === "professional" && (
+            <Link
+              to="/painel/mensagens"
+              search={{ com: appt.patient_id }}
+              className={buttonGhost}
+              aria-label={tr([
+                `Mensagem para ${person?.name ?? "paciente"}`,
+                `Message ${person?.name ?? "patient"}`,
+                `Mensaje a ${person?.name ?? "paciente"}`,
+                `Message à ${person?.name ?? "patient"}`,
+              ])}
+            >
+              <MessageCircle className="h-4 w-4" />
+              {tr(["Mensagem", "Message", "Mensaje", "Message"])}
+            </Link>
           )}
 
           {role === "professional" && (
