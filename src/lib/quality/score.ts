@@ -86,7 +86,7 @@ export function itemHistory(id: string, rounds: QualityRound[] = ROUNDS) {
 /** Cor da nota (0–10): vermelho, âmbar, verde. */
 export function scoreTone(score: number | null) {
   if (score === null) return "bg-secondary text-muted-foreground";
-  if (score >= 9) return "bg-emerald-600 text-white";
+  if (score >= 9) return "bg-emerald-700 text-white";
   if (score >= 7) return "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300";
   if (score >= 5) return "bg-amber-400/25 text-amber-800 dark:text-amber-300";
   return "bg-red-500/20 text-red-700 dark:text-red-300";

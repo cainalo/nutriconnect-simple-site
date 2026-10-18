@@ -253,7 +253,7 @@ function DesafiosIndexPage() {
                   className={`flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
                     badge.achieved
                       ? "border-accent/40 bg-accent-soft/40"
-                      : "border-border bg-secondary/30 opacity-60"
+                      : "border-dashed border-border bg-secondary/30 text-muted-foreground"
                   }`}
                 >
                   <EmojiIcon

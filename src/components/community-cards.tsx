@@ -484,7 +484,7 @@ export function PostCard({ post }: PostCardProps) {
       <PostCardFrame type={post.type} className={frameClass} footer={footer(false, true)}>
         <div
           className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider"
-          style={{ color: "var(--pt)" }}
+          style={{ color: "color-mix(in srgb, var(--pt) 65%, var(--foreground))" }}
         >
           <ChefHat className="h-4 w-4" /> {t("postcard.communityRecipe")}
         </div>
@@ -565,7 +565,7 @@ export function PostCard({ post }: PostCardProps) {
       <PostCardFrame type={post.type} className={frameClass} footer={footer()}>
         <div
           className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider"
-          style={{ color: "var(--pt)" }}
+          style={{ color: "color-mix(in srgb, var(--pt) 65%, var(--foreground))" }}
         >
           <Heart className="h-4 w-4" /> {t("postcard.communityStory")}
         </div>
@@ -601,7 +601,7 @@ export function PostCard({ post }: PostCardProps) {
       <PostCardFrame type={post.type} className={frameClass} footer={footer(true)}>
         <div
           className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider"
-          style={{ color: "var(--pt)" }}
+          style={{ color: "color-mix(in srgb, var(--pt) 65%, var(--foreground))" }}
         >
           <HelpCircle className="h-4 w-4" /> {t("postcard.question")}
         </div>

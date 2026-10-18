@@ -575,7 +575,7 @@ export function AnnouncementsSection() {
               type="checkbox"
               checked={form.active ?? true}
               onChange={(e) => setForm({ ...form, active: e.target.checked })}
-              className="h-4 w-4 accent-[var(--color-accent)]"
+              className="h-5 w-5 accent-[var(--color-accent)]"
             />
             Publicado (visível dentro do período)
           </label>

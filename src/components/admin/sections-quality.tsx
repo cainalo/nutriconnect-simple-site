@@ -173,7 +173,12 @@ export function QualitySection() {
             gravada (docs/QUALIDADE.md).
           </p>
         )}
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-x-auto"
+          tabIndex={0}
+          role="region"
+          aria-label="Notas por item e critério"
+        >
           <table className="w-full min-w-[56rem] border-separate border-spacing-y-1 text-left">
             <thead>
               <tr className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">

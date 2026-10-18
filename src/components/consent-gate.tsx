@@ -91,7 +91,7 @@ export function ConsentGate() {
             type="checkbox"
             checked={terms}
             onChange={(e) => setTerms(e.target.checked)}
-            className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+            className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-primary)]"
           />
           <span>
             Li e aceito os{" "}
@@ -125,7 +125,7 @@ export function ConsentGate() {
             type="checkbox"
             checked={health}
             onChange={(e) => setHealth(e.target.checked)}
-            className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+            className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-primary)]"
           />
           <span>
             <span className="font-semibold">Dados de saúde (opcional).</span> Consinto que o

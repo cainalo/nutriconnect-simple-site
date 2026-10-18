@@ -23,7 +23,7 @@ export interface CanvasEditing {
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 // Cores dos diagramas e das maquetes (a cor de cada item segue esta ordem).
-const PALETTE = ["#b4532a", "#555f36", "#7a3f8f", "#e0a27f", "#b9c28f", "#f5c542"];
+const PALETTE = ["#a64b24", "#555f36", "#7a3f8f", "#e0a27f", "#b9c28f", "#f5c542"];
 
 const MOCK_TITLE: Record<string, string> = {
   feed: "Feed",
@@ -187,7 +187,7 @@ function MockupView({ block, locale }: { block: Block; locale: Locale }) {
       >
         <div
           className="px-[2cqw] py-[1.6cqw] font-bold text-white"
-          style={{ background: "#b4532a", fontSize: "2.2cqw" }}
+          style={{ background: "#a64b24", fontSize: "2.2cqw" }}
         >
           {MOCK_TITLE[block.kind] ?? "Tela"}
         </div>
@@ -412,7 +412,7 @@ function BlockView({
         cursor: editing ? "move" : undefined,
         outline:
           editing && selected
-            ? "2px solid #b4532a"
+            ? "2px solid #a64b24"
             : editing
               ? "1px dashed rgb(52 45 36 / 0.25)"
               : undefined,

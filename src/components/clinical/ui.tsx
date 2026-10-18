@@ -206,7 +206,7 @@ export function Stat({
         {value}
       </p>
       {hint && (
-        <p className="mt-1 text-xs text-muted-foreground opacity-80 relative z-10">{hint}</p>
+        <p className="mt-1 text-xs text-muted-foreground relative z-10">{hint}</p>
       )}
     </div>
   );

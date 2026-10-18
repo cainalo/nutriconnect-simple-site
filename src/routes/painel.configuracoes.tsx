@@ -167,7 +167,7 @@ function ProfessionalSettingsPage() {
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
-                className="h-4 w-4 accent-[var(--color-primary)]"
+                className="h-5 w-5 accent-[var(--color-primary)]"
                 checked={form.accepting_patients}
                 onChange={(e) => set("accepting_patients", e.target.checked)}
               />
@@ -224,7 +224,7 @@ function ProfessionalSettingsPage() {
               <label className="flex items-center gap-2 text-sm font-semibold">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-[var(--color-primary)]"
+                  className="h-5 w-5 accent-[var(--color-primary)]"
                   checked={form.offers_presential}
                   onChange={(e) => set("offers_presential", e.target.checked)}
                 />
@@ -244,7 +244,7 @@ function ProfessionalSettingsPage() {
               <label className="flex items-center gap-2 text-sm font-semibold">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-[var(--color-primary)]"
+                  className="h-5 w-5 accent-[var(--color-primary)]"
                   checked={form.offers_online}
                   onChange={(e) => set("offers_online", e.target.checked)}
                 />

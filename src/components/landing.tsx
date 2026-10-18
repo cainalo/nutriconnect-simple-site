@@ -253,7 +253,7 @@ function LandingNatural() {
                 <h3 className="mt-4 font-display text-lg font-bold text-primary-foreground">
                   {tr(s.title)}
                 </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-primary-foreground/80">
+                <p className="mt-1.5 text-sm leading-relaxed text-primary-foreground">
                   {tr(s.text)}
                 </p>
               </li>

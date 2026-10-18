@@ -59,17 +59,18 @@ export function useHideOnScroll(pathname: string) {
 /**
  * Cada página tem a sua cor: o ícone da página em que a pessoa está fica colorido (e ganha um fundo
  * suave), os outros ficam discretos. Vale para a barra de cima, a de baixo (celular) e o desktop.
+ * A cor do tema claro (1º valor) passa 4,5:1 sobre o fundo suave dela em todos os designs (WCAG AA).
  */
 export const NAV_COLORS = {
-  espaco: ["#d9692a", "#f08a4b"],
-  comunidades: ["#3b7bbf", "#6aa6e6"],
-  desafios: ["#c58a12", "#e8b13b"],
-  nina: ["#8a5fb0", "#b48ad6"],
-  explorar: ["#0f9aa8", "#4fc3cf"],
-  notificacoes: ["#d6456b", "#ef7a98"],
-  tema: ["#4f8a4b", "#78b873"],
-  funcoes: ["#2f7d6d", "#5fbfa9"],
-  perfil: ["#5b6fd6", "#8f9df0"],
+  espaco: ["#94481d", "#f08a4b"],
+  comunidades: ["#2e5f93", "#6aa6e6"],
+  desafios: ["#7b560b", "#e8b13b"],
+  nina: ["#724e91", "#bf98de"],
+  explorar: ["#0a666f", "#4fc3cf"],
+  notificacoes: ["#a13451", "#ef7a98"],
+  tema: ["#3c6838", "#78b873"],
+  funcoes: ["#27675a", "#5fbfa9"],
+  perfil: ["#4656a6", "#8f9df0"],
 } as const;
 export type NavKey = keyof typeof NAV_COLORS;
 

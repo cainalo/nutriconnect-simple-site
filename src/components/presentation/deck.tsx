@@ -413,7 +413,34 @@ export function PresentationDeck({
         {/* Rodapé: narradora, progresso e navegação */}
         <footer className="shrink-0 border-t border-border/70 bg-background/95 backdrop-blur">
           {/* Progresso agrupado por parte: cada integrante tem sua cor. */}
-          <nav aria-label={copy.ui.goTo} className="flex gap-3 px-3 pt-2 sm:px-5">
+          {/* No celular os 23 pontinhos não cabem com 24 px cada: a barra só mostra o progresso
+              (navegação pelas setas e pela lista de partes); do sm para cima, cada ponto é um botão. */}
+          <div aria-hidden className="flex gap-3 px-3 pt-2 sm:hidden">
+            {PRESENTERS.map((p, part) => (
+              <div
+                key={p.name}
+                className="flex min-w-0 gap-0.5"
+                style={{ flexGrow: slides.filter((s) => s.part === part).length }}
+              >
+                {slides.map((s, i) =>
+                  s.part !== part ? null : (
+                    <span
+                      key={s.id}
+                      className={`flex-1 rounded-full transition-all ${i === index ? "h-2.5" : "mt-0.5 h-1.5"} ${
+                        i > index ? "bg-secondary" : ""
+                      }`}
+                      style={
+                        i <= index
+                          ? { background: p.color, opacity: i < index ? 0.55 : 1 }
+                          : undefined
+                      }
+                    />
+                  ),
+                )}
+              </div>
+            ))}
+          </div>
+          <nav aria-label={copy.ui.goTo} className="hidden gap-3 px-3 pt-1 sm:flex sm:px-5">
             {PRESENTERS.map((p, part) => (
               <div
                 key={p.name}
@@ -429,7 +456,7 @@ export function PresentationDeck({
                       onClick={() => goTo(i)}
                       aria-label={`${copy.ui.goTo} ${i + 1}`}
                       aria-current={i === index ? "step" : undefined}
-                      className="group flex h-4 flex-1 items-center"
+                      className="group flex h-6 min-w-6 flex-1 items-center"
                     >
                       <span
                         className={`w-full rounded-full transition-all ${

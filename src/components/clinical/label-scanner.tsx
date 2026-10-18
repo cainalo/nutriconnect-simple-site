@@ -644,7 +644,7 @@ function History({
                 checked={on}
                 onChange={() => onToggle(s.id)}
                 aria-label={tr(["Comparar", "Compare", "Comparar", "Comparer"])}
-                className="h-4 w-4 accent-[var(--color-primary)]"
+                className="h-5 w-5 accent-[var(--color-primary)]"
               />
             )}
             <button

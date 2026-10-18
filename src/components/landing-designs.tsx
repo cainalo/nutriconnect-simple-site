@@ -175,26 +175,26 @@ export function LandingVibrante() {
         <div className="relative overflow-hidden rounded-[2.5rem] bg-primary px-6 py-12 text-primary-foreground sm:px-12 sm:py-16">
           <div className="relative grid items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
             <div>
-              <p className="text-sm font-extrabold text-white/85">{tr(COPY.badge)}</p>
-              <h1 className="mt-3 font-display text-4xl font-black leading-[1.05] text-white sm:text-6xl">
+              <p className="text-sm font-extrabold text-primary-foreground">{tr(COPY.badge)}</p>
+              <h1 className="mt-3 font-display text-4xl font-black leading-[1.05] text-primary-foreground sm:text-6xl">
                 {tr(COPY.h1a)}{" "}
-                <span className="underline decoration-white/50 decoration-4 underline-offset-8">
+                <span className="underline decoration-primary-foreground/50 decoration-4 underline-offset-8">
                   {tr(COPY.h1b)}
                 </span>
               </h1>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-primary-foreground sm:text-lg">
                 {tr(COPY.lead)}
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link
                   to="/cadastro"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3.5 font-extrabold text-primary shadow-xl transition hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-primary-foreground px-6 py-3.5 font-extrabold text-primary shadow-xl transition hover:-translate-y-0.5"
                 >
                   {tr(COPY.start)} <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   to="/apresentacao"
-                  className="inline-flex items-center gap-2 rounded-2xl border-2 border-white/60 px-6 py-3.5 font-extrabold text-white transition hover:bg-white/15"
+                  className="inline-flex items-center gap-2 rounded-2xl border-2 border-primary-foreground/60 px-6 py-3.5 font-extrabold text-primary-foreground transition hover:bg-primary-foreground/15"
                 >
                   <Presentation className="h-4 w-4" /> {tr(COPY.presentation)}
                 </Link>
@@ -202,7 +202,9 @@ export function LandingVibrante() {
               <div className="mt-4">
                 <AndroidDownloadButton />
               </div>
-              <p className="mt-4 text-xs font-semibold text-white/80">{tr(COPY.freeNote)}</p>
+              <p className="mt-4 text-xs font-semibold text-primary-foreground">
+                {tr(COPY.freeNote)}
+              </p>
             </div>
             <div className="relative mx-auto grid w-full max-w-sm grid-cols-2 gap-3">
               {["market", "cooking-together", "meeting"].map((img, i) => (
@@ -330,21 +332,19 @@ export function LandingVibrante() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-3 pb-16">
-        <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-accent px-6 py-12 text-center text-white">
+        <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-accent px-6 py-12 text-center text-accent-foreground">
           <Mascot id="nina" mood="cheer" size={100} />
-          <h2 className="font-display text-3xl font-black text-white sm:text-4xl">
-            {tr(COPY.finalTitle)}
-          </h2>
+          <h2 className="font-display text-3xl font-black sm:text-4xl">{tr(COPY.finalTitle)}</h2>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               to="/cadastro"
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3.5 font-extrabold text-primary shadow-xl"
+              className="inline-flex items-center gap-2 rounded-2xl bg-accent-foreground px-6 py-3.5 font-extrabold text-accent shadow-xl"
             >
               {tr(COPY.finalCreate)} <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center rounded-2xl border-2 border-white/60 px-6 py-3.5 font-extrabold"
+              className="inline-flex items-center rounded-2xl border-2 border-accent-foreground/60 px-6 py-3.5 font-extrabold"
             >
               {tr(COPY.haveAccount)}
             </Link>
@@ -513,7 +513,7 @@ export function LandingEditorial() {
       {/* Como funciona: inverso */}
       <section className="bg-foreground text-background">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-background/60">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-background/75">
             {tr(COPY.howTitle)}
           </p>
           <ol className="mt-6 grid gap-8 md:grid-cols-3">
@@ -792,21 +792,19 @@ export function LandingAurora() {
       </section>
 
       <section className="relative mx-auto w-full max-w-4xl px-4 pb-16">
-        <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-primary px-6 py-12 text-center text-white shadow-2xl">
+        <div className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-primary px-6 py-12 text-center text-primary-foreground shadow-2xl">
           <Mascot id="nina" mood="cheer" size={100} />
-          <h2 className="font-display text-3xl font-semibold text-white sm:text-4xl">
-            {tr(COPY.finalTitle)}
-          </h2>
+          <h2 className="font-display text-3xl font-semibold sm:text-4xl">{tr(COPY.finalTitle)}</h2>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               to="/cadastro"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-primary shadow-xl"
+              className="inline-flex items-center gap-2 rounded-full bg-primary-foreground px-6 py-3 font-semibold text-primary shadow-xl"
             >
               {tr(COPY.finalCreate)} <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center rounded-full border border-white/60 px-6 py-3 font-semibold"
+              className="inline-flex items-center rounded-full border border-primary-foreground/60 px-6 py-3 font-semibold"
             >
               {tr(COPY.haveAccount)}
             </Link>

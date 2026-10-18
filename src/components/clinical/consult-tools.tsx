@@ -940,7 +940,7 @@ function TimerTool({ session }: { session: ConsultSession }) {
       <label className="mt-4 flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
-          className="h-4 w-4 accent-[var(--color-primary)]"
+          className="h-5 w-5 accent-[var(--color-primary)]"
           checked={share}
           onChange={(e) => setShare(e.target.checked)}
         />

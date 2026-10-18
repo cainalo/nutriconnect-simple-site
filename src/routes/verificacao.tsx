@@ -347,7 +347,7 @@ function VerificationForm({ userId, userName }: { userId: string; userName: stri
           type="checkbox"
           checked={declared}
           onChange={(e) => setDeclared(e.target.checked)}
-          className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]"
+          className="mt-0.5 h-5 w-5 accent-[var(--color-primary)]"
         />
         <span>{t("verify.declare")}</span>
       </label>

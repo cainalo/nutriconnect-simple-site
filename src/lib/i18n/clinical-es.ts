@@ -612,6 +612,7 @@ const clinical: Record<ClinicalKey, string> = {
   "diary.deleted": "Registro eliminado.",
   "diary.deleteConfirm": "¿Eliminar este registro del diario?",
   "diary.today": "Hoy",
+  "diary.yesterday": "Ayer",
   "diary.empty": "Ningún registro en el diario",
   "diary.emptyOwner": "Empieza registrando tu próxima comida; basta con una foto.",
   "diary.emptyPro": "El paciente todavía no registró comidas.",

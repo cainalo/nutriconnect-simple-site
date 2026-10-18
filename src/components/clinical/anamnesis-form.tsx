@@ -185,7 +185,7 @@ export function AnamnesisForm({
           <input
             type="checkbox"
             disabled={readOnly}
-            className="h-4 w-4 accent-[var(--color-primary)]"
+            className="h-5 w-5 accent-[var(--color-primary)]"
             checked={!!data.lifestyle?.smoking}
             onChange={(e) => setNested("lifestyle", "smoking", e.target.checked)}
           />

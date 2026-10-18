@@ -1077,7 +1077,7 @@ export function ShareModal({
                         type="checkbox"
                         checked={joinTheme}
                         onChange={(e) => setJoinTheme(e.target.checked)}
-                        className="mt-0.5 h-4 w-4 accent-[var(--color-accent)]"
+                        className="mt-0.5 h-5 w-5 accent-[var(--color-accent)]"
                       />
                       <span>
                         <span className="font-semibold">{t("sm.joinTheme")}</span>

@@ -112,7 +112,7 @@ function SchedulePage() {
               type="checkbox"
               checked={showCancelled}
               onChange={(e) => setShowCancelled(e.target.checked)}
-              className="h-4 w-4 accent-[var(--color-primary)]"
+              className="h-5 w-5 accent-[var(--color-primary)]"
             />
             {t("schedule.showCancelled")}
           </label>
@@ -148,7 +148,7 @@ function SchedulePage() {
                   </p>
                   <div className="space-y-1.5">
                     {empty && (
-                      <p className="text-[11px] text-muted-foreground/70 md:hidden">
+                      <p className="text-[11px] text-muted-foreground md:hidden">
                         {t("schedule.free")}
                       </p>
                     )}

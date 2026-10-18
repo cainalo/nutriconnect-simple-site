@@ -143,6 +143,7 @@ export function TrailHeader(props: TrailHeaderProps) {
         <div
           className="mt-2 h-2 w-full overflow-hidden rounded-full bg-secondary"
           role="progressbar"
+          aria-label={t("hub.level").replace("{n}", String(props.level))}
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}

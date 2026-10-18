@@ -983,7 +983,11 @@ function Chip({
   return (
     <span
       className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
-      style={{ background: `color-mix(in srgb, ${color} 16%, var(--card))`, color }}
+      style={{
+        background: `color-mix(in srgb, ${color} 16%, var(--card))`,
+        // Texto puxado para a cor do tema: passa 4,5:1 no claro e no escuro.
+        color: `color-mix(in srgb, ${color} 65%, var(--foreground))`,
+      }}
     >
       <Icon className="h-3.5 w-3.5" />
       {children}

@@ -64,8 +64,9 @@ export function Panel({
                 {hint && (
                   <span
                     title={hint}
+                    role="img"
                     aria-label={hint}
-                    className="cursor-help text-muted-foreground/70"
+                    className="cursor-help text-muted-foreground"
                   >
                     <CircleHelp className="h-4 w-4" />
                   </span>

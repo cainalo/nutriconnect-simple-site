@@ -174,7 +174,7 @@ function Cadastro() {
             type="checkbox"
             checked={accepted}
             onChange={(e) => setAccepted(e.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+            className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-primary)]"
           />
           <span>
             Tenho {MIN_AGE} anos ou mais e li e aceito os{" "}

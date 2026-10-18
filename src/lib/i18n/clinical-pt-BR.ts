@@ -654,6 +654,7 @@ const clinicalPtBR = {
   "diary.deleted": "Registro excluído.",
   "diary.deleteConfirm": "Excluir este registro do diário?",
   "diary.today": "Hoje",
+  "diary.yesterday": "Ontem",
   "diary.empty": "Nenhum registro no diário",
   "diary.emptyOwner": "Comece registrando sua próxima refeição, pode ser só uma foto.",
   "diary.emptyPro": "O paciente ainda não registrou refeições.",
