@@ -17,7 +17,9 @@ import {
   Send,
   Trash2,
   XCircle,
+  CalendarPlus,
 } from "lucide-react";
+import { ConfirmAction } from "@/components/confirm-action";
 import { AppScreen } from "@/components/app-screen";
 import { PhaseBadge, useEventDate } from "@/components/community-events";
 import { useTr } from "@/components/settings-ui";
@@ -51,12 +53,63 @@ export const Route = createFileRoute("/evento/$eventId")({
 const card = "rounded-3xl border border-border bg-card p-5 shadow-card";
 const btnPrimary =
   "inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50";
+// Botões pequenos: 40 px de altura no celular (alvo de toque), 32 px no computador.
+const btnSecondary =
+  "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-secondary";
 const iconBtn =
-  "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:opacity-50";
+  "inline-flex min-h-10 items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold sm:min-h-8 sm:px-2 sm:text-[11px] text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:opacity-50";
 const field =
   "w-full rounded-2xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground";
 
 const onError = (err: unknown) => toast.error((err as Error).message);
+
+/** Arquivo .ics do evento para pôr na agenda do celular/computador (com aviso 15 min antes). */
+function downloadIcs(e: {
+  id: string;
+  title: string;
+  description?: string | null;
+  starts_at: string;
+  duration_min: number;
+}) {
+  const fmt = (d: Date) =>
+    d
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d{3}/, "");
+  const esc = (v: string) =>
+    v
+      .replace(/\\/g, "\\\\")
+      .replace(/[,;]/g, (m) => "\\" + m)
+      .replace(/\n/g, "\\n");
+  const start = new Date(e.starts_at);
+  const end = new Date(start.getTime() + e.duration_min * 60_000);
+  const url = `${window.location.origin}/evento/${e.id}`;
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//NutriConnect//Eventos//PT",
+    "BEGIN:VEVENT",
+    `UID:${e.id}@nutriconnect`,
+    `DTSTAMP:${fmt(new Date())}`,
+    `DTSTART:${fmt(start)}`,
+    `DTEND:${fmt(end)}`,
+    `SUMMARY:${esc(e.title)}`,
+    `DESCRIPTION:${esc(`${e.description ?? ""}\n${url}`.trim())}`,
+    `URL:${url}`,
+    "BEGIN:VALARM",
+    "TRIGGER:-PT15M",
+    "ACTION:DISPLAY",
+    `DESCRIPTION:${esc(e.title)}`,
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+  a.download = "evento-nutriconnect.ics";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
 
 function EventPage() {
   const { user, hydrated } = useRequireAuth();
@@ -75,6 +128,7 @@ function EventView({ me }: { me: string }) {
   const event = useCommunityEvent(eventId);
   const questions = useEventQuestions(eventId);
   const cancel = useCancelEvent();
+  const [confirmCancel, setConfirmCancel] = useState(false);
   useEventRealtime(eventId);
 
   const authors = [...new Set((questions.data ?? []).map((q) => q.author_id))].sort();
@@ -132,35 +186,62 @@ function EventView({ me }: { me: string }) {
       <header className={card}>
         <PhaseBadge event={e} />
         <h1 className="mt-2 text-2xl font-extrabold font-display text-foreground">{e.title}</h1>
-        <p className="mt-1 text-sm capitalize text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground first-letter:uppercase">
           {when(e.starts_at)} · {e.duration_min} min
         </p>
         {e.description && (
-          <p className="mt-3 whitespace-pre-line text-sm text-foreground/85">{e.description}</p>
+          <p className="mt-3 whitespace-pre-line text-left text-sm text-foreground/85">
+            {e.description}
+          </p>
         )}
-        {isHost && phase !== "encerrado" && phase !== "cancelado" && (
-          <button
-            type="button"
-            className={cn(iconBtn, "mt-3")}
-            disabled={cancel.isPending}
-            onClick={() => {
-              if (
-                window.confirm(
-                  tr([
-                    "Cancelar o evento?",
-                    "Cancel the event?",
-                    "¿Cancelar el evento?",
-                    "Annuler l'événement ?",
-                  ]),
-                )
-              )
-                cancel.mutate(e.id, { onError });
-            }}
-          >
-            <XCircle className="h-3.5 w-3.5" />
-            {tr(["Cancelar evento", "Cancel event", "Cancelar evento", "Annuler"])}
-          </button>
-        )}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {phase === "agendado" && (
+            <button type="button" className={btnSecondary} onClick={() => downloadIcs(e)}>
+              <CalendarPlus className="h-4 w-4" />
+              {tr([
+                "Lembrar-me (pôr na agenda)",
+                "Remind me (add to calendar)",
+                "Recordarme (añadir a la agenda)",
+                "Me le rappeler (agenda)",
+              ])}
+            </button>
+          )}
+          {isHost && phase !== "encerrado" && phase !== "cancelado" && (
+            <button
+              type="button"
+              className={iconBtn}
+              disabled={cancel.isPending}
+              onClick={() => setConfirmCancel(true)}
+            >
+              <XCircle className="h-3.5 w-3.5" />
+              {tr(["Cancelar evento", "Cancel event", "Cancelar evento", "Annuler"])}
+            </button>
+          )}
+        </div>
+        <ConfirmAction
+          open={confirmCancel}
+          onOpenChange={setConfirmCancel}
+          title={tr([
+            "Cancelar o evento?",
+            "Cancel the event?",
+            "¿Cancelar el evento?",
+            "Annuler l'événement ?",
+          ])}
+          description={tr([
+            "Quem participa da comunidade vê o evento como cancelado e não dá mais para enviar perguntas.",
+            "Community members will see the event as cancelled and no more questions can be sent.",
+            "Los miembros verán el evento como cancelado y no se podrán enviar más preguntas.",
+            "Les membres verront l'événement annulé et ne pourront plus poser de questions.",
+          ])}
+          confirmLabel={tr([
+            "Cancelar evento",
+            "Cancel event",
+            "Cancelar evento",
+            "Annuler l'événement",
+          ])}
+          cancelLabel={tr(["Manter evento", "Keep event", "Mantener evento", "Garder"])}
+          onConfirm={() => cancel.mutate(e.id, { onError })}
+        />
       </header>
 
       {canAsk && !isHost && <AskForm eventId={e.id} />}
@@ -301,6 +382,7 @@ function QuestionItem({
   const moderate = useModerateQuestion();
   const answer = useAnswerQuestion();
   const [replying, setReplying] = useState(false);
+  const [confirming, setConfirming] = useState<"apagar" | "denunciar" | null>(null);
   const [reply, setReply] = useState(q.answer ?? "");
   const mine = q.author_id === me;
 
@@ -312,6 +394,16 @@ function QuestionItem({
           onClick={() => vote.mutate(q.id, { onError })}
           disabled={mine || vote.isPending}
           aria-pressed={q.voted}
+          aria-label={`${tr([
+            "Também quero saber",
+            "I want to know too",
+            "Yo también quiero saber",
+            "Moi aussi",
+          ])} (${q.votes} ${
+            q.votes === 1
+              ? tr(["voto", "vote", "voto", "vote"])
+              : tr(["votos", "votes", "votos", "votes"])
+          })`}
           title={tr([
             "Também quero saber",
             "I want to know too",
@@ -351,7 +443,9 @@ function QuestionItem({
               </span>
             )}
           </p>
-          <p className="mt-1 whitespace-pre-line break-words text-sm text-foreground">{q.body}</p>
+          <p className="mt-1 whitespace-pre-line break-words text-left text-sm text-foreground">
+            {q.body}
+          </p>
 
           {q.answer && !replying && (
             <div className="mt-3 rounded-2xl bg-accent-soft/40 p-3">
@@ -359,7 +453,7 @@ function QuestionItem({
                 <MessageCircleReply className="h-3.5 w-3.5" />
                 {tr(["Resposta", "Answer", "Respuesta", "Réponse"])}
               </p>
-              <p className="mt-1 whitespace-pre-line break-words text-sm text-foreground">
+              <p className="mt-1 whitespace-pre-line break-words text-left text-sm text-foreground">
                 {q.answer}
               </p>
             </div>
@@ -446,7 +540,7 @@ function QuestionItem({
                 type="button"
                 className={iconBtn}
                 disabled={remove.isPending}
-                onClick={() => remove.mutate(q.id, { onError })}
+                onClick={() => setConfirming("apagar")}
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 {tr(["Apagar", "Delete", "Borrar", "Supprimer"])}
@@ -457,30 +551,7 @@ function QuestionItem({
                 type="button"
                 className={iconBtn}
                 disabled={flag.isPending}
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      tr([
-                        "Denunciar esta pergunta como inadequada?",
-                        "Report this question as inappropriate?",
-                        "¿Denunciar esta pregunta como inapropiada?",
-                        "Signaler cette question comme inappropriée ?",
-                      ]),
-                    )
-                  )
-                    flag.mutate(q.id, {
-                      onSuccess: () =>
-                        toast.success(
-                          tr([
-                            "Obrigado por avisar.",
-                            "Thanks for letting us know.",
-                            "Gracias por avisar.",
-                            "Merci de nous avoir prévenus.",
-                          ]),
-                        ),
-                      onError,
-                    });
-                }}
+                onClick={() => setConfirming("denunciar")}
               >
                 <Flag className="h-3.5 w-3.5" />
                 {tr(["Denunciar", "Report", "Denunciar", "Signaler"])}
@@ -489,6 +560,55 @@ function QuestionItem({
           </div>
         </div>
       </div>
+      <ConfirmAction
+        open={confirming === "apagar"}
+        onOpenChange={(o) => !o && setConfirming(null)}
+        title={tr([
+          "Apagar sua pergunta?",
+          "Delete your question?",
+          "¿Borrar tu pregunta?",
+          "Supprimer votre question ?",
+        ])}
+        description={tr([
+          "Os votos dela somem junto. Você pode enviar outra depois.",
+          "Its votes go away too. You can send another one later.",
+          "Sus votos también desaparecen. Puedes enviar otra después.",
+          "Ses votes disparaissent aussi. Vous pourrez en envoyer une autre.",
+        ])}
+        confirmLabel={tr(["Apagar", "Delete", "Borrar", "Supprimer"])}
+        onConfirm={() => remove.mutate(q.id, { onError })}
+      />
+      <ConfirmAction
+        open={confirming === "denunciar"}
+        onOpenChange={(o) => !o && setConfirming(null)}
+        title={tr([
+          "Denunciar esta pergunta?",
+          "Report this question?",
+          "¿Denunciar esta pregunta?",
+          "Signaler cette question ?",
+        ])}
+        description={tr([
+          "O profissional e a moderação vão revisar. Quem escreveu não fica sabendo que foi você.",
+          "The professional and moderators will review it. The author won't know it was you.",
+          "El profesional y la moderación la revisarán. Quien la escribió no sabrá que fuiste tú.",
+          "Le professionnel et la modération vont l'examiner. L'auteur ne saura pas que c'était vous.",
+        ])}
+        confirmLabel={tr(["Denunciar", "Report", "Denunciar", "Signaler"])}
+        onConfirm={() =>
+          flag.mutate(q.id, {
+            onSuccess: () =>
+              toast.success(
+                tr([
+                  "Obrigado por avisar.",
+                  "Thanks for letting us know.",
+                  "Gracias por avisar.",
+                  "Merci de nous avoir prévenus.",
+                ]),
+              ),
+            onError,
+          })
+        }
+      />
     </li>
   );
 }
