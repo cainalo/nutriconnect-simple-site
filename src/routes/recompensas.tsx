@@ -1,5 +1,7 @@
 // X4 — Pontos e recompensas: saldo, como ganhar, troca por recompensas, códigos e histórico.
 import { useState } from "react";
+import { friendlyError } from "@/lib/friendly-error";
+import { METRICS, useLeague, useMyFriendChallenges, weekStartOf } from "@/lib/friend-challenges";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -35,7 +37,10 @@ export const Route = createFileRoute("/recompensas")({
 
 const card = "rounded-3xl border border-border/70 bg-card p-5 shadow-xs";
 const btnPrimary =
-  "inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50";
+  "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
+// Botão que ainda não dá para usar (faltam pontos, esgotado): texto escuro em fundo neutro, legível.
+const btnWaiting =
+  "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-border bg-secondary px-4 py-2 text-xs font-semibold text-foreground cursor-not-allowed";
 const btnSoft =
   "inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-secondary disabled:opacity-50";
 
@@ -71,8 +76,8 @@ function RewardsPage() {
         </p>
       </header>
 
-      <section className={cn(card, "grid gap-4 sm:grid-cols-2")}>
-        <div className="nc-rise text-center sm:text-left">
+      <section className={cn(card, "grid items-center gap-4 sm:grid-cols-2")}>
+        <div className="nc-rise text-center">
           <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             {tr(["Seu saldo", "Your balance", "Tu saldo", "Votre solde"])}
           </p>
@@ -83,9 +88,9 @@ function RewardsPage() {
             {tr(["pontos", "points", "puntos", "points"])}
           </p>
         </div>
-        <div className="nc-rise rounded-2xl bg-amber-500/10 p-4" style={{ animationDelay: "80ms" }}>
+        <div className="nc-rise rounded-2xl bg-accent/10 p-4" style={{ animationDelay: "80ms" }}>
           <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-            <Sparkles className="h-4 w-4 text-amber-500" />
+            <Sparkles className="h-4 w-4 text-accent" />
             {tr(["Nesta semana", "This week", "Esta semana", "Cette semaine"])}
           </p>
           <p className="mt-1 font-display text-3xl font-extrabold text-foreground">
@@ -99,6 +104,7 @@ function RewardsPage() {
               "Ajoutés à votre solde lundi.",
             ])}
           </p>
+          {user && <WeekBreakdown />}
         </div>
       </section>
 
@@ -270,11 +276,23 @@ function RewardCard({
             </span>
           )}
         </div>
-        <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-secondary">
+        <div
+          className="mt-1.5 h-2 overflow-hidden rounded-full bg-secondary"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          aria-label={tr([
+            `${reward.title}: ${pct}% dos pontos`,
+            `${reward.title}: ${pct}% of the points`,
+            `${reward.title}: ${pct}% de los puntos`,
+            `${reward.title} : ${pct} % des points`,
+          ])}
+        >
           <div
             className={cn(
               "h-full rounded-full transition-all duration-700",
-              enough ? "bg-primary" : "bg-amber-400",
+              enough ? "bg-primary" : "bg-accent",
             )}
             style={{ width: `${pct}%` }}
           />
@@ -301,7 +319,7 @@ function RewardCard({
                     );
                     setConfirm(false);
                   },
-                  onError: (e) => toast.error((e as Error).message),
+                  onError: (e) => toast.error(tr(friendlyError(e))),
                 })
               }
             >
@@ -316,7 +334,7 @@ function RewardCard({
         ) : (
           <button
             type="button"
-            className={cn(btnPrimary, "mt-3 w-full")}
+            className={cn(!enough || soldOut ? btnWaiting : btnPrimary, "mt-3 w-full")}
             disabled={!enough || soldOut}
             onClick={() => setConfirm(true)}
           >
@@ -446,8 +464,11 @@ function History({ userId }: { userId: string }) {
   const tr = useTr();
   const { locale } = useI18n();
   const history = usePointsHistory(userId);
-  const list = history.data ?? [];
-  if (!list.length) return null;
+  const [all, setAll] = useState(false);
+  const full = history.data ?? [];
+  if (!full.length) return null;
+  // Os 10 mais recentes; o resto (até 30) com "Ver mais".
+  const list = all ? full : full.slice(0, 10);
   return (
     <section className={cn(card, "mt-8")}>
       <h2 className="text-lg font-bold font-display text-foreground">
@@ -473,6 +494,79 @@ function History({ userId }: { userId: string }) {
           </li>
         ))}
       </ul>
+      {full.length > 10 && (
+        <button
+          type="button"
+          className={cn(btnSoft, "mt-3 min-h-10 w-full")}
+          aria-expanded={all}
+          onClick={() => setAll((v) => !v)}
+        >
+          {all
+            ? tr(["Ver menos", "Show less", "Ver menos", "Voir moins"])
+            : tr([
+                `Ver mais (${full.length - 10})`,
+                `Show more (${full.length - 10})`,
+                `Ver más (${full.length - 10})`,
+                `Voir plus (${full.length - 10})`,
+              ])}
+        </button>
+      )}
     </section>
+  );
+}
+
+/** De onde vêm os pontos desta semana: dias de cada meta (10 cada) e desafios cumpridos (+50). */
+function WeekBreakdown() {
+  const tr = useTr();
+  const league = useLeague(true);
+  const challenges = useMyFriendChallenges(true);
+  const me = (league.data ?? []).find((r) => r.is_me);
+  const week = weekStartOf();
+  const done = (challenges.data ?? []).filter((c) => {
+    if (c.my_status !== "aceito" || c.week_start !== week) return false;
+    const mine = c.members.find((m) => m.is_me);
+    return !!mine && mine.days >= c.target;
+  }).length;
+  const rows = METRICS.map((m) => ({
+    id: m.id,
+    name: tr(m.names),
+    days: me ? me[m.id] : 0,
+  })).filter((r) => r.days > 0);
+  if (!rows.length && !done) return null;
+  return (
+    <details className="mt-3 text-xs">
+      <summary className="inline-flex min-h-6 cursor-pointer items-center font-semibold text-primary">
+        {tr(["De onde vêm", "Where they come from", "De dónde vienen", "D'où ils viennent"])}
+      </summary>
+      <ul className="mt-2 space-y-1">
+        {rows.map((r) => (
+          <li key={r.id} className="flex justify-between gap-2 text-foreground">
+            <span>
+              {r.name} ·{" "}
+              {tr([
+                `${r.days} ${r.days === 1 ? "dia" : "dias"}`,
+                `${r.days} ${r.days === 1 ? "day" : "days"}`,
+                `${r.days} ${r.days === 1 ? "día" : "días"}`,
+                `${r.days} ${r.days === 1 ? "jour" : "jours"}`,
+              ])}
+            </span>
+            <span className="font-bold">+{r.days * 10}</span>
+          </li>
+        ))}
+        {done > 0 && (
+          <li className="flex justify-between gap-2 text-foreground">
+            <span>
+              {tr([
+                `Desafios com amigos · ${done}`,
+                `Friends' challenges · ${done}`,
+                `Desafíos con amigos · ${done}`,
+                `Défis entre amis · ${done}`,
+              ])}
+            </span>
+            <span className="font-bold">+{done * 50}</span>
+          </li>
+        )}
+      </ul>
+    </details>
   );
 }

@@ -6,6 +6,14 @@ import { useRouterState } from "@tanstack/react-router";
 import {
   Award,
   Bell,
+  CalendarDays,
+  FolderOpen,
+  LineChart,
+  MessageCircle,
+  NotebookPen,
+  ScanLine,
+  Target,
+  Utensils,
   BookOpenText,
   CalendarRange,
   Apple,
@@ -233,6 +241,94 @@ const HEADS: Record<string, HeadDef> = {
       "Una lista, una nevera y un menú para toda la familia.",
       "Une liste, un frigo et un menu pour toute la famille.",
     ],
+  }, // Páginas internas do acompanhamento: a faixa diz em que página a pessoa está.
+  "/acompanhamento/plano": {
+    icon: Utensils,
+    color: "#8a5fb0",
+    title: ["Plano alimentar", "Meal plan", "Plan alimentario", "Plan alimentaire"],
+    text: [
+      "O plano do seu profissional, com substituições.",
+      "Your professional's plan, with swaps.",
+      "El plan de tu profesional, con sustituciones.",
+      "Le plan de votre pro, avec équivalences.",
+    ],
+  },
+  "/acompanhamento/diario": {
+    icon: NotebookPen,
+    color: "#8a5fb0",
+    title: ["Diário", "Diary", "Diario", "Journal"],
+    text: [
+      "Refeições, fome, saciedade e sintomas.",
+      "Meals, hunger, fullness and symptoms.",
+      "Comidas, hambre, saciedad y síntomas.",
+      "Repas, faim, satiété et symptômes.",
+    ],
+  },
+  "/acompanhamento/metas": {
+    icon: Target,
+    color: "#8a5fb0",
+    title: ["Metas", "Goals", "Metas", "Objectifs"],
+    text: [
+      "O que você combinou fazer, dia a dia.",
+      "What you agreed to do, day by day.",
+      "Lo que acordaste hacer, día a día.",
+      "Ce que vous avez convenu, jour après jour.",
+    ],
+  },
+  "/acompanhamento/rotulos": {
+    icon: ScanLine,
+    color: "#8a5fb0",
+    title: ["Leitor de rótulos", "Label reader", "Lector de etiquetas", "Lecteur d'étiquettes"],
+    text: [
+      "Código de barras, lupa da Anvisa e comparação.",
+      "Barcode, warning labels and comparison.",
+      "Código de barras, sellos y comparación.",
+      "Code-barres, alertes et comparaison.",
+    ],
+  },
+  "/acompanhamento/evolucao": {
+    icon: LineChart,
+    color: "#8a5fb0",
+    title: ["Evolução", "Progress", "Evolución", "Évolution"],
+    text: [
+      "Medidas, gráficos e o relatório do mês.",
+      "Measures, charts and the monthly report.",
+      "Medidas, gráficos y el informe del mes.",
+      "Mesures, courbes et rapport du mois.",
+    ],
+  },
+  "/acompanhamento/consultas": {
+    icon: CalendarDays,
+    color: "#8a5fb0",
+    title: ["Consultas", "Appointments", "Consultas", "Consultations"],
+    text: [
+      "Próximas consultas e o histórico.",
+      "Upcoming visits and history.",
+      "Próximas consultas e historial.",
+      "Consultations à venir et historique.",
+    ],
+  },
+  "/acompanhamento/mensagens": {
+    icon: MessageCircle,
+    color: "#8a5fb0",
+    title: ["Mensagens", "Messages", "Mensajes", "Messages"],
+    text: [
+      "Conversa com o seu profissional.",
+      "Chat with your professional.",
+      "Conversación con tu profesional.",
+      "Échanges avec votre pro.",
+    ],
+  },
+  "/acompanhamento/exames": {
+    icon: FolderOpen,
+    color: "#8a5fb0",
+    title: ["Exames", "Tests", "Exámenes", "Examens"],
+    text: [
+      "Seus exames e documentos.",
+      "Your tests and documents.",
+      "Tus exámenes y documentos.",
+      "Vos examens et documents.",
+    ],
   },
 };
 
@@ -243,7 +339,7 @@ function useHead(): (HeadDef & { photo: string }) | null {
   const depth = pathname.split("/").filter(Boolean).length;
   const allowDeeper = key === "/acompanhamento" || key === "/painel";
   if (depth > 1 && !allowDeeper) return null;
-  const def = HEADS[key];
+  const def = HEADS[pathname.replace(/\/$/, "")] ?? HEADS[key];
   return def ? { ...def, photo: `/images/heads${key}.jpg` } : null;
 }
 
