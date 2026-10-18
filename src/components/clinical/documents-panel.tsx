@@ -88,9 +88,21 @@ export function DocumentsPanel({
                 d.uploaded_by === meId ? t("docs.byYou") : people.data?.get(d.uploaded_by)?.name;
               return (
                 <li key={d.id} className="flex items-center gap-3 px-4 py-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent">
-                    <Icon className="h-5 w-5" />
-                  </span>
+                  {isImage && url ? (
+                    // Prévia da imagem no lugar do ícone (o link assinado já existe para abrir).
+                    <a href={url} target="_blank" rel="noreferrer" className="shrink-0">
+                      <img
+                        src={url}
+                        alt=""
+                        loading="lazy"
+                        className="h-12 w-12 rounded-xl border border-border/70 object-cover"
+                      />
+                    </a>
+                  ) : (
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                  )}
                   <div className="min-w-0 flex-1">
                     <a
                       href={url}

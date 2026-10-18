@@ -5,10 +5,12 @@ import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BadgeCheck,
+  Gift,
   HeartPulse,
   LayoutDashboard,
   LogOut,
   Mail,
+  Palette,
   Settings,
   Shield,
   UserRound,
@@ -76,6 +78,17 @@ export function AccountMenu({
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild>
+          <Link to="/recompensas" className={item}>
+            <Gift className="h-4 w-4" />
+            {tr([
+              "Pontos e recompensas",
+              "Points and rewards",
+              "Puntos y recompensas",
+              "Points et récompenses",
+            ])}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         {user.professional ? (
           <DropdownMenuItem asChild>
@@ -92,6 +105,12 @@ export function AccountMenu({
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild>
+          <Link to="/perfil/personalizacao" className={item}>
+            <Palette className="h-4 w-4" />
+            {tr(["Personalização", "Personalization", "Personalización", "Personnalisation"])}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/perfil/configuracoes" className={item}>
             <Settings className="h-4 w-4" />

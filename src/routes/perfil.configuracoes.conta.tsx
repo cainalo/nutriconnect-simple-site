@@ -162,6 +162,14 @@ function ContaPage() {
       <h1 className="sr-only">{t("settings.account.title")}</h1>
 
       <div className="space-y-6">
+        <GroupLabel>
+          {tr([
+            "Você e seu contato",
+            "You and your contact",
+            "Tú y tu contacto",
+            "Vous et vos coordonnées",
+          ])}
+        </GroupLabel>
         {/* Informações pessoais */}
         <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6 shadow-xs">
           <h2 className="text-sm font-bold font-display text-foreground">
@@ -284,6 +292,14 @@ function ContaPage() {
         </section>
 
         {/* Senha */}
+        <GroupLabel>
+          {tr([
+            "Segurança e dados",
+            "Security and data",
+            "Seguridad y datos",
+            "Sécurité et données",
+          ])}
+        </GroupLabel>
         <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6 shadow-xs">
           <h2 className="text-sm font-bold font-display text-foreground mb-4">
             {t("settings.account.password.title")}
@@ -409,5 +425,14 @@ function ContaPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+/** Título de um grupo de blocos da página (Conta tem muitos: separa por tema). */
+function GroupLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="px-1 pt-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+      {children}
+    </h2>
   );
 }

@@ -196,18 +196,19 @@ export function Stat({
   return (
     <div className="group relative overflow-hidden rounded-[1.75rem] border border-border/50 bg-card/60 p-5 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-white/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-white/5" />
-      <div className="flex items-start justify-between gap-3 relative z-10">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent shadow-sm transition-transform duration-300 group-hover:scale-110">
-          <Icon className="h-5 w-5" />
+      <div className="relative z-10 flex items-center gap-2">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent shadow-sm transition-transform duration-300 group-hover:scale-110">
+          <Icon className="h-4 w-4" />
         </span>
+        {/* Sem justificar: rótulo curto em coluna estreita ficava com buracos entre as palavras. */}
+        <p className="!text-left text-xs font-semibold leading-tight text-muted-foreground">
+          {label}
+        </p>
       </div>
-      <p className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground relative z-10">
+      <p className="relative z-10 mt-3 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
         {value}
       </p>
-      {hint && (
-        <p className="mt-1 text-xs text-muted-foreground relative z-10">{hint}</p>
-      )}
+      {hint && <p className="mt-1 text-xs text-muted-foreground relative z-10">{hint}</p>}
     </div>
   );
 }

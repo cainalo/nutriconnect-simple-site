@@ -233,47 +233,6 @@ function DesafiosIndexPage() {
           }
         />
 
-        {/* Conquistas compactas (só fazem sentido com desafios sociais, no perfil do responsável) */}
-        {active.kind === "adult" && (
-          <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 mb-8 shadow-xs">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <h2 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
-                <Award className="h-4 w-4 text-accent" />
-                <span>{t("dz.achievements")}</span>
-              </h2>
-              <span className="text-[10px] text-muted-foreground font-medium">
-                {totals.levels} {t("dz.levelsAnd")} {completedCount(challenges)}{" "}
-                {t("dz.challengesDone")}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {badges.map((badge) => (
-                <div
-                  key={badge.label}
-                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
-                    badge.achieved
-                      ? "border-accent/40 bg-accent-soft/40"
-                      : "border-dashed border-border bg-secondary/30 text-muted-foreground"
-                  }`}
-                >
-                  <EmojiIcon
-                    emoji={badge.achieved ? badge.icon : "🔒"}
-                    className={`h-4 w-4 ${badge.achieved ? "text-accent" : "text-muted-foreground"}`}
-                  />
-                  <span className="text-[11px] font-bold text-foreground">{td(badge.label)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Card de nível (o mesmo do perfil), só aqui e em Funções. */}
-        {active.kind === "adult" && (
-          <section className="mb-8 max-w-md">
-            <ProfileCard />
-          </section>
-        )}
-
         {/* Navegação por Abas (perfis infantis não têm rede social: sem desafios ou comunidades) */}
         <div
           className={`mb-8 grid gap-1 rounded-2xl bg-secondary p-1 sm:flex sm:items-center ${
@@ -443,6 +402,48 @@ function DesafiosIndexPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* Conquistas e nível depois do conteúdo: no celular o mapa da trilha aparece primeiro. */}
+        {/* Conquistas compactas (só fazem sentido com desafios sociais, no perfil do responsável) */}
+        {active.kind === "adult" && (
+          <div className="mt-10 rounded-3xl border border-border bg-card p-5 sm:p-6 mb-8 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <h2 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
+                <Award className="h-4 w-4 text-accent" />
+                <span>{t("dz.achievements")}</span>
+              </h2>
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {totals.levels} {t("dz.levelsAnd")} {completedCount(challenges)}{" "}
+                {t("dz.challengesDone")}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {badges.map((badge) => (
+                <div
+                  key={badge.label}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
+                    badge.achieved
+                      ? "border-accent/40 bg-accent-soft/40"
+                      : "border-dashed border-border bg-secondary/30 text-muted-foreground"
+                  }`}
+                >
+                  <EmojiIcon
+                    emoji={badge.achieved ? badge.icon : "🔒"}
+                    className={`h-4 w-4 ${badge.achieved ? "text-accent" : "text-muted-foreground"}`}
+                  />
+                  <span className="text-[11px] font-bold text-foreground">{td(badge.label)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Card de nível (o mesmo do perfil), só aqui e em Funções. */}
+        {active.kind === "adult" && (
+          <section className="mb-8 max-w-md">
+            <ProfileCard />
+          </section>
         )}
       </div>
 

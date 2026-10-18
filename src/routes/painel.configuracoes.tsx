@@ -271,8 +271,13 @@ function ProfessionalSettingsPage() {
 
         <PaymentsCard professionalId={user.id} />
 
-        <div className="flex justify-end">
-          <button type="submit" className={buttonPrimary} disabled={save.isPending || noModality}>
+        {/* Salvar fica preso no rodapé enquanto a página rola (no celular, acima da barra de baixo). */}
+        <div className="sticky bottom-24 z-20 flex justify-end lg:bottom-4">
+          <button
+            type="submit"
+            className={`${buttonPrimary} shadow-lg`}
+            disabled={save.isPending || noModality}
+          >
             {t("common.save")}
           </button>
         </div>
