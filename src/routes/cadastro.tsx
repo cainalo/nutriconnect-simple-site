@@ -220,13 +220,23 @@ function Cadastro() {
             className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-primary)]"
           />
           <span>
-            Tenho {MIN_AGE} anos ou mais e li e aceito os{" "}
+            {tr([
+              "Tenho {n} anos ou mais e li e aceito os",
+              "I am {n} or older and have read and accept the",
+              "Tengo {n} años o más y he leído y acepto los",
+              "J'ai {n} ans ou plus et j'ai lu et j'accepte les",
+            ]).replace("{n}", String(MIN_AGE))}{" "}
             <Link to="/termos" target="_blank" className="text-accent underline">
-              Termos de Uso
+              {tr(["Termos de Uso", "Terms of Use", "Términos de Uso", "Conditions d'utilisation"])}
             </Link>{" "}
-            e a{" "}
+            {tr(["e a", "and the", "y la", "et la"])}{" "}
             <Link to="/privacidade" target="_blank" className="text-accent underline">
-              Política de Privacidade
+              {tr([
+                "Política de Privacidade",
+                "Privacy Policy",
+                "Política de Privacidad",
+                "Politique de confidentialité",
+              ])}
             </Link>
             .
           </span>

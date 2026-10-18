@@ -243,7 +243,9 @@ function PageDemo() {
   const root = createRootRoute({ component: () => <><Comp /><BackToTop /></> });
   // Endereço real da página (comunidades.index → /comunidades), para a faixa de título aparecer.
   const path = "/" + (q.get("p") ?? "funcoes").split(".").filter((x) => x !== "index" && !x.startsWith("$")).join("/");
-  const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: [path] }) });
+  // &busca=secao%3Dusuarios → abre a página com ?secao=usuarios (para páginas que leem a busca).
+  const busca = q.get("busca");
+  const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: [busca ? `${path}?${busca}` : path] }) });
   return <RouterProvider router={router} />;
 }
 // v=card&c=HabitCheckinCard → um card de Funções sozinho (&click=<texto do botão> para clicar).

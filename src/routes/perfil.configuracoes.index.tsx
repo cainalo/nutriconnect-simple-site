@@ -164,7 +164,9 @@ function ConfiguracoesPage() {
         className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Voltar para o perfil</span>
+        <span>
+          {tr(["Voltar para o perfil", "Back to profile", "Volver al perfil", "Retour au profil"])}
+        </span>
       </Link>
 
       <h1 className="sr-only">{t("settings.title")}</h1>
@@ -210,7 +212,12 @@ function ConfiguracoesPage() {
             <div>
               <p className="text-sm font-bold text-foreground">{t("settings.signout")}</p>
               <p className="text-[11px] text-muted-foreground">
-                Você será desconectado e voltará para a tela de login.
+                {tr([
+                  "Você será desconectado e voltará para a tela de login.",
+                  "You'll be signed out and taken back to the login screen.",
+                  "Se cerrará tu sesión y volverás a la pantalla de inicio de sesión.",
+                  "Vous serez déconnecté et renvoyé à l'écran de connexion.",
+                ])}
               </p>
             </div>
             <button
@@ -230,12 +237,20 @@ function ConfiguracoesPage() {
             icon={Info}
             tone="bg-accent-soft text-accent"
             title={t("settings.section.about.title")}
-            hint="Nossa proposta e como falar com a gente"
+            hint={tr([
+              "Nossa proposta e como falar com a gente",
+              "What we stand for and how to reach us",
+              "Nuestra propuesta y cómo contactarnos",
+              "Notre mission et comment nous joindre",
+            ])}
           />
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Sua alimentação. Sua jornada. Uma rede viva para descobrir, compartilhar, aprender e
-            construir hábitos melhores juntos. Incentivamos a conexão saudável com a alimentação,
-            sem culpa e sem julgamento corporal.
+            {tr([
+              "Sua alimentação. Sua jornada. Uma rede viva para descobrir, compartilhar, aprender e construir hábitos melhores juntos. Incentivamos a conexão saudável com a alimentação, sem culpa e sem julgamento corporal.",
+              "Your food. Your journey. A living network to discover, share, learn and build better habits together. We encourage a healthy relationship with food, without guilt or body judgment.",
+              "Tu alimentación. Tu camino. Una red viva para descubrir, compartir, aprender y construir mejores hábitos juntos. Fomentamos una relación sana con la comida, sin culpa ni juicios sobre el cuerpo.",
+              "Votre alimentation. Votre parcours. Un réseau vivant pour découvrir, partager, apprendre et construire de meilleures habitudes ensemble. Nous encourageons un rapport sain à l'alimentation, sans culpabilité ni jugement sur le corps.",
+            ])}
           </p>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <Link
@@ -257,25 +272,41 @@ function ConfiguracoesPage() {
               className="flex items-center gap-2.5 rounded-xl border border-border/70 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary"
             >
               <FileText className="h-4 w-4 text-accent" />
-              Termos de Uso
+              {tr(["Termos de Uso", "Terms of Use", "Términos de Uso", "Conditions d'utilisation"])}
             </Link>
             <Link
               to="/privacidade"
               className="flex items-center gap-2.5 rounded-xl border border-border/70 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary"
             >
               <ShieldCheck className="h-4 w-4 text-accent" />
-              Política de Privacidade
+              {tr([
+                "Política de Privacidade",
+                "Privacy Policy",
+                "Política de Privacidad",
+                "Politique de confidentialité",
+              ])}
             </Link>
             <Link
               to="/diretrizes"
               className="flex items-center gap-2.5 rounded-xl border border-border/70 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary"
             >
               <Heart className="h-4 w-4 text-accent" />
-              Diretrizes da Comunidade
+              {tr([
+                "Diretrizes da Comunidade",
+                "Community Guidelines",
+                "Normas de la Comunidad",
+                "Règles de la communauté",
+              ])}
             </Link>
           </div>
           <p className="mt-4 text-[11px] text-muted-foreground">
-            © {new Date().getFullYear()} NutriConnect. Sua caminhada, no seu ritmo.
+            © {new Date().getFullYear()} NutriConnect.{" "}
+            {tr([
+              "Sua caminhada, no seu ritmo.",
+              "Your journey, at your pace.",
+              "Tu camino, a tu ritmo.",
+              "Votre parcours, à votre rythme.",
+            ])}
           </p>
         </section>
       </div>

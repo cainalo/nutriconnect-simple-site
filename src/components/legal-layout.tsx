@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-chrome";
 import { useI18n } from "@/hooks/use-i18n";
 import { SiteFooter } from "@/components/site-footer";
 import { LEGAL_UPDATED_AT } from "@/lib/legal";
+import { useTr } from "@/components/settings-ui";
 
 /** Moldura das páginas jurídicas (Termos, Privacidade, Diretrizes). */
 export function LegalLayout({
@@ -18,6 +19,7 @@ export function LegalLayout({
   children: ReactNode;
 }) {
   const { locale } = useI18n();
+  const tr = useTr();
   const lines = locale === "pt-BR" ? undefined : summary?.[locale as "en" | "es" | "fr"];
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -28,7 +30,13 @@ export function LegalLayout({
             {title}
           </h1>
           <p className="mt-2 text-xs text-muted-foreground">
-            Última atualização: {LEGAL_UPDATED_AT}
+            {tr([
+              "Última atualização",
+              "Last updated",
+              "Última actualización",
+              "Dernière mise à jour",
+            ])}
+            : {LEGAL_UPDATED_AT}
           </p>
           {lines && (
             <aside
@@ -63,6 +71,7 @@ type SectionProps = { id?: string; title: string; children: ReactNode };
 
 /** Índice das seções (as que têm id), para pular direto num texto longo. */
 function LegalIndex({ children }: { children: ReactNode }) {
+  const tr = useTr();
   const items = Children.toArray(children).flatMap((child) =>
     isValidElement<SectionProps>(child) && child.type === LegalSection && child.props.id
       ? [{ id: child.props.id, title: child.props.title }]
@@ -71,11 +80,11 @@ function LegalIndex({ children }: { children: ReactNode }) {
   if (items.length < 4) return null;
   return (
     <nav
-      aria-label="Índice"
+      aria-label={tr(["Índice", "Contents", "Índice", "Sommaire"])}
       className="mt-8 rounded-2xl border border-border/70 bg-card p-4 shadow-xs sm:p-5"
     >
       <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-        Nesta página
+        {tr(["Nesta página", "On this page", "En esta página", "Sur cette page"])}
       </p>
       <ol
         className="mt-3 grid gap-x-4 gap-y-1 sm:grid-flow-col sm:grid-cols-2 sm:[grid-template-rows:repeat(var(--rows),auto)]"

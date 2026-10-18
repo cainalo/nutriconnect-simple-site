@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
+import { useTr } from "@/components/settings-ui";
 import { supabase } from "@/integrations/supabase/client";
 import { COMPANY } from "@/lib/legal";
 
@@ -33,9 +34,10 @@ export const Route = createFileRoute("/contato")({
 function Contato() {
   const { t } = useI18n();
   const { user } = useAuth();
+  const tr = useTr();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [subject, setSubject] = useState("Dúvida geral");
+  const [subject, setSubject] = useState(() => t("contact.subject.general"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -44,9 +46,19 @@ function Contato() {
   const subjects = [
     t("contact.subject.general"),
     t("contact.subject.account"),
-    "Privacidade e dados pessoais (LGPD)",
-    "Denúncia de conteúdo",
-    "Pedir revisão de uma moderação",
+    tr([
+      "Privacidade e dados pessoais (LGPD)",
+      "Privacy and personal data (LGPD)",
+      "Privacidad y datos personales (LGPD)",
+      "Confidentialité et données personnelles (LGPD)",
+    ]),
+    tr(["Denúncia de conteúdo", "Report content", "Denuncia de contenido", "Signaler un contenu"]),
+    tr([
+      "Pedir revisão de uma moderação",
+      "Ask for a moderation review",
+      "Pedir revisión de una moderación",
+      "Demander la révision d'une modération",
+    ]),
     t("contact.subject.partners"),
     t("contact.subject.press"),
   ];
@@ -130,18 +142,32 @@ function Contato() {
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div className="text-xs leading-relaxed text-muted-foreground">
-                  <p className="text-sm font-bold text-foreground">Seus dados e denúncias</p>
+                  <p className="text-sm font-bold text-foreground">
+                    {tr([
+                      "Seus dados e denúncias",
+                      "Your data and reports",
+                      "Tus datos y denuncias",
+                      "Vos données et signalements",
+                    ])}
+                  </p>
                   <p className="mt-1">
-                    Para pedidos da LGPD (acesso, correção, exclusão) escolha o assunto “Privacidade
-                    e dados pessoais”. Você também pode baixar seus dados e excluir a conta em
-                    Configurações. Para denunciar um conteúdo, use o botão de denúncia ou o assunto
-                    “Denúncia de conteúdo”. Veja as{" "}
+                    {tr([
+                      "Para pedidos da LGPD (acesso, correção, exclusão) escolha o assunto “Privacidade e dados pessoais”. Você também pode baixar seus dados e excluir a conta em Configurações. Para denunciar um conteúdo, use o botão de denúncia ou o assunto “Denúncia de conteúdo”. Veja as",
+                      "For data requests (access, correction, deletion) choose the subject “Privacy and personal data”. You can also download your data and delete your account in Settings. To report content, use the report button or the subject “Report content”. See the",
+                      "Para solicitudes de datos (acceso, corrección, eliminación) elige el asunto “Privacidad y datos personales”. También puedes descargar tus datos y eliminar la cuenta en Ajustes. Para denunciar un contenido, usa el botón de denuncia o el asunto “Denuncia de contenido”. Consulta las",
+                      "Pour les demandes sur vos données (accès, rectification, suppression), choisissez le sujet « Confidentialité et données personnelles ». Vous pouvez aussi télécharger vos données et supprimer votre compte dans Paramètres. Pour signaler un contenu, utilisez le bouton de signalement ou le sujet « Signaler un contenu ». Consultez les",
+                    ])}{" "}
                     <Link to="/diretrizes" className="underline">
-                      Diretrizes
+                      {tr(["Diretrizes", "Guidelines", "Normas", "Règles"])}
                     </Link>{" "}
-                    e a{" "}
+                    {tr(["e a", "and the", "y la", "et la"])}{" "}
                     <Link to="/privacidade" className="underline">
-                      Política de Privacidade
+                      {tr([
+                        "Política de Privacidade",
+                        "Privacy Policy",
+                        "Política de Privacidad",
+                        "Politique de confidentialité",
+                      ])}
                     </Link>
                     .
                   </p>
@@ -187,7 +213,12 @@ function Contato() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="voce@exemplo.com"
+                        placeholder={tr([
+                          "voce@exemplo.com",
+                          "you@example.com",
+                          "tu@ejemplo.com",
+                          "vous@exemple.com",
+                        ])}
                       />
                     </Field>
                   </div>

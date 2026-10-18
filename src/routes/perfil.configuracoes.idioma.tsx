@@ -150,7 +150,12 @@ function IdiomaPage() {
       >
         <Row title={tr(["Formato da data", "Date format", "Formato de fecha", "Format de date"])}>
           <select
-            aria-label="date format"
+            aria-label={tr([
+              "Formato da data",
+              "Date format",
+              "Formato de fecha",
+              "Format de date",
+            ])}
             value={a.dateFormat}
             onChange={(e) => update({ dateFormat: e.target.value as DateFormat })}
             className={`${selectClass} max-w-[16rem]`}
@@ -164,7 +169,12 @@ function IdiomaPage() {
         </Row>
         <Row title={tr(["Formato da hora", "Time format", "Formato de hora", "Format de l'heure"])}>
           <select
-            aria-label="time format"
+            aria-label={tr([
+              "Formato da hora",
+              "Time format",
+              "Formato de hora",
+              "Format de l'heure",
+            ])}
             value={a.timeFormat}
             onChange={(e) => update({ timeFormat: e.target.value as TimeFormat })}
             className={selectClass}
@@ -186,7 +196,7 @@ function IdiomaPage() {
           ])}
         >
           <select
-            aria-label="time zone"
+            aria-label={tr(["Fuso horário", "Time zone", "Zona horaria", "Fuseau horaire"])}
             value={a.timeZone}
             onChange={(e) => update({ timeZone: e.target.value })}
             className={`${selectClass} max-w-[14rem]`}
