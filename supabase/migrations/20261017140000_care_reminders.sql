@@ -284,8 +284,9 @@ revoke execute on function public.export_my_data() from public, anon;
 grant execute on function public.export_my_data() to authenticated;
 
 -- ---------------------------------------------------------------------------
--- Push: o aviso de exame abre Exames; o de avaliação recebida abre Avaliações do painel.
--- (cópia de push_claim de 20261011100000_water.sql com as duas linhas novas)
+-- Push: o aviso de exame abre Exames; o de avaliação recebida abre Avaliações do painel; os de
+-- desafio entre amigos (X3) abrem Desafios.
+-- (cópia de push_claim de 20261011100000_water.sql com as linhas novas)
 -- ---------------------------------------------------------------------------
 create or replace function public.push_claim()
 returns table (user_id uuid, kind text, payload jsonb)
@@ -327,7 +328,7 @@ begin
         'kind', r.rkind, 'title', r.title, 'body', r.body,
         'url', coalesce(r.url, case r.rkind
                                  when 'refeicao' then '/acompanhamento/plano'
-                                 when 'desafio' then '/desafios'
+                                 when 'desafio' then '/desafios?aba=amigos'
                                  when 'agua' then '/acompanhamento'
                                  else '/espaco' end),
         'tag', 'lembrete-' || r.id, 'preview', r.preview, 'locale', r.locale);
@@ -406,6 +407,7 @@ begin
         when r.type in ('plano_publicado', 'plano_cuidado') then '/acompanhamento/plano'
         when r.type = 'avaliacao_registrada' then '/acompanhamento/evolucao'
         when r.type like 'exame_%' then '/acompanhamento/exames'
+        when r.type like 'desafio\_%' then '/desafios?aba=amigos'
         when r.type = 'diario_comentario' then '/acompanhamento/diario'
         when r.type = 'acompanhamento_pedido' then '/convites'
         when r.type = 'convite_aceito' then '/painel/pacientes'

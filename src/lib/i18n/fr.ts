@@ -1179,6 +1179,7 @@ const fr: Record<DictKey, string> = {
   "dz.tab.trail": "Mon Parcours",
   "dz.tab.popular": "Défis Populaires",
   "dz.tab.communities": "De Mes Communautés",
+  "dz.tab.friends": "Entre amis",
   "dz.badge": "Apprentissage et Défis",
   "dz.title": "Défis et Apprentissage",
   "dz.intro":

@@ -1652,6 +1652,59 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ DESAFIOS ENTRE AMIGOS E LIGA (X3)
+  -- B e C são amigos; A não é amigo de nenhum dos dois (B bloqueou A acima); F é estranho.
+  if to_regclass('public.friend_challenges') is not null then
+    declare
+      ch uuid;
+      today date := (now() at time zone 'America/Sao_Paulo')::date;
+    begin
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''agua'', 3, array[%L]::uuid[])', f));
+      res := res || jsonb_build_object('teste', 'desafio só com amigos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select public.create_friend_challenge(''agua'', 3, array[]::uuid[])');
+      res := res || jsonb_build_object('teste', 'desafio precisa de pelo menos 1 amigo', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select count(*) from public.friends_weekly_league() where user_id = %L', c));
+      res := res || jsonb_build_object('teste', 'amigo sem pontos NÃO aparece na liga (sem lanterninha)', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''agua'', 3, array[%L]::uuid[])', c));
+      res := res || jsonb_build_object('teste', 'cria desafio e o amigo é convidado',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = c and type = 'desafio_amigo_convite'),
+        'obtido', left(r, 90));
+      ch := r::uuid;
+      r := pg_temp.as_user(a, 'authenticated', format('select count(*) from public.friend_challenges where id = %L', ch));
+      res := res || jsonb_build_object('teste', 'quem não está no desafio NÃO o vê', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(a, 'authenticated', format('select public.respond_friend_challenge(%L, true)', ch));
+      res := res || jsonb_build_object('teste', 'só o convidado responde', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('select public.respond_friend_challenge(%L, true)', ch));
+      res := res || jsonb_build_object('teste', 'amigo aceita e quem criou é avisado',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = b and type = 'desafio_amigo_aceito'),
+        'obtido', left(r, 90));
+      insert into public.water_days (user_id, day, glasses, goal) values (c, today, 8, 8)
+      on conflict (user_id, day) do update set glasses = 8, goal = 8;
+      r := pg_temp.as_user(b, 'authenticated', format(
+        'select (m ->> ''days'') from public.my_friend_challenges() x, jsonb_array_elements(x.members) m where x.id = %L and (m ->> ''user_id'')::uuid = %L', ch, c));
+      res := res || jsonb_build_object('teste', 'placar conta os dias de água na meta do amigo', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', format('select public.cheer_friend_challenge(%L, %L)', ch, b));
+      res := res || jsonb_build_object('teste', 'mandar força para quem está no desafio', 'ok', (r = 't'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', format('select public.cheer_friend_challenge(%L, %L)', ch, b));
+      res := res || jsonb_build_object('teste', 'força só uma vez por dia', 'ok', (r = 'f'), 'obtido', r);
+      r := pg_temp.as_user(a, 'authenticated', format('select public.cheer_friend_challenge(%L, %L)', ch, b));
+      res := res || jsonb_build_object('teste', 'quem não participa NÃO manda força', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select agua from public.friends_weekly_league() where user_id = %L', c));
+      res := res || jsonb_build_object('teste', 'liga mostra os dias do amigo', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.friends_weekly_league() where is_me');
+      res := res || jsonb_build_object('teste', 'você sempre aparece na sua liga', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', 'select public.set_league_visible(false)');
+      r := pg_temp.as_user(b, 'authenticated', format('select count(*) from public.friends_weekly_league() where user_id = %L', c));
+      res := res || jsonb_build_object('teste', 'quem sai da liga some para os amigos', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''calma'', 2, array[%L]::uuid[])', c));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''trilha'', 2, array[%L]::uuid[])', c));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''mover'', 2, array[%L]::uuid[])', c));
+      res := res || jsonb_build_object('teste', 'no máximo 3 desafios criados por semana', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.friend_challenge_members where challenge_id = %L', ch));
+      res := res || jsonb_build_object('teste', 'estranho NÃO vê os membros', 'ok', (r = '0'), 'obtido', r);
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

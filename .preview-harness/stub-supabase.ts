@@ -12,6 +12,22 @@ const FIXTURES: Record<string, unknown> = fx
         { id: "r2", rating: 4, comment: "Consulta atenciosa e sem julgamento. Só atrasou uns 10 minutos.", reply: null, replied_at: null, created_at: "2026-10-02T15:00:00Z", author_name: null, author_avatar: null, mine: false },
         { id: "r3", rating: 5, comment: null, reply: null, replied_at: null, created_at: "2026-09-21T10:00:00Z", author_name: "Marcos", author_avatar: null, mine: false },
       ],
+      friends_weekly_league: [
+        { user_id: "f1", name: "Juliana Prado", username: "ju", avatar_url: null, points: 17, agua: 5, verduras: 4, caseira: 3, mover: 2, calma: 1, trilha: 2, is_me: false },
+        { user_id: "u1", name: "Maria Silva", username: "maria", avatar_url: null, points: 12, agua: 4, verduras: 3, caseira: 2, mover: 1, calma: 0, trilha: 2, is_me: true },
+        { user_id: "f2", name: "Marcos Lima", username: "marcos", avatar_url: null, points: 9, agua: 3, verduras: 2, caseira: 2, mover: 1, calma: 1, trilha: 0, is_me: false },
+        { user_id: "f3", name: "Ana Costa", username: "ana", avatar_url: null, points: 4, agua: 2, verduras: 1, caseira: 1, mover: 0, calma: 0, trilha: 0, is_me: false },
+      ],
+      my_friend_challenges: [
+        { id: "c1", metric: "agua", target: 5, title: "Turma da água", week_start: "2099-01-01", creator_id: "u1", my_status: "aceito", members: [
+          { user_id: "u1", name: "Maria Silva", avatar_url: null, status: "aceito", days: 4, is_me: true },
+          { user_id: "f1", name: "Juliana Prado", avatar_url: null, status: "aceito", days: 5, is_me: false },
+          { user_id: "f2", name: "Marcos Lima", avatar_url: null, status: "convidado", days: 0, is_me: false },
+        ] },
+        { id: "c2", metric: "verduras", target: 4, title: null, week_start: "2099-01-01", creator_id: "f3", my_status: "convidado", members: [
+          { user_id: "f3", name: "Ana Costa", avatar_url: null, status: "aceito", days: 1, is_me: false },
+        ] },
+      ],
     }
   : {};
 

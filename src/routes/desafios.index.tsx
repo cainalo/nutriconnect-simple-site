@@ -2,7 +2,7 @@ import { td } from "@/lib/i18n/data";
 import { ProfileCard } from "@/components/rail-cards";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Award, BookOpen, Flame, UserRound, Users } from "lucide-react";
+import { Award, BookOpen, Flame, Trophy, UserRound, Users } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ChallengeCard } from "@/components/community-cards";
 import {
@@ -48,6 +48,7 @@ import { KidLunchboxToday, LunchboxLink } from "@/components/lunchbox-panel";
 import { useI18n } from "@/hooks/use-i18n";
 import type { DictKey } from "@/lib/i18n";
 import { EmojiIcon } from "@/components/emoji-icon";
+import { FriendsTab } from "@/components/friend-challenges";
 
 export const Route = createFileRoute("/desafios/")({
   head: () => ({
@@ -60,15 +61,19 @@ export const Route = createFileRoute("/desafios/")({
       },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { aba?: "amigos" } => ({
+    aba: search.aba === "amigos" ? "amigos" : undefined,
+  }),
   component: DesafiosIndexPage,
 });
 
-type Tab = "trilha" | "populares" | "comunidades";
+type Tab = "trilha" | "populares" | "comunidades" | "amigos";
 
 const TABS: { key: Tab; label: DictKey; icon: React.ReactNode }[] = [
   { key: "trilha", label: "dz.tab.trail", icon: <BookOpen className="h-4 w-4" /> },
   { key: "populares", label: "dz.tab.popular", icon: <Flame className="h-4 w-4" /> },
   { key: "comunidades", label: "dz.tab.communities", icon: <Users className="h-4 w-4" /> },
+  { key: "amigos", label: "dz.tab.friends", icon: <Trophy className="h-4 w-4" /> },
 ];
 
 function DesafiosIndexPage() {
@@ -80,7 +85,8 @@ function DesafiosIndexPage() {
   const challenges = useMemo(() => challengesQuery.data ?? [], [challengesQuery.data]);
   const communities = useMemo(() => myCommunities.data ?? [], [myCommunities.data]);
   const hydrated = !challengesQuery.isLoading;
-  const [tab, setTab] = useState<Tab>("trilha");
+  const { aba } = Route.useSearch();
+  const [tab, setTab] = useState<Tab>(aba ?? "trilha");
 
   const currentUserId = user?.id || "guest";
   const { profiles, active, select, addKid, removeKid } = useTrailProfiles(
@@ -269,12 +275,16 @@ function DesafiosIndexPage() {
         )}
 
         {/* Navegação por Abas (perfis infantis não têm rede social: sem desafios ou comunidades) */}
-        <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1 mb-8 overflow-x-auto no-scrollbar">
+        <div
+          className={`mb-8 grid gap-1 rounded-2xl bg-secondary p-1 sm:flex sm:items-center ${
+            active.kind === "adult" ? "grid-cols-2" : "grid-cols-1"
+          }`}
+        >
           {(active.kind === "adult" ? TABS : TABS.filter((tb) => tb.key === "trilha")).map((tb) => (
             <button
               key={tb.key}
               onClick={() => setTab(tb.key)}
-              className={`flex items-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 text-xs font-semibold transition whitespace-nowrap ${
+              className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 sm:px-5 py-2.5 text-center text-xs font-semibold leading-tight transition sm:whitespace-nowrap ${
                 tab === tb.key
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
@@ -389,6 +399,9 @@ function DesafiosIndexPage() {
                 )}
               </div>
             )}
+
+            {/* ── ABA: Com amigos (desafios entre amigos e liga da semana) ── */}
+            {tab === "amigos" && active.kind === "adult" && <FriendsTab />}
 
             {/* ── ABA: Das Minhas Comunidades ── */}
             {tab === "comunidades" && active.kind === "adult" && (

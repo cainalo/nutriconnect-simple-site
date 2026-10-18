@@ -41,6 +41,28 @@ export const CATALOG_B: CatalogItem[] = [
     howTo: ["Abra Desafios", "Escolha um desafio e toque em Participar"],
   },
   {
+    id: "desafios-amigos",
+    kind: "funcionalidade",
+    area: "social",
+    title: "Desafios com amigos e liga da semana",
+    route: "/desafios?aba=amigos",
+    audience: "Quem tem amigos no site",
+    summary:
+      "Metas de dias na semana feitas junto com amigos e uma liga gentil, que conta os dias em que cada um cuidou de si.",
+    features: [
+      "6 metas: água na meta, verduras, comida de casa, movimento, refeição com calma e trilha",
+      "Convidar de 1 a 7 amigos; cada um topa ou não; até 3 desafios criados por semana",
+      "Placar em dias com barra de progresso e Mandar força (um aviso por pessoa por dia)",
+      "Liga da semana: pódio e pontos dos amigos; quem não pontuou não aparece (sem lanterninha)",
+      "Interruptor Aparecer para os amigos; ninguém vê dados de saúde, só dias",
+    ],
+    howTo: [
+      "Abra Desafios → Com amigos",
+      "Toque em Novo desafio, escolha a meta, os dias e os amigos",
+      "Acompanhe o placar e mande força",
+    ],
+  },
+  {
     id: "desafio",
     kind: "funcionalidade",
     area: "trilha",

@@ -4954,6 +4954,7 @@ export type Database = {
         Row: {
           appearance: Json | null
           habit_choice: string[] | null
+          league_visible: boolean
           id: string
           locale: string | null
           no_numbers: boolean
@@ -4966,6 +4967,7 @@ export type Database = {
         Insert: {
           appearance?: Json | null
           habit_choice?: string[] | null
+          league_visible?: boolean
           id: string
           locale?: string | null
           no_numbers?: boolean
@@ -4978,6 +4980,7 @@ export type Database = {
         Update: {
           appearance?: Json | null
           habit_choice?: string[] | null
+          league_visible?: boolean
           id?: string
           locale?: string | null
           no_numbers?: boolean
@@ -6164,6 +6167,54 @@ export type Database = {
         }
       }
       confirm_attendance: { Args: { p_appointment: string }; Returns: undefined }
+      cheer_friend_challenge: {
+        Args: { p_challenge: string; p_user: string }
+        Returns: boolean
+      }
+      create_friend_challenge: {
+        Args: {
+          p_friends: string[]
+          p_metric: string
+          p_target: number
+          p_title?: string
+        }
+        Returns: string
+      }
+      friends_weekly_league: {
+        Args: { p_week_start?: string }
+        Returns: {
+          agua: number
+          avatar_url: string
+          caseira: number
+          calma: number
+          is_me: boolean
+          mover: number
+          name: string
+          points: number
+          trilha: number
+          user_id: string
+          username: string
+          verduras: number
+        }[]
+      }
+      my_friend_challenges: {
+        Args: never
+        Returns: {
+          creator_id: string
+          id: string
+          members: Json
+          metric: string
+          my_status: string
+          target: number
+          title: string
+          week_start: string
+        }[]
+      }
+      respond_friend_challenge: {
+        Args: { p_accept: boolean; p_challenge: string }
+        Returns: undefined
+      }
+      set_league_visible: { Args: { p_visible: boolean }; Returns: undefined }
       export_my_data: { Args: never; Returns: Json }
       admin_set_review_hidden: {
         Args: { p_hidden: boolean; p_review: string }

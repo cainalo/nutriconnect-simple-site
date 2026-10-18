@@ -291,3 +291,16 @@ exames, e `push_claim()` (links do push de exame e de avaliação). 13 testes (4
 **E-mail:** o projeto não tem provedor de e-mail. Para mandar os lembretes por e-mail, criar conta
 num provedor (ex.: Resend), guardar a chave como segredo das Edge Functions e fazer uma função que
 leia as mesmas notificações.
+
+## X3 — Desafios com amigos e liga da semana (18/10/2026)
+
+Aba **Com amigos** em Desafios (`/desafios?aba=amigos`; as abas viraram grade 2×2 no celular).
+Migration `20261017150000_friend_challenges.sql` (**ainda não aplicada em produção**): tudo conta
+DIAS na semana (domingo a sábado, Brasília) a partir do que já existe: `water_days` na meta, hábitos
+`veg`/`homemade`/`move` em `daily_checkins`, `mindful_meals`, dias com XP na trilha
+(`_activity_days`, só uso interno). Desafio: `create_friend_challenge` (1 a 7 amigos, até 3 por
+semana), `respond_friend_challenge`, `my_friend_challenges` (placar), `cheer_friend_challenge`
+(1 força por pessoa por dia). Liga: `friends_weekly_league` (você + amigos com
+`user_settings.league_visible`; quem tem 0 ponto não aparece para os outros). Avisos
+`desafio_amigo_convite`, `desafio_amigo_aceito`, `desafio_forca` (categoria social; push abre a aba).
+16 testes (515 no total). Harness: `?v=page&p=desafios.index&fx=1&click=Com amigos`.

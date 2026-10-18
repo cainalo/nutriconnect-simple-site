@@ -155,7 +155,9 @@ function categoryOf(type: string): CategoryId {
     ["reacao", "comentario", "seguidor", "amizade_pedido", "amizade_aceita"].includes(type) ||
     type.startsWith("dupla_") ||
     type.startsWith("casa_") ||
-    type.startsWith("evento_")
+    type.startsWith("evento_") ||
+    type.startsWith("desafio_amigo_") ||
+    type === "desafio_forca"
   )
     return "social";
   if (
@@ -301,6 +303,39 @@ function describe(
         ]),
         detail: dateOf(data.starts_at, locale),
         go: { to: isPro ? "/painel/agenda" : "/acompanhamento/consultas" },
+      };
+    case "desafio_amigo_convite":
+      return {
+        icon: Trophy,
+        text: fill([
+          "{name} chamou você para um desafio da semana",
+          "{name} invited you to a weekly challenge",
+          "{name} te invitó a un desafío de la semana",
+          "{name} vous invite à un défi de la semaine",
+        ]),
+        go: { to: "/desafios", search: { aba: "amigos" } },
+      };
+    case "desafio_amigo_aceito":
+      return {
+        icon: Trophy,
+        text: fill([
+          "{name} topou o seu desafio",
+          "{name} joined your challenge",
+          "{name} se sumó a tu desafío",
+          "{name} a rejoint votre défi",
+        ]),
+        go: { to: "/desafios", search: { aba: "amigos" } },
+      };
+    case "desafio_forca":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} mandou força para você no desafio",
+          "{name} cheered you on in the challenge",
+          "{name} te envió ánimo en el desafío",
+          "{name} vous encourage dans le défi",
+        ]),
+        go: { to: "/desafios", search: { aba: "amigos" } },
       };
     case "consulta_lembrete":
       return {

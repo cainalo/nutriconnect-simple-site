@@ -124,7 +124,7 @@ do admin (Design do site) escolhe qual está no ar.
 10. [x] P1 — Marketplace de consultas (busca por especialidade, avaliações verificadas, agenda, pagamento) — avaliações e ordenação feitas em 17/10
 11. [x] X1 — Diário de sintomas e alimentação com correlações (para levar à consulta) — feito em 17/10 (aba Sintomas do Diário)
 12. [x] X2 — Lembretes de consulta e de exames (e-mail e push, confirmação de presença) — feito em 17/10 no site e por push; e-mail espera um provedor (Resend ou similar)
-13. [ ] X3 — Desafios entre amigos e ligas semanais (ranking gentil, sem culpa)
+13. [x] X3 — Desafios entre amigos e ligas semanais (ranking gentil, sem culpa) — feito em 18/10 (Desafios → Com amigos)
 14. [ ] X4 — Pontos e recompensas (desconto na Loja de programas, brindes de parceiros)
 15. [ ] X5 — Receitas da comunidade (coleções salvas; tabela nutricional de base fixa, TACO)
 16. [ ] X6 — Modo família e cuidador (acompanha hábitos de criança/idoso sem ver dados clínicos)

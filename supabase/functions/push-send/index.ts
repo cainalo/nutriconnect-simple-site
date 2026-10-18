@@ -174,6 +174,24 @@ const AVISOS: Record<string, Names> = {
     "Recordatorio: tienes un examen en las próximas 24 horas",
     "Rappel : vous avez un examen dans les prochaines 24 heures",
   ],
+  desafio_amigo_convite: [
+    "{name} chamou você para um desafio da semana",
+    "{name} invited you to a weekly challenge",
+    "{name} te invitó a un desafío de la semana",
+    "{name} vous invite à un défi de la semaine",
+  ],
+  desafio_amigo_aceito: [
+    "{name} topou o seu desafio",
+    "{name} joined your challenge",
+    "{name} se sumó a tu desafío",
+    "{name} a rejoint votre défi",
+  ],
+  desafio_forca: [
+    "{name} mandou força para você no desafio",
+    "{name} cheered you on in the challenge",
+    "{name} te envió ánimo en el desafío",
+    "{name} vous encourage dans le défi",
+  ],
   consulta_sala: [
     "{name} entrou na sala da consulta",
     "{name} joined the appointment room",

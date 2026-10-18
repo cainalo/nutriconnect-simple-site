@@ -1175,6 +1175,7 @@ const ptBR = {
   "dz.tab.trail": "Minha Trilha",
   "dz.tab.popular": "Desafios Populares",
   "dz.tab.communities": "Das Minhas Comunidades",
+  "dz.tab.friends": "Com amigos",
   "dz.badge": "Aprendizado & Desafios",
   "dz.title": "Desafios & Aprendizado",
   "dz.intro":
