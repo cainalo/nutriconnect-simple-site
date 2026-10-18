@@ -28,6 +28,9 @@ const FIXTURES: Record<string, unknown> = fx
           { user_id: "f3", name: "Ana Costa", avatar_url: null, status: "aceito", days: 1, is_me: false },
         ] },
       ],
+      get_care_invite: [
+        { code: "ABC123", professional_id: PRO, professional_name: "Ana Paula Reis", invitee_name: "Maria", valid: true },
+      ],
       reward_balance: 480,
       reward_week_preview: 120,
     }
@@ -35,6 +38,9 @@ const FIXTURES: Record<string, unknown> = fx
 // Tabelas com dados de exemplo (&fx=1).
 const TABLES: Record<string, unknown> = fx
   ? {
+      professional_directory: [
+        { id: PRO, name: "Ana Paula Reis", avatar_url: null, profession: "Nutricionista", council: "CRN", registration: "12345", uf: "SP", verified_at: "2026-09-01T00:00:00Z", headline: null, bio: null, specialties: [], accepting_patients: true },
+      ],
       rewards: [
         { id: "rw1", kind: "desconto_programa", title: "10% de desconto num programa da Loja", description: "Vale para um programa de qualquer profissional. O desconto sai da taxa do NutriConnect: o profissional recebe o mesmo valor.", cost: 600, discount_percent: 10, partner_id: null, stock: null, valid_days: 60, active: true, position: 0, created_at: "2026-10-18T00:00:00Z" },
         { id: "rw2", kind: "brinde_parceiro", title: "Kit de temperos do Empório", description: "Retire na loja parceira com o código.", cost: 400, discount_percent: null, partner_id: null, stock: 12, valid_days: 30, active: true, position: 1, created_at: "2026-10-18T00:00:00Z" },
@@ -52,7 +58,13 @@ const TABLES: Record<string, unknown> = fx
 
 function make(data: unknown): any {
   const c: any = new Proxy(function () {}, {
-    get: (_t, p) => (p === "then" ? (r: any) => r({ data, error: null }) : c),
+    get: (_t, p) =>
+      p === "then"
+        ? (r: any) => r({ data, error: null })
+        : // .single()/.maybeSingle() devolvem a primeira linha, como no Supabase.
+          (p === "single" || p === "maybeSingle") && Array.isArray(data)
+          ? () => make(data[0] ?? null)
+          : c,
     apply: () => c,
   });
   return c;
