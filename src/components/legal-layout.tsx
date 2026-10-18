@@ -1,4 +1,4 @@
-import { Children, isValidElement, type CSSProperties, type ReactNode } from "react";
+import { Children, isValidElement, type ReactNode } from "react";
 import { SiteHeader } from "@/components/site-chrome";
 import { useI18n } from "@/hooks/use-i18n";
 import { SiteFooter } from "@/components/site-footer";
@@ -86,14 +86,12 @@ function LegalIndex({ children }: { children: ReactNode }) {
       <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
         {tr(["Nesta página", "On this page", "En esta página", "Sur cette page"])}
       </p>
-      <ol
-        className="mt-3 grid gap-x-4 gap-y-1 sm:grid-flow-col sm:grid-cols-2 sm:[grid-template-rows:repeat(var(--rows),auto)]"
-        style={{ "--rows": Math.ceil(items.length / 2) } as CSSProperties}
-      >
+      {/* Duas colunas que se leem de cima para baixo (1–7 na primeira, 8–13 na segunda). */}
+      <ol className="mt-3 gap-x-4 space-y-1 sm:columns-2">
         {items.map(({ id, title }) => {
           const m = /^(\d+)\.\s*(.*)$/.exec(title);
           return (
-            <li key={id}>
+            <li key={id} className="break-inside-avoid">
               <a
                 href={`#${id}`}
                 className="flex min-h-10 items-center gap-2.5 rounded-xl px-2 text-sm text-foreground transition hover:bg-secondary"
