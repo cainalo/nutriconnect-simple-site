@@ -36,3 +36,16 @@ export function isAdult(birthDate: string, today = new Date()): boolean {
   const limit = new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate());
   return new Date(y, mo - 1, d) <= limit;
 }
+
+/** Campos de COMPANY obrigatórios para divulgar o site comercialmente (Decreto 7.962/2013 e LGPD). */
+export const REQUIRED_LEGAL_FIELDS = ["legalName", "cnpj", "address", "dpoName"] as const;
+export type LegalField = (typeof REQUIRED_LEGAL_FIELDS)[number];
+
+/**
+ * Campos legais ainda vazios. Enquanto houver algum, o site não está pronto para lançamento
+ * comercial: o admin mostra o aviso e `npm run audit:release` falha. Os dados vêm do operador;
+ * nunca preencha com exemplos.
+ */
+export function missingLegalFields(company: Record<LegalField, string> = COMPANY): LegalField[] {
+  return REQUIRED_LEGAL_FIELDS.filter((f) => !company[f]?.trim());
+}

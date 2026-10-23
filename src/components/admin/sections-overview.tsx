@@ -21,6 +21,8 @@ import {
 import { BarChart, Panel, QueryError, StatCard } from "@/components/admin/admin-ui";
 import { money, useOverview, useSettings, type Overview, type SeriesPoint } from "@/lib/admin-api";
 import { useTr } from "@/components/settings-ui";
+import { missingLegalFields, type LegalField } from "@/lib/legal";
+import type { Names } from "@/lib/appearance-data";
 import type { SectionId } from "@/components/admin/sections";
 
 const dm = (day: string) => {
@@ -270,6 +272,7 @@ export function OverviewSection({ go }: { go: (id: SectionId) => void }) {
 
   return (
     <div className="space-y-5">
+      <LegalPending />
       <Panel
         title={tr(["Atenção agora", "Needs attention", "Atención ahora", "À traiter maintenant"])}
         hint={
@@ -526,5 +529,55 @@ export function OverviewSection({ go }: { go: (id: SectionId) => void }) {
         )}
       </p>
     </div>
+  );
+}
+
+const LEGAL_LABELS: Record<LegalField, Names> = {
+  legalName: ["Razão social", "Legal name", "Razón social", "Raison sociale"],
+  cnpj: ["CNPJ", "CNPJ (company ID)", "CNPJ (identificación fiscal)", "CNPJ (identifiant fiscal)"],
+  address: ["Endereço da sede", "Registered address", "Dirección de la sede", "Adresse du siège"],
+  dpoName: [
+    "Encarregado de dados (DPO)",
+    "Data protection officer (DPO)",
+    "Encargado de datos (DPO)",
+    "Délégué à la protection des données (DPO)",
+  ],
+};
+
+/** Dados da empresa que faltam para o lançamento comercial (NC-LEGAL-003). */
+function LegalPending() {
+  const tr = useTr();
+  const missing = missingLegalFields();
+  if (missing.length === 0) return null;
+  return (
+    <Panel
+      title={tr([
+        "Lançamento comercial bloqueado",
+        "Commercial launch blocked",
+        "Lanzamiento comercial bloqueado",
+        "Lancement commercial bloqué",
+      ])}
+      hint={tr([
+        "A lei pede a identificação de quem opera o site e do encarregado de dados. Preencha com os dados reais em src/lib/legal.ts (com revisão jurídica).",
+        "The law requires identifying who runs the site and the data protection officer. Fill in the real details in src/lib/legal.ts (with legal review).",
+        "La ley exige identificar a quien opera el sitio y al encargado de datos. Completa los datos reales en src/lib/legal.ts (con revisión jurídica).",
+        "La loi exige d'identifier l'exploitant du site et le délégué à la protection des données. Renseignez les vraies données dans src/lib/legal.ts (avec une revue juridique).",
+      ])}
+    >
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {missing.map((f) => (
+          <li
+            key={f}
+            className="flex min-h-10 items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 text-sm text-foreground"
+          >
+            <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" aria-hidden />
+            {tr(LEGAL_LABELS[f])}
+            <span className="ml-auto text-xs text-muted-foreground">
+              {tr(["vazio", "empty", "vacío", "vide"])}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Panel>
   );
 }
