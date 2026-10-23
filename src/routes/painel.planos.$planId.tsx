@@ -1,7 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { sitePrompt } from "@/components/confirm-action";
-import { siteConfirm } from "@/components/confirm-action";
-import { ArrowLeft, BookmarkPlus, Copy, FileDown, Send, Trash2, Utensils } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { siteConfirm, sitePrompt } from "@/components/confirm-action";
+import {
+  ArrowLeft,
+  BookmarkPlus,
+  Copy,
+  FileDown,
+  Send,
+  Trash2,
+  Utensils,
+  MoreHorizontal,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useTr } from "@/components/settings-ui";
 import { useSavePlanTemplate } from "@/lib/clinical/adherence";
@@ -124,73 +138,87 @@ function MealPlanPage() {
             {plan.status === "rascunho" && ` · ${t("plan.draftHint")}`}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" className={buttonSecondary} onClick={() => void pdf()}>
-            <FileDown className="h-4 w-4" /> PDF
-          </button>
-          {linkActive && (
-            <button
-              type="button"
-              className={buttonSecondary}
-              disabled={duplicate.isPending}
-              onClick={() => duplicate.mutate(undefined)}
-            >
-              <Copy className="h-4 w-4" /> {t("plan.duplicate")}
-            </button>
-          )}
-          {plan.professional_id === user?.id && (
-            <button
-              type="button"
-              className={buttonSecondary}
-              disabled={saveTemplate.isPending}
-              onClick={async () => {
-                const name = await sitePrompt(
-                  tr([
-                    "Nome do modelo (sem dados do paciente):",
-                    "Template name (no patient data):",
-                    "Nombre de la plantilla (sin datos del paciente):",
-                    "Nom du modèle (sans données du patient) :",
-                  ]),
-                  plan.title,
-                );
-                if (name?.trim())
-                  saveTemplate.mutate(
-                    { planId, title: name.trim() },
-                    {
-                      onSuccess: () =>
-                        toast.success(
-                          tr([
-                            'Modelo salvo. Use em "Novo plano" de qualquer paciente.',
-                            'Template saved. Use it from "New plan" for any patient.',
-                            'Plantilla guardada. Úsala en "Nuevo plan" de cualquier paciente.',
-                            "Modèle enregistré. Utilisez-le via « Nouveau plan » pour tout patient.",
-                          ]),
-                        ),
-                      onError: (err) => toast.error((err as Error).message),
-                    },
-                  );
-              }}
-            >
-              <BookmarkPlus className="h-4 w-4" />
-              {tr([
-                "Salvar como modelo",
-                "Save as template",
-                "Guardar como plantilla",
-                "Enregistrer comme modèle",
-              ])}
-            </button>
-          )}
-          {plan.status === "rascunho" && (
-            <button
-              type="button"
-              className={buttonDanger}
-              onClick={async () =>
-                (await siteConfirm(t("plan.deleteConfirm"))) && remove.mutate(undefined)
-              }
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
+        {/* PDF, duplicar, modelo e apagar ficam no menu "Mais"; Publicar fica ao lado. */}
+        <div className="flex items-center gap-2">
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <button type="button" className={buttonSecondary}>
+                <MoreHorizontal className="h-4 w-4" />
+                {tr(["Mais", "More", "Más", "Plus"])}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+              <DropdownMenuItem className="min-h-10 gap-2" onSelect={() => void pdf()}>
+                <FileDown className="h-4 w-4" /> PDF
+              </DropdownMenuItem>
+              {linkActive && (
+                <DropdownMenuItem
+                  className="min-h-10 gap-2"
+                  disabled={duplicate.isPending}
+                  onSelect={() => duplicate.mutate(undefined)}
+                >
+                  <Copy className="h-4 w-4" /> {t("plan.duplicate")}
+                </DropdownMenuItem>
+              )}
+              {plan.professional_id === user?.id && (
+                <DropdownMenuItem
+                  className="min-h-10 gap-2"
+                  disabled={saveTemplate.isPending}
+                  onSelect={async () => {
+                    const name = await sitePrompt(
+                      tr([
+                        "Nome do modelo (sem dados do paciente):",
+                        "Template name (no patient data):",
+                        "Nombre de la plantilla (sin datos del paciente):",
+                        "Nom du modèle (sans données du patient) :",
+                      ]),
+                      plan.title,
+                    );
+                    if (name?.trim())
+                      saveTemplate.mutate(
+                        { planId, title: name.trim() },
+                        {
+                          onSuccess: () =>
+                            toast.success(
+                              tr([
+                                'Modelo salvo. Use em "Novo plano" de qualquer paciente.',
+                                'Template saved. Use it from "New plan" for any patient.',
+                                'Plantilla guardada. Úsala en "Nuevo plan" de cualquier paciente.',
+                                "Modèle enregistré. Utilisez-le via « Nouveau plan » pour tout patient.",
+                              ]),
+                            ),
+                          onError: (err) => toast.error((err as Error).message),
+                        },
+                      );
+                  }}
+                >
+                  <BookmarkPlus className="h-4 w-4" />
+                  {tr([
+                    "Salvar como modelo",
+                    "Save as template",
+                    "Guardar como plantilla",
+                    "Enregistrer comme modèle",
+                  ])}
+                </DropdownMenuItem>
+              )}
+              {plan.status === "rascunho" && (
+                <DropdownMenuItem
+                  className="min-h-10 gap-2 text-destructive focus:text-destructive"
+                  onSelect={async () =>
+                    (await siteConfirm(t("plan.deleteConfirm"))) && remove.mutate(undefined)
+                  }
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {tr([
+                    "Apagar rascunho",
+                    "Delete draft",
+                    "Borrar borrador",
+                    "Supprimer le brouillon",
+                  ])}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           {editable && plan.status !== "ativo" && (
             <button
               type="button"
