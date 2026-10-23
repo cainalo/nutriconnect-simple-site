@@ -25,6 +25,7 @@ import {
   UsersRound,
   type LucideIcon,
 } from "lucide-react";
+import type { Names } from "@/lib/appearance-data";
 
 export type SectionId =
   | "visao"
@@ -51,37 +52,158 @@ export type SectionId =
   | "config"
   | "auditoria";
 
+/** Nomes nos 4 idiomas (pt, en, es, fr), escolhidos com useTr(). */
 export interface SectionDef {
   id: SectionId;
-  label: string;
+  label: Names;
   icon: LucideIcon;
-  group: string;
+  group: Names;
 }
 
 export const SECTIONS: SectionDef[] = [
-  { id: "visao", label: "Visão geral", icon: LayoutDashboard, group: "Painel" },
-  { id: "documentacao", label: "Documentação", icon: BookOpen, group: "Painel" },
-  { id: "qualidade", label: "Qualidade", icon: ClipboardCheck, group: "Painel" },
-  { id: "usuarios", label: "Pessoas", icon: Users, group: "Pessoas" },
-  { id: "verificacoes", label: "Verificações", icon: BadgeCheck, group: "Pessoas" },
-  { id: "contato", label: "Fale conosco", icon: Inbox, group: "Pessoas" },
-  { id: "posts", label: "Publicações", icon: FileText, group: "Conteúdo" },
-  { id: "ia_barrados", label: "Barrados pela IA", icon: Bot, group: "Conteúdo" },
-  { id: "moderacao", label: "Moderação", icon: Flag, group: "Conteúdo" },
-  { id: "comunidades", label: "Comunidades", icon: UsersRound, group: "Conteúdo" },
-  { id: "temas", label: "Temas da semana", icon: CalendarDays, group: "Conteúdo" },
-  { id: "apresentacao", label: "Apresentação", icon: Presentation, group: "Conteúdo" },
-  { id: "anuncios", label: "Anúncios", icon: Megaphone, group: "Conteúdo" },
-  { id: "redes", label: "Redes sociais", icon: Share2, group: "Conteúdo" },
-  { id: "site_features", label: "Funcionalidades", icon: ToggleRight, group: "Site" },
-  { id: "site_nina", label: "Nina", icon: Smile, group: "Site" },
-  { id: "site_design", label: "Design e imagens", icon: Palette, group: "Site" },
-  { id: "financeiro", label: "Financeiro", icon: Banknote, group: "Negócio" },
-  { id: "mercados", label: "Mercados parceiros", icon: ShoppingCart, group: "Negócio" },
-  { id: "recompensas", label: "Recompensas", icon: Gift, group: "Negócio" },
-  { id: "ia", label: "Inteligência artificial", icon: Brain, group: "Sistema" },
-  { id: "config", label: "Configurações", icon: Settings, group: "Sistema" },
-  { id: "auditoria", label: "Auditoria", icon: History, group: "Sistema" },
+  {
+    id: "visao",
+    label: ["Visão geral", "Overview", "Visión general", "Vue d'ensemble"],
+    icon: LayoutDashboard,
+    group: ["Painel", "Dashboard", "Panel", "Tableau de bord"],
+  },
+  {
+    id: "documentacao",
+    label: ["Documentação", "Documentation", "Documentación", "Documentation"],
+    icon: BookOpen,
+    group: ["Painel", "Dashboard", "Panel", "Tableau de bord"],
+  },
+  {
+    id: "qualidade",
+    label: ["Qualidade", "Quality", "Calidad", "Qualité"],
+    icon: ClipboardCheck,
+    group: ["Painel", "Dashboard", "Panel", "Tableau de bord"],
+  },
+  {
+    id: "usuarios",
+    label: ["Pessoas", "People", "Personas", "Personnes"],
+    icon: Users,
+    group: ["Pessoas", "People", "Personas", "Personnes"],
+  },
+  {
+    id: "verificacoes",
+    label: ["Verificações", "Verifications", "Verificaciones", "Vérifications"],
+    icon: BadgeCheck,
+    group: ["Pessoas", "People", "Personas", "Personnes"],
+  },
+  {
+    id: "contato",
+    label: ["Fale conosco", "Contact us", "Contacto", "Nous contacter"],
+    icon: Inbox,
+    group: ["Pessoas", "People", "Personas", "Personnes"],
+  },
+  {
+    id: "posts",
+    label: ["Publicações", "Posts", "Publicaciones", "Publications"],
+    icon: FileText,
+    group: ["Conteúdo", "Content", "Contenido", "Contenu"],
+  },
+  {
+    id: "ia_barrados",
+    label: ["Barrados pela IA", "Blocked by AI", "Bloqueados por la IA", "Bloqués par l'IA"],
+    icon: Bot,
+    group: ["Conteúdo", "Content", "Contenido", "Contenu"],
+  },
+  {
+    id: "moderacao",
+    label: ["Moderação", "Moderation", "Moderación", "Modération"],
+    icon: Flag,
+    group: ["Conteúdo", "Content", "Contenido", "Contenu"],
+  },
+  {
+    id: "comunidades",
+    label: ["Comunidades", "Communities", "Comunidades", "Communautés"],
+    icon: UsersRound,
+    group: ["Conteúdo", "Content", "Contenido", "Contenu"],
+  },
+  {
+    id: "temas",
+    label: ["Temas da semana", "Weekly themes", "Temas de la semana", "Thèmes de la semaine"],
+    icon: CalendarDays,
+    group: ["Conteúdo", "Content", "Contenido", "Contenu"],
+  },
+  {
+    id: "apresentacao",
+    label: ["Apresentação", "Presentation", "Presentación", "Présentation"],
+    icon: Presentation,
+    group: ["Conteúdo", "Content", "Contenido", "Contenu"],
+  },
+  {
+    id: "anuncios",
+    label: ["Anúncios", "Announcements", "Anuncios", "Annonces"],
+    icon: Megaphone,
+    group: ["Conteúdo", "Content", "Contenido", "Contenu"],
+  },
+  {
+    id: "redes",
+    label: ["Redes sociais", "Social media", "Redes sociales", "Réseaux sociaux"],
+    icon: Share2,
+    group: ["Conteúdo", "Content", "Contenido", "Contenu"],
+  },
+  {
+    id: "site_features",
+    label: ["Funcionalidades", "Features", "Funciones", "Fonctionnalités"],
+    icon: ToggleRight,
+    group: ["Site", "Site", "Sitio", "Site"],
+  },
+  {
+    id: "site_nina",
+    label: ["Nina", "Nina", "Nina", "Nina"],
+    icon: Smile,
+    group: ["Site", "Site", "Sitio", "Site"],
+  },
+  {
+    id: "site_design",
+    label: ["Design e imagens", "Design and images", "Diseño e imágenes", "Design et images"],
+    icon: Palette,
+    group: ["Site", "Site", "Sitio", "Site"],
+  },
+  {
+    id: "financeiro",
+    label: ["Financeiro", "Finance", "Finanzas", "Finances"],
+    icon: Banknote,
+    group: ["Negócio", "Business", "Negocio", "Activité"],
+  },
+  {
+    id: "mercados",
+    label: ["Mercados parceiros", "Partner markets", "Mercados asociados", "Marchés partenaires"],
+    icon: ShoppingCart,
+    group: ["Negócio", "Business", "Negocio", "Activité"],
+  },
+  {
+    id: "recompensas",
+    label: ["Recompensas", "Rewards", "Recompensas", "Récompenses"],
+    icon: Gift,
+    group: ["Negócio", "Business", "Negocio", "Activité"],
+  },
+  {
+    id: "ia",
+    label: [
+      "Inteligência artificial",
+      "Artificial intelligence",
+      "Inteligencia artificial",
+      "Intelligence artificielle",
+    ],
+    icon: Brain,
+    group: ["Sistema", "System", "Sistema", "Système"],
+  },
+  {
+    id: "config",
+    label: ["Configurações", "Settings", "Configuración", "Paramètres"],
+    icon: Settings,
+    group: ["Sistema", "System", "Sistema", "Système"],
+  },
+  {
+    id: "auditoria",
+    label: ["Auditoria", "Audit log", "Auditoría", "Journal d'audit"],
+    icon: History,
+    group: ["Sistema", "System", "Sistema", "Système"],
+  },
 ];
 
 export const isSectionId = (v: unknown): v is SectionId => SECTIONS.some((s) => s.id === v);
