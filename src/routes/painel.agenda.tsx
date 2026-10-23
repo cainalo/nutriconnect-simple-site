@@ -65,7 +65,14 @@ function SchedulePage() {
     : null;
 
   const today = new Date();
-  const weekLabel = `${formatDate(days[0], locale, { day: "numeric", month: "short" })} – ${formatDate(days[6], locale, { day: "numeric", month: "short", year: "numeric" })}`;
+  // Intervalo curto no formato do idioma ("12–18 de out.", "Oct 12 – 18"); o ano só aparece
+  // quando a semana não é deste ano. Cabe numa linha no celular.
+  const thisYear = days[6].getFullYear() === new Date().getFullYear();
+  const weekLabel = new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    ...(thisYear ? {} : { year: "numeric" }),
+  }).formatRange(days[0], days[6]);
 
   return (
     <>
@@ -105,7 +112,9 @@ function SchedulePage() {
             >
               <ChevronRight className="h-4 w-4" />
             </button>
-            <span className="ml-2 text-sm font-semibold text-foreground">{weekLabel}</span>
+            <span className="ml-2 whitespace-nowrap text-sm font-semibold text-foreground">
+              {weekLabel}
+            </span>
           </div>
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <input
