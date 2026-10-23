@@ -1,4 +1,6 @@
 import { td } from "@/lib/i18n/data";
+import { useTr } from "@/components/settings-ui";
+import { useConfirm } from "@/components/confirm-action";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { CalendarCheck, ImagePlus, Pin, Trash2, Users } from "lucide-react";
@@ -313,6 +315,8 @@ function MembershipAction({
   const join = useJoinCommunity();
   const leave = useLeaveCommunity();
   const leaveAdmin = useLeaveAdmin();
+  const [ask, confirmDialog] = useConfirm();
+  const tr = useTr();
   const cover = variant === "cover";
   const base = cover
     ? "hidden sm:inline-flex rounded-full px-5 py-2.5 text-sm font-bold shadow-soft transition"
@@ -365,15 +369,38 @@ function MembershipAction({
     );
   }
 
+  const onClick = async () => {
+    if (!isMember) return join.mutate(community.id);
+    const ok = await ask({
+      title: tr([
+        `Sair de ${community.name}?`,
+        `Leave ${community.name}?`,
+        `¿Salir de ${community.name}?`,
+        `Quitter ${community.name} ?`,
+      ]),
+      description: tr([
+        "Você deixa de ver os posts dela no seu feed. Dá para voltar quando quiser.",
+        "You'll stop seeing its posts in your feed. You can rejoin anytime.",
+        "Dejarás de ver sus posts en tu feed. Puedes volver cuando quieras.",
+        "Vous ne verrez plus ses publications dans votre fil. Vous pourrez revenir quand vous voudrez.",
+      ]),
+      confirmLabel: t("cf.leaveCommunity"),
+      danger: true,
+    });
+    if (ok) leave.mutate(community.id);
+  };
   return (
-    <button
-      type="button"
-      disabled={join.isPending || leave.isPending}
-      onClick={() => (isMember ? leave.mutate(community.id) : join.mutate(community.id))}
-      className={`${base} ${isMember ? secondary : primary} disabled:opacity-60`}
-    >
-      {isMember ? t("cf.leaveCommunity") : t("cf.join")}
-    </button>
+    <>
+      <button
+        type="button"
+        disabled={join.isPending || leave.isPending}
+        onClick={() => void onClick()}
+        className={`${base} ${isMember ? secondary : primary} disabled:opacity-60`}
+      >
+        {isMember ? t("cf.leaveCommunity") : t("cf.join")}
+      </button>
+      {confirmDialog}
+    </>
   );
 }
 
