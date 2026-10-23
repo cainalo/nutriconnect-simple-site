@@ -286,7 +286,12 @@ serve(async (req) => {
     return json({ ok: false, error: "unavailable", message: "Não foi possível analisar agora. Tente de novo em instantes." });
   }
   if (!allowed) {
-    return reject("inadequado", "Você chegou ao limite diário de publicações e comentários. Volte amanhã!");
+    return json({
+      ok: true,
+      approved: false,
+      code: "limite_diario",
+      message: "Você chegou ao limite diário de publicações e comentários. Volte amanhã!",
+    });
   }
 
   // Foto: data URL (novo envio) ou arquivo já enviado pela própria pessoa.
