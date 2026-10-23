@@ -186,7 +186,7 @@ function ExamRow({
         exam.done_at
           ? "border-border/50 opacity-70"
           : soon
-            ? "border-amber-500/50 bg-amber-500/5"
+            ? "border-warning/50 bg-warning/5"
             : "border-border/70",
       )}
       style={{ animationDelay: `${index * 50}ms` }}
@@ -219,7 +219,7 @@ function ExamRow({
           <span
             className={cn(
               late && "font-semibold text-destructive",
-              soon && "font-semibold text-amber-600",
+              soon && "font-semibold text-warning",
             )}
           >
             {formatDate(due, locale, { weekday: "short", day: "numeric", month: "short" })} ·{" "}

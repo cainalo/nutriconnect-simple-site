@@ -175,7 +175,7 @@ function LeagueCard({ userId }: { userId: string }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1 basis-56">
           <h2 className="flex items-center gap-2 text-lg font-bold font-display text-foreground">
-            <Trophy className="h-5 w-5 text-amber-500" />
+            <Trophy className="h-5 w-5 text-warning" />
             {tr(["Liga da semana", "Weekly league", "Liga de la semana", "Ligue de la semaine"])}
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -284,7 +284,7 @@ function PodiumSpot({ row, place }: { row?: LeagueRow; place: number }) {
       className="nc-rise flex min-w-0 flex-col items-center"
       style={{ animationDelay: `${place * 90}ms` }}
     >
-      {place === 1 && <Crown className="mb-1 h-5 w-5 text-amber-500" />}
+      {place === 1 && <Crown className="mb-1 h-5 w-5 text-warning" />}
       <Face name={row.name} url={row.avatar_url} size={place === 1 ? 56 : 44} />
       <p className="mt-1 w-full truncate text-center text-xs font-semibold text-foreground">
         {row.is_me ? tr(["Você", "You", "Tú", "Vous"]) : row.name.split(" ")[0]}
@@ -329,9 +329,9 @@ function MyBreakdown({ row }: { row: LeagueRow }) {
       </div>
       <Link
         to="/recompensas"
-        className="mt-3 flex items-center justify-center gap-1.5 rounded-2xl bg-amber-500/10 px-3 py-2.5 text-xs font-semibold text-foreground transition hover:bg-amber-500/20"
+        className="mt-3 flex items-center justify-center gap-1.5 rounded-2xl bg-warning/10 px-3 py-2.5 text-xs font-semibold text-foreground transition hover:bg-warning/20"
       >
-        <Gift className="h-4 w-4 text-amber-500" />
+        <Gift className="h-4 w-4 text-warning" />
         {tr([
           "Cada dia vale 10 pontos para trocar por recompensas",
           "Each day is worth 10 points to trade for rewards",
@@ -479,7 +479,7 @@ function ChallengeCard({
                   <div
                     className={cn(
                       "h-full rounded-full transition-all duration-700",
-                      reached ? "bg-primary" : "bg-amber-400",
+                      reached ? "bg-primary" : "bg-warning",
                     )}
                     style={{ width: `${pct}%` }}
                   />
@@ -488,7 +488,7 @@ function ChallengeCard({
               {!finished && !x.is_me && (
                 <button
                   type="button"
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-pink-500/10 hover:text-pink-600 active:scale-90"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-accent/10 hover:text-accent active:scale-90"
                   aria-label={tr([
                     `Mandar força para ${x.name}`,
                     `Cheer ${x.name} on`,

@@ -216,7 +216,7 @@ function Adherence({ planId, days }: { planId: string; days: Set<string> }) {
             key={d}
             className={cn(
               "h-2 w-2 rounded-full",
-              days.has(`${planId}:${d}`) ? "bg-emerald-500" : "bg-border",
+              days.has(`${planId}:${d}`) ? "bg-primary" : "bg-border",
             )}
           />
         ))}
@@ -456,7 +456,7 @@ export function PatientCarePlans({ patientId }: { patientId: string }) {
               className={cn(
                 "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition",
                 done
-                  ? "bg-emerald-500 text-white"
+                  ? "bg-primary text-white"
                   : "border border-border bg-background text-foreground hover:bg-secondary",
               )}
             >

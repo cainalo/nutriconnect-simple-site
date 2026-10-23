@@ -1089,7 +1089,7 @@ export function ProTasksCard() {
         "Consultations à clôturer",
       ],
       to: "/painel/agenda",
-      tone: "text-amber-600 dark:text-amber-400",
+      tone: "text-warning",
     },
     {
       n: requests,

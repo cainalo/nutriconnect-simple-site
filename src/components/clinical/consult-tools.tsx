@@ -364,7 +364,8 @@ function TimerOverlay({ timer }: { timer: TimerState }) {
       <div
         className={cn(
           "flex flex-col items-center rounded-3xl px-6 py-3 shadow-2xl backdrop-blur-md",
-          done ? "bg-emerald-500/90" : "bg-black/65",
+          // Sobre o vídeo: cores fixas, legíveis com texto branco em qualquer design.
+          done ? "bg-emerald-700/90" : "bg-black/65",
         )}
       >
         {timer.label && (
@@ -1179,7 +1180,7 @@ export function ConsultTools({
               <Icon className="h-3.5 w-3.5" />
               {tr(label)}
               {id === "avaliacoes" && session.pending.length > 0 && (
-                <span className="grid h-4 min-w-4 place-items-center rounded-full bg-amber-500 px-1 text-[10px] text-white">
+                <span className="grid h-4 min-w-4 place-items-center rounded-full bg-warning px-1 text-[10px] text-warning-foreground">
                   {session.pending.length}
                 </span>
               )}

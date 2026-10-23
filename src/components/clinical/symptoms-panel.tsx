@@ -311,7 +311,7 @@ function RelationsCard({
   return (
     <Card>
       <h2 className="flex items-center gap-2 font-display text-lg font-bold text-foreground">
-        <Lightbulb className="h-5 w-5 text-amber-500" />
+        <Lightbulb className="h-5 w-5 text-warning" />
         {tr(["Relações possíveis", "Possible links", "Relaciones posibles", "Liens possibles"])}
       </h2>
       {relations.length === 0 ? (
@@ -335,7 +335,7 @@ function RelationsCard({
           {relations.slice(0, 6).map((r, i) => (
             <li
               key={`${r.symptom}-${r.group}`}
-              className="nc-rise flex gap-3 rounded-2xl bg-amber-500/10 p-3 text-sm text-foreground"
+              className="nc-rise flex gap-3 rounded-2xl bg-warning/10 p-3 text-sm text-foreground"
               style={{ animationDelay: `${i * 60}ms` }}
             >
               <SymptomIcon id={r.symptom} className="mt-0.5 h-5 w-5 shrink-0" />

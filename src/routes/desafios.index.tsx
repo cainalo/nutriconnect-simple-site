@@ -252,7 +252,7 @@ function DesafiosIndexPage() {
               {tb.icon}
               <span>{t(tb.label)}</span>
               {tb.key === "populares" && (
-                <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400">
+                <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[9px] font-bold text-warning">
                   {popularChallenges.length}
                 </span>
               )}
@@ -321,7 +321,7 @@ function DesafiosIndexPage() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-lg font-bold font-display text-foreground flex items-center gap-2">
-                      <Flame className="h-5 w-5 text-amber-500" />
+                      <Flame className="h-5 w-5 text-warning" />
                       {t("dz.popularTitle")}
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">{t("dz.popularHint")}</p>

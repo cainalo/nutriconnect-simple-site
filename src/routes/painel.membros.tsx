@@ -54,7 +54,7 @@ function MembersPanel() {
         preview={
           <div className="rounded-2xl border border-border/70 bg-card p-4">
             <p className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <Crown className="h-4 w-4 text-amber-500" />
+              <Crown className="h-4 w-4 text-warning" />
               {tr(["Clube da marmita", "Meal prep club", "Club de la vianda", "Club des repas"])}
               <span className="ml-auto text-xs font-semibold text-muted-foreground">
                 R$ 19,90/{tr(["mês", "month", "mes", "mois"])}

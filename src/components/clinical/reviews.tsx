@@ -48,7 +48,7 @@ export function Stars({ value, size = 14 }: { value: number; size?: number }) {
         ))}
       </span>
       <span
-        className="absolute inset-y-0 left-0 flex overflow-hidden text-amber-500"
+        className="absolute inset-y-0 left-0 flex overflow-hidden text-warning"
         style={{ width: `${(Math.max(0, Math.min(5, value)) / 5) * 100}%` }}
       >
         {[0, 1, 2, 3, 4].map((i) => (
@@ -90,7 +90,7 @@ export function RatingBadge({
         `Note ${avg} sur 5, ${summary.total} avis`,
       ])}
     >
-      <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+      <Star className="h-3.5 w-3.5 fill-warning text-warning" />
       {avg}
       <span className="font-normal text-muted-foreground">({summary.total})</span>
     </span>
@@ -196,7 +196,7 @@ export function ReviewDialog({
                 <Star
                   className={cn(
                     "h-9 w-9 transition-all duration-200",
-                    n <= shown ? "scale-110 fill-amber-500 text-amber-500" : "text-border",
+                    n <= shown ? "scale-110 fill-warning text-warning" : "text-border",
                   )}
                   style={{ transitionDelay: `${(n - 1) * 30}ms` }}
                 />
@@ -305,7 +305,7 @@ export function ReviewButton({
         className={existing ? buttonGhost : buttonSecondary}
         onClick={() => setOpen(true)}
       >
-        <Star className={cn("h-4 w-4", existing && "fill-amber-500 text-amber-500")} />
+        <Star className={cn("h-4 w-4", existing && "fill-warning text-warning")} />
         {existing
           ? tr([
               `Sua nota: ${existing.rating}`,
@@ -368,10 +368,10 @@ export function ProReviewsSection({
             return (
               <div key={n} className="flex items-center gap-2 text-xs">
                 <span className="w-3 text-right font-semibold text-muted-foreground">{n}</span>
-                <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                <Star className="h-3 w-3 fill-warning text-warning" />
                 <span className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
                   <span
-                    className="block h-full rounded-full bg-amber-500 transition-all duration-700"
+                    className="block h-full rounded-full bg-warning transition-all duration-700"
                     style={{ width: total ? `${(c / total) * 100}%` : 0 }}
                   />
                 </span>

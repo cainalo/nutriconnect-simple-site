@@ -178,7 +178,7 @@ function Contato() {
             <div className="rounded-3xl border bg-card p-8 shadow-xl">
               {submitted ? (
                 <div className="space-y-4 py-12 text-center">
-                  <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60">
+                  <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-primary/10 text-primary">
                     <CheckCircle2 className="h-8 w-8" />
                   </div>
                   <h3 className="font-display text-2xl font-bold">{t("contact.received")}</h3>
