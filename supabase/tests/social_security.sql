@@ -1788,6 +1788,23 @@ begin
     end;
   end if;
 
+  -- Webhook do Stripe: o registro de eventos não é visível nem gravável por usuários.
+  if to_regclass('public.stripe_events') is not null then
+    insert into public.stripe_events (id, type, payment_intent) values ('evt_sintetico_1', 'charge.refunded', 'pi_sintetico');
+    r := pg_temp.as_user(a, 'authenticated', 'select count(*) from public.stripe_events');
+    res := res || jsonb_build_object('teste', 'usuário NÃO lê os eventos do Stripe', 'ok', (r like 'ERRO%' or r = '0'), 'obtido', left(r, 100));
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.stripe_events (id, type) values (''evt_falso'', ''checkout.session.completed'')');
+    res := res || jsonb_build_object('teste', 'usuário NÃO grava evento do Stripe', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
+    r := pg_temp.as_user(null, 'anon', 'select count(*) from public.stripe_events');
+    res := res || jsonb_build_object('teste', 'visitante NÃO lê os eventos do Stripe', 'ok', (r like 'ERRO%' or r = '0'), 'obtido', left(r, 100));
+    begin
+      insert into public.stripe_events (id, type) values ('evt_sintetico_1', 'charge.refunded');
+      res := res || jsonb_build_object('teste', 'mesmo evento NÃO entra duas vezes', 'ok', false, 'obtido', 'inseriu');
+    exception when unique_violation then
+      res := res || jsonb_build_object('teste', 'mesmo evento NÃO entra duas vezes', 'ok', true, 'obtido', '');
+    end;
+  end if;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

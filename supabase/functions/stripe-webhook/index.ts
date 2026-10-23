@@ -3,6 +3,9 @@
 // Eventos tratados: checkout.session.completed (confirma a consulta, a assinatura de membros ou a
 // compra de um programa da loja) e charge.refunded
 // (estorno feito direto no painel do Stripe).
+// Repetição e ordem: cada evento processado fica em stripe_events (pelo id do Stripe); um reenvio
+// do mesmo evento é ignorado. Um estorno que chega antes da confirmação do pagamento também fica
+// registrado ali, e a confirmação, quando chegar, já grava o pagamento como estornado.
 import { json, serve } from "../_shared/http.ts";
 import {
   createRefund,
@@ -12,8 +15,10 @@ import {
   verifyWebhookSignature,
 } from "../_shared/stripe.ts";
 import { adminClient } from "../_shared/supabase.ts";
+import { canOverwritePayment, memberStatus, paymentIntentOf } from "../_shared/stripe-events.ts";
 
 interface StripeEvent {
+  id?: string;
   type?: string;
   data?: { object?: Record<string, unknown> };
 }
@@ -26,6 +31,38 @@ serve(async (req) => {
   const event = JSON.parse(rawBody) as StripeEvent;
   const db = adminClient();
 
+  if (event.id) {
+    const { data: seen } = await db.from("stripe_events").select("id").eq("id", event.id).maybeSingle();
+    if (seen) return json({ ok: true, duplicate: true });
+  }
+  const res = await handleEvent(event, db);
+  // Só marca como processado depois de dar certo: se algo falhou no meio, o reenvio do Stripe
+  // tenta de novo.
+  if (event.id && res.ok) {
+    await db.from("stripe_events").upsert(
+      { id: event.id, type: event.type ?? "", payment_intent: paymentIntentOf(event) },
+      { onConflict: "id", ignoreDuplicates: true },
+    );
+  }
+  return res;
+});
+
+type Db = ReturnType<typeof adminClient>;
+
+/** Um estorno desse pagamento já chegou (às vezes antes da confirmação do pagamento). */
+async function alreadyRefunded(db: Db, paymentIntent: string | null | undefined) {
+  if (!paymentIntent) return false;
+  const { data } = await db
+    .from("stripe_events")
+    .select("id")
+    .eq("type", "charge.refunded")
+    .eq("payment_intent", paymentIntent)
+    .limit(1)
+    .maybeSingle();
+  return !!data;
+}
+
+async function handleEvent(event: StripeEvent, db: Db): Promise<Response> {
   if (event.type === "charge.refunded") {
     const charge = event.data?.object as { payment_intent?: string } | undefined;
     if (charge?.payment_intent) {
@@ -63,7 +100,8 @@ serve(async (req) => {
     await db.rpc("upsert_member_subscription", {
       p_pro: sessionObj.metadata.professional_id,
       p_member: sessionObj.metadata.member_id,
-      p_status: "ativa",
+      // O estado de agora no Stripe: uma confirmação reenviada depois do cancelamento não reativa.
+      p_status: memberStatus(sub),
       p_price_cents: price,
       p_stripe_subscription: subId,
       p_stripe_customer: sub.customer ?? null,
@@ -96,6 +134,12 @@ serve(async (req) => {
       p_stripe_session: paid.id ?? null,
       p_payment_intent: paid.payment_intent ?? null,
     });
+    if (await alreadyRefunded(db, paid.payment_intent)) {
+      await db
+        .from("program_purchases")
+        .update({ status: "reembolsada", refunded_at: new Date().toISOString() })
+        .eq("stripe_payment_intent", paid.payment_intent!);
+    }
     if (paid.metadata.redemption_id) {
       await db.rpc("use_reward_redemption", {
         p_redemption: paid.metadata.redemption_id,
@@ -121,6 +165,18 @@ serve(async (req) => {
     .eq("id", appointmentId)
     .maybeSingle();
   if (!appt) return json({ ignored: "consulta inexistente" });
+
+  const { data: existing } = await db
+    .from("payments")
+    .select("id, status")
+    .eq("appointment_id", appt.id)
+    .eq("provider", "stripe")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (existing && !canOverwritePayment(existing.status)) {
+    return json({ ignored: "pagamento já estornado" });
+  }
 
   let status = "aprovado";
   const patch: Record<string, unknown> = {
@@ -158,14 +214,12 @@ serve(async (req) => {
     }
   }
 
-  const { data: existing } = await db
-    .from("payments")
-    .select("id")
-    .eq("appointment_id", appt.id)
-    .eq("provider", "stripe")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  if (status !== "reembolsado" && (await alreadyRefunded(db, session.payment_intent))) {
+    status = "reembolsado";
+    patch.status = status;
+    patch.refunded_at = new Date().toISOString();
+  }
+
   if (existing) {
     await db.from("payments").update(patch).eq("id", existing.id);
   } else {
@@ -180,10 +234,10 @@ serve(async (req) => {
     });
   }
   return json({ ok: true, status });
-});
+}
 
 // Eventos de assinatura: status, fim do período, faturas e a taxa do nível atual.
-async function handleMemberEvent(event: StripeEvent, db: ReturnType<typeof adminClient>) {
+async function handleMemberEvent(event: StripeEvent, db: Db) {
   const obj = event.data?.object as Record<string, unknown>;
 
   if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
@@ -194,14 +248,7 @@ async function handleMemberEvent(event: StripeEvent, db: ReturnType<typeof admin
       .eq("stripe_subscription_id", sub.id)
       .maybeSingle();
     if (!row) return json({ ignored: "assinatura desconhecida" });
-    const status =
-      event.type === "customer.subscription.deleted" || sub.status === "canceled"
-        ? "cancelada"
-        : sub.status === "past_due" || sub.status === "unpaid"
-          ? "inadimplente"
-          : sub.cancel_at_period_end
-            ? "cancelando"
-            : "ativa";
+    const status = memberStatus(sub, event.type);
     await db.rpc("upsert_member_subscription", {
       p_pro: row.professional_id,
       p_member: row.member_id,
