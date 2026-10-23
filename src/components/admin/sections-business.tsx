@@ -125,7 +125,7 @@ export function FinanceSection() {
               "Consultations à venir",
             ])}
             value={o.appointments_upcoming}
-            sub={`${o.appointments_7d} ${tr(["marcadas em 7 dias", "booked in 7 days", "reservadas en 7 días", "réservées en 7 jours"])}`}
+            sub={`${o.appointments_7d ?? 0} ${tr(["marcadas em 7 dias", "booked in 7 days", "reservadas en 7 días", "réservées en 7 jours"])}`}
             icon={Users}
           />
         </div>
