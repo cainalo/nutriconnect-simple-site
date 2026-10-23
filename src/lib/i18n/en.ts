@@ -419,8 +419,7 @@ const en: Record<DictKey, string> = {
   "recipes.title": "Community recipes",
   "recipes.intro": 'What the community is cooking this week. Made one too? Tap "I made this".',
   "recipes.shareMine": "Share my recipe",
-  "recipes.searchPlaceholder":
-    "Search by name, ingredient or tag (e.g. oats, apple, vegetables)…",
+  "recipes.searchPlaceholder": "Search by name, ingredient or tag (e.g. oats, apple, vegetables)…",
   "recipes.loading": "Loading recipes…",
   "recipes.fallbackCategory": "Recipe",
   "recipes.fallbackTitle": "Community recipe",
