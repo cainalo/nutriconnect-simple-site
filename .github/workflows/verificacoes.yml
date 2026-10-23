@@ -28,9 +28,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
-      - run: npm ci
+      # O lock oficial do projeto é o bun.lock (mantido pelo Lovable).
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install --frozen-lockfile
 
       - name: Tipos
         run: npx tsc --noEmit -p .
