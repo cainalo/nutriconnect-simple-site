@@ -100,6 +100,7 @@ const fr: Record<DictKey, string> = {
   "settings.account.danger.delete.confirmPlaceholder": "supprimer",
   "settings.account.danger.delete.confirmButton": "Oui, supprimer mon compte",
   "settings.account.danger.delete.success": "Compte supprimé. Vous allez nous manquer !",
+  "settings.deleteError": "Impossible de supprimer le compte. Réessayez.",
 
   "settings.privacy.title": "Confidentialité",
   "settings.privacy.profile.title": "Visibilité du profil",

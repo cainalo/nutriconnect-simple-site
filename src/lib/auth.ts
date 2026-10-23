@@ -304,8 +304,12 @@ export async function setNewPassword(newPassword: string) {
 }
 
 export async function deleteAccount() {
-  const { error } = await supabase.rpc("delete_my_account");
-  if (error) throw new Error(error.message);
+  // No servidor: cancela assinaturas pagas, apaga os arquivos do Storage e depois a conta.
+  const { data, error } = await supabase.functions.invoke<{ ok?: boolean; error?: string }>(
+    "account-delete",
+    { body: {} },
+  );
+  if (error || !data?.ok) throw new Error(data?.error ?? t("settings.deleteError"));
   await supabase.auth.signOut();
   currentUser = null;
   emit();

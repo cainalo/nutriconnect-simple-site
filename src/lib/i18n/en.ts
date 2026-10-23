@@ -97,6 +97,7 @@ const en: Record<DictKey, string> = {
   "settings.account.danger.delete.confirmPlaceholder": "delete",
   "settings.account.danger.delete.confirmButton": "Yes, delete my account",
   "settings.account.danger.delete.success": "Account deleted. We'll miss you!",
+  "settings.deleteError": "We couldn't delete your account. Please try again.",
 
   "settings.privacy.title": "Privacy",
   "settings.privacy.profile.title": "Profile visibility",

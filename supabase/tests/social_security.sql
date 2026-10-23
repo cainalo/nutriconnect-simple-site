@@ -1816,6 +1816,35 @@ begin
                          and has_function_privilege('anon', p.oid, 'execute')),
     'obtido', '');
 
+  -- Exclusão da conta (LGPD): assinatura paga ativa bloqueia; sem ela, nada da pessoa fica no banco.
+  -- Fica por último porque apaga a conta A.
+  declare
+    m uuid;
+    restos text := '';
+    col record;
+    n bigint;
+  begin
+    select member_id into m from public.member_subscriptions
+     where status in ('ativa', 'cancelando', 'inadimplente') limit 1;
+    if m is not null then
+      r := pg_temp.as_user(m, 'authenticated', 'select public.delete_my_account()');
+      res := res || jsonb_build_object('teste', 'NÃO exclui a conta com assinatura paga ativa', 'ok', (r like 'ERRO%assinaturas%'), 'obtido', left(r, 120));
+    end if;
+    update public.member_subscriptions set status = 'cancelada' where member_id = a or professional_id = a;
+    r := pg_temp.as_user(a, 'authenticated', 'select public.delete_my_account()');
+    res := res || jsonb_build_object('teste', 'pessoa exclui a própria conta', 'ok', (r not like 'ERRO%'), 'obtido', left(r, 120));
+    for col in
+      select c.table_name, c.column_name from information_schema.columns c
+        join information_schema.tables t on t.table_schema = c.table_schema and t.table_name = c.table_name
+       where c.table_schema = 'public' and t.table_type = 'BASE TABLE' and c.data_type = 'uuid'
+         and c.column_name in ('user_id', 'author_id', 'patient_id', 'member_id', 'buyer_id', 'owner_id', 'id')
+    loop
+      execute format('select count(*) from public.%I where %I = $1', col.table_name, col.column_name) into n using a;
+      if n > 0 then restos := restos || format('%s.%s=%s ', col.table_name, col.column_name, n); end if;
+    end loop;
+    res := res || jsonb_build_object('teste', 'conta excluída não deixa dados da pessoa no banco', 'ok', (restos = ''), 'obtido', left(restos, 300));
+  end;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

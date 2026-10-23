@@ -97,6 +97,7 @@ const es: Record<DictKey, string> = {
   "settings.account.danger.delete.confirmPlaceholder": "eliminar",
   "settings.account.danger.delete.confirmButton": "Sí, eliminar mi cuenta",
   "settings.account.danger.delete.success": "Cuenta eliminada. ¡Te vamos a extrañar!",
+  "settings.deleteError": "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
 
   "settings.privacy.title": "Privacidad",
   "settings.privacy.profile.title": "Visibilidad del perfil",

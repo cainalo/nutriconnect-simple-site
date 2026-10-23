@@ -102,6 +102,7 @@ const ptBR = {
   "settings.account.danger.delete.confirmPlaceholder": "excluir",
   "settings.account.danger.delete.confirmButton": "Sim, excluir minha conta",
   "settings.account.danger.delete.success": "Conta excluída. Sentiremos sua falta!",
+  "settings.deleteError": "Não foi possível excluir a conta. Tente de novo.",
 
   // Privacidade -------------------------------------------------------------
   "settings.privacy.title": "Privacidade",

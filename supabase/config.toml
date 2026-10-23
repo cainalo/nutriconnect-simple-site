@@ -39,6 +39,9 @@ verify_jwt = false
 [functions.member-connect]
 verify_jwt = false
 
+[functions.account-delete]
+verify_jwt = true
+
 [functions.member-checkout]
 verify_jwt = false
 
