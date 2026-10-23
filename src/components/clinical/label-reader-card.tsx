@@ -123,7 +123,8 @@ export function LabelReaderCard({ saveToHistory = false }: { saveToHistory?: boo
       }
     } catch (err) {
       console.error("label reader", err);
-      setError(err instanceof Error && err.message ? err.message : ERRORS.failed);
+      // Nada de mensagem crua do servidor: o texto traduzido de sempre.
+      setError(ERRORS.failed);
     } finally {
       setAnalyzing(false);
     }
@@ -139,7 +140,7 @@ export function LabelReaderCard({ saveToHistory = false }: { saveToHistory?: boo
 
   return (
     <Card
-      className="relative overflow-hidden border-t-8 border-t-primary/80"
+      className="relative overflow-hidden"
       title={
         <div className="flex items-center gap-2">
           <ScanLine className="h-5 w-5 text-primary" />

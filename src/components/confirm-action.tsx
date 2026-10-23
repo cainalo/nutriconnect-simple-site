@@ -1,3 +1,4 @@
+// Confirmação com o diálogo do site (no lugar de window.confirm), controlada por `open`.
 import type { ReactNode } from "react";
 import {
   AlertDialog,
@@ -9,13 +10,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button";
 import { useTr } from "@/components/settings-ui";
 import { cn } from "@/lib/utils";
 
-/**
- * Confirmação com a janela do site (no lugar de window.confirm), controlada por `open`.
- * Uso: guarde o alvo num estado, abra com ele e chame a ação em onConfirm.
- */
 export function ConfirmAction({
   open,
   onOpenChange,
@@ -32,27 +30,29 @@ export function ConfirmAction({
   description?: ReactNode;
   confirmLabel: string;
   cancelLabel?: string;
+  /** Ação que apaga ou encerra algo: botão na cor de perigo. */
   danger?: boolean;
   onConfirm: () => void;
 }) {
   const tr = useTr();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-md rounded-3xl">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="min-h-10">
-            {cancelLabel ?? tr(["Cancelar", "Cancel", "Cancelar", "Annuler"])}
+        <AlertDialogFooter className="gap-2">
+          <AlertDialogCancel className="min-h-10 rounded-full">
+            {cancelLabel ?? tr(["Voltar", "Go back", "Volver", "Retour"])}
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
             className={cn(
-              "min-h-10",
-              danger && "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+              "min-h-10 rounded-full",
+              danger && buttonVariants({ variant: "destructive" }),
+              danger && "min-h-10 rounded-full",
             )}
+            onClick={onConfirm}
           >
             {confirmLabel}
           </AlertDialogAction>

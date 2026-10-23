@@ -7,11 +7,13 @@ import {
   MessageCircle,
   NotebookPen,
   ScanLine,
+  ShoppingBag,
   Stethoscope,
   Target,
   Utensils,
 } from "lucide-react";
 import { AuthGateLoading } from "@/components/site-chrome";
+import { useTr } from "@/components/settings-ui";
 import { ClinicalLayout, type ClinicalNavItem } from "@/components/clinical/layout";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { useClinicalRealtime, useConversations } from "@/lib/clinical/queries";
@@ -25,6 +27,7 @@ export const Route = createFileRoute("/acompanhamento")({
 function PatientAreaLayout() {
   const { user, hydrated } = useRequireAuth();
   const { t } = useClinicalI18n();
+  const tr = useTr();
   useClinicalRealtime(user?.id);
   const conversations = useConversations(!!user);
   const unread = (conversations.data ?? [])
@@ -48,6 +51,11 @@ function PatientAreaLayout() {
       badge: unread,
     },
     { to: "/acompanhamento/exames", label: t("patientNav.documents"), icon: FolderOpen },
+    {
+      to: "/programas",
+      label: tr(["Programas", "Programs", "Programas", "Programmes"]),
+      icon: ShoppingBag,
+    },
     { to: "/profissionais", label: t("patientNav.findProfessional"), icon: Stethoscope },
   ];
 

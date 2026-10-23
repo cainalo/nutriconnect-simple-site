@@ -18,7 +18,9 @@ import {
   CookingPot,
   Dices,
   Droplets,
+  Activity,
   FileText,
+  Gift,
   Flame,
   HandHeart,
   HeartHandshake,
@@ -158,6 +160,8 @@ interface Tile {
   text: Names;
   tool?: ToolId;
   to?: string;
+  /** Busca do endereço de `to` (ex.: abrir a aba Sintomas do diário). */
+  search?: Record<string, string>;
   /** Some quando a administração desliga a funcionalidade. */
   feature?: FeatureKey;
 }
@@ -372,6 +376,26 @@ const SECTIONS: Section[] = [
           "A pair with a daily check-in",
           "Una pareja con registro diario",
           "Un binôme avec un point par jour",
+        ],
+      },
+      {
+        id: "recompensas",
+        art: "trophy",
+        color2: "#f4c84a",
+        icon: Gift,
+        color: "#c58a12",
+        to: "/recompensas",
+        title: [
+          "Pontos e recompensas",
+          "Points and rewards",
+          "Puntos y recompensas",
+          "Points et récompenses",
+        ],
+        text: [
+          "Troque a semana por prêmios",
+          "Trade your week for rewards",
+          "Cambia tu semana por premios",
+          "Échangez votre semaine",
         ],
       },
       {
@@ -721,6 +745,27 @@ const SECTIONS: Section[] = [
           "With photos and Nina's notes",
           "Con foto y notas de Nina",
           "Avec photos et Nina",
+        ],
+      },
+      {
+        id: "sintomas",
+        art: "pulse",
+        color2: "#f6a5bd",
+        icon: Activity,
+        color: "#d6456b",
+        to: "/acompanhamento/diario",
+        search: { aba: "sintomas" },
+        title: [
+          "Diário de sintomas",
+          "Symptom diary",
+          "Diario de síntomas",
+          "Journal des symptômes",
+        ],
+        text: [
+          "Anote o que sentiu e leve à consulta",
+          "Log how you felt for your visit",
+          "Anota lo que sentiste",
+          "Notez vos symptômes",
         ],
       },
       {
@@ -1146,7 +1191,7 @@ function TileCard({
   return (
     <div className="nc-tile-in h-full" style={{ animationDelay: `${Math.min(index, 24) * 45}ms` }}>
       {tile.to ? (
-        <Link to={tile.to} ref={(el) => void (ref.current = el)} {...props}>
+        <Link to={tile.to} search={tile.search} ref={(el) => void (ref.current = el)} {...props}>
           {body}
         </Link>
       ) : (
