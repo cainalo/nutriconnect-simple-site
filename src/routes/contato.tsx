@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, Mail, MapPin, Send, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-chrome";
@@ -40,6 +40,12 @@ function Contato() {
   const [subject, setSubject] = useState(() => t("contact.subject.general"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  // Quem está logado já chega com nome e e-mail preenchidos (dá para mudar).
+  useEffect(() => {
+    if (!user) return;
+    setName((n) => n || user.name || "");
+    setEmail((e) => e || user.email || "");
+  }, [user]);
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
 
@@ -77,7 +83,12 @@ function Contato() {
     setLoading(false);
     if (error) {
       toast.error(
-        `Não foi possível enviar agora. Escreva para ${COMPANY.supportEmail} se o problema continuar.`,
+        tr([
+          `Não foi possível enviar agora. Escreva para ${COMPANY.supportEmail} se o problema continuar.`,
+          `We couldn't send it right now. Write to ${COMPANY.supportEmail} if the problem persists.`,
+          `No se pudo enviar ahora. Escribe a ${COMPANY.supportEmail} si el problema continúa.`,
+          `Impossible d'envoyer pour le moment. Écrivez à ${COMPANY.supportEmail} si le problème persiste.`,
+        ]),
       );
       return;
     }
