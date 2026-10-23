@@ -86,6 +86,8 @@ import {
   type TemplateCategory,
 } from "@/lib/social-templates";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
+import type { Names } from "@/lib/appearance-data";
 import { ImageBank } from "@/components/admin/social/image-bank";
 import { ArtIcon, Floaters, IconBadge, StudioCard } from "@/components/admin/social/kit";
 import {
@@ -119,11 +121,35 @@ import {
 } from "@/components/admin/social/use-art";
 
 type Step = "comecar" | "texto" | "visual" | "publicar";
-const STEPS: { id: Step; label: string; hint: string; icon: LucideIcon; color: string }[] = [
-  { id: "comecar", label: "Começar", hint: "Modelo ou IA", icon: LayoutTemplate, color: "#c58a12" },
-  { id: "texto", label: "Texto", hint: "Gancho e legenda", icon: Type, color: "#3b7bbf" },
-  { id: "visual", label: "Visual", hint: "Arte e fotos", icon: Palette, color: "#d6456b" },
-  { id: "publicar", label: "Publicar", hint: "Revisar e postar", icon: Send, color: "#2f8a5b" },
+const STEPS: { id: Step; label: Names; hint: Names; icon: LucideIcon; color: string }[] = [
+  {
+    id: "comecar",
+    label: ["Começar", "Start", "Empezar", "Commencer"],
+    hint: ["Modelo ou IA", "Template or AI", "Plantilla o IA", "Modèle ou IA"],
+    icon: LayoutTemplate,
+    color: "#c58a12",
+  },
+  {
+    id: "texto",
+    label: ["Texto", "Text", "Texto", "Texte"],
+    hint: ["Gancho e legenda", "Hook and caption", "Gancho y descripción", "Accroche et légende"],
+    icon: Type,
+    color: "#3b7bbf",
+  },
+  {
+    id: "visual",
+    label: ["Visual", "Visual", "Visual", "Visuel"],
+    hint: ["Arte e fotos", "Artwork and photos", "Diseño y fotos", "Visuel et photos"],
+    icon: Palette,
+    color: "#d6456b",
+  },
+  {
+    id: "publicar",
+    label: ["Publicar", "Publish", "Publicar", "Publier"],
+    hint: ["Revisar e postar", "Review and post", "Revisar y publicar", "Relire et publier"],
+    icon: Send,
+    color: "#2f8a5b",
+  },
 ];
 
 const MODES: PreviewMode[] = [
@@ -147,55 +173,109 @@ const MODE_NETWORK: Record<PreviewMode, Network> = {
   youtube: "youtube",
 };
 
-const QUICK: { label: string; prompt: string; icon: LucideIcon; color: string }[] = [
-  { label: "Mais curto", prompt: "Mais curto e direto", icon: Scissors, color: "#3b7bbf" },
+const QUICK: { label: Names; prompt: string; icon: LucideIcon; color: string }[] = [
   {
-    label: "Mais leve",
+    label: ["Mais curto", "Shorter", "Más corto", "Plus court"],
+    prompt: "Mais curto e direto",
+    icon: Scissors,
+    color: "#3b7bbf",
+  },
+  {
+    label: ["Mais leve", "Lighter", "Más ligero", "Plus léger"],
     prompt: "Mais leve e acolhedor, sem emojis",
     icon: Smile,
     color: "#c58a12",
   },
   {
-    label: "Mais científico",
+    label: ["Mais científico", "More scientific", "Más científico", "Plus scientifique"],
     prompt: "Mais científico e confiável, citando o Guia Alimentar quando fizer sentido",
     icon: FlaskConical,
     color: "#7a5cc4",
   },
   {
-    label: "Pergunta no fim",
+    label: ["Pergunta no fim", "Question at the end", "Pregunta al final", "Question à la fin"],
     prompt: "Termine com uma pergunta que gere comentários",
     icon: MessageCircleQuestion,
     color: "#d6456b",
   },
   {
-    label: "Tom profissional",
+    label: ["Tom profissional", "Professional tone", "Tono profesional", "Ton professionnel"],
     prompt: "Tom profissional para o LinkedIn, frases claras e sem gírias",
     icon: Briefcase,
     color: "#0a66c2",
   },
   {
-    label: "Fala de vídeo",
+    label: ["Fala de vídeo", "Video speech", "Habla de video", "Discours vidéo"],
     prompt: "Adapte para fala informal de vídeo curto (TikTok/Reels)",
     icon: Music2,
     color: "#1f2937",
   },
 ];
 
-const GOALS: { id: Goal; label: string; icon: LucideIcon }[] = [
-  { id: "engajamento", label: "Engajamento", icon: MessageCircleQuestion },
-  { id: "alcance", label: "Alcance", icon: Megaphone },
-  { id: "autoridade", label: "Autoridade", icon: FlaskConical },
-  { id: "conversao", label: "Novas contas", icon: Target },
-  { id: "comunidade", label: "Comunidade", icon: Users },
+const GOALS: { id: Goal; label: Names; icon: LucideIcon }[] = [
+  {
+    id: "engajamento",
+    label: ["Engajamento", "Engagement", "Interacción", "Engagement"],
+    icon: MessageCircleQuestion,
+  },
+  { id: "alcance", label: ["Alcance", "Reach", "Alcance", "Portée"], icon: Megaphone },
+  {
+    id: "autoridade",
+    label: ["Autoridade", "Authority", "Autoridad", "Autorité"],
+    icon: FlaskConical,
+  },
+  {
+    id: "conversao",
+    label: ["Novas contas", "New accounts", "Nuevas cuentas", "Nouveaux comptes"],
+    icon: Target,
+  },
+  { id: "comunidade", label: ["Comunidade", "Community", "Comunidad", "Communauté"], icon: Users },
 ];
 
-const BEST_TIME: Partial<Record<Network, string>> = {
-  instagram: "Dias úteis entre 11h e 13h ou 18h e 21h.",
-  tiktok: "Fim da tarde e noite (18h–22h), também nos fins de semana.",
-  facebook: "Manhã (9h–11h) e início da noite.",
-  linkedin: "Terça a quinta, entre 8h e 10h.",
-  x: "Manhã cedo e horário de almoço.",
-  youtube: "Sexta a domingo, à tarde.",
+const BEST_TIME: Partial<Record<Network, Names>> = {
+  instagram: [
+    "Dias úteis entre 11h e 13h ou 18h e 21h.",
+    "Weekdays between 11 a.m. and 1 p.m. or 6 and 9 p.m.",
+    "Días hábiles entre las 11 y las 13 h o entre las 18 y las 21 h.",
+    "En semaine entre 11 h et 13 h ou entre 18 h et 21 h.",
+  ],
+  tiktok: [
+    "Fim da tarde e noite (18h–22h), também nos fins de semana.",
+    "Late afternoon and evening (6–10 p.m.), weekends too.",
+    "Final de la tarde y noche (18–22 h), también los fines de semana.",
+    "Fin d’après-midi et soirée (18 h–22 h), aussi le week-end.",
+  ],
+  facebook: [
+    "Manhã (9h–11h) e início da noite.",
+    "Morning (9–11 a.m.) and early evening.",
+    "Mañana (9–11 h) y comienzo de la noche.",
+    "Matin (9 h–11 h) et début de soirée.",
+  ],
+  linkedin: [
+    "Terça a quinta, entre 8h e 10h.",
+    "Tuesday to Thursday, between 8 and 10 a.m.",
+    "De martes a jueves, entre las 8 y las 10 h.",
+    "Du mardi au jeudi, entre 8 h et 10 h.",
+  ],
+  x: [
+    "Manhã cedo e horário de almoço.",
+    "Early morning and lunchtime.",
+    "Temprano en la mañana y a la hora del almuerzo.",
+    "Tôt le matin et à l’heure du déjeuner.",
+  ],
+  youtube: [
+    "Sexta a domingo, à tarde.",
+    "Friday to Sunday, in the afternoon.",
+    "De viernes a domingo, por la tarde.",
+    "Du vendredi au dimanche, l’après-midi.",
+  ],
+};
+
+const GROUP_NAMES: Record<ArtIconGroup, Names> = {
+  Comida: ["Comida", "Food", "Comida", "Nourriture"],
+  Bebidas: ["Bebidas", "Drinks", "Bebidas", "Boissons"],
+  Saúde: ["Saúde", "Health", "Salud", "Santé"],
+  Conteúdo: ["Conteúdo", "Content", "Contenido", "Contenu"],
 };
 
 /** Valor que só muda depois de um tempo parado (evita redesenhar a cada tecla). */
@@ -244,6 +324,7 @@ export function Composer({
   onClose: () => void;
 }) {
   const { locale } = useI18n();
+  const tr = useTr();
   const save = useSavePost();
   const remove = useDeletePost();
   const [d, setD] = useState<Draft>(initial);
@@ -272,7 +353,7 @@ export function Composer({
           const next = { ...d, id };
           setD(next);
           setSaved(JSON.stringify(next));
-          toast.success("Post salvo.");
+          toast.success(tr(["Post salvo.", "Post saved.", "Post guardado.", "Post enregistré."]));
         },
         onError: (err) => toast.error((err as Error).message),
       },
@@ -291,7 +372,15 @@ export function Composer({
         }),
       },
       {
-        onSuccess: () => toast.success("Salvo em Modelos da equipe."),
+        onSuccess: () =>
+          toast.success(
+            tr([
+              "Salvo em Modelos da equipe.",
+              "Saved to Team templates.",
+              "Guardado en Plantillas del equipo.",
+              "Enregistré dans les modèles de l’équipe.",
+            ]),
+          ),
         onError: (err) => toast.error((err as Error).message),
       },
     );
@@ -311,16 +400,41 @@ export function Composer({
   }, []);
 
   const close = () => {
-    if (dirty && !window.confirm("Há mudanças não salvas. Sair mesmo assim?")) return;
+    if (
+      dirty &&
+      !window.confirm(
+        tr([
+          "Há mudanças não salvas. Sair mesmo assim?",
+          "There are unsaved changes. Leave anyway?",
+          "Hay cambios sin guardar. ¿Salir de todos modos?",
+          "Des modifications ne sont pas enregistrées. Quitter quand même ?",
+        ]),
+      )
+    )
+      return;
     onClose();
   };
 
   const copyCaption = async () => {
     try {
       await navigator.clipboard.writeText(composeCaption(d));
-      toast.success("Legenda copiada. É só colar na rede.");
+      toast.success(
+        tr([
+          "Legenda copiada. É só colar na rede.",
+          "Caption copied. Just paste it on the network.",
+          "Descripción copiada. Solo pégala en la red.",
+          "Légende copiée. Il suffit de la coller sur le réseau.",
+        ]),
+      );
     } catch {
-      toast.error("Não foi possível copiar.");
+      toast.error(
+        tr([
+          "Não foi possível copiar.",
+          "Couldn’t copy.",
+          "No se pudo copiar.",
+          "Impossible de copier.",
+        ]),
+      );
     }
   };
 
@@ -359,9 +473,20 @@ export function Composer({
           `${d.title || "post"}-${i + 2}`,
         );
       }
-      toast.success(total > 1 ? `${total} artes baixadas.` : "Arte baixada.");
+      toast.success(
+        total > 1
+          ? `${total} ${tr(["artes baixadas.", "images downloaded.", "diseños descargados.", "visuels téléchargés."])}`
+          : tr(["Arte baixada.", "Image downloaded.", "Diseño descargado.", "Visuel téléchargé."]),
+      );
     } catch {
-      toast.error("Não foi possível gerar a arte. Tente outra foto.");
+      toast.error(
+        tr([
+          "Não foi possível gerar a arte. Tente outra foto.",
+          "Couldn’t generate the artwork. Try another photo.",
+          "No se pudo generar el diseño. Prueba otra foto.",
+          "Impossible de générer le visuel. Essayez une autre photo.",
+        ]),
+      );
     }
   };
 
@@ -371,7 +496,12 @@ export function Composer({
     <div className="st-root fixed inset-0 z-[60] flex flex-col bg-background animate-in fade-in duration-300">
       {/* Cabeçalho */}
       <header className="st-glass relative z-20 flex min-h-16 items-center gap-2 border-b border-border/60 px-3 py-2.5 sm:gap-3 sm:px-5">
-        <button type="button" onClick={close} className={btnIcon} aria-label="Fechar">
+        <button
+          type="button"
+          onClick={close}
+          className={btnIcon}
+          aria-label={tr(["Fechar", "Close", "Cerrar", "Fermer"])}
+        >
           <X className="h-5 w-5" />
         </button>
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
@@ -386,7 +516,12 @@ export function Composer({
               value={d.title}
               maxLength={160}
               onChange={(e) => set("title", e.target.value)}
-              placeholder="Título do post (só para a equipe)"
+              placeholder={tr([
+                "Título do post (só para a equipe)",
+                "Post title (team only)",
+                "Título del post (solo para el equipo)",
+                "Titre du post (pour l’équipe uniquement)",
+              ])}
               className="block w-full min-w-0 truncate bg-transparent font-display text-base font-bold leading-tight text-foreground outline-none placeholder:text-muted-foreground/60 sm:text-lg"
             />
             <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -405,7 +540,11 @@ export function Composer({
                 ) : (
                   <Check className="h-3 w-3" />
                 )}
-                {dirty ? "Não salvo" : d.id ? "Salvo" : "Novo"}
+                {dirty
+                  ? tr(["Não salvo", "Not saved", "Sin guardar", "Non enregistré"])
+                  : d.id
+                    ? tr(["Salvo", "Saved", "Guardado", "Enregistré"])
+                    : tr(["Novo", "New", "Nuevo", "Nouveau"])}
               </span>
             </p>
           </div>
@@ -423,7 +562,7 @@ export function Composer({
             value={d.status}
             onChange={(e) => set("status", e.target.value as Draft["status"])}
             className="cursor-pointer appearance-none bg-transparent pr-4 outline-none"
-            aria-label="Status"
+            aria-label={tr(["Status", "Status", "Estado", "Statut"])}
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -438,21 +577,27 @@ export function Composer({
           className={cn(btnSoft, "hidden h-9 px-3.5 text-xs sm:inline-flex")}
           onClick={() => void copyCaption()}
         >
-          <Copy className="h-3.5 w-3.5" /> Copiar legenda
+          <Copy className="h-3.5 w-3.5" />{" "}
+          {tr(["Copiar legenda", "Copy caption", "Copiar descripción", "Copier la légende"])}
         </button>
         <button
           type="button"
           className={cn(btnPrimary, "h-9 px-4 text-xs")}
           disabled={save.isPending}
           onClick={() => doSave()}
-          title="Salvar (Ctrl+S)"
+          title={tr([
+            "Salvar (Ctrl+S)",
+            "Save (Ctrl+S)",
+            "Guardar (Ctrl+S)",
+            "Enregistrer (Ctrl+S)",
+          ])}
         >
           {save.isPending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
             <Save className="h-3.5 w-3.5" />
           )}
-          Salvar
+          {tr(["Salvar", "Save", "Guardar", "Enregistrer"])}
         </button>
       </header>
 
@@ -461,7 +606,7 @@ export function Composer({
         <aside className="flex min-w-0 flex-col border-border/60 bg-background lg:min-h-0 lg:border-r">
           <nav
             className="grid grid-cols-4 gap-1.5 border-b border-border/60 p-2.5"
-            aria-label="Etapas"
+            aria-label={tr(["Etapas", "Steps", "Etapas", "Étapes"])}
           >
             {STEPS.map((s, k) => {
               const on = step === s.id;
@@ -505,7 +650,7 @@ export function Composer({
                       on ? "text-foreground" : "text-muted-foreground",
                     )}
                   >
-                    {s.label}
+                    {tr(s.label)}
                   </span>
                 </button>
               );
@@ -573,7 +718,16 @@ export function Composer({
                   onDelete={
                     d.id
                       ? () => {
-                          if (window.confirm("Apagar este post?"))
+                          if (
+                            window.confirm(
+                              tr([
+                                "Apagar este post?",
+                                "Delete this post?",
+                                "¿Borrar este post?",
+                                "Supprimer ce post ?",
+                              ]),
+                            )
+                          )
                             remove.mutate(d.id!, { onSuccess: onClose });
                         }
                       : undefined
@@ -590,10 +744,11 @@ export function Composer({
               disabled={stepIndex === 0}
               onClick={() => go(STEPS[stepIndex - 1].id)}
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Voltar
+              <ArrowLeft className="h-3.5 w-3.5" /> {tr(["Voltar", "Back", "Volver", "Retour"])}
             </button>
             <span className="flex-1 text-center text-[11px] text-muted-foreground">
-              Etapa {stepIndex + 1} de {STEPS.length}
+              {tr(["Etapa", "Step", "Etapa", "Étape"])} {stepIndex + 1}{" "}
+              {tr(["de", "of", "de", "sur"])} {STEPS.length}
             </span>
             {stepIndex < STEPS.length - 1 ? (
               <button
@@ -601,7 +756,7 @@ export function Composer({
                 className={cn(btnPrimary, "h-9 px-4 text-xs")}
                 onClick={() => go(STEPS[stepIndex + 1].id)}
               >
-                {STEPS[stepIndex + 1].label} <ArrowRight className="h-3.5 w-3.5" />
+                {tr(STEPS[stepIndex + 1].label)} <ArrowRight className="h-3.5 w-3.5" />
               </button>
             ) : (
               <button
@@ -610,7 +765,8 @@ export function Composer({
                 disabled={save.isPending}
                 onClick={() => doSave()}
               >
-                <Save className="h-3.5 w-3.5" /> Salvar post
+                <Save className="h-3.5 w-3.5" />{" "}
+                {tr(["Salvar post", "Save post", "Guardar post", "Enregistrer le post"])}
               </button>
             )}
           </footer>
@@ -671,7 +827,8 @@ export function Composer({
                     : "border-border/60 bg-card/80 text-muted-foreground",
                 )}
               >
-                {composeCaption(d).length}/{CAPTION_LIMIT[mode]} caracteres
+                {composeCaption(d).length}/{CAPTION_LIMIT[mode]}{" "}
+                {tr(["caracteres", "characters", "caracteres", "caractères"])}
               </span>
             </div>
             {art.images.length > 1 && (
@@ -806,6 +963,7 @@ function StartStep({
   locale: string;
   onApply: (next: Draft) => void;
 }) {
+  const tr = useTr();
   const [cat, setCat] = useState<TemplateCategory | "todos">("todos");
   const [theme, setTheme] = useState("");
   const [goal, setGoal] = useState<Goal>("engajamento");
@@ -814,10 +972,17 @@ function StartStep({
   const hasContent = !!(d.caption || d.title);
 
   const apply = (t: SocialTemplate) => {
-    if (hasContent && !window.confirm(`Usar o modelo "${t.name}"? O texto atual será substituído.`))
+    if (
+      hasContent &&
+      !window.confirm(
+        `${tr(["Usar o modelo", "Use the template", "¿Usar la plantilla", "Utiliser le modèle"])} “${t.name}”? ${tr(["O texto atual será substituído.", "The current text will be replaced.", "El texto actual será reemplazado.", "Le texte actuel sera remplacé."])}`,
+      )
+    )
       return;
     onApply(draftFromTemplate(t));
-    toast.success(`Modelo "${t.name}" aplicado. Agora é só ajustar.`);
+    toast.success(
+      `${tr(["Modelo", "Template", "Plantilla", "Modèle"])} “${t.name}” ${tr(["aplicado. Agora é só ajustar.", "applied. Now just adjust it.", "aplicada. Ahora solo ajústala.", "appliqué. Il ne reste plus qu’à l’ajuster."])}`,
+    );
   };
 
   const fromAi = async () => {
@@ -837,8 +1002,18 @@ function StartStep({
       if ("error" in res) {
         toast.error(
           res.error === "limit"
-            ? "A cota de IA de hoje acabou."
-            : "A IA não conseguiu criar agora.",
+            ? tr([
+                "A cota de IA de hoje acabou.",
+                "Today’s AI quota is used up.",
+                "La cuota de IA de hoy se agotó.",
+                "Le quota d’IA du jour est épuisé.",
+              ])
+            : tr([
+                "A IA não conseguiu criar agora.",
+                "The AI couldn’t create anything right now.",
+                "La IA no pudo crear ahora.",
+                "L’IA n’a pas pu créer pour le moment.",
+              ]),
         );
         return;
       }
@@ -861,9 +1036,23 @@ function StartStep({
           design: { ...d.design, kicker: d.design.kicker || idea.pillar.slice(0, 30) },
         }),
       );
-      toast.success("Post criado pela IA. Revise antes de publicar.");
+      toast.success(
+        tr([
+          "Post criado pela IA. Revise antes de publicar.",
+          "Post created by the AI. Review it before publishing.",
+          "Post creado por la IA. Revísalo antes de publicar.",
+          "Post créé par l’IA. Relisez-le avant de publier.",
+        ]),
+      );
     } catch {
-      toast.error("A IA não conseguiu criar agora.");
+      toast.error(
+        tr([
+          "A IA não conseguiu criar agora.",
+          "The AI couldn’t create anything right now.",
+          "La IA no pudo crear ahora.",
+          "L’IA n’a pas pu créer pour le moment.",
+        ]),
+      );
     } finally {
       setBusy(false);
     }
@@ -887,10 +1076,17 @@ function StartStep({
         <div className="relative flex items-center gap-3">
           <IconBadge icon={Sparkles} color="#7a5cc4" />
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-foreground">Criar com IA</h3>
+            <h3 className="text-sm font-bold text-foreground">
+              {tr(["Criar com IA", "Create with AI", "Crear con IA", "Créer avec l’IA"])}
+            </h3>
             <p className="text-[11px] leading-snug text-foreground/70">
-              Diga o tema: a IA escreve o post completo para {NETWORK_LABEL[d.network]} ·{" "}
-              {FORMAT_LABEL[d.format]}.
+              {tr([
+                "Diga o tema: a IA escreve o post completo para",
+                "Give the theme: the AI writes the full post for",
+                "Di el tema: la IA escribe el post completo para",
+                "Donnez le thème : l’IA rédige le post complet pour",
+              ])}{" "}
+              {NETWORK_LABEL[d.network]} · {FORMAT_LABEL[d.format]}.
             </p>
           </div>
         </div>
@@ -899,7 +1095,12 @@ function StartStep({
           onChange={(e) => setTheme(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !busy && void fromAi()}
           maxLength={300}
-          placeholder="Ex.: lancheira na volta às aulas, mitos do glúten…"
+          placeholder={tr([
+            "Ex.: lancheira na volta às aulas, mitos do glúten…",
+            "E.g.: back-to-school lunchbox, gluten myths…",
+            "Ej.: lonchera para la vuelta a clases, mitos del gluten…",
+            "Ex. : boîte à goûter de la rentrée, mythes sur le gluten…",
+          ])}
           className={cn(field, "relative mt-3 bg-card/95")}
         />
         <div className="relative mt-2.5 grid grid-cols-5 gap-1.5">
@@ -908,7 +1109,7 @@ function StartStep({
               key={g.id}
               type="button"
               onClick={() => setGoal(g.id)}
-              title={g.label}
+              title={tr(g.label)}
               className={cn(
                 "flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-semibold transition",
                 goal === g.id
@@ -917,7 +1118,7 @@ function StartStep({
               )}
             >
               <g.icon className="h-3.5 w-3.5" />
-              <span className="max-w-full truncate">{g.label}</span>
+              <span className="max-w-full truncate">{tr(g.label)}</span>
             </button>
           ))}
         </div>
@@ -928,15 +1129,32 @@ function StartStep({
           className={cn(btnPrimary, "relative mt-3 w-full")}
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-          {busy ? "Escrevendo o post…" : "Gerar post com IA"}
+          {busy
+            ? tr([
+                "Escrevendo o post…",
+                "Writing the post…",
+                "Escribiendo el post…",
+                "Rédaction du post…",
+              ])
+            : tr([
+                "Gerar post com IA",
+                "Generate post with AI",
+                "Generar post con IA",
+                "Générer un post avec l’IA",
+              ])}
         </button>
       </section>
 
       <StudioCard
         icon={LayoutTemplate}
         color="#c58a12"
-        title="Modelos prontos"
-        hint={`${list.length} modelos profissionais, prontos para ajustar`}
+        title={tr([
+          "Modelos prontos",
+          "Ready-made templates",
+          "Plantillas listas",
+          "Modèles prêts",
+        ])}
+        hint={`${list.length} ${tr(["modelos profissionais, prontos para ajustar", "professional templates, ready to adjust", "plantillas profesionales, listas para ajustar", "modèles professionnels, prêts à ajuster"])}`}
         delay={60}
       >
         <div className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
@@ -966,7 +1184,7 @@ function StartStep({
                   ) : (
                     <Shapes className="h-3.5 w-3.5" />
                   )}
-                  {c === "todos" ? "Todos" : CATEGORY_LABEL[c]}
+                  {c === "todos" ? tr(["Todos", "All", "Todos", "Tous"]) : CATEGORY_LABEL[c]}
                 </button>
               );
             },
@@ -976,7 +1194,17 @@ function StartStep({
           <button
             type="button"
             onClick={() => {
-              if (hasContent && !window.confirm("Começar do zero? O texto atual será apagado."))
+              if (
+                hasContent &&
+                !window.confirm(
+                  tr([
+                    "Começar do zero? O texto atual será apagado.",
+                    "Start from scratch? The current text will be erased.",
+                    "¿Empezar desde cero? El texto actual se borrará.",
+                    "Repartir de zéro ? Le texte actuel sera effacé.",
+                  ]),
+                )
+              )
                 return;
               onApply({ ...EMPTY_DRAFT, network: d.network, format: d.format });
             }}
@@ -985,9 +1213,21 @@ function StartStep({
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-secondary text-foreground transition duration-300 group-hover:rotate-90 group-hover:bg-accent group-hover:text-accent-foreground">
               <Plus className="h-5 w-5" />
             </span>
-            <span className="text-xs font-bold text-foreground">Começar do zero</span>
+            <span className="text-xs font-bold text-foreground">
+              {tr([
+                "Começar do zero",
+                "Start from scratch",
+                "Empezar desde cero",
+                "Partir de zéro",
+              ])}
+            </span>
             <span className="text-[10px] leading-snug text-muted-foreground">
-              Página em branco, no seu ritmo
+              {tr([
+                "Página em branco, no seu ritmo",
+                "Blank page, at your own pace",
+                "Página en blanco, a tu ritmo",
+                "Page blanche, à votre rythme",
+              ])}
             </span>
           </button>
           {list.map((t, k) => (
@@ -1008,6 +1248,7 @@ function TemplateCard({
   delay: number;
   onClick: () => void;
 }) {
+  const tr = useTr();
   const net = NETWORK_STYLE[t.network];
   return (
     <button
@@ -1028,7 +1269,8 @@ function TemplateCard({
           <net.icon className="h-3.5 w-3.5" />
         </span>
         <span className="absolute inset-x-2 bottom-2 flex translate-y-2 items-center justify-center gap-1 rounded-full bg-white/95 py-1.5 text-[11px] font-bold text-neutral-900 opacity-0 shadow-lg transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <Sparkles className="h-3 w-3" /> Usar modelo
+          <Sparkles className="h-3 w-3" />{" "}
+          {tr(["Usar modelo", "Use template", "Usar plantilla", "Utiliser le modèle"])}
         </span>
       </div>
       <div className="flex min-h-[4.25rem] flex-col p-2.5">
@@ -1060,6 +1302,7 @@ function TextStep({
   onNetwork: (n: Network) => void;
   onFormat: (f: PostFormat) => void;
 }) {
+  const tr = useTr();
   const [busy, setBusy] = useState<string | null>(null);
   const [custom, setCustom] = useState("");
   const [tag, setTag] = useState("");
@@ -1068,16 +1311,39 @@ function TextStep({
   const emoji = draftHasEmoji(d);
 
   const rewrite = async (how: string) => {
-    if (!d.caption.trim()) return toast.error("Escreva a legenda primeiro.");
+    if (!d.caption.trim())
+      return toast.error(
+        tr([
+          "Escreva a legenda primeiro.",
+          "Write the caption first.",
+          "Escribe la descripción primero.",
+          "Rédigez d’abord la légende.",
+        ]),
+      );
     setBusy(how);
     try {
       const res = await rewriteSocialText({
         data: { text: d.caption, instruction: how, network: d.network, locale: locale as never },
       });
-      if ("error" in res) toast.error("A IA não conseguiu reescrever agora.");
+      if ("error" in res)
+        toast.error(
+          tr([
+            "A IA não conseguiu reescrever agora.",
+            "The AI couldn’t rewrite right now.",
+            "La IA no pudo reescribir ahora.",
+            "L’IA n’a pas pu réécrire pour le moment.",
+          ]),
+        );
       else set("caption", stripEmoji(res.text));
     } catch {
-      toast.error("A IA não conseguiu reescrever agora.");
+      toast.error(
+        tr([
+          "A IA não conseguiu reescrever agora.",
+          "The AI couldn’t rewrite right now.",
+          "La IA no pudo reescribir ahora.",
+          "L’IA n’a pas pu réécrire pour le moment.",
+        ]),
+      );
     } finally {
       setBusy(null);
     }
@@ -1085,7 +1351,15 @@ function TextStep({
 
   const suggestTags = async () => {
     const base = [d.title, d.hook, d.caption].filter(Boolean).join("\n");
-    if (!base.trim()) return toast.error("Escreva o texto primeiro.");
+    if (!base.trim())
+      return toast.error(
+        tr([
+          "Escreva o texto primeiro.",
+          "Write the text first.",
+          "Escribe el texto primero.",
+          "Rédigez d’abord le texte.",
+        ]),
+      );
     setBusy("tags");
     try {
       const res = await rewriteSocialText({
@@ -1097,11 +1371,26 @@ function TextStep({
           locale: locale as never,
         },
       });
-      if ("error" in res) return toast.error("A IA não conseguiu sugerir agora.");
+      if ("error" in res)
+        return toast.error(
+          tr([
+            "A IA não conseguiu sugerir agora.",
+            "The AI couldn’t suggest anything right now.",
+            "La IA no pudo sugerir ahora.",
+            "L’IA n’a rien pu suggérer pour le moment.",
+          ]),
+        );
       const found = [...res.text.matchAll(/#([\p{L}\p{N}_]+)/gu)].map((m) => m[1].toLowerCase());
       setD((o) => ({ ...o, hashtags: [...new Set([...o.hashtags, ...found])].slice(0, 30) }));
     } catch {
-      toast.error("A IA não conseguiu sugerir agora.");
+      toast.error(
+        tr([
+          "A IA não conseguiu sugerir agora.",
+          "The AI couldn’t suggest anything right now.",
+          "La IA no pudo sugerir ahora.",
+          "L’IA n’a rien pu suggérer pour le moment.",
+        ]),
+      );
     } finally {
       setBusy(null);
     }
@@ -1134,17 +1423,24 @@ function TextStep({
         <div className="nc-tile-in flex items-center gap-3 rounded-2xl border border-warning/40 bg-warning/10 px-3.5 py-3">
           <Ban className="h-4 w-4 shrink-0 text-warning" />
           <p className="min-w-0 flex-1 text-xs leading-snug text-foreground">
-            O texto tem emojis. No NutriConnect usamos só ícones.
+            {tr([
+              "O texto tem emojis. No NutriConnect usamos só ícones.",
+              "The text has emojis. At NutriConnect we only use icons.",
+              "El texto tiene emojis. En NutriConnect solo usamos íconos.",
+              "Le texte contient des emojis. Chez NutriConnect, nous n’utilisons que des icônes.",
+            ])}
           </p>
           <button
             type="button"
             className={cn(btnSoft, "h-8 px-3 text-[11px]")}
             onClick={() => {
               setD((o) => cleanDraft(o));
-              toast.success("Emojis removidos.");
+              toast.success(
+                tr(["Emojis removidos.", "Emojis removed.", "Emojis quitados.", "Emojis retirés."]),
+              );
             }}
           >
-            <Eraser className="h-3.5 w-3.5" /> Remover
+            <Eraser className="h-3.5 w-3.5" /> {tr(["Remover", "Remove", "Quitar", "Retirer"])}
           </button>
         </div>
       )}
@@ -1152,10 +1448,15 @@ function TextStep({
       <StudioCard
         icon={Send}
         color="#3b7bbf"
-        title="Rede e formato"
-        hint="Onde e como o post vai sair"
+        title={tr(["Rede e formato", "Network and format", "Red y formato", "Réseau et format"])}
+        hint={tr([
+          "Onde e como o post vai sair",
+          "Where and how the post will go out",
+          "Dónde y cómo saldrá el post",
+          "Où et comment le post sera publié",
+        ])}
       >
-        <Label>Rede</Label>
+        <Label>{tr(["Rede", "Network", "Red", "Réseau"])}</Label>
         <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-7">
           {NETWORKS.map((n) => (
             <Choice
@@ -1172,7 +1473,7 @@ function TextStep({
           ))}
         </div>
         <div className="mt-3.5">
-          <Label>Formato</Label>
+          <Label>{tr(["Formato", "Format", "Formato", "Format"])}</Label>
           <div className="grid grid-cols-3 gap-1.5">
             {FORMATS.map((f) => (
               <Choice
@@ -1191,12 +1492,19 @@ function TextStep({
           </div>
         </div>
         <div className="mt-3.5">
-          <Label>Pilar de conteúdo</Label>
+          <Label>
+            {tr(["Pilar de conteúdo", "Content pillar", "Pilar de contenido", "Pilier de contenu"])}
+          </Label>
           <input
             value={d.pillar}
             maxLength={80}
             onChange={(e) => set("pillar", e.target.value)}
-            placeholder="Ex.: Educativo, Receitas, Bastidores"
+            placeholder={tr([
+              "Ex.: Educativo, Receitas, Bastidores",
+              "E.g.: Educational, Recipes, Behind the scenes",
+              "Ej.: Educativo, Recetas, Detrás de escena",
+              "Ex. : Éducatif, Recettes, Coulisses",
+            ])}
             className={field}
           />
         </div>
@@ -1205,8 +1513,13 @@ function TextStep({
       <StudioCard
         icon={Zap}
         color="#c58a12"
-        title="Gancho"
-        hint="A primeira linha ou os primeiros segundos"
+        title={tr(["Gancho", "Hook", "Gancho", "Accroche"])}
+        hint={tr([
+          "A primeira linha ou os primeiros segundos",
+          "The first line or the first seconds",
+          "La primera línea o los primeros segundos",
+          "La première ligne ou les premières secondes",
+        ])}
         right={<Counter n={d.hook.length} max={150} />}
         delay={40}
       >
@@ -1214,7 +1527,12 @@ function TextStep({
           value={d.hook}
           maxLength={300}
           onChange={(e) => set("hook", e.target.value)}
-          placeholder="A frase que faz a pessoa parar de rolar"
+          placeholder={tr([
+            "A frase que faz a pessoa parar de rolar",
+            "The line that makes people stop scrolling",
+            "La frase que hace que la persona deje de deslizar",
+            "La phrase qui fait arrêter de défiler",
+          ])}
           className={field}
         />
       </StudioCard>
@@ -1222,8 +1540,8 @@ function TextStep({
       <StudioCard
         icon={AlignLeft}
         color="#2f8a5b"
-        title="Legenda"
-        hint={`Limite do ${PREVIEW_LABEL[mode]}`}
+        title={tr(["Legenda", "Caption", "Descripción", "Légende"])}
+        hint={`${tr(["Limite do", "Limit for", "Límite de", "Limite pour"])} ${PREVIEW_LABEL[mode]}`}
         right={<Counter n={total} max={limit} />}
         delay={80}
       >
@@ -1232,15 +1550,27 @@ function TextStep({
           maxLength={5000}
           rows={9}
           onChange={(e) => set("caption", e.target.value)}
-          placeholder="Escreva a legenda…"
+          placeholder={tr([
+            "Escreva a legenda…",
+            "Write the caption…",
+            "Escribe la descripción…",
+            "Rédigez la légende…",
+          ])}
           className={cn(field, "min-h-[12rem] resize-y leading-relaxed")}
         />
         <div className="mt-3">
-          <Label>Reescrever com IA</Label>
+          <Label>
+            {tr([
+              "Reescrever com IA",
+              "Rewrite with AI",
+              "Reescribir con IA",
+              "Réécrire avec l’IA",
+            ])}
+          </Label>
           <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
             {QUICK.map((q) => (
               <button
-                key={q.label}
+                key={q.prompt}
                 type="button"
                 disabled={!!busy}
                 onClick={() => void rewrite(q.prompt)}
@@ -1259,7 +1589,7 @@ function TextStep({
                     <q.icon className="h-3.5 w-3.5" />
                   )}
                 </span>
-                <span className="truncate">{q.label}</span>
+                <span className="truncate">{tr(q.label)}</span>
               </button>
             ))}
           </div>
@@ -1271,7 +1601,12 @@ function TextStep({
               onKeyDown={(e) => {
                 if (e.key === "Enter" && custom.trim() && !busy) void rewrite(custom.trim());
               }}
-              placeholder="Outro pedido para a IA…"
+              placeholder={tr([
+                "Outro pedido para a IA…",
+                "Another request for the AI…",
+                "Otro pedido para la IA…",
+                "Une autre demande pour l’IA…",
+              ])}
               className={cn(field, "h-10 py-0")}
             />
             <button
@@ -1279,7 +1614,7 @@ function TextStep({
               className={cn(btnPrimary, "w-10 px-0")}
               disabled={!custom.trim() || !!busy}
               onClick={() => void rewrite(custom.trim())}
-              aria-label="Pedir à IA"
+              aria-label={tr(["Pedir à IA", "Ask the AI", "Pedir a la IA", "Demander à l’IA"])}
             >
               <Sparkles className="h-4 w-4" />
             </button>
@@ -1291,8 +1626,18 @@ function TextStep({
         <StudioCard
           icon={GalleryHorizontal}
           color="#7a5cc4"
-          title="Slides do carrossel"
-          hint="A capa é o slide 1; o ideal são 5 a 8"
+          title={tr([
+            "Slides do carrossel",
+            "Carousel slides",
+            "Diapositivas del carrusel",
+            "Diapositives du carrousel",
+          ])}
+          hint={tr([
+            "A capa é o slide 1; o ideal são 5 a 8",
+            "The cover is slide 1; 5 to 8 is ideal",
+            "La portada es la diapositiva 1; lo ideal son de 5 a 8",
+            "La couverture est la diapositive 1 ; l’idéal est de 5 à 8",
+          ])}
           right={
             <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
               {d.slides.length + 1}/10
@@ -1313,7 +1658,12 @@ function TextStep({
                   <input
                     value={s.title}
                     maxLength={120}
-                    placeholder="Título do slide"
+                    placeholder={tr([
+                      "Título do slide",
+                      "Slide title",
+                      "Título de la diapositiva",
+                      "Titre de la diapositive",
+                    ])}
                     onChange={(e) => editSlide(i, { title: e.target.value })}
                     className="min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none placeholder:text-muted-foreground/60"
                   />
@@ -1323,7 +1673,7 @@ function TextStep({
                       onClick={() => moveSlide(i, -1)}
                       disabled={i === 0}
                       className={cn(btnIcon, "h-7 w-7 disabled:opacity-30")}
-                      aria-label="Subir"
+                      aria-label={tr(["Subir", "Move up", "Subir", "Monter"])}
                     >
                       <ArrowUp className="h-3.5 w-3.5" />
                     </button>
@@ -1332,7 +1682,7 @@ function TextStep({
                       onClick={() => moveSlide(i, 1)}
                       disabled={i === d.slides.length - 1}
                       className={cn(btnIcon, "h-7 w-7 disabled:opacity-30")}
-                      aria-label="Descer"
+                      aria-label={tr(["Descer", "Move down", "Bajar", "Descendre"])}
                     >
                       <ArrowDown className="h-3.5 w-3.5" />
                     </button>
@@ -1342,7 +1692,12 @@ function TextStep({
                         setD((o) => ({ ...o, slides: o.slides.filter((_, j) => j !== i) }))
                       }
                       className={cn(btnIcon, "h-7 w-7 hover:text-destructive")}
-                      aria-label="Remover slide"
+                      aria-label={tr([
+                        "Remover slide",
+                        "Remove slide",
+                        "Quitar diapositiva",
+                        "Retirer la diapositive",
+                      ])}
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -1352,7 +1707,12 @@ function TextStep({
                   value={s.text}
                   maxLength={400}
                   rows={2}
-                  placeholder="Texto do slide (uma linha por item para listas)"
+                  placeholder={tr([
+                    "Texto do slide (uma linha por item para listas)",
+                    "Slide text (one line per item for lists)",
+                    "Texto de la diapositiva (una línea por ítem para listas)",
+                    "Texte de la diapositive (une ligne par élément pour les listes)",
+                  ])}
                   onChange={(e) => editSlide(i, { text: e.target.value })}
                   className="mt-1.5 block w-full resize-none bg-transparent pl-8 text-xs leading-relaxed text-muted-foreground outline-none placeholder:text-muted-foreground/60"
                 />
@@ -1365,7 +1725,8 @@ function TextStep({
             disabled={d.slides.length >= 9}
             onClick={() => setD((o) => ({ ...o, slides: [...o.slides, { title: "", text: "" }] }))}
           >
-            <Plus className="h-4 w-4" /> Adicionar slide
+            <Plus className="h-4 w-4" />{" "}
+            {tr(["Adicionar slide", "Add slide", "Agregar diapositiva", "Ajouter une diapositive"])}
           </button>
         </StudioCard>
       )}
@@ -1374,8 +1735,13 @@ function TextStep({
         <StudioCard
           icon={Clapperboard}
           color="#e0302a"
-          title="Roteiro"
-          hint="Cenas, falas e tempo de cada parte"
+          title={tr(["Roteiro", "Script", "Guion", "Script"])}
+          hint={tr([
+            "Cenas, falas e tempo de cada parte",
+            "Scenes, lines and timing for each part",
+            "Escenas, diálogos y tiempo de cada parte",
+            "Scènes, répliques et durée de chaque partie",
+          ])}
           delay={120}
         >
           <textarea
@@ -1383,7 +1749,12 @@ function TextStep({
             maxLength={5000}
             rows={7}
             onChange={(e) => set("script", e.target.value)}
-            placeholder={"0–3s (gancho): …\n3–8s: …"}
+            placeholder={tr([
+              "0–3s (gancho): …\n3–8s: …",
+              "0–3s (hook): …\n3–8s: …",
+              "0–3s (gancho): …\n3–8s: …",
+              "0–3s (accroche) : …\n3–8s : …",
+            ])}
             className={cn(field, "resize-y font-mono text-xs leading-relaxed")}
           />
         </StudioCard>
@@ -1393,7 +1764,12 @@ function TextStep({
         icon={Hash}
         color="#d6456b"
         title="Hashtags"
-        hint="Enter, espaço ou vírgula para adicionar"
+        hint={tr([
+          "Enter, espaço ou vírgula para adicionar",
+          "Enter, space or comma to add",
+          "Enter, espacio o coma para agregar",
+          "Entrée, espace ou virgule pour ajouter",
+        ])}
         right={
           <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
             {d.hashtags.length}/30
@@ -1412,7 +1788,7 @@ function TextStep({
                 type="button"
                 onClick={() => setD((o) => ({ ...o, hashtags: o.hashtags.filter((x) => x !== h) }))}
                 className="grid h-4 w-4 place-items-center rounded-full hover:bg-[#d6456b]/20"
-                aria-label={`Remover ${h}`}
+                aria-label={`${tr(["Remover", "Remove", "Quitar", "Retirer"])} ${h}`}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -1434,7 +1810,16 @@ function TextStep({
               addTags(tag);
               setTag("");
             }}
-            placeholder={d.hashtags.length ? "" : "Digite uma hashtag"}
+            placeholder={
+              d.hashtags.length
+                ? ""
+                : tr([
+                    "Digite uma hashtag",
+                    "Type a hashtag",
+                    "Escribe un hashtag",
+                    "Saisissez un hashtag",
+                  ])
+            }
             className="h-7 min-w-[120px] flex-1 bg-transparent px-1 text-xs outline-none"
           />
         </div>
@@ -1449,33 +1834,67 @@ function TextStep({
           ) : (
             <Sparkles className="h-3.5 w-3.5 text-accent" />
           )}
-          Sugerir hashtags com IA
+          {tr([
+            "Sugerir hashtags com IA",
+            "Suggest hashtags with AI",
+            "Sugerir hashtags con IA",
+            "Suggérer des hashtags avec l’IA",
+          ])}
         </button>
       </StudioCard>
 
       <StudioCard
         icon={Megaphone}
         color="#555f36"
-        title="Chamada e notas"
-        hint="O convite final e recados para a equipe"
+        title={tr([
+          "Chamada e notas",
+          "Call to action and notes",
+          "Llamada y notas",
+          "Appel à l’action et notes",
+        ])}
+        hint={tr([
+          "O convite final e recados para a equipe",
+          "The final invitation and notes for the team",
+          "La invitación final y mensajes para el equipo",
+          "L’invitation finale et des messages pour l’équipe",
+        ])}
         delay={200}
       >
-        <Label>Chamada para ação</Label>
+        <Label>
+          {tr(["Chamada para ação", "Call to action", "Llamada a la acción", "Appel à l’action"])}
+        </Label>
         <input
           value={d.cta}
           maxLength={300}
           onChange={(e) => set("cta", e.target.value)}
-          placeholder="Ex.: Salve para lembrar e mande para alguém."
+          placeholder={tr([
+            "Ex.: Salve para lembrar e mande para alguém.",
+            "E.g.: Save it to remember and send it to someone.",
+            "Ej.: Guárdalo para recordar y envíalo a alguien.",
+            "Ex. : Enregistrez pour vous en souvenir et envoyez-le à quelqu’un.",
+          ])}
           className={field}
         />
         <div className="mt-3">
-          <Label>Notas para a equipe</Label>
+          <Label>
+            {tr([
+              "Notas para a equipe",
+              "Notes for the team",
+              "Notas para el equipo",
+              "Notes pour l’équipe",
+            ])}
+          </Label>
           <textarea
             value={d.visual_idea}
             maxLength={1000}
             rows={3}
             onChange={(e) => set("visual_idea", e.target.value)}
-            placeholder="Ideia visual, referências, observações…"
+            placeholder={tr([
+              "Ideia visual, referências, observações…",
+              "Visual idea, references, remarks…",
+              "Idea visual, referencias, observaciones…",
+              "Idée visuelle, références, remarques…",
+            ])}
             className={cn(field, "resize-y")}
           />
         </div>
@@ -1497,6 +1916,7 @@ function VisualStep({
   handle: string;
   onDownload: () => void;
 }) {
+  const tr = useTr();
   const [group, setGroup] = useState<ArtIconGroup>("Comida");
   const preview = useDebounced(d, 350);
   const auto = coverBody({ ...d, design: { ...d.design, body: "" } }, handle);
@@ -1506,8 +1926,18 @@ function VisualStep({
       <StudioCard
         icon={LayoutTemplate}
         color="#d6456b"
-        title="Layout da arte"
-        hint="Cada card já mostra o seu post nesse layout"
+        title={tr([
+          "Layout da arte",
+          "Artwork layout",
+          "Diseño de la imagen",
+          "Mise en page du visuel",
+        ])}
+        hint={tr([
+          "Cada card já mostra o seu post nesse layout",
+          "Each card already shows your post in that layout",
+          "Cada tarjeta ya muestra tu post en ese diseño",
+          "Chaque carte montre déjà votre post dans cette mise en page",
+        ])}
       >
         <div className="grid grid-cols-3 gap-2">
           {(Object.keys(ART_LAYOUTS) as ArtLayout[]).map((l, k) => {
@@ -1551,7 +1981,18 @@ function VisualStep({
         </div>
       </StudioCard>
 
-      <StudioCard icon={Palette} color="#7a5cc4" title="Cores" hint="Paletas da marca" delay={40}>
+      <StudioCard
+        icon={Palette}
+        color="#7a5cc4"
+        title={tr(["Cores", "Colors", "Colores", "Couleurs"])}
+        hint={tr([
+          "Paletas da marca",
+          "Brand palettes",
+          "Paletas de la marca",
+          "Palettes de la marque",
+        ])}
+        delay={40}
+      >
         <div className="grid grid-cols-4 gap-2">
           {(Object.keys(ART_THEMES) as ArtTheme[]).map((t) => {
             const th = ART_THEMES[t];
@@ -1597,8 +2038,13 @@ function VisualStep({
       <StudioCard
         icon={Shapes}
         color="#3b7bbf"
-        title="Ícone"
-        hint="Selo da arte (o NutriConnect não usa emojis)"
+        title={tr(["Ícone", "Icon", "Ícono", "Icône"])}
+        hint={tr([
+          "Selo da arte (o NutriConnect não usa emojis)",
+          "Artwork badge (NutriConnect doesn’t use emojis)",
+          "Sello de la imagen (NutriConnect no usa emojis)",
+          "Badge du visuel (NutriConnect n’utilise pas d’emojis)",
+        ])}
         right={
           d.design.icon ? (
             <button
@@ -1606,7 +2052,7 @@ function VisualStep({
               onClick={() => setDesign({ icon: "" })}
               className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
             >
-              Sem ícone
+              {tr(["Sem ícone", "No icon", "Sin ícono", "Sans icône"])}
             </button>
           ) : null
         }
@@ -1625,7 +2071,7 @@ function VisualStep({
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {g}
+              {tr(GROUP_NAMES[g])}
             </button>
           ))}
         </div>
@@ -1662,8 +2108,13 @@ function VisualStep({
       <StudioCard
         icon={ImageIcon}
         color="#2f8a5b"
-        title="Banco de imagens"
-        hint="Foto de fundo da arte"
+        title={tr(["Banco de imagens", "Image bank", "Banco de imágenes", "Banque d’images"])}
+        hint={tr([
+          "Foto de fundo da arte",
+          "Artwork background photo",
+          "Foto de fondo de la imagen",
+          "Photo de fond du visuel",
+        ])}
         right={
           d.design.image ? (
             <button
@@ -1671,7 +2122,8 @@ function VisualStep({
               onClick={() => setDesign({ image: undefined })}
               className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-destructive"
             >
-              <Trash2 className="h-3 w-3" /> Tirar foto
+              <Trash2 className="h-3 w-3" />{" "}
+              {tr(["Tirar foto", "Remove photo", "Quitar foto", "Retirer la photo"])}
             </button>
           ) : null
         }
@@ -1683,8 +2135,13 @@ function VisualStep({
       <StudioCard
         icon={Type}
         color="#c58a12"
-        title="Textos da arte"
-        hint="O título da arte é o título do post"
+        title={tr(["Textos da arte", "Artwork text", "Textos de la imagen", "Textes du visuel"])}
+        hint={tr([
+          "O título da arte é o título do post",
+          "The artwork title is the post title",
+          "El título de la imagen es el título del post",
+          "Le titre du visuel est le titre du post",
+        ])}
         delay={160}
       >
         <Label
@@ -1694,13 +2151,23 @@ function VisualStep({
             </span>
           }
         >
-          Chamada (selo acima do título)
+          {tr([
+            "Chamada (selo acima do título)",
+            "Kicker (badge above the title)",
+            "Llamada (sello sobre el título)",
+            "Surtitre (badge au-dessus du titre)",
+          ])}
         </Label>
         <input
           value={d.design.kicker ?? ""}
           maxLength={40}
           onChange={(e) => setDesign({ kicker: e.target.value })}
-          placeholder="Ex.: Mito ou verdade?"
+          placeholder={tr([
+            "Ex.: Mito ou verdade?",
+            "E.g.: Myth or fact?",
+            "Ej.: ¿Mito o verdad?",
+            "Ex. : Mythe ou réalité ?",
+          ])}
           className={field}
         />
         <div className="mt-3">
@@ -1712,31 +2179,57 @@ function VisualStep({
                   onClick={() => setDesign({ body: "" })}
                   className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
                 >
-                  Voltar ao automático
+                  {tr([
+                    "Voltar ao automático",
+                    "Back to automatic",
+                    "Volver a automático",
+                    "Revenir à l’automatique",
+                  ])}
                 </button>
               ) : (
-                <span className="text-[11px] text-muted-foreground">Automático</span>
+                <span className="text-[11px] text-muted-foreground">
+                  {tr(["Automático", "Automatic", "Automático", "Automatique"])}
+                </span>
               )
             }
           >
-            Texto da capa
+            {tr(["Texto da capa", "Cover text", "Texto de la portada", "Texte de couverture"])}
           </Label>
           <textarea
             value={d.design.body ?? ""}
             maxLength={400}
             rows={3}
             onChange={(e) => setDesign({ body: e.target.value })}
-            placeholder={auto || "Deixe vazio para usar o gancho ou a legenda"}
+            placeholder={
+              auto ||
+              tr([
+                "Deixe vazio para usar o gancho ou a legenda",
+                "Leave empty to use the hook or the caption",
+                "Déjalo vacío para usar el gancho o la descripción",
+                "Laissez vide pour utiliser l’accroche ou la légende",
+              ])
+            }
             className={cn(field, "resize-y text-xs leading-relaxed")}
           />
           <p className="mt-1.5 text-[10.5px] leading-snug text-muted-foreground">
-            Lista, Receita e Enquete: um item por linha. Troca: “em vez de → prefira”.
+            {tr([
+              "Lista, Receita e Enquete: um item por linha. Troca: “em vez de → prefira”.",
+              "List, Recipe and Poll: one item per line. Swap: “instead of → prefer”.",
+              "Lista, Receta y Encuesta: un ítem por línea. Cambio: “en vez de → prefiere”.",
+              "Liste, Recette et Sondage : un élément par ligne. Échange : « au lieu de → préférez ».",
+            ])}
           </p>
         </div>
       </StudioCard>
 
       <button type="button" className={cn(btnPrimary, "h-11 w-full")} onClick={onDownload}>
-        <Download className="h-4 w-4" /> Baixar artes em PNG (alta resolução)
+        <Download className="h-4 w-4" />{" "}
+        {tr([
+          "Baixar artes em PNG (alta resolução)",
+          "Download artwork as PNG (high resolution)",
+          "Descargar diseños en PNG (alta resolución)",
+          "Télécharger les visuels en PNG (haute résolution)",
+        ])}
       </button>
     </>
   );
@@ -1767,17 +2260,37 @@ function PublishStep({
   onTemplate: () => void;
   onDelete?: () => void;
 }) {
+  const tr = useTr();
   const total = composeCaption(d).length;
   const emoji = draftHasEmoji(d);
   const checks = useMemo(() => {
-    const list: { ok: boolean; label: string }[] = [
-      { ok: d.hook.trim().length >= 10, label: "Gancho forte na primeira linha" },
-      { ok: d.caption.trim().length >= 40, label: "Legenda escrita" },
+    const list: { ok: boolean; label: Names; emoji?: boolean }[] = [
+      {
+        ok: d.hook.trim().length >= 10,
+        label: [
+          "Gancho forte na primeira linha",
+          "Strong hook in the first line",
+          "Gancho fuerte en la primera línea",
+          "Accroche forte dès la première ligne",
+        ],
+      },
+      {
+        ok: d.caption.trim().length >= 40,
+        label: ["Legenda escrita", "Caption written", "Descripción escrita", "Légende rédigée"],
+      },
       {
         ok: total <= CAPTION_LIMIT[mode],
-        label: `Dentro do limite da rede (${CAPTION_LIMIT[mode]} caracteres)`,
+        label: [
+          `Dentro do limite da rede (${CAPTION_LIMIT[mode]} caracteres)`,
+          `Within the network’s limit (${CAPTION_LIMIT[mode]} characters)`,
+          `Dentro del límite de la red (${CAPTION_LIMIT[mode]} caracteres)`,
+          `Dans la limite du réseau (${CAPTION_LIMIT[mode]} caractères)`,
+        ],
       },
-      { ok: d.cta.trim().length > 0, label: "Chamada para ação" },
+      {
+        ok: d.cta.trim().length > 0,
+        label: ["Chamada para ação", "Call to action", "Llamada a la acción", "Appel à l’action"],
+      },
       {
         ok:
           d.network === "linkedin" || d.network === "x"
@@ -1785,22 +2298,52 @@ function PublishStep({
             : d.hashtags.length >= 3 && d.hashtags.length <= 15,
         label:
           d.network === "linkedin" || d.network === "x"
-            ? "Até 5 hashtags"
-            : "Entre 3 e 15 hashtags",
+            ? ["Até 5 hashtags", "Up to 5 hashtags", "Hasta 5 hashtags", "Jusqu’à 5 hashtags"]
+            : [
+                "Entre 3 e 15 hashtags",
+                "Between 3 and 15 hashtags",
+                "Entre 3 y 15 hashtags",
+                "Entre 3 et 15 hashtags",
+              ],
       },
-      { ok: images.length > 0, label: "Arte pronta" },
-      { ok: !emoji, label: "Sem emojis (regra do NutriConnect)" },
+      {
+        ok: images.length > 0,
+        label: ["Arte pronta", "Artwork ready", "Diseño listo", "Visuel prêt"],
+      },
+      {
+        ok: !emoji,
+        label: [
+          "Sem emojis (regra do NutriConnect)",
+          "No emojis (NutriConnect rule)",
+          "Sin emojis (regla de NutriConnect)",
+          "Pas d’emojis (règle NutriConnect)",
+        ],
+        emoji: true,
+      },
     ];
     if (d.format === "carrossel")
       list.push({
         ok: d.slides.filter((s) => s.title || s.text).length >= 2,
-        label: "Carrossel com 3 ou mais slides",
+        label: [
+          "Carrossel com 3 ou mais slides",
+          "Carousel with 3 or more slides",
+          "Carrusel con 3 o más diapositivas",
+          "Carrousel de 3 diapositives ou plus",
+        ],
       });
     if (["reels", "video", "story"].includes(d.format))
-      list.push({ ok: d.script.trim().length > 20, label: "Roteiro do vídeo" });
+      list.push({
+        ok: d.script.trim().length > 20,
+        label: ["Roteiro do vídeo", "Video script", "Guion del video", "Script de la vidéo"],
+      });
     list.push({
       ok: !/antes e depois|emagre[çc]a \d|perca \d+ ?kg|garantid/i.test(`${d.caption} ${d.hook}`),
-      label: "Sem promessas nem “antes e depois” (ética CFN)",
+      label: [
+        "Sem promessas nem “antes e depois” (ética CFN)",
+        "No promises or “before and after” (CFN ethics)",
+        "Sin promesas ni “antes y después” (ética CFN)",
+        "Ni promesses ni « avant/après » (éthique CFN)",
+      ],
     });
     return list;
   }, [d, images.length, mode, total, emoji]);
@@ -1812,8 +2355,13 @@ function PublishStep({
       <StudioCard
         icon={CheckCircle2}
         color="#2f8a5b"
-        title="Revisão"
-        hint="Tudo verde? Está pronto para publicar"
+        title={tr(["Revisão", "Review", "Revisión", "Relecture"])}
+        hint={tr([
+          "Tudo verde? Está pronto para publicar",
+          "All green? It’s ready to publish",
+          "¿Todo en verde? Está listo para publicar",
+          "Tout est vert ? C’est prêt à publier",
+        ])}
       >
         <div className="flex items-center gap-4">
           <div className="relative grid h-20 w-20 shrink-0 place-items-center">
@@ -1845,19 +2393,31 @@ function PublishStep({
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-foreground">
-              {ready ? "Pronto para publicar" : "Quase lá"}
+              {ready
+                ? tr([
+                    "Pronto para publicar",
+                    "Ready to publish",
+                    "Listo para publicar",
+                    "Prêt à publier",
+                  ])
+                : tr(["Quase lá", "Almost there", "Casi listo", "Presque fini"])}
             </p>
             <p className="text-xs leading-snug text-muted-foreground">
               {ready
-                ? "Copie a legenda, baixe as artes e poste."
-                : `${checks.filter((c) => !c.ok).length} ponto(s) para revisar.`}
+                ? tr([
+                    "Copie a legenda, baixe as artes e poste.",
+                    "Copy the caption, download the artwork and post.",
+                    "Copia la descripción, descarga los diseños y publica.",
+                    "Copiez la légende, téléchargez les visuels et publiez.",
+                  ])
+                : `${checks.filter((c) => !c.ok).length} ${tr(["ponto(s) para revisar.", "item(s) to review.", "punto(s) por revisar.", "point(s) à revoir."])}`}
             </p>
           </div>
         </div>
         <ul className="mt-3.5 grid gap-1.5">
           {checks.map((c, k) => (
             <li
-              key={c.label}
+              key={c.label[0]}
               className={cn(
                 "nc-tile-in flex min-h-9 items-center gap-2.5 rounded-xl px-3 py-2 text-xs transition",
                 c.ok
@@ -1871,14 +2431,14 @@ function PublishStep({
               ) : (
                 <Circle className="h-4 w-4 shrink-0" />
               )}
-              <span className="min-w-0 flex-1">{c.label}</span>
-              {!c.ok && c.label.startsWith("Sem emojis") && (
+              <span className="min-w-0 flex-1">{tr(c.label)}</span>
+              {!c.ok && c.emoji && (
                 <button
                   type="button"
                   onClick={onClean}
                   className="shrink-0 text-[11px] font-bold text-accent hover:underline"
                 >
-                  Remover
+                  {tr(["Remover", "Remove", "Quitar", "Retirer"])}
                 </button>
               )}
             </li>
@@ -1889,13 +2449,18 @@ function PublishStep({
       <StudioCard
         icon={CalendarDays}
         color="#d6456b"
-        title="Agenda"
-        hint="Quando e em qual perfil"
+        title={tr(["Agenda", "Schedule", "Agenda", "Planning"])}
+        hint={tr([
+          "Quando e em qual perfil",
+          "When and on which profile",
+          "Cuándo y en qué perfil",
+          "Quand et sur quel profil",
+        ])}
         delay={40}
       >
         <div className="grid grid-cols-2 gap-2">
           <div className="min-w-0">
-            <Label>Data</Label>
+            <Label>{tr(["Data", "Date", "Fecha", "Date"])}</Label>
             <input
               type="date"
               value={d.scheduled_for ?? ""}
@@ -1904,13 +2469,13 @@ function PublishStep({
             />
           </div>
           <div className="min-w-0">
-            <Label>Perfil</Label>
+            <Label>{tr(["Perfil", "Profile", "Perfil", "Profil"])}</Label>
             <select
               value={d.profile_id ?? ""}
               onChange={(e) => set("profile_id", e.target.value || null)}
               className={cn(field, "h-10 py-0")}
             >
-              <option value="">Nenhum</option>
+              <option value="">{tr(["Nenhum", "None", "Ninguno", "Aucun"])}</option>
               {profiles.map((p) => (
                 <option key={p.id} value={p.id}>
                   {NETWORK_LABEL[p.network as Network]} · {p.handle}
@@ -1923,8 +2488,16 @@ function PublishStep({
           <p className="mt-3 flex gap-2 rounded-xl bg-[#d6456b]/8 px-3 py-2.5 text-xs leading-snug text-foreground">
             <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d6456b]" />
             <span>
-              <span className="font-bold">Bons horários no {NETWORK_LABEL[d.network]}:</span>{" "}
-              {BEST_TIME[d.network]}
+              <span className="font-bold">
+                {tr([
+                  "Bons horários no",
+                  "Good times on",
+                  "Buenos horarios en",
+                  "Bons horaires sur",
+                ])}{" "}
+                {NETWORK_LABEL[d.network]}:
+              </span>{" "}
+              {tr(BEST_TIME[d.network]!)}
             </span>
           </p>
         )}
@@ -1933,29 +2506,67 @@ function PublishStep({
       <StudioCard
         icon={Send}
         color="#555f36"
-        title="Publicar"
-        hint="Leve o post para a rede"
+        title={tr(["Publicar", "Publish", "Publicar", "Publier"])}
+        hint={tr([
+          "Leve o post para a rede",
+          "Take the post to the network",
+          "Lleva el post a la red",
+          "Emmenez le post sur le réseau",
+        ])}
         delay={80}
       >
         <div className="grid grid-cols-2 gap-2">
-          <ActionTile icon={Copy} color="#2f8a5b" label="Copiar legenda" onClick={onCopy} />
-          <ActionTile icon={Download} color="#3b7bbf" label="Baixar artes" onClick={onDownload} />
+          <ActionTile
+            icon={Copy}
+            color="#2f8a5b"
+            label={tr([
+              "Copiar legenda",
+              "Copy caption",
+              "Copiar descripción",
+              "Copier la légende",
+            ])}
+            onClick={onCopy}
+          />
+          <ActionTile
+            icon={Download}
+            color="#3b7bbf"
+            label={tr([
+              "Baixar artes",
+              "Download artwork",
+              "Descargar diseños",
+              "Télécharger les visuels",
+            ])}
+            onClick={onDownload}
+          />
           {!d.is_template && (
             <ActionTile
               icon={FilePlus2}
               color="#c58a12"
-              label="Salvar como modelo"
+              label={tr([
+                "Salvar como modelo",
+                "Save as template",
+                "Guardar como plantilla",
+                "Enregistrer comme modèle",
+              ])}
               onClick={onTemplate}
             />
           )}
           {onDelete && (
-            <ActionTile icon={Trash2} color="#c2416b" label="Apagar post" onClick={onDelete} />
+            <ActionTile
+              icon={Trash2}
+              color="#c2416b"
+              label={tr(["Apagar post", "Delete post", "Borrar post", "Supprimer le post"])}
+              onClick={onDelete}
+            />
           )}
         </div>
         <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-          A publicação direta nas redes exige um app aprovado pela Meta e pelo TikTok. Por enquanto:
-          copie a legenda, baixe as artes e poste pelo aplicativo da rede. Depois, mude o status
-          para “Publicado”.
+          {tr([
+            "A publicação direta nas redes exige um app aprovado pela Meta e pelo TikTok. Por enquanto: copie a legenda, baixe as artes e poste pelo aplicativo da rede. Depois, mude o status para “Publicado”.",
+            "Publishing directly to the networks requires an app approved by Meta and TikTok. For now: copy the caption, download the artwork and post from the network’s app. Then change the status to “Published”.",
+            "La publicación directa en las redes exige una app aprobada por Meta y TikTok. Por ahora: copia la descripción, descarga los diseños y publica desde la app de la red. Después, cambia el estado a “Publicado”.",
+            "La publication directe sur les réseaux exige une app approuvée par Meta et TikTok. Pour l’instant : copiez la légende, téléchargez les visuels et publiez depuis l’app du réseau. Ensuite, passez le statut à « Publié ».",
+          ])}
         </p>
       </StudioCard>
     </>
