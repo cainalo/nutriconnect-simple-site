@@ -33,49 +33,79 @@ import {
 import { useSocialPosts, useSocialProfiles, type SocialPost } from "@/lib/social-studio";
 import type { SocialTemplate } from "@/lib/social-templates";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
+import type { Names } from "@/lib/appearance-data";
 
 type Tab = StudioTab;
-const TABS: { id: Tab; label: string; title: string; icon: LucideIcon; color: string }[] = [
-  { id: "inicio", label: "Início", title: "Início", icon: Home, color: "#b4532a" },
+const TABS: { id: Tab; label: Names; title: Names; icon: LucideIcon; color: string }[] = [
+  {
+    id: "inicio",
+    label: ["Início", "Home", "Inicio", "Accueil"],
+    title: ["Início", "Home", "Inicio", "Accueil"],
+    icon: Home,
+    color: "#b4532a",
+  },
   {
     id: "quadro",
-    label: "Quadro",
-    title: "Quadro de produção",
+    label: ["Quadro", "Board", "Tablero", "Tableau"],
+    title: [
+      "Quadro de produção",
+      "Production board",
+      "Tablero de producción",
+      "Tableau de production",
+    ],
     icon: KanbanSquare,
     color: "#3b7bbf",
   },
   {
     id: "ideias",
-    label: "Ideias com IA",
-    title: "Ideias com IA",
+    label: ["Ideias com IA", "AI ideas", "Ideas con IA", "Idées avec l’IA"],
+    title: ["Ideias com IA", "AI ideas", "Ideas con IA", "Idées avec l’IA"],
     icon: Lightbulb,
     color: "#7a5cc4",
   },
   {
     id: "modelos",
-    label: "Modelos",
-    title: "Modelos de post",
+    label: ["Modelos", "Templates", "Plantillas", "Modèles"],
+    title: ["Modelos de post", "Post templates", "Plantillas de post", "Modèles de post"],
     icon: LayoutTemplate,
     color: "#c58a12",
   },
   {
     id: "calendario",
-    label: "Calendário",
-    title: "Calendário editorial",
+    label: ["Calendário", "Calendar", "Calendario", "Calendrier"],
+    title: [
+      "Calendário editorial",
+      "Editorial calendar",
+      "Calendario editorial",
+      "Calendrier éditorial",
+    ],
     icon: CalendarDays,
     color: "#d6456b",
   },
   {
     id: "tendencias",
-    label: "Tendências",
-    title: "Tendências do momento",
+    label: ["Tendências", "Trends", "Tendencias", "Tendances"],
+    title: [
+      "Tendências do momento",
+      "Current trends",
+      "Tendencias del momento",
+      "Tendances du moment",
+    ],
     icon: TrendingUp,
     color: "#2f8a5b",
   },
-  { id: "perfis", label: "Perfis", title: "Perfis das redes", icon: UserRound, color: "#555f36" },
+  {
+    id: "perfis",
+    label: ["Perfis", "Profiles", "Perfiles", "Profils"],
+    title: ["Perfis das redes", "Network profiles", "Perfiles de las redes", "Profils des réseaux"],
+    icon: UserRound,
+    color: "#555f36",
+  },
 ];
 
 export function SocialStudioSection() {
+  const tr = useTr();
   const [tab, setTab] = useState<Tab>("inicio");
   const [composer, setComposer] = useState<Draft | null>(null);
   const [prefill, setPrefill] = useState<string | undefined>();
@@ -95,11 +125,15 @@ export function SocialStudioSection() {
   // Sem as tabelas no banco (migration pendente), mostra o aviso em vez das abas.
   if (profiles.error && posts.error) {
     return (
-      <Panel title="Redes sociais">
+      <Panel title={tr(["Redes sociais", "Social media", "Redes sociales", "Réseaux sociaux"])}>
         {/schema cache|does not exist/i.test((profiles.error as Error).message) ? (
           <p className="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-foreground">
-            O estúdio já está no site, mas o banco de dados ainda não recebeu a atualização que cria
-            as tabelas dele.
+            {tr([
+              "O estúdio já está no site, mas o banco de dados ainda não recebeu a atualização que cria as tabelas dele.",
+              "The studio is already on the site, but the database hasn’t received the update that creates its tables yet.",
+              "El estudio ya está en el sitio, pero la base de datos aún no recibió la actualización que crea sus tablas.",
+              "Le studio est déjà sur le site, mais la base de données n’a pas encore reçu la mise à jour qui crée ses tables.",
+            ])}
           </p>
         ) : (
           <QueryError error={profiles.error} />
@@ -131,7 +165,7 @@ export function SocialStudioSection() {
                   className="h-3.5 w-3.5 transition group-hover:scale-110"
                   style={on ? undefined : { color: t.color }}
                 />
-                {t.label}
+                {tr(t.label)}
               </button>
             );
           })}
@@ -141,13 +175,16 @@ export function SocialStudioSection() {
           onClick={() => openNew()}
           className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-accent px-4 text-xs font-bold text-accent-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg"
         >
-          <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Criar post</span>
+          <Plus className="h-4 w-4" />{" "}
+          <span className="hidden sm:inline">
+            {tr(["Criar post", "Create post", "Crear post", "Créer un post"])}
+          </span>
         </button>
       </nav>
 
       {tab !== "inicio" && (
         <SectionTitle icon={current.icon} color={current.color}>
-          {current.title}
+          {tr(current.title)}
         </SectionTitle>
       )}
 

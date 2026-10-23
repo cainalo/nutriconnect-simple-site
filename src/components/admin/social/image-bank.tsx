@@ -15,6 +15,7 @@ import {
   type MediaItem,
 } from "@/lib/social-media";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
 
 const pill =
   "inline-flex h-7 shrink-0 items-center rounded-full border px-3 text-[11px] font-semibold transition";
@@ -28,6 +29,7 @@ export function ImageBank({
   value?: string;
   onPick: (src: string | undefined) => void;
 }) {
+  const tr = useTr();
   const [tab, setTab] = useState<"banco" | "equipe">("banco");
   const [cat, setCat] = useState<MediaCategory | "todas">("todas");
   const team = useTeamMedia(tab === "equipe");
@@ -37,15 +39,38 @@ export function ImageBank({
   const stock = STOCK_MEDIA.filter((m) => cat === "todas" || m.category === cat);
 
   const send = async (f: File) => {
-    if (!MEDIA_TYPES.includes(f.type)) return toast.error("Use uma foto JPEG, PNG ou WebP.");
+    if (!MEDIA_TYPES.includes(f.type))
+      return toast.error(
+        tr([
+          "Use uma foto JPEG, PNG ou WebP.",
+          "Use a JPEG, PNG or WebP photo.",
+          "Usa una foto JPEG, PNG o WebP.",
+          "Utilisez une photo JPEG, PNG ou WebP.",
+        ]),
+      );
     try {
       const blob = await compressToBlob(f);
       const url = await upload.mutateAsync({ blob, name: f.name });
       onPick(url);
       setTab("equipe");
-      toast.success("Foto salva na biblioteca da equipe e aplicada na arte.");
+      toast.success(
+        tr([
+          "Foto salva na biblioteca da equipe e aplicada na arte.",
+          "Photo saved to the team library and applied to the artwork.",
+          "Foto guardada en la biblioteca del equipo y aplicada al diseño.",
+          "Photo enregistrée dans la bibliothèque de l’équipe et appliquée au visuel.",
+        ]),
+      );
     } catch (err) {
-      toast.error((err as Error).message || "Não foi possível enviar a foto.");
+      toast.error(
+        (err as Error).message ||
+          tr([
+            "Não foi possível enviar a foto.",
+            "Couldn’t upload the photo.",
+            "No se pudo subir la foto.",
+            "Impossible d’envoyer la photo.",
+          ]),
+      );
     }
   };
 
@@ -55,7 +80,7 @@ export function ImageBank({
         {(
           [
             ["banco", `NutriConnect (${STOCK_MEDIA.length})`],
-            ["equipe", "Da equipe"],
+            ["equipe", tr(["Da equipe", "Team", "Del equipo", "De l’équipe"])],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -85,14 +110,21 @@ export function ImageBank({
                   onClick={() => setCat(c)}
                   className={cn(pill, cat === c ? pillOn : pillOff)}
                 >
-                  {c === "todas" ? "Todas" : MEDIA_CATEGORY_LABEL[c]}
+                  {c === "todas"
+                    ? tr(["Todas", "All", "Todas", "Toutes"])
+                    : MEDIA_CATEGORY_LABEL[c]}
                 </button>
               ),
             )}
           </div>
           <Grid items={stock} value={value} onPick={onPick} />
           <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
-            Fotos do Unsplash (licença de uso livre, inclusive comercial).
+            {tr([
+              "Fotos do Unsplash (licença de uso livre, inclusive comercial).",
+              "Photos from Unsplash (free-use license, including commercial).",
+              "Fotos de Unsplash (licencia de uso libre, incluso comercial).",
+              "Photos Unsplash (licence d’utilisation libre, y compris commerciale).",
+            ])}
           </p>
         </>
       ) : (
@@ -108,7 +140,14 @@ export function ImageBank({
             ) : (
               <ImagePlus className="h-4 w-4" />
             )}
-            {upload.isPending ? "Enviando…" : "Enviar foto para a biblioteca"}
+            {upload.isPending
+              ? tr(["Enviando…", "Uploading…", "Subiendo…", "Envoi…"])
+              : tr([
+                  "Enviar foto para a biblioteca",
+                  "Upload photo to the library",
+                  "Subir foto a la biblioteca",
+                  "Envoyer une photo dans la bibliothèque",
+                ])}
           </button>
           <input
             ref={file}
@@ -129,11 +168,22 @@ export function ImageBank({
             </div>
           ) : team.error ? (
             <p className="mt-3 rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
-              Não foi possível abrir a biblioteca: {(team.error as Error).message}
+              {tr([
+                "Não foi possível abrir a biblioteca:",
+                "Couldn’t open the library:",
+                "No se pudo abrir la biblioteca:",
+                "Impossible d’ouvrir la bibliothèque :",
+              ])}{" "}
+              {(team.error as Error).message}
             </p>
           ) : (team.data ?? []).length === 0 ? (
             <p className="mt-3 rounded-xl bg-secondary/60 px-3 py-3 text-center text-xs text-muted-foreground">
-              A biblioteca da equipe ainda está vazia. As fotos enviadas ficam aqui para reusar.
+              {tr([
+                "A biblioteca da equipe ainda está vazia. As fotos enviadas ficam aqui para reusar.",
+                "The team library is still empty. Uploaded photos stay here to reuse.",
+                "La biblioteca del equipo aún está vacía. Las fotos subidas quedan aquí para reutilizarlas.",
+                "La bibliothèque de l’équipe est encore vide. Les photos envoyées restent ici pour être réutilisées.",
+              ])}
             </p>
           ) : (
             <Grid
@@ -141,11 +191,23 @@ export function ImageBank({
               value={value}
               onPick={onPick}
               onDelete={(m) => {
-                if (!window.confirm("Apagar esta foto da biblioteca da equipe?")) return;
+                if (
+                  !window.confirm(
+                    tr([
+                      "Apagar esta foto da biblioteca da equipe?",
+                      "Delete this photo from the team library?",
+                      "¿Borrar esta foto de la biblioteca del equipo?",
+                      "Supprimer cette photo de la bibliothèque de l’équipe ?",
+                    ]),
+                  )
+                )
+                  return;
                 remove.mutate(m.id, {
                   onSuccess: () => {
                     if (value === m.src) onPick(undefined);
-                    toast.success("Foto apagada.");
+                    toast.success(
+                      tr(["Foto apagada.", "Photo deleted.", "Foto borrada.", "Photo supprimée."]),
+                    );
                   },
                   onError: (err) => toast.error((err as Error).message),
                 });
@@ -153,7 +215,12 @@ export function ImageBank({
             />
           )}
           <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
-            Use só fotos próprias ou com direito de uso. Nada de “antes e depois”.
+            {tr([
+              "Use só fotos próprias ou com direito de uso. Nada de “antes e depois”.",
+              "Only use your own photos or ones you have the rights to. No “before and after”.",
+              "Usa solo fotos propias o con derecho de uso. Nada de “antes y después”.",
+              "N’utilisez que vos propres photos ou des photos dont vous avez les droits. Pas d’« avant/après ».",
+            ])}
           </p>
         </>
       )}
@@ -172,6 +239,7 @@ function Grid({
   onPick: (src: string | undefined) => void;
   onDelete?: (m: MediaItem) => void;
 }) {
+  const tr = useTr();
   return (
     <div className="st-thin mt-2 grid max-h-[22rem] grid-cols-3 gap-2 overflow-y-auto pr-0.5">
       {items.map((m, k) => {
@@ -211,7 +279,12 @@ function Grid({
               <button
                 type="button"
                 onClick={() => onDelete(m)}
-                aria-label="Apagar foto"
+                aria-label={tr([
+                  "Apagar foto",
+                  "Delete photo",
+                  "Borrar foto",
+                  "Supprimer la photo",
+                ])}
                 className="absolute left-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-white opacity-0 transition hover:bg-destructive group-hover:opacity-100"
               >
                 <Trash2 className="h-3 w-3" />

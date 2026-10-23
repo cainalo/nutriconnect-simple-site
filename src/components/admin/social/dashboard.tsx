@@ -31,6 +31,8 @@ import {
 import type { Network, PostFormat } from "@/lib/social-studio.functions";
 import { TEMPLATES, type SocialTemplate } from "@/lib/social-templates";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
+import { useI18n } from "@/hooks/use-i18n";
 import { EmptyState, Floaters, SectionTitle, Tile } from "@/components/admin/social/kit";
 import {
   NETWORK_STYLE,
@@ -69,6 +71,8 @@ export function StudioDashboard({
   onOpen: (p: SocialPost) => void;
   go: (tab: StudioTab) => void;
 }) {
+  const tr = useTr();
+  const { locale } = useI18n();
   const real = posts.filter((p) => !p.is_template);
   const today = new Date();
   const month = iso(today).slice(0, 7);
@@ -91,10 +95,27 @@ export function StudioDashboard({
   ).length;
 
   const stats: { status: PostStatus; label: string; value: number }[] = [
-    { status: "ideia", label: "Ideias", value: count("ideia") },
-    { status: "rascunho", label: "Rascunhos", value: count("rascunho") },
-    { status: "agendado", label: "Agendados", value: count("agendado") + count("aprovado") },
-    { status: "publicado", label: "Publicados no mês", value: publishedMonth },
+    { status: "ideia", label: tr(["Ideias", "Ideas", "Ideas", "Idées"]), value: count("ideia") },
+    {
+      status: "rascunho",
+      label: tr(["Rascunhos", "Drafts", "Borradores", "Brouillons"]),
+      value: count("rascunho"),
+    },
+    {
+      status: "agendado",
+      label: tr(["Agendados", "Scheduled", "Programados", "Programmés"]),
+      value: count("agendado") + count("aprovado"),
+    },
+    {
+      status: "publicado",
+      label: tr([
+        "Publicados no mês",
+        "Published this month",
+        "Publicados en el mes",
+        "Publiés ce mois-ci",
+      ]),
+      value: publishedMonth,
+    },
   ];
 
   return (
@@ -109,7 +130,7 @@ export function StudioDashboard({
       {/* Atalhos */}
       <section className="min-w-0">
         <SectionTitle icon={Wand2} color="#7a5cc4">
-          Criar e planejar
+          {tr(["Criar e planejar", "Create and plan", "Crear y planificar", "Créer et planifier"])}
         </SectionTitle>
         <ul className="grid auto-rows-[minmax(8.5rem,auto)] grid-cols-2 gap-3 @2xl:grid-cols-3 @4xl:grid-cols-6">
           <li className="col-span-2">
@@ -117,8 +138,13 @@ export function StudioDashboard({
               icon={Plus}
               color="#b4532a"
               color2="#f6c27a"
-              title="Criar post"
-              text="Modelo, IA ou do zero, com prévia em cada rede"
+              title={tr(["Criar post", "Create post", "Crear post", "Créer un post"])}
+              text={tr([
+                "Modelo, IA ou do zero, com prévia em cada rede",
+                "Template, AI or from scratch, with a preview for each network",
+                "Plantilla, IA o desde cero, con vista previa en cada red",
+                "Modèle, IA ou à partir de zéro, avec un aperçu pour chaque réseau",
+              ])}
               onClick={() => onNew()}
               delay={0}
             >
@@ -134,8 +160,13 @@ export function StudioDashboard({
               icon={Sparkles}
               color="#7a5cc4"
               color2="#c4b0f0"
-              title="Ideias com IA"
-              text="Sugestões prontas para o perfil"
+              title={tr(["Ideias com IA", "AI ideas", "Ideas con IA", "Idées avec l’IA"])}
+              text={tr([
+                "Sugestões prontas para o perfil",
+                "Ready-made suggestions for the profile",
+                "Sugerencias listas para el perfil",
+                "Suggestions prêtes pour le profil",
+              ])}
               onClick={() => go("ideias")}
               delay={45}
             />
@@ -145,8 +176,8 @@ export function StudioDashboard({
               icon={LayoutTemplate}
               color="#c58a12"
               color2="#f6d38b"
-              title="Modelos"
-              text={`${TEMPLATES.length} prontos + da equipe`}
+              title={tr(["Modelos", "Templates", "Plantillas", "Modèles"])}
+              text={`${TEMPLATES.length} ${tr(["prontos + da equipe", "ready-made + team", "listas + del equipo", "prêts + de l’équipe"])}`}
               onClick={() => go("modelos")}
               delay={90}
             />
@@ -156,8 +187,13 @@ export function StudioDashboard({
               icon={CalendarDays}
               color="#d6456b"
               color2="#f39bb0"
-              title="Calendário"
-              text="O mês inteiro de posts"
+              title={tr(["Calendário", "Calendar", "Calendario", "Calendrier"])}
+              text={tr([
+                "O mês inteiro de posts",
+                "The whole month of posts",
+                "El mes entero de posts",
+                "Tout le mois de posts",
+              ])}
               onClick={() => go("calendario")}
               delay={135}
             />
@@ -167,8 +203,13 @@ export function StudioDashboard({
               icon={TrendingUp}
               color="#2f8a5b"
               color2="#9fd18c"
-              title="Tendências"
-              text="O que está em alta agora"
+              title={tr(["Tendências", "Trends", "Tendencias", "Tendances"])}
+              text={tr([
+                "O que está em alta agora",
+                "What’s trending now",
+                "Lo que está en tendencia ahora",
+                "Ce qui est tendance en ce moment",
+              ])}
               onClick={() => go("tendencias")}
               delay={180}
             />
@@ -187,11 +228,12 @@ export function StudioDashboard({
               onClick={() => go("quadro")}
               className="inline-flex items-center gap-1 text-accent hover:underline"
             >
-              Abrir quadro <ArrowRight className="h-3.5 w-3.5" />
+              {tr(["Abrir quadro", "Open board", "Abrir tablero", "Ouvrir le tableau"])}{" "}
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
           }
         >
-          Produção
+          {tr(["Produção", "Production", "Producción", "Production"])}
         </SectionTitle>
         <ul className="grid grid-cols-2 gap-3 @4xl:grid-cols-4">
           {stats.map((s, k) => {
@@ -246,11 +288,17 @@ export function StudioDashboard({
                   onClick={() => go("modelos")}
                   className="inline-flex items-center gap-1 text-accent hover:underline"
                 >
-                  Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                  {tr(["Ver todos", "See all", "Ver todos", "Tout voir"])}{" "}
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               }
             >
-              Comece por um modelo
+              {tr([
+                "Comece por um modelo",
+                "Start from a template",
+                "Empieza con una plantilla",
+                "Commencez par un modèle",
+              ])}
             </SectionTitle>
             <ul className="grid grid-cols-2 gap-3 @2xl:grid-cols-3 @6xl:grid-cols-6">
               {featured.map((t, k) => (
@@ -267,7 +315,13 @@ export function StudioDashboard({
                         className="aspect-[4/5] w-full transition duration-500 group-hover:scale-[1.04]"
                       />
                       <span className="absolute inset-x-2 bottom-2 flex translate-y-2 items-center justify-center gap-1 rounded-full bg-white/95 py-1.5 text-[11px] font-bold text-neutral-900 opacity-0 shadow-lg transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                        <Sparkles className="h-3 w-3" /> Usar modelo
+                        <Sparkles className="h-3 w-3" />{" "}
+                        {tr([
+                          "Usar modelo",
+                          "Use template",
+                          "Usar plantilla",
+                          "Utiliser le modèle",
+                        ])}
                       </span>
                     </div>
                     <div className="px-3 py-2.5">
@@ -294,22 +348,44 @@ export function StudioDashboard({
                     onClick={() => go("quadro")}
                     className="inline-flex items-center gap-1 text-accent hover:underline"
                   >
-                    Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                    {tr(["Ver todos", "See all", "Ver todos", "Tout voir"])}{" "}
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </button>
                 ) : undefined
               }
             >
-              Mexidos por último
+              {tr([
+                "Mexidos por último",
+                "Recently edited",
+                "Editados recientemente",
+                "Modifiés récemment",
+              ])}
             </SectionTitle>
             {recent.length === 0 ? (
               <EmptyState
                 icon={Wand2}
                 color="#3b7bbf"
-                title="Nenhum post ainda"
-                text="Comece por um modelo pronto ou peça uma ideia para a IA."
+                title={tr([
+                  "Nenhum post ainda",
+                  "No posts yet",
+                  "Aún no hay posts",
+                  "Aucun post pour l’instant",
+                ])}
+                text={tr([
+                  "Comece por um modelo pronto ou peça uma ideia para a IA.",
+                  "Start from a ready-made template or ask the AI for an idea.",
+                  "Empieza con una plantilla lista o pide una idea a la IA.",
+                  "Commencez par un modèle prêt ou demandez une idée à l’IA.",
+                ])}
                 action={
                   <button type="button" className={btnPrimary} onClick={() => onNew()}>
-                    <Plus className="h-4 w-4" /> Criar o primeiro post
+                    <Plus className="h-4 w-4" />{" "}
+                    {tr([
+                      "Criar o primeiro post",
+                      "Create the first post",
+                      "Crear el primer post",
+                      "Créer le premier post",
+                    ])}
                   </button>
                 }
               />
@@ -377,11 +453,11 @@ export function StudioDashboard({
                   onClick={() => go("calendario")}
                   className="inline-flex items-center gap-1 text-accent hover:underline"
                 >
-                  Mês <ArrowRight className="h-3.5 w-3.5" />
+                  {tr(["Mês", "Month", "Mes", "Mois"])} <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               }
             >
-              Próximos 7 dias
+              {tr(["Próximos 7 dias", "Next 7 days", "Próximos 7 días", "7 prochains jours"])}
             </SectionTitle>
             <ol className="nc-tile-in space-y-1.5 rounded-[1.4rem] border border-border/60 bg-card p-2.5">
               {week.map((day) => {
@@ -399,7 +475,7 @@ export function StudioDashboard({
                     >
                       <span>
                         <span className="block text-[9px] font-semibold uppercase">
-                          {day.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "")}
+                          {day.toLocaleDateString(locale, { weekday: "short" }).replace(".", "")}
                         </span>
                         <span className="mt-0.5 block text-sm font-bold">{day.getDate()}</span>
                       </span>
@@ -430,7 +506,8 @@ export function StudioDashboard({
                           onClick={() => onNew(key)}
                           className="flex h-8 w-full items-center gap-1 rounded-lg border border-dashed border-border/80 px-2 text-left text-[11px] text-muted-foreground transition hover:border-accent hover:text-accent"
                         >
-                          <Plus className="h-3 w-3" /> Planejar
+                          <Plus className="h-3 w-3" />{" "}
+                          {tr(["Planejar", "Plan", "Planificar", "Planifier"])}
                         </button>
                       )}
                     </div>
@@ -443,7 +520,12 @@ export function StudioDashboard({
           {/* Datas */}
           <section className="min-w-0">
             <SectionTitle icon={CalendarHeart} color="#2f8a5b">
-              Datas que rendem post
+              {tr([
+                "Datas que rendem post",
+                "Dates worth a post",
+                "Fechas que dan para un post",
+                "Dates qui valent un post",
+              ])}
             </SectionTitle>
             <ul className="space-y-2">
               {dates.map((d, k) => (
@@ -463,7 +545,7 @@ export function StudioDashboard({
                       </span>
                       <span className="mt-0.5 block text-[9px] font-semibold uppercase text-muted-foreground">
                         {new Date(2026, d.month - 1, 1)
-                          .toLocaleDateString("pt-BR", { month: "short" })
+                          .toLocaleDateString(locale, { month: "short" })
                           .replace(".", "")}
                       </span>
                     </span>
@@ -497,6 +579,7 @@ function Hero({
   onNew: () => void;
   onIdeas: () => void;
 }) {
+  const tr = useTr();
   const [action, setAction] = useState<"wave" | "talk" | "idle">("wave");
   useEffect(() => {
     const a = window.setTimeout(() => setAction("talk"), 1800);
@@ -507,7 +590,12 @@ function Hero({
     };
   }, []);
   const hour = new Date().getHours();
-  const hello = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const hello =
+    hour < 12
+      ? tr(["Bom dia", "Good morning", "Buenos días", "Bonjour"])
+      : hour < 18
+        ? tr(["Boa tarde", "Good afternoon", "Buenas tardes", "Bon après-midi"])
+        : tr(["Boa noite", "Good evening", "Buenas noches", "Bonsoir"]);
   return (
     <section
       className="nc-tile-in nc-gradient-pan relative overflow-hidden rounded-[2rem] border border-border/60 p-4 shadow-soft sm:p-6"
@@ -530,41 +618,73 @@ function Hero({
           action={action}
           framing="bust"
           className="h-28 w-24 shrink-0 sm:h-36 sm:w-32"
-          label="Nutri Nina acenando"
+          label={tr([
+            "Nutri Nina acenando",
+            "Nutri Nina waving",
+            "Nutri Nina saludando",
+            "Nutri Nina fait coucou",
+          ])}
         />
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60">
-            Estúdio de redes sociais
+            {tr([
+              "Estúdio de redes sociais",
+              "Social media studio",
+              "Estudio de redes sociales",
+              "Studio des réseaux sociaux",
+            ])}
           </p>
           <h1 className="mt-1 font-display text-2xl font-bold leading-tight text-foreground sm:text-3xl">
-            O que vamos publicar hoje?
+            {tr([
+              "O que vamos publicar hoje?",
+              "What are we posting today?",
+              "¿Qué vamos a publicar hoy?",
+              "Qu’allons-nous publier aujourd’hui ?",
+            ])}
           </h1>
           <p className="relative mt-2 inline-block max-w-full rounded-2xl rounded-tl-sm bg-card/90 px-3 py-2 text-sm font-medium text-foreground shadow-xs">
             {hello}!{" "}
-            {scheduledWeek
-              ? `${scheduledWeek} post(s) agendado(s) para esta semana.`
-              : "Nada agendado para esta semana ainda. Vamos planejar?"}
+            {scheduledWeek === 1
+              ? tr([
+                  "1 post agendado para esta semana.",
+                  "1 post scheduled for this week.",
+                  "1 post programado para esta semana.",
+                  "1 post programmé cette semaine.",
+                ])
+              : scheduledWeek
+                ? `${scheduledWeek} ${tr(["posts agendados para esta semana.", "posts scheduled for this week.", "posts programados para esta semana.", "posts programmés cette semaine."])}`
+                : tr([
+                    "Nada agendado para esta semana ainda. Vamos planejar?",
+                    "Nothing scheduled for this week yet. Shall we plan?",
+                    "Nada programado para esta semana todavía. ¿Planificamos?",
+                    "Rien de programmé cette semaine pour l’instant. On planifie ?",
+                  ])}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             <Chip icon={CalendarDays} color="#d6456b">
-              {scheduledWeek} na semana
+              {scheduledWeek} {tr(["na semana", "this week", "en la semana", "cette semaine"])}
             </Chip>
             <Chip icon={PenLine} color="#3b7bbf">
-              {drafts} rascunho(s)
+              {drafts}{" "}
+              {drafts === 1
+                ? tr(["rascunho", "draft", "borrador", "brouillon"])
+                : tr(["rascunhos", "drafts", "borradores", "brouillons"])}
             </Chip>
             <button
               type="button"
               onClick={onNew}
               className="group inline-flex h-7 items-center gap-1 rounded-full bg-accent px-3 text-[11px] font-bold text-accent-foreground shadow-soft transition hover:bg-accent/90"
             >
-              <Plus className="h-3.5 w-3.5" /> Criar post
+              <Plus className="h-3.5 w-3.5" />{" "}
+              {tr(["Criar post", "Create post", "Crear post", "Créer un post"])}
             </button>
             <button
               type="button"
               onClick={onIdeas}
               className="group inline-flex h-7 items-center gap-1 rounded-full bg-card/90 px-3 text-[11px] font-bold text-foreground shadow-xs transition hover:bg-card"
             >
-              <Sparkles className="h-3.5 w-3.5 text-[#7a5cc4]" /> Ideias com IA
+              <Sparkles className="h-3.5 w-3.5 text-[#7a5cc4]" />{" "}
+              {tr(["Ideias com IA", "AI ideas", "Ideas con IA", "Idées avec l’IA"])}
               <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </button>
           </div>
