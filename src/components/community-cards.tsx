@@ -647,46 +647,50 @@ export function PostCard({ post }: PostCardProps) {
           ),
           recipe: post.recipeData && (
             <div className="rounded-2xl border border-border bg-secondary/30 p-5 mb-2">
-              <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-foreground mb-4 pb-4 border-b border-border/50">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-accent" /> {post.recipeData.prepTime}
-                </span>
-                <span>·</span>
-                <span>{post.recipeData.servings}</span>
-                <span>·</span>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-foreground mb-4 pb-4 border-b border-border/50">
+                {post.recipeData.prepTime && (
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-accent" /> {post.recipeData.prepTime}
+                  </span>
+                )}
+                {post.recipeData.servings && <span>{post.recipeData.servings}</span>}
                 <span className="text-primary">{td(post.recipeData.difficulty)}</span>
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                    {t("postcard.ingredients")}
-                  </h4>
-                  <ul className="space-y-2 text-sm text-foreground">
-                    {post.recipeData.ingredients.map((ing, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-accent font-bold">•</span> <span>{ing}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <BuyAtMarket
-                    items={post.recipeData.ingredients}
-                    source="receita"
-                    className="mt-3"
-                  />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                    {t("postcard.preparation")}
-                  </h4>
-                  <ol className="space-y-3 text-sm text-foreground list-decimal list-inside">
-                    {post.recipeData.steps.map((step, i) => (
-                      <li key={i} className="leading-relaxed">
-                        <span className="text-foreground/90">{step}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
+                {post.recipeData.ingredients.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                      {t("postcard.ingredients")}
+                    </h4>
+                    <ul className="space-y-2 text-sm text-foreground">
+                      {post.recipeData.ingredients.map((ing, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-accent font-bold">•</span> <span>{ing}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <BuyAtMarket
+                      items={post.recipeData.ingredients}
+                      source="receita"
+                      className="mt-3"
+                    />
+                  </div>
+                )}
+                {post.recipeData.steps.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                      {t("postcard.preparation")}
+                    </h4>
+                    <ol className="space-y-3 text-sm text-foreground list-decimal list-inside">
+                      {post.recipeData.steps.map((step, i) => (
+                        <li key={i} className="leading-relaxed">
+                          <span className="text-foreground/90">{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
               </div>
             </div>
           ),

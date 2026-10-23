@@ -554,12 +554,13 @@ export function ShareModal({
     const ingredients = lines(ingredientsText);
     const steps = lines(stepsText);
     return {
-      prepTime: prepTime.trim() || "20 min",
-      servings: servings.trim() || t("recipe.defaultServings"),
+      // Só o que a pessoa escreveu: nada de tempo, porções ou ingredientes inventados.
+      prepTime: prepTime.trim(),
+      servings: servings.trim(),
       difficulty,
       category: recipeCategory,
-      ingredients: ingredients.length > 0 ? ingredients : [t("sm.defaultIngredients")],
-      steps: steps.length > 0 ? steps : [t("sm.defaultSteps")],
+      ingredients,
+      steps,
     };
   };
 
