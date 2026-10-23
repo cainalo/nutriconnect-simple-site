@@ -76,7 +76,10 @@ export function RatingBadge({
       </span>
     );
   }
-  const avg = summary.average.toLocaleString(locale, { minimumFractionDigits: 1 });
+  const avg = summary.average.toLocaleString(locale, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
   return (
     <span
       className={cn(
@@ -343,6 +346,8 @@ export function ProReviewsSection({
   const [limit, setLimit] = useState(5);
   const reviews = useProReviews(proId, limit);
   const list = reviews.data ?? [];
+  // Sem o resumo do servidor (ou ainda chegando), a lista completa já dá a nota.
+  if (!summary?.total && list.length && list.length < limit) summary = summarize(list);
   const total = summary?.total ?? 0;
 
   return (
@@ -350,19 +355,31 @@ export function ProReviewsSection({
       <div className="grid gap-5 sm:grid-cols-[11rem_1fr] sm:items-center">
         <div className="text-center sm:text-left">
           <p className="font-display text-5xl font-extrabold text-foreground">
-            {total ? summary!.average.toLocaleString(locale, { minimumFractionDigits: 1 }) : "–"}
+            {total
+              ? summary!.average.toLocaleString(locale, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })
+              : "–"}
           </p>
           <Stars value={summary?.average ?? 0} size={18} />
           <p className="mt-1 text-xs text-muted-foreground">
-            {tr([
-              `${total} avaliações verificadas`,
-              `${total} verified reviews`,
-              `${total} reseñas verificadas`,
-              `${total} avis vérifiés`,
-            ])}
+            {total === 1
+              ? tr([
+                  "1 avaliação verificada",
+                  "1 verified review",
+                  "1 reseña verificada",
+                  "1 avis vérifié",
+                ])
+              : tr([
+                  `${total} avaliações verificadas`,
+                  `${total} verified reviews`,
+                  `${total} reseñas verificadas`,
+                  `${total} avis vérifiés`,
+                ])}
           </p>
         </div>
-        <div className="space-y-1.5">
+        <div className="max-w-md space-y-1.5">
           {[5, 4, 3, 2, 1].map((n) => {
             const c = summary?.counts[n - 1] ?? 0;
             return (
@@ -511,4 +528,12 @@ function ReplyBox({ reviewId, current }: { reviewId: string; current: string | n
       </div>
     </div>
   );
+}
+
+/** Resumo (média e contagem por estrela) a partir de uma lista completa de avaliações. */
+function summarize(list: { rating: number }[]): RatingSummary {
+  const counts: RatingSummary["counts"] = [0, 0, 0, 0, 0];
+  for (const r of list) counts[Math.min(5, Math.max(1, r.rating)) - 1]++;
+  const average = list.reduce((a, r) => a + r.rating, 0) / list.length;
+  return { average, total: list.length, counts };
 }
