@@ -22,6 +22,8 @@ import {
   type Size,
 } from "@/lib/custom-slides";
 import type { Locale } from "@/lib/i18n/locales";
+import { useTr } from "@/components/settings-ui";
+import type { Names } from "@/lib/appearance-data";
 
 const BLOCK_TYPES: BlockType[] = [
   "text",
@@ -34,10 +36,10 @@ const BLOCK_TYPES: BlockType[] = [
   "mockup",
 ];
 const SIZES: Size[] = ["sm", "md", "lg", "xl"];
-const SHAPES: { id: Shape; label: string }[] = [
-  { id: "circle", label: "Círculo" },
-  { id: "blob", label: "Orgânica" },
-  { id: "rect", label: "Retângulo" },
+const SHAPES: { id: Shape; label: Names }[] = [
+  { id: "circle", label: ["Círculo", "Circle", "Círculo", "Cercle"] },
+  { id: "blob", label: ["Orgânica", "Organic", "Orgánica", "Organique"] },
+  { id: "rect", label: ["Retângulo", "Rectangle", "Rectángulo", "Rectangle"] },
 ];
 
 export interface BuilderProps {
@@ -63,6 +65,7 @@ export function SlideBuilder({
   onDuplicateSlide,
   onUpload,
 }: BuilderProps) {
+  const tr = useTr();
   const block = slide.blocks.find((b) => b.id === selected) ?? null;
 
   const setBlock = (id: string, fn: (b: Block) => Block) =>
@@ -112,15 +115,22 @@ export function SlideBuilder({
   return (
     <div className="space-y-4 text-sm">
       <section className="space-y-2 rounded-2xl border border-border bg-card p-3">
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Slide</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          {tr(["Slide", "Slide", "Diapositiva", "Diapositive"])}
+        </p>
         <input
           className={inputCls}
           value={slide.name}
           onChange={(e) => onSlide((s) => ({ ...s, name: e.target.value }))}
-          aria-label="Nome do slide"
+          aria-label={tr([
+            "Nome do slide",
+            "Slide name",
+            "Nombre de la diapositiva",
+            "Nom de la diapositive",
+          ])}
         />
         <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-          Parte
+          {tr(["Parte", "Part", "Parte", "Partie"])}
           <select
             className={inputCls}
             value={slide.part}
@@ -133,7 +143,9 @@ export function SlideBuilder({
             ))}
           </select>
         </label>
-        <p className="text-xs font-semibold text-muted-foreground">Tema</p>
+        <p className="text-xs font-semibold text-muted-foreground">
+          {tr(["Tema", "Theme", "Tema", "Thème"])}
+        </p>
         <div className="flex flex-wrap gap-2">
           {THEMES.map((t) => (
             <button
@@ -146,7 +158,9 @@ export function SlideBuilder({
             </button>
           ))}
         </div>
-        <p className="text-xs font-semibold text-muted-foreground">Papel de parede</p>
+        <p className="text-xs font-semibold text-muted-foreground">
+          {tr(["Papel de parede", "Wallpaper", "Fondo", "Fond d'écran"])}
+        </p>
         <div className="grid grid-cols-4 gap-2">
           {BACKGROUNDS.map((bg) => (
             <button
@@ -162,7 +176,7 @@ export function SlideBuilder({
           ))}
         </div>
         <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-          Transição
+          {tr(["Transição", "Transition", "Transición", "Transition"])}
           <select
             className={inputCls}
             value={slide.transition}
@@ -179,17 +193,29 @@ export function SlideBuilder({
         </label>
         <div className="flex flex-wrap gap-2">
           <button type="button" className={btnCls} onClick={onDuplicateSlide}>
-            <Copy className="h-3.5 w-3.5" /> Duplicar slide
+            <Copy className="h-3.5 w-3.5" />{" "}
+            {tr([
+              "Duplicar slide",
+              "Duplicate slide",
+              "Duplicar diapositiva",
+              "Dupliquer la diapositive",
+            ])}
           </button>
           <button type="button" className={btnDanger} onClick={onDeleteSlide}>
-            <Trash2 className="h-3.5 w-3.5" /> Excluir slide
+            <Trash2 className="h-3.5 w-3.5" />{" "}
+            {tr([
+              "Excluir slide",
+              "Delete slide",
+              "Eliminar diapositiva",
+              "Supprimer la diapositive",
+            ])}
           </button>
         </div>
       </section>
 
       <section className="space-y-2 rounded-2xl border border-border bg-card p-3">
         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-          Adicionar elemento
+          {tr(["Adicionar elemento", "Add element", "Añadir elemento", "Ajouter un élément"])}
         </p>
         <div className="flex flex-wrap gap-2">
           {BLOCK_TYPES.map((t) => (
@@ -199,10 +225,17 @@ export function SlideBuilder({
           ))}
         </div>
         <p className="pt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-          Elementos
+          {tr(["Elementos", "Elements", "Elementos", "Éléments"])}
         </p>
         {slide.blocks.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Nenhum elemento ainda. Adicione acima.</p>
+          <p className="text-xs text-muted-foreground">
+            {tr([
+              "Nenhum elemento ainda. Adicione acima.",
+              "No elements yet. Add one above.",
+              "Todavía no hay elementos. Añade uno arriba.",
+              "Aucun élément pour l'instant. Ajoutez-en un ci-dessus.",
+            ])}
+          </p>
         ) : (
           <ol className="space-y-1">
             {slide.blocks.map((b, i) => (
@@ -225,7 +258,7 @@ export function SlideBuilder({
                   className={btnCls}
                   disabled={i === 0}
                   onClick={() => moveBlock(b.id, -1)}
-                  aria-label="Trazer para trás"
+                  aria-label={tr(["Trazer para trás", "Send backward", "Enviar atrás", "Reculer"])}
                 >
                   <ArrowUp className="h-3 w-3" />
                 </button>
@@ -234,7 +267,12 @@ export function SlideBuilder({
                   className={btnCls}
                   disabled={i === slide.blocks.length - 1}
                   onClick={() => moveBlock(b.id, 1)}
-                  aria-label="Levar para frente"
+                  aria-label={tr([
+                    "Levar para frente",
+                    "Bring forward",
+                    "Traer adelante",
+                    "Avancer",
+                  ])}
                 >
                   <ArrowDown className="h-3 w-3" />
                 </button>
@@ -247,12 +285,13 @@ export function SlideBuilder({
       {block && (
         <section className="space-y-3 rounded-2xl border border-border bg-card p-3">
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            {BLOCK_LABEL[block.type]} selecionado
+            {BLOCK_LABEL[block.type]} ·{" "}
+            {tr(["selecionado", "selected", "seleccionado", "sélectionné"])}
           </p>
 
           {(block.type === "text" || block.type === "card" || block.type === "image") && (
             <label className="block text-xs font-semibold text-muted-foreground">
-              Título ({locale})
+              {tr(["Título", "Title", "Título", "Titre"])} ({locale})
               <input
                 className={inputCls}
                 value={title(block)}
@@ -267,7 +306,10 @@ export function SlideBuilder({
           )}
           {(block.type === "text" || block.type === "card" || block.type === "nina") && (
             <label className="block text-xs font-semibold text-muted-foreground">
-              {block.type === "nina" ? "Fala da Nina" : "Texto"} ({locale})
+              {block.type === "nina"
+                ? tr(["Fala da Nina", "Nina's line", "Lo que dice Nina", "Réplique de Nina"])
+                : tr(["Texto", "Text", "Texto", "Texte"])}{" "}
+              ({locale})
               <textarea
                 className={`${inputCls} min-h-[4rem]`}
                 value={body(block)}
@@ -294,7 +336,7 @@ export function SlideBuilder({
           )}
           {block.type === "nina" && (
             <label className="block text-xs font-semibold text-muted-foreground">
-              Situação
+              {tr(["Situação", "Pose", "Situación", "Pose"])}
               <select
                 className={inputCls}
                 value={block.pose}
@@ -313,7 +355,7 @@ export function SlideBuilder({
           {block.type === "image" && (
             <div className="space-y-2">
               <label className={`${btnCls} cursor-pointer`}>
-                Enviar imagem
+                {tr(["Enviar imagem", "Upload image", "Subir imagen", "Envoyer une image"])}
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -333,14 +375,14 @@ export function SlideBuilder({
                   className={btnCls}
                   onClick={() => setBlock(block.id, (b) => ({ ...b, src: "" }))}
                 >
-                  Tirar imagem
+                  {tr(["Tirar imagem", "Remove image", "Quitar imagen", "Retirer l'image"])}
                 </button>
               )}
             </div>
           )}
           {block.type === "diagram" && (
             <label className="block text-xs font-semibold text-muted-foreground">
-              Tipo de diagrama
+              {tr(["Tipo de diagrama", "Diagram type", "Tipo de diagrama", "Type de diagramme"])}
               <select
                 className={inputCls}
                 value={block.kind}
@@ -356,7 +398,7 @@ export function SlideBuilder({
           )}
           {block.type === "mockup" && (
             <label className="block text-xs font-semibold text-muted-foreground">
-              Tela do app
+              {tr(["Tela do app", "App screen", "Pantalla de la app", "Écran de l'appli"])}
               <select
                 className={inputCls}
                 value={block.kind}
@@ -375,9 +417,24 @@ export function SlideBuilder({
               <p className="text-xs font-semibold text-muted-foreground">
                 {block.type === "diagram"
                   ? block.kind === "bars"
-                    ? `Barras (${locale}): escreva "rótulo:valor", ex.: Abril:30`
-                    : `Itens do diagrama (${locale})`
-                  : `Linhas da tela (${locale})`}
+                    ? tr([
+                        `Barras (${locale}): escreva "rótulo:valor", ex.: Abril:30`,
+                        `Bars (${locale}): write "label:value", e.g.: April:30`,
+                        `Barras (${locale}): escribe "etiqueta:valor", ej.: Abril:30`,
+                        `Barres (${locale}) : écrivez « libellé:valeur », ex. : Avril:30`,
+                      ])
+                    : tr([
+                        `Itens do diagrama (${locale})`,
+                        `Diagram items (${locale})`,
+                        `Elementos del diagrama (${locale})`,
+                        `Éléments du diagramme (${locale})`,
+                      ])
+                  : tr([
+                      `Linhas da tela (${locale})`,
+                      `Screen lines (${locale})`,
+                      `Líneas de la pantalla (${locale})`,
+                      `Lignes de l'écran (${locale})`,
+                    ])}
               </p>
               {block.items.map((item, i) => (
                 <div key={i} className="flex gap-1">
@@ -396,7 +453,12 @@ export function SlideBuilder({
                   <button
                     type="button"
                     className={btnDanger}
-                    aria-label="Remover item"
+                    aria-label={tr([
+                      "Remover item",
+                      "Remove item",
+                      "Quitar elemento",
+                      "Retirer l'élément",
+                    ])}
                     onClick={() =>
                       setBlock(block.id, (b) => ({
                         ...b,
@@ -418,13 +480,14 @@ export function SlideBuilder({
                   }))
                 }
               >
-                <Plus className="h-3.5 w-3.5" /> Adicionar item
+                <Plus className="h-3.5 w-3.5" />{" "}
+                {tr(["Adicionar item", "Add item", "Añadir elemento", "Ajouter un élément"])}
               </button>
             </div>
           )}
           {block.type === "shape" && (
             <label className="block text-xs font-semibold text-muted-foreground">
-              Formato
+              {tr(["Formato", "Shape", "Forma", "Forme"])}
               <select
                 className={inputCls}
                 value={block.shape}
@@ -434,7 +497,7 @@ export function SlideBuilder({
               >
                 {SHAPES.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.label}
+                    {tr(s.label)}
                   </option>
                 ))}
               </select>
@@ -443,7 +506,7 @@ export function SlideBuilder({
 
           <div className="grid grid-cols-2 gap-2">
             <label className="text-xs font-semibold text-muted-foreground">
-              Cor
+              {tr(["Cor", "Color", "Color", "Couleur"])}
               <select
                 className={inputCls}
                 value={block.tone}
@@ -459,7 +522,7 @@ export function SlideBuilder({
               </select>
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Tamanho
+              {tr(["Tamanho", "Size", "Tamaño", "Taille"])}
               <select
                 className={inputCls}
                 value={block.size}
@@ -475,7 +538,7 @@ export function SlideBuilder({
               </select>
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Alinhamento
+              {tr(["Alinhamento", "Alignment", "Alineación", "Alignement"])}
               <select
                 className={inputCls}
                 value={block.align}
@@ -483,13 +546,13 @@ export function SlideBuilder({
                   setBlock(block.id, (b) => ({ ...b, align: e.target.value as Block["align"] }))
                 }
               >
-                <option value="left">Esquerda</option>
-                <option value="center">Centro</option>
-                <option value="right">Direita</option>
+                <option value="left">{tr(["Esquerda", "Left", "Izquierda", "Gauche"])}</option>
+                <option value="center">{tr(["Centro", "Center", "Centro", "Centre"])}</option>
+                <option value="right">{tr(["Direita", "Right", "Derecha", "Droite"])}</option>
               </select>
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Animação
+              {tr(["Animação", "Animation", "Animación", "Animation"])}
               <select
                 className={inputCls}
                 value={block.anim}
@@ -505,7 +568,7 @@ export function SlideBuilder({
               </select>
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Atraso (ms)
+              {tr(["Atraso (ms)", "Delay (ms)", "Retraso (ms)", "Délai (ms)"])}
               <input
                 type="number"
                 min={0}
@@ -540,10 +603,17 @@ export function SlideBuilder({
 
           <div className="flex flex-wrap gap-2">
             <button type="button" className={btnCls} onClick={() => duplicateBlock(block.id)}>
-              <Copy className="h-3.5 w-3.5" /> Duplicar
+              <Copy className="h-3.5 w-3.5" />{" "}
+              {tr(["Duplicar", "Duplicate", "Duplicar", "Dupliquer"])}
             </button>
             <button type="button" className={btnDanger} onClick={() => removeBlock(block.id)}>
-              <Trash2 className="h-3.5 w-3.5" /> Excluir elemento
+              <Trash2 className="h-3.5 w-3.5" />{" "}
+              {tr([
+                "Excluir elemento",
+                "Delete element",
+                "Eliminar elemento",
+                "Supprimer l'élément",
+              ])}
             </button>
           </div>
         </section>
