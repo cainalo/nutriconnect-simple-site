@@ -9,16 +9,24 @@ import {
   stableJson,
   usePresentationRows,
 } from "@/components/admin/presentation-editor";
+import { useTr } from "@/components/settings-ui";
+import type { Names } from "@/lib/appearance-data";
 
-const NAMES: Record<string, string> = {
-  "pt-BR": "Português",
-  en: "Inglês",
-  es: "Espanhol",
-  fr: "Francês",
-  layout: "Equipe, fotos e ordem",
+const NAMES: Record<string, Names> = {
+  "pt-BR": ["Português", "Portuguese", "Portugués", "Portugais"],
+  en: ["Inglês", "English", "Inglés", "Anglais"],
+  es: ["Espanhol", "Spanish", "Español", "Espagnol"],
+  fr: ["Francês", "French", "Francés", "Français"],
+  layout: [
+    "Equipe, fotos e ordem",
+    "Team, photos and order",
+    "Equipo, fotos y orden",
+    "Équipe, photos et ordre",
+  ],
 };
 
 export function PresentationSection() {
+  const tr = useTr();
   const rows = usePresentationRows();
   const [open, setOpen] = useState(false);
 
@@ -28,8 +36,13 @@ export function PresentationSection() {
   return (
     <>
       <Panel
-        title="Apresentação"
-        hint="Edite a própria apresentação, com a mesma aparência que o usuário vê. Nada vai ao ar sem Publicar."
+        title={tr(["Apresentação", "Presentation", "Presentación", "Présentation"])}
+        hint={tr([
+          "Edite a própria apresentação, com a mesma aparência que o usuário vê. Nada vai ao ar sem Publicar.",
+          "Edit the presentation itself, looking just as users see it. Nothing goes live until you Publish.",
+          "Edita la presentación misma, con el mismo aspecto que ve el usuario. Nada se publica sin Publicar.",
+          "Modifiez la présentation elle-même, telle que l'utilisateur la voit. Rien n'est mis en ligne sans Publier.",
+        ])}
       >
         <ul className="mb-4 grid gap-2 sm:grid-cols-2">
           {list.map((r) => {
@@ -39,7 +52,7 @@ export function PresentationSection() {
                 key={r.key}
                 className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm"
               >
-                <span className="font-medium">{NAMES[r.key] ?? r.key}</span>
+                <span className="font-medium">{NAMES[r.key] ? tr(NAMES[r.key]) : r.key}</span>
                 <span
                   className={
                     pending
@@ -47,7 +60,14 @@ export function PresentationSection() {
                       : "text-xs text-muted-foreground"
                   }
                 >
-                  {pending ? "alterações não publicadas" : "publicado"}
+                  {pending
+                    ? tr([
+                        "alterações não publicadas",
+                        "unpublished changes",
+                        "cambios sin publicar",
+                        "modifications non publiées",
+                      ])
+                    : tr(["publicado", "published", "publicado", "publié"])}
                 </span>
               </li>
             );
@@ -60,10 +80,17 @@ export function PresentationSection() {
             onClick={() => setOpen(true)}
             disabled={!rows.data}
           >
-            <Pencil className="h-3.5 w-3.5" /> Editar apresentação
+            <Pencil className="h-3.5 w-3.5" />{" "}
+            {tr([
+              "Editar apresentação",
+              "Edit presentation",
+              "Editar presentación",
+              "Modifier la présentation",
+            ])}
           </button>
           <Link to="/apresentacao" className={btnCls} target="_blank" rel="noreferrer">
-            <ExternalLink className="h-3.5 w-3.5" /> Ver publicada
+            <ExternalLink className="h-3.5 w-3.5" />{" "}
+            {tr(["Ver publicada", "View published", "Ver publicada", "Voir la version publiée"])}
           </Link>
         </div>
       </Panel>
