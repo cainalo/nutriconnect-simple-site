@@ -229,6 +229,14 @@ export async function signOut() {
   emit();
   // O próximo login no mesmo navegador não herda o cache da trilha desta conta.
   if (previousId) void import("./trail-sync").then((m) => m.clearTrailCache(previousId));
+  // O PIN do responsável (perfil infantil) é apagado ao sair: é o caminho de quem o esqueceu.
+  if (previousId) {
+    void import("./parent-pin").then((m) => m.clearParentPin(previousId));
+    // E a próxima entrada começa no perfil do responsável.
+    void import("./trail-profiles").then((m) =>
+      m.setActiveProfileId(previousId, m.ADULT_PROFILE_ID),
+    );
+  }
 }
 
 export async function updateCurrentUser(

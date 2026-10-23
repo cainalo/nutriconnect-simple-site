@@ -224,6 +224,7 @@ function DesafiosIndexPage() {
           totalLevels={totals.totalLevels}
           profileSlot={
             <ProfileSwitcher
+              userId={user?.id ?? "guest"}
               profiles={profiles}
               active={active}
               onSelect={select}
