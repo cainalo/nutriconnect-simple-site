@@ -9,11 +9,18 @@ import { AREAS, CATALOG, CATALOG_BY_ID } from "@/lib/quality/catalog";
 import type { CatalogItem, DemoId } from "@/lib/quality/catalog-types";
 import { pct, scoreTone, summarizeItem } from "@/lib/quality/score";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
+import type { Names } from "@/lib/appearance-data";
 
-const KIND_NAMES = {
-  pagina: "Página",
-  funcao: "Função do site",
-  funcionalidade: "Parte de uma função",
+const KIND_NAMES: Record<CatalogItem["kind"], Names> = {
+  pagina: ["Página", "Page", "Página", "Page"],
+  funcao: ["Função do site", "Site feature", "Función del sitio", "Fonction du site"],
+  funcionalidade: [
+    "Parte de uma função",
+    "Part of a feature",
+    "Parte de una función",
+    "Partie d'une fonction",
+  ],
 };
 
 // Os cards de Funções só são baixados quando alguém abre a demonstração.
@@ -53,6 +60,7 @@ const plain = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerC
 const openable = (route?: string) => !!route && !route.includes("$");
 
 function ItemPage({ item }: { item: CatalogItem }) {
+  const tr = useTr();
   const [demo, setDemo] = useState(false);
   const q = summarizeItem(item.id);
   const Demo = item.demo ? DEMOS[item.demo] : null;
@@ -61,25 +69,32 @@ function ItemPage({ item }: { item: CatalogItem }) {
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {KIND_NAMES[item.kind]} · {AREAS.find((a) => a.id === item.area)?.name}
+            {tr(KIND_NAMES[item.kind])} · {AREAS.find((a) => a.id === item.area)?.name}
           </p>
           <h2 className="mt-1 font-display text-2xl font-bold text-foreground">{item.title}</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Quem usa: <span className="font-semibold text-foreground">{item.audience}</span>
+            {tr(["Quem usa:", "Who uses it:", "Quién la usa:", "Qui l'utilise :"])}{" "}
+            <span className="font-semibold text-foreground">{item.audience}</span>
             {item.route && (
               <>
                 {" "}
-                · Endereço: <code className="text-foreground">{item.route}</code>
+                · {tr(["Endereço:", "Address:", "Dirección:", "Adresse :"])}{" "}
+                <code className="text-foreground">{item.route}</code>
               </>
             )}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <span
-            title="Nota média nas rodadas de qualidade"
+            title={tr([
+              "Nota média nas rodadas de qualidade",
+              "Average score in the quality rounds",
+              "Nota media en las rondas de calidad",
+              "Note moyenne lors des séries de qualité",
+            ])}
             className={cn("rounded-full px-3 py-1 text-xs font-bold", scoreTone(q.average))}
           >
-            Qualidade {pct(q.average)}
+            {tr(["Qualidade", "Quality", "Calidad", "Qualité"])} {pct(q.average)}
           </span>
           {openable(item.route) && (
             <a
@@ -88,7 +103,7 @@ function ItemPage({ item }: { item: CatalogItem }) {
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-semibold hover:bg-secondary"
             >
-              <ExternalLink className="h-3.5 w-3.5" /> Abrir
+              <ExternalLink className="h-3.5 w-3.5" /> {tr(["Abrir", "Open", "Abrir", "Ouvrir"])}
             </a>
           )}
         </div>
@@ -100,19 +115,31 @@ function ItemPage({ item }: { item: CatalogItem }) {
         <figure className="overflow-hidden rounded-2xl border border-border/70 bg-secondary/30">
           <img
             src={`/images/docs/${item.id}.jpg`}
-            alt={`Tela: ${item.title}`}
+            alt={`${tr(["Tela:", "Screen:", "Pantalla:", "Écran :"])} ${item.title}`}
             loading="lazy"
             className="w-full"
           />
           <figcaption className="px-3 py-1.5 text-[11px] text-muted-foreground">
-            Print da tela no computador (design Natural, dados de exemplo).
+            {tr([
+              "Print da tela no computador (design Natural, dados de exemplo).",
+              "Desktop screenshot (Natural design, sample data).",
+              "Captura de pantalla en el ordenador (diseño Natural, datos de ejemplo).",
+              "Capture d'écran sur ordinateur (design Natural, données d'exemple).",
+            ])}
           </figcaption>
         </figure>
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded-2xl border border-border/70 p-4">
-          <h3 className="text-sm font-bold text-foreground">O que dá para fazer</h3>
+          <h3 className="text-sm font-bold text-foreground">
+            {tr([
+              "O que dá para fazer",
+              "What you can do",
+              "Qué se puede hacer",
+              "Ce qu'on peut faire",
+            ])}
+          </h3>
           <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-foreground">
             {item.features.map((f) => (
               <li key={f}>{f}</li>
@@ -120,7 +147,9 @@ function ItemPage({ item }: { item: CatalogItem }) {
           </ul>
         </section>
         <section className="rounded-2xl border border-border/70 p-4">
-          <h3 className="text-sm font-bold text-foreground">Como usar</h3>
+          <h3 className="text-sm font-bold text-foreground">
+            {tr(["Como usar", "How to use", "Cómo usarla", "Mode d'emploi"])}
+          </h3>
           <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-foreground">
             {item.howTo.map((f) => (
               <li key={f}>{f}</li>
@@ -133,19 +162,31 @@ function ItemPage({ item }: { item: CatalogItem }) {
         <section className="rounded-2xl border border-dashed border-accent/50 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-              <MousePointerClick className="h-4 w-4 text-accent" /> Testar aqui
+              <MousePointerClick className="h-4 w-4 text-accent" />{" "}
+              {tr(["Testar aqui", "Try it here", "Probar aquí", "Tester ici"])}
             </h3>
             <button
               type="button"
               onClick={() => setDemo((d) => !d)}
               className="rounded-full border border-border px-3 py-1 text-xs font-semibold hover:bg-secondary"
             >
-              {demo ? "Fechar" : "Abrir a função"}
+              {demo
+                ? tr(["Fechar", "Close", "Cerrar", "Fermer"])
+                : tr([
+                    "Abrir a função",
+                    "Open the feature",
+                    "Abrir la función",
+                    "Ouvrir la fonction",
+                  ])}
             </button>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            É a função de verdade, com a sua conta: o que você fizer aqui fica salvo como se usasse
-            pela página Funções.
+            {tr([
+              "É a função de verdade, com a sua conta: o que você fizer aqui fica salvo como se usasse pela página Funções.",
+              "It's the real feature, with your account: whatever you do here is saved as if you used it from the Features page.",
+              "Es la función real, con tu cuenta: lo que hagas aquí se guarda como si la usaras desde la página Funciones.",
+              "C'est la vraie fonction, avec votre compte : ce que vous faites ici est enregistré comme si vous l'utilisiez depuis la page Fonctions.",
+            ])}
           </p>
           {demo && (
             <div className="mx-auto mt-3 max-w-md">
@@ -160,7 +201,12 @@ function ItemPage({ item }: { item: CatalogItem }) {
       {q.improve.length > 0 && (
         <section className="rounded-2xl bg-secondary/50 p-4">
           <h3 className="text-sm font-bold text-foreground">
-            O que ainda vamos melhorar (rodada {q.lastRound})
+            {tr([
+              `O que ainda vamos melhorar (rodada ${q.lastRound})`,
+              `What we'll still improve (round ${q.lastRound})`,
+              `Lo que todavía vamos a mejorar (ronda ${q.lastRound})`,
+              `Ce que nous allons encore améliorer (série ${q.lastRound})`,
+            ])}
           </h3>
           <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-foreground">
             {q.improve.map((x) => (
@@ -174,16 +220,26 @@ function ItemPage({ item }: { item: CatalogItem }) {
 }
 
 function Overview({ onPick }: { onPick: (id: string) => void }) {
+  const tr = useTr();
+  const nFuncs = CATALOG.filter((i) => i.kind === "funcao").length;
   return (
     <div className="space-y-4">
       <div>
         <h2 className="font-display text-2xl font-bold text-foreground">
-          Como o NutriConnect funciona
+          {tr([
+            "Como o NutriConnect funciona",
+            "How NutriConnect works",
+            "Cómo funciona NutriConnect",
+            "Comment fonctionne NutriConnect",
+          ])}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Tudo o que o site faz, por área: {CATALOG.filter((i) => i.kind === "funcao").length}{" "}
-          funções (consulta, acompanhamento, diário, geladeira, grupo familiar…), com as partes de
-          cada uma e as páginas simples. Escolha no menu ou comece por uma área abaixo.
+          {tr([
+            `Tudo o que o site faz, por área: ${nFuncs} funções (consulta, acompanhamento, diário, geladeira, grupo familiar…), com as partes de cada uma e as páginas simples. Escolha no menu ou comece por uma área abaixo.`,
+            `Everything the site does, by area: ${nFuncs} features (appointments, follow-up, diary, fridge, family group…), with the parts of each one and the simple pages. Pick from the menu or start with an area below.`,
+            `Todo lo que hace el sitio, por área: ${nFuncs} funciones (consulta, seguimiento, diario, nevera, grupo familiar…), con las partes de cada una y las páginas simples. Elige en el menú o empieza por un área de abajo.`,
+            `Tout ce que fait le site, par domaine : ${nFuncs} fonctions (consultation, suivi, journal, frigo, groupe familial…), avec les parties de chacune et les pages simples. Choisissez dans le menu ou commencez par un domaine ci-dessous.`,
+          ])}
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -199,7 +255,11 @@ function Overview({ onPick }: { onPick: (id: string) => void }) {
               <span className="text-sm font-bold text-foreground">{a.name}</span>
               <span className="mt-1 flex-1 text-xs text-muted-foreground">{a.text}</span>
               <span className="mt-2 text-[11px] font-semibold text-accent">
-                {items.length} {items.length === 1 ? "item" : "itens"} →
+                {items.length}{" "}
+                {items.length === 1
+                  ? tr(["item", "item", "elemento", "élément"])
+                  : tr(["itens", "items", "elementos", "éléments"])}{" "}
+                →
               </span>
             </button>
           );
@@ -210,6 +270,7 @@ function Overview({ onPick }: { onPick: (id: string) => void }) {
 }
 
 export function DocsSection() {
+  const tr = useTr();
   const [current, setCurrent] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const q = plain(query.trim());
@@ -242,7 +303,12 @@ export function DocsSection() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar função ou página"
+            placeholder={tr([
+              "Buscar função ou página",
+              "Search feature or page",
+              "Buscar función o página",
+              "Rechercher une fonction ou une page",
+            ])}
             className="min-w-0 flex-1 bg-transparent text-sm outline-none"
           />
         </label>
@@ -254,7 +320,8 @@ export function DocsSection() {
             !current ? "bg-accent text-accent-foreground" : "hover:bg-secondary",
           )}
         >
-          <BookOpen className="h-4 w-4" /> Visão geral
+          <BookOpen className="h-4 w-4" />{" "}
+          {tr(["Visão geral", "Overview", "Visión general", "Vue d'ensemble"])}
         </button>
         <nav className="mt-2 max-h-[70vh] space-y-3 overflow-y-auto pr-1 lg:max-h-[calc(100vh-12rem)]">
           {groups.map(({ area, items }) => (
@@ -278,7 +345,11 @@ export function DocsSection() {
                     >
                       <span className="truncate">{i.title}</span>
                       {i.kind !== "funcao" && (
-                        <Badge>{i.kind === "pagina" ? "página" : "parte"}</Badge>
+                        <Badge>
+                          {i.kind === "pagina"
+                            ? tr(["página", "page", "página", "page"])
+                            : tr(["parte", "part", "parte", "partie"])}
+                        </Badge>
                       )}
                     </button>
                   </li>
@@ -287,7 +358,9 @@ export function DocsSection() {
             </div>
           ))}
           {groups.length === 0 && (
-            <p className="px-2 text-xs text-muted-foreground">Nada encontrado.</p>
+            <p className="px-2 text-xs text-muted-foreground">
+              {tr(["Nada encontrado.", "Nothing found.", "No se encontró nada.", "Rien trouvé."])}
+            </p>
           )}
         </nav>
       </Panel>

@@ -25,6 +25,7 @@ import {
   useTeleconsultRequired,
   type Registry,
 } from "@/lib/teleconsult";
+import { useTr } from "@/components/settings-ui";
 
 /** Pedidos de verificação profissional (aguardando e já analisados). */
 export function VerificationsSection({
@@ -335,6 +336,7 @@ function CommunityCase({ community: c }: { community: RemoteCommunity }) {
 // ── Habilitação para teleconsulta (M4) ───────────────────────────────────────
 
 function TeleconsultReview() {
+  const tr = useTr();
   const checks = useAdminTeleconsultChecks();
   const required = useTeleconsultRequired();
   const setRequired = useSetTeleconsultRequired();
@@ -354,12 +356,20 @@ function TeleconsultReview() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
-            Teleconsulta (CFN 760/2023)
+            {tr([
+              "Teleconsulta (CFN 760/2023)",
+              "Teleconsultation (CFN 760/2023)",
+              "Teleconsulta (CFN 760/2023)",
+              "Téléconsultation (CFN 760/2023)",
+            ])}
           </h2>
           <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
-            Confira o número no cadastro público do conselho (e-Nutricionista do CFN; e-Psi do CFP)
-            e o comprovante enviado. Com a exigência ligada, só profissionais aprovados recebem
-            consultas online.
+            {tr([
+              "Confira o número no cadastro público do conselho (e-Nutricionista do CFN; e-Psi do CFP) e o comprovante enviado. Com a exigência ligada, só profissionais aprovados recebem consultas online.",
+              "Check the number in the council's public registry (CFN's e-Nutricionista; CFP's e-Psi) and the proof that was sent. With the requirement on, only approved professionals get online appointments.",
+              "Comprueba el número en el registro público del consejo (e-Nutricionista del CFN; e-Psi del CFP) y el comprobante enviado. Con la exigencia activada, solo los profesionales aprobados reciben consultas en línea.",
+              "Vérifiez le numéro dans le registre public de l'ordre (e-Nutricionista du CFN ; e-Psi du CFP) et le justificatif envoyé. Avec l'exigence activée, seuls les professionnels approuvés reçoivent des consultations en ligne.",
+            ])}
           </p>
         </div>
         <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -370,27 +380,55 @@ function TeleconsultReview() {
             onChange={(e) =>
               setRequired.mutate(e.target.checked, {
                 onSuccess: () =>
-                  toast.success(e.target.checked ? "Exigência ligada." : "Exigência desligada."),
+                  toast.success(
+                    e.target.checked
+                      ? tr([
+                          "Exigência ligada.",
+                          "Requirement on.",
+                          "Exigencia activada.",
+                          "Exigence activée.",
+                        ])
+                      : tr([
+                          "Exigência desligada.",
+                          "Requirement off.",
+                          "Exigencia desactivada.",
+                          "Exigence désactivée.",
+                        ]),
+                  ),
                 onError: (err) => toast.error((err as Error).message),
               })
             }
           />
-          Exigir habilitação para atender online
+          {tr([
+            "Exigir habilitação para atender online",
+            "Require authorization for online appointments",
+            "Exigir habilitación para atender en línea",
+            "Exiger une habilitation pour consulter en ligne",
+          ])}
         </label>
       </div>
       {pending.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-          Nenhum pedido de teleconsulta aguardando.
+          {tr([
+            "Nenhum pedido de teleconsulta aguardando.",
+            "No teleconsultation requests waiting.",
+            "No hay solicitudes de teleconsulta pendientes.",
+            "Aucune demande de téléconsultation en attente.",
+          ])}
         </p>
       ) : (
         pending.map((c) => (
           <article key={c.id} className="rounded-2xl border border-border/70 p-3">
             <p className="text-sm font-semibold text-foreground">
-              {people.data?.get(c.professional_id)?.name ?? "Profissional"} ·{" "}
-              {REGISTRY_LABEL[c.registry as Registry]}{" "}
+              {people.data?.get(c.professional_id)?.name ??
+                tr(["Profissional", "Professional", "Profesional", "Professionnel"])}{" "}
+              · {REGISTRY_LABEL[c.registry as Registry]}{" "}
               <span className="font-mono">{c.registry_number}</span>
             </p>
-            <p className="text-xs text-muted-foreground">Enviado em {formatDate(c.submitted_at)}</p>
+            <p className="text-xs text-muted-foreground">
+              {tr(["Enviado em", "Sent on", "Enviado el", "Envoyé le"])}{" "}
+              {formatDate(c.submitted_at)}
+            </p>
             {c.documentUrl && (
               <a
                 href={c.documentUrl}
@@ -398,7 +436,12 @@ function TeleconsultReview() {
                 rel="noreferrer"
                 className="mt-1 inline-block text-xs font-semibold text-accent hover:underline"
               >
-                Abrir comprovante
+                {tr([
+                  "Abrir comprovante",
+                  "Open proof",
+                  "Abrir comprobante",
+                  "Ouvrir le justificatif",
+                ])}
               </a>
             )}
             <div className="mt-2 flex gap-2">
@@ -409,22 +452,41 @@ function TeleconsultReview() {
                 onClick={() =>
                   review.mutate(
                     { id: c.id, approve: true },
-                    { onSuccess: () => toast.success("Habilitação aprovada.") },
+                    {
+                      onSuccess: () =>
+                        toast.success(
+                          tr([
+                            "Habilitação aprovada.",
+                            "Authorization approved.",
+                            "Habilitación aprobada.",
+                            "Habilitation approuvée.",
+                          ]),
+                        ),
+                    },
                   )
                 }
               >
-                <Check className="h-3.5 w-3.5" /> Aprovar
+                <Check className="h-3.5 w-3.5" />{" "}
+                {tr(["Aprovar", "Approve", "Aprobar", "Approuver"])}
               </button>
               <button
                 type="button"
                 className="inline-flex items-center gap-1 rounded-full border border-destructive/40 px-3 py-1.5 text-xs font-semibold text-destructive"
                 disabled={review.isPending}
                 onClick={() => {
-                  const reason = window.prompt("Motivo da recusa (o profissional vê):") ?? "";
+                  const reason =
+                    window.prompt(
+                      tr([
+                        "Motivo da recusa (o profissional vê):",
+                        "Reason for declining (the professional sees it):",
+                        "Motivo del rechazo (lo ve el profesional):",
+                        "Motif du refus (visible par le professionnel) :",
+                      ]),
+                    ) ?? "";
                   if (reason.trim()) review.mutate({ id: c.id, approve: false, reason });
                 }}
               >
-                <X className="h-3.5 w-3.5" /> Recusar
+                <X className="h-3.5 w-3.5" /> {tr(["Recusar", "Decline", "Rechazar", "Refuser"])}
               </button>
             </div>
           </article>
@@ -434,9 +496,13 @@ function TeleconsultReview() {
         <ul className="divide-y divide-border/60 text-xs text-muted-foreground">
           {done.map((c) => (
             <li key={c.id} className="py-1.5">
-              {people.data?.get(c.professional_id)?.name ?? "Profissional"} ·{" "}
-              {c.status === "aprovado" ? "aprovado" : "recusado"} em{" "}
-              {c.reviewed_at ? formatDate(c.reviewed_at) : "—"}
+              {people.data?.get(c.professional_id)?.name ??
+                tr(["Profissional", "Professional", "Profesional", "Professionnel"])}{" "}
+              ·{" "}
+              {c.status === "aprovado"
+                ? tr(["aprovado", "approved", "aprobado", "approuvé"])
+                : tr(["recusado", "declined", "rechazado", "refusé"])}{" "}
+              {tr(["em", "on", "el", "le"])} {c.reviewed_at ? formatDate(c.reviewed_at) : "—"}
             </li>
           ))}
         </ul>
