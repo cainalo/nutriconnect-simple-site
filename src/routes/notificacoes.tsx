@@ -240,12 +240,21 @@ function describe(
     case "comentario":
       return {
         icon: MessageCircle,
-        text: fill([
-          "{name} comentou na sua publicação",
-          "{name} commented on your post",
-          "{name} comentó tu publicación",
-          "{name} a commenté votre publication",
-        ]),
+        text: fill(
+          data.reply
+            ? [
+                "{name} respondeu ao seu comentário",
+                "{name} replied to your comment",
+                "{name} respondió a tu comentario",
+                "{name} a répondu à votre commentaire",
+              ]
+            : [
+                "{name} comentou na sua publicação",
+                "{name} commented on your post",
+                "{name} comentó tu publicación",
+                "{name} a commenté votre publication",
+              ],
+        ),
         detail: quote(data.comment),
         go: post,
       };

@@ -1,22 +1,30 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AuthLayout, Field } from "./login";
+import { AuthLayout, Field, PasswordInput } from "./login";
+import { PasswordRules } from "./cadastro";
+import { useTr } from "@/components/settings-ui";
 import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { requestPasswordReset, setNewPassword, signOut, verifyRecoveryCode } from "@/lib/auth";
-import { KeyRound, Mail, CheckCircle2, ArrowRight, ShieldCheck } from "lucide-react";
+import { Mail, CheckCircle2, ArrowRight, Check } from "lucide-react";
 
 export const Route = createFileRoute("/recuperar-senha")({
-  head: () => ({ meta: [{ title: "Recuperar Senha — NutriConnect" }] }),
+  // ?email= vem do link "Esqueceu a senha?" do login, já com o e-mail digitado.
+  validateSearch: (search: Record<string, unknown>): { email?: string } => ({
+    email: typeof search.email === "string" ? search.email.slice(0, 200) : undefined,
+  }),
+  head: () => ({ meta: [{ title: "Recuperar senha — NutriConnect" }] }),
   component: Recuperar,
 });
 
 function Recuperar() {
   const navigate = useNavigate();
   const { t } = useI18n();
+  const tr = useTr();
+  const search = Route.useSearch();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(search.email ?? "");
   const [code, setCode] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [conf, setConf] = useState("");
@@ -86,31 +94,35 @@ function Recuperar() {
               : t("reset.sub4")
       }
     >
-      {/* INDICADOR DE PASSOS */}
-      <div className="mb-6 flex items-center justify-between border-b pb-4">
+      {/* INDICADOR DE PASSOS: no celular só o passo atual mostra o nome. */}
+      <ol className="mb-6 flex items-center justify-between gap-2 border-b pb-4">
         {[1, 2, 3].map((s) => (
-          <div key={s} className="flex items-center gap-2">
+          <li
+            key={s}
+            className="flex items-center gap-2"
+            aria-current={step === s ? "step" : undefined}
+          >
             <span
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                 step === s
                   ? "bg-primary text-primary-foreground"
                   : step > s
-                    ? "bg-emerald-500 text-white"
+                    ? "bg-primary/15 text-primary"
                     : "bg-secondary text-muted-foreground"
               }`}
             >
-              {step > s ? "✓" : s}
+              {step > s ? <Check className="h-4 w-4" aria-hidden /> : s}
             </span>
-            <span className="text-xs font-medium hidden sm:inline">
+            <span className={`text-xs font-medium ${step === s ? "inline" : "hidden sm:inline"}`}>
               {s === 1
                 ? t("reset.step.email")
                 : s === 2
                   ? t("reset.step.code")
                   : t("reset.step.password")}
             </span>
-          </div>
+          </li>
         ))}
-      </div>
+      </ol>
 
       {step === 1 && (
         <form onSubmit={handleSendEmail} className="space-y-4">
@@ -119,12 +131,17 @@ function Recuperar() {
               <input
                 type="email"
                 required
-                className="input pl-10"
+                autoComplete="email"
+                className="input"
+                style={{ paddingLeft: "2.5rem" }}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="voce@exemplo.com"
               />
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Mail
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
             </div>
           </Field>
           <button
@@ -153,7 +170,8 @@ function Recuperar() {
               className="input tracking-[0.5em] text-center text-xl font-bold uppercase"
               value={code}
               inputMode="numeric"
-              onChange={(e) => setCode(e.target.value.replace(/D/g, ""))}
+              autoComplete="one-time-code"
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               placeholder="123456"
             />
           </Field>
@@ -168,7 +186,7 @@ function Recuperar() {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="text-muted-foreground hover:text-foreground"
+              className="min-h-10 text-muted-foreground hover:text-foreground"
             >
               {t("reset.changeEmail")}
             </button>
@@ -178,10 +196,17 @@ function Recuperar() {
               onClick={() =>
                 void run(async () => {
                   await requestPasswordReset(email);
-                  toast.success(t("reset.resent"));
+                  toast.success(
+                    tr([
+                      "Enviamos um novo código.",
+                      "We sent you a new code.",
+                      "Te enviamos un código nuevo.",
+                      "Nous vous avons envoyé un nouveau code.",
+                    ]),
+                  );
                 })
               }
-              className="text-primary font-semibold hover:underline"
+              className="min-h-10 text-primary font-semibold hover:underline"
             >
               {t("reset.resend")}
             </button>
@@ -192,26 +217,25 @@ function Recuperar() {
       {step === 3 && (
         <form onSubmit={handleResetPassword} className="space-y-4">
           <Field label={t("reset.newPassword")}>
-            <input
-              type="password"
+            <PasswordInput
               required
               minLength={6}
-              className="input"
+              autoComplete="new-password"
               value={novaSenha}
               onChange={(e) => setNovaSenha(e.target.value)}
               placeholder="••••••••"
             />
           </Field>
           <Field label={t("reset.confirmNew")}>
-            <input
-              type="password"
+            <PasswordInput
               required
-              className="input"
+              autoComplete="new-password"
               value={conf}
               onChange={(e) => setConf(e.target.value)}
               placeholder="••••••••"
             />
           </Field>
+          <PasswordRules password={novaSenha} confirm={conf} />
           <button
             type="submit"
             disabled={loading}
@@ -224,7 +248,7 @@ function Recuperar() {
 
       {step === 4 && (
         <div className="py-6 text-center space-y-4">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/15 text-primary">
             <CheckCircle2 className="h-8 w-8" />
           </div>
           <h3 className="font-display text-xl font-bold">{t("reset.successTitle")}</h3>

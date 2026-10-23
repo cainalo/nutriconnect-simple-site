@@ -1,5 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Leaf, Users, ChefHat, Award, Stethoscope, Presentation, ArrowRight } from "lucide-react";
+import {
+  Leaf,
+  Users,
+  ChefHat,
+  Award,
+  Stethoscope,
+  Presentation,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Info,
+} from "lucide-react";
 import { useState } from "react";
 import { loginUser, requestLoginEmail, verifyLoginCode } from "@/lib/auth";
 import { useTr } from "@/components/settings-ui";
@@ -89,21 +100,25 @@ function Login() {
     }
   };
   return (
-    <AuthLayout title={t("auth.loginTitle")} subtitle={t("auth.loginSubtitle")}>
+    <AuthLayout
+      title={t("auth.loginTitle")}
+      subtitle={t("auth.loginSubtitle")}
+      notice={redirect ? <RedirectNotice redirect={redirect} /> : undefined}
+    >
       <form onSubmit={submit} className="space-y-5">
         <Field label={t("auth.email")}>
           <input
             className="input"
             type="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="voce@email.com"
           />
         </Field>
         <Field label={t("auth.password")}>
-          <input
-            className="input"
-            type="password"
+          <PasswordInput
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
@@ -157,18 +172,32 @@ function Login() {
             type="button"
             disabled={submitting}
             onClick={sendLink}
-            className="w-full rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:opacity-60"
+            className="w-full rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:opacity-60"
           >
-            {tr([
-              "Entrar sem senha (link no e-mail)",
-              "Log in without a password (e-mail link)",
-              "Entrar sin contraseña (enlace al correo)",
-              "Se connecter sans mot de passe (lien par e-mail)",
-            ])}
+            <span className="block">
+              {tr([
+                "Entrar sem senha",
+                "Log in without a password",
+                "Entrar sin contraseña",
+                "Se connecter sans mot de passe",
+              ])}
+            </span>
+            <span className="block text-xs font-normal text-muted-foreground">
+              {tr([
+                "código ou link no e-mail",
+                "code or link by e-mail",
+                "código o enlace al correo",
+                "code ou lien par e-mail",
+              ])}
+            </span>
           </button>
         )}
         <div className="flex items-center justify-between text-sm">
-          <Link to="/recuperar-senha" className="text-accent hover:underline">
+          <Link
+            to="/recuperar-senha"
+            search={{ email: email.trim() || undefined }}
+            className="text-accent hover:underline"
+          >
             {t("auth.forgot")}
           </Link>
           <Link to="/cadastro" className="text-muted-foreground hover:text-foreground">
@@ -187,13 +216,80 @@ const FEATURES: { icon: typeof Users; key: DictKey }[] = [
   { icon: Stethoscope, key: "auth.feature4" },
 ];
 
+/** Contexto para quem chegou por um link (convite, casa, consulta…): diz por que entrar. */
+export function RedirectNotice({ redirect }: { redirect: string }) {
+  const tr = useTr();
+  const text = redirect.startsWith("/convite/")
+    ? tr([
+        "Um profissional convidou você para acompanhar sua alimentação. Entre ou crie sua conta: depois voltamos sozinhos para o convite.",
+        "A professional invited you to follow up on your eating. Log in or create your account: we'll take you back to the invite.",
+        "Un profesional te invitó a acompañar tu alimentación. Entra o crea tu cuenta: luego volvemos solos a la invitación.",
+        "Un professionnel vous a invité à suivre votre alimentation. Connectez-vous ou créez un compte : nous revenons ensuite à l'invitation.",
+      ])
+    : redirect.startsWith("/casa/")
+      ? tr([
+          "Alguém chamou você para uma casa no NutriConnect. Entre ou crie sua conta: depois voltamos sozinhos para o convite.",
+          "Someone invited you to a household on NutriConnect. Log in or create your account: we'll take you back to the invite.",
+          "Alguien te invitó a un hogar en NutriConnect. Entra o crea tu cuenta: luego volvemos solos a la invitación.",
+          "Quelqu'un vous a invité dans un foyer sur NutriConnect. Connectez-vous ou créez un compte : nous revenons ensuite à l'invitation.",
+        ])
+      : tr([
+          "Entre para continuar: depois voltamos sozinhos para a página que você abriu.",
+          "Log in to continue: we'll take you back to the page you opened.",
+          "Entra para continuar: luego volvemos solos a la página que abriste.",
+          "Connectez-vous pour continuer : nous revenons ensuite à la page ouverte.",
+        ]);
+  return (
+    <p className="mt-4 flex items-start gap-2 rounded-xl border border-accent/40 bg-accent-soft/60 p-3 text-left text-sm text-foreground">
+      <Info className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
+      <span>{text}</span>
+    </p>
+  );
+}
+
+/** Campo de senha com botão de mostrar/ocultar (funciona com gerenciadores de senha). */
+export function PasswordInput(props: Omit<React.InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const tr = useTr();
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input {...props} type={show ? "text" : "password"} className="input pr-12" />
+      <button
+        type="button"
+        onClick={() => setShow((v) => !v)}
+        aria-pressed={show}
+        aria-label={
+          show
+            ? tr([
+                "Ocultar senha",
+                "Hide password",
+                "Ocultar contraseña",
+                "Masquer le mot de passe",
+              ])
+            : tr([
+                "Mostrar senha",
+                "Show password",
+                "Mostrar contraseña",
+                "Afficher le mot de passe",
+              ])
+        }
+        className="absolute right-1 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition hover:text-foreground"
+      >
+        {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+    </div>
+  );
+}
+
 export function AuthLayout({
   title,
   subtitle,
+  notice,
   children,
 }: {
   title: string;
   subtitle?: string;
+  notice?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const { t } = useI18n();
@@ -261,6 +357,7 @@ export function AuthLayout({
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
           {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
+          {notice}
           <div className="mt-8 rounded-2xl border bg-card p-6 shadow-card">{children}</div>
           <Link
             to="/apresentacao"
