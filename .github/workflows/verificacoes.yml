@@ -1,0 +1,54 @@
+# Verificações a cada envio para main/prod e em cada PR: tipos, lint, testes de unidade,
+# varredura de segredos (sem imprimir valores) e os testes de acesso do banco (PGlite, sem
+# banco real). Não publica nada e não usa nenhum segredo.
+name: Verificações
+
+on:
+  push:
+    branches: [main, prod]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: verificacoes-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # a varredura de segredos olha todo o histórico
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tipos
+        run: npx tsc --noEmit -p .
+
+      - name: Lint
+        run: npx eslint src tests scripts
+
+      - name: Testes de unidade
+        run: npm test
+
+      - name: Segredos (código e histórico)
+        run: python3 scripts/auditoria/varrer-segredos.py
+
+      - name: Testes de acesso do banco (PGlite)
+        run: |
+          mkdir -p /tmp/pg && cd /tmp/pg
+          npm init -y >/dev/null
+          npm i @electric-sql/pglite@0.2.17 >/dev/null
+          cp "$GITHUB_WORKSPACE/supabase/tests/run-local.mjs" .
+          node run-local.mjs "$GITHUB_WORKSPACE" | tee resultado.txt
+          grep -q " 0 falharam" resultado.txt
