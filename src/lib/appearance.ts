@@ -39,6 +39,8 @@ export type HomePageId =
 
 export type DateFormat = "auto" | "dmy" | "mdy" | "ymd" | "long";
 export type TimeFormat = "auto" | "24h" | "12h";
+/** Primeiro dia da semana na agenda e nos calendários. */
+export type WeekStart = "mon" | "sun";
 
 export type ColorFilter = "none" | "grayscale" | "sepia" | "invert" | "lowsat" | "highsat";
 
@@ -195,6 +197,7 @@ export interface Appearance {
   timeFormat: TimeFormat;
   /** Fuso horário (nome IANA) ou "auto" = o do aparelho. */
   timeZone: string;
+  weekStart: WeekStart;
 
   // ── Notificações ─────────────────────────────────────────────────────────
   /** Mostra o texto da notificação do navegador (desligado = só "Você tem uma novidade"). */
@@ -301,6 +304,7 @@ export const DEFAULT_APPEARANCE: Appearance = {
   dateFormat: "auto",
   timeFormat: "auto",
   timeZone: "auto",
+  weekStart: "mon",
 
   notifPreview: true,
 };

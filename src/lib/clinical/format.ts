@@ -1,5 +1,5 @@
 import { localeMeta, type Locale } from "@/lib/i18n";
-import { applyRegion } from "@/lib/region";
+import { applyRegion, weekStartsOn } from "@/lib/region";
 
 const tag = (locale: Locale) => localeMeta(locale).tag;
 
@@ -68,10 +68,10 @@ export function startOfDay(date: Date): Date {
   return d;
 }
 
-/** Segunda-feira da semana da data. */
+/** Início da semana da data: segunda-feira ou domingo, conforme Idioma e região. */
 export function startOfWeek(date: Date): Date {
   const d = startOfDay(date);
-  const diff = (d.getDay() + 6) % 7;
+  const diff = (d.getDay() + 7 - weekStartsOn()) % 7;
   return addDays(d, -diff);
 }
 

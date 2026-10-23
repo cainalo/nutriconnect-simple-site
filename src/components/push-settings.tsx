@@ -372,7 +372,55 @@ const DAY_LETTERS: [string, string, string, string][] = [
   ["S", "F", "V", "V"],
   ["S", "S", "S", "S"],
 ];
+const DAY_NAMES: [string, string, string, string][] = [
+  ["Domingo", "Sunday", "Domingo", "Dimanche"],
+  ["Segunda", "Monday", "Lunes", "Lundi"],
+  ["Terça", "Tuesday", "Martes", "Mardi"],
+  ["Quarta", "Wednesday", "Miércoles", "Mercredi"],
+  ["Quinta", "Thursday", "Jueves", "Jeudi"],
+  ["Sexta", "Friday", "Viernes", "Vendredi"],
+  ["Sábado", "Saturday", "Sábado", "Samedi"],
+];
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
+
+/** Dias da semana do lembrete (pelo menos um fica marcado). */
+function DayPicker({ days, onToggle }: { days: number[]; onToggle: (d: number) => void }) {
+  const tr = useTr();
+  return (
+    <div
+      role="group"
+      aria-label={tr([
+        "Dias da semana",
+        "Days of the week",
+        "Días de la semana",
+        "Jours de la semaine",
+      ])}
+      className="flex gap-1"
+    >
+      {ALL_DAYS.map((d) => {
+        const on = days.includes(d);
+        return (
+          <button
+            key={d}
+            type="button"
+            aria-pressed={on}
+            aria-label={tr(DAY_NAMES[d])}
+            title={tr(DAY_NAMES[d])}
+            onClick={() => onToggle(d)}
+            className={cn(
+              "h-7 w-7 rounded-full text-[11px] font-semibold transition",
+              on
+                ? "bg-accent text-accent-foreground"
+                : "bg-secondary/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tr(DAY_LETTERS[d])}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 const hhmm = (time: string) => time.slice(0, 5);
 
@@ -440,26 +488,8 @@ function ReminderRow({ reminder }: { reminder: Reminder }) {
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
-      <div className="mt-2 flex gap-1 pl-0.5">
-        {ALL_DAYS.map((d) => {
-          const on = reminder.days.includes(d);
-          return (
-            <button
-              key={d}
-              type="button"
-              aria-pressed={on}
-              onClick={() => toggleDay(d)}
-              className={cn(
-                "h-7 w-7 rounded-full text-[11px] font-semibold transition",
-                on
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-secondary/60 text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {tr(DAY_LETTERS[d])}
-            </button>
-          );
-        })}
+      <div className="mt-2 pl-0.5">
+        <DayPicker days={reminder.days} onToggle={toggleDay} />
       </div>
     </div>
   );
@@ -474,6 +504,7 @@ export function RemindersSection() {
   const reminders = useQuery({ queryKey: qk.reminders, queryFn: listReminders, enabled: !!user });
   const [title, setTitle] = useState("");
   const [time, setTime] = useState("15:00");
+  const [days, setDays] = useState<number[]>(ALL_DAYS);
 
   const create = useMutation({
     mutationFn: (input: Parameters<typeof createReminder>[1]) => createReminder(user!.id, input),
@@ -492,8 +523,13 @@ export function RemindersSection() {
     const t = title.trim();
     if (!t || !time) return;
     create.mutate(
-      { kind: "personalizado", title: t.slice(0, 80), time_of_day: time },
-      { onSuccess: () => setTitle("") },
+      { kind: "personalizado", title: t.slice(0, 80), time_of_day: time, days },
+      {
+        onSuccess: () => {
+          setTitle("");
+          setDays(ALL_DAYS);
+        },
+      },
     );
   };
 
@@ -558,36 +594,54 @@ export function RemindersSection() {
         </div>
       )}
 
-      <form
-        onSubmit={addCustom}
-        className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/60 pt-4"
-      >
+      {/* Novo lembrete: o texto numa linha inteira; dias, hora e Adicionar embaixo */}
+      <form onSubmit={addCustom} className="mt-4 space-y-2 border-t border-border/60 pt-4">
+        <label className="block text-xs font-semibold text-foreground" htmlFor="new-reminder">
+          {tr(["Novo lembrete", "New reminder", "Nuevo recordatorio", "Nouveau rappel"])}
+        </label>
         <input
+          id="new-reminder"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={80}
           placeholder={tr([
-            "Novo lembrete (ex.: tomar a vitamina)",
-            "New reminder (e.g. take vitamins)",
-            "Nuevo recordatorio (ej.: tomar la vitamina)",
-            "Nouveau rappel (ex. : prendre la vitamine)",
+            "Ex.: tomar a vitamina",
+            "E.g. take vitamins",
+            "Ej.: tomar la vitamina",
+            "Ex. : prendre la vitamine",
           ])}
-          className="min-w-0 flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+          className="w-full rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground"
         />
-        <input
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          aria-label={tr(["Horário", "Time", "Hora", "Heure"])}
-          className="rounded-full border border-border bg-background px-3 py-2 text-sm tabular-nums text-foreground"
-        />
-        <button
-          type="submit"
-          disabled={!title.trim() || create.isPending}
-          className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
-        >
-          {tr(["Adicionar", "Add", "Agregar", "Ajouter"])}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <DayPicker
+            days={days}
+            onToggle={(d) =>
+              setDays((prev) =>
+                prev.includes(d)
+                  ? prev.length > 1
+                    ? prev.filter((x) => x !== d)
+                    : prev
+                  : [...prev, d].sort(),
+              )
+            }
+          />
+          <div className="ml-auto flex items-center gap-2">
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              aria-label={tr(["Horário", "Time", "Hora", "Heure"])}
+              className="rounded-full border border-border bg-background px-3 py-2 text-sm tabular-nums text-foreground"
+            />
+            <button
+              type="submit"
+              disabled={!title.trim() || create.isPending}
+              className="min-h-10 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
+            >
+              {tr(["Adicionar", "Add", "Agregar", "Ajouter"])}
+            </button>
+          </div>
+        </div>
       </form>
     </section>
   );

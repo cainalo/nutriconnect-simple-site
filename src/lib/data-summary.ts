@@ -67,3 +67,27 @@ export function openDataSummary(html: string) {
   setTimeout(() => win.print(), 300);
   return true;
 }
+
+/**
+ * Abre a aba já no clique (antes de buscar os dados), para o navegador do celular e o app
+ * não bloquearem a janela. Mostra "carregando" até `writeDataSummary` preencher.
+ */
+export function preopenDataSummary(loading: string) {
+  const win = window.open("", "_blank");
+  if (!win) return null;
+  win.document.open();
+  win.document.write(
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(loading)}</title></head><body style="font:15px system-ui,sans-serif;margin:40px;color:#444">${esc(loading)}</body></html>`,
+  );
+  win.document.close();
+  return win;
+}
+
+/** Escreve o resumo na aba aberta antes e chama a impressão. */
+export function writeDataSummary(win: Window, html: string) {
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 300);
+}
