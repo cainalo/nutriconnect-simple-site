@@ -15,9 +15,37 @@ export const Route = createFileRoute("/diretrizes")({
   component: Diretrizes,
 });
 
+const SUMMARY = {
+  en: [
+    "Respect above all: no insults, harassment or discrimination, no comments about other people's bodies, and no exposing other people's data.",
+    "Talk about health responsibly: no miracle cures or guaranteed diets, no encouraging extreme fasting or eating-disorder behaviour, and never tell anyone to stop a treatment. If you are struggling: CVV 188, emergencies SAMU 192.",
+    "No hidden advertising, scams or impersonation; professionals follow their council's code of ethics.",
+    "The platform is for adults (18+). Content that exposes or endangers children is removed and reported to the authorities when needed.",
+    "Report with the button on the post or profile, or through Contact us; whoever reports is not identified to the author.",
+    "Every post and comment is checked by AI before going live; reported content may be hidden until reviewed, and authors can ask a person to review the decision through Contact us.",
+  ],
+  es: [
+    "Respeto ante todo: sin insultos, acoso ni discriminación, sin comentarios sobre el cuerpo de otras personas y sin exponer datos ajenos.",
+    "Habla de salud con responsabilidad: sin curas milagrosas ni dietas con resultado garantizado, sin incentivar ayunos extremos ni conductas de trastorno alimentario, y nunca aconsejes abandonar un tratamiento. Si lo estás pasando mal: CVV 188, emergencias SAMU 192.",
+    "Sin publicidad encubierta, estafas ni suplantación; los profesionales siguen el código de ética de su consejo.",
+    "La plataforma es para mayores de 18 años. El contenido que expone o pone en riesgo a niños se elimina y se comunica a las autoridades cuando es necesario.",
+    "Denuncia con el botón del post o del perfil, o por Contáctanos; quien denuncia no se identifica ante el autor.",
+    "Cada publicación y comentario pasa por un análisis de IA antes de publicarse; el contenido denunciado puede ocultarse hasta su revisión, y el autor puede pedir revisión de una persona por Contáctanos.",
+  ],
+  fr: [
+    "Le respect avant tout : pas d'insultes, de harcèlement ni de discrimination, pas de commentaires sur le corps des autres et pas d'exposition de données d'autrui.",
+    "Parlez de santé avec responsabilité : pas de cures miracles ni de régimes à résultat garanti, pas d'incitation au jeûne extrême ni aux troubles alimentaires, et ne conseillez jamais d'arrêter un traitement. Si vous allez mal : CVV 188, urgences SAMU 192.",
+    "Pas de publicité déguisée, d'arnaques ni d'usurpation d'identité ; les professionnels suivent le code de déontologie de leur ordre.",
+    "La plateforme est réservée aux adultes (18 ans et plus). Tout contenu qui expose ou met en danger des enfants est retiré et signalé aux autorités si nécessaire.",
+    "Signalez avec le bouton de la publication ou du profil, ou via Nous contacter ; la personne qui signale n'est pas identifiée auprès de l'auteur.",
+    "Chaque publication et commentaire est analysé par l'IA avant d'être publié ; un contenu signalé peut être masqué jusqu'à son examen, et l'auteur peut demander une révision humaine via Nous contacter.",
+  ],
+};
+
 function Diretrizes() {
   return (
     <LegalLayout
+      summary={SUMMARY}
       title="Diretrizes da Comunidade"
       intro="O NutriConnect é um espaço acolhedor para falar de comida sem culpa nem julgamento. Estas regras valem para publicações, comentários, comunidades, mensagens e perfis."
     >
