@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { PaymentError } from "@/components/payment-error";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, CalendarClock, CheckCircle2, Clock, Lock, MapPin, Video } from "lucide-react";
@@ -413,7 +414,7 @@ function PagamentoPage() {
                 </span>
               </div>
               {error ? (
-                <p className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</p>
+                <PaymentError detail={error} />
               ) : stripe && clientSecret ? (
                 <FitToHeight>
                   <stripe.Provider

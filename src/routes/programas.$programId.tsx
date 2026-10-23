@@ -1,6 +1,7 @@
 // Página de um programa da loja (N10): quem ainda não comprou vê a descrição e paga ali mesmo (Stripe
 // embutido); quem comprou (e o profissional) vê os módulos e marca o que já fez.
 import { useEffect, useState } from "react";
+import { PaymentError } from "@/components/payment-error";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, Circle, Loader2, Lock, ShieldCheck, Gift } from "lucide-react";
@@ -252,7 +253,7 @@ function Buy({ programId, price }: { programId: string; price: string }) {
         {tr(["Pagamento seguro", "Secure payment", "Pago seguro", "Paiement sécurisé"])}
       </p>
       {error ? (
-        <p className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</p>
+        <PaymentError detail={error} />
       ) : stripe && clientSecret ? (
         <stripe.Provider
           stripe={stripe.stripePromise}
