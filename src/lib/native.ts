@@ -4,7 +4,7 @@
 // então quem chama não precisa saber onde está.
 
 /** Aberto pelo app Android, que se identifica no user agent (mesma regra de lib/push.ts). */
-function isNativeApp() {
+export function isNativeApp() {
   return typeof navigator !== "undefined" && /NutriConnectApp\//.test(navigator.userAgent);
 }
 

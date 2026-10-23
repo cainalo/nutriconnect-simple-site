@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { isNativeApp } from "@/lib/native";
 import { Bell, BellOff, BellRing, Download, Plus, Share, Trash2, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Select } from "@/components/appearance-editor";
@@ -227,33 +228,41 @@ export function PushDeviceSection() {
     ? null
     : state.support === "instalar"
       ? null
-      : state.support === "sem-suporte"
-        ? tr([
-            "Este navegador não recebe notificações push. Tente o Chrome, o Edge ou o Firefox.",
-            "This browser can't receive push notifications. Try Chrome, Edge or Firefox.",
-            "Este navegador no recibe notificaciones push. Prueba Chrome, Edge o Firefox.",
-            "Ce navigateur ne reçoit pas les notifications push. Essayez Chrome, Edge ou Firefox.",
+      : state.support === "sem-suporte" && isNativeApp()
+        ? // Dentro do app Android o push do sistema ainda não chega (depende do Firebase).
+          tr([
+            "No app, os avisos aparecem no sino de notificações enquanto o app está aberto. Para receber no celular com o app fechado, abra o site no navegador do celular e ative por lá.",
+            "In the app, notices show up in the bell while the app is open. To get them with the app closed, open the site in your phone's browser and turn them on there.",
+            "En la app, los avisos aparecen en la campana mientras la app está abierta. Para recibirlos con la app cerrada, abre el sitio en el navegador del móvil y actívalos allí.",
+            "Dans l'app, les avis apparaissent dans la cloche tant que l'app est ouverte. Pour les recevoir app fermée, ouvrez le site dans le navigateur du téléphone et activez-les là.",
           ])
-        : state.permission === "denied"
+        : state.support === "sem-suporte"
           ? tr([
-              "As notificações estão bloqueadas para este site. Libere nas configurações do navegador (ícone do cadeado) e recarregue a página.",
-              "Notifications are blocked for this site. Allow them in the browser settings (padlock icon) and reload.",
-              "Las notificaciones están bloqueadas para este sitio. Permítelas en el navegador (candado) y recarga.",
-              "Les notifications sont bloquées pour ce site. Autorisez-les dans le navigateur (cadenas) et rechargez.",
+              "Este navegador não recebe notificações push. Tente o Chrome, o Edge ou o Firefox.",
+              "This browser can't receive push notifications. Try Chrome, Edge or Firefox.",
+              "Este navegador no recibe notificaciones push. Prueba Chrome, Edge o Firefox.",
+              "Ce navigateur ne reçoit pas les notifications push. Essayez Chrome, Edge ou Firefox.",
             ])
-          : state.on
+          : state.permission === "denied"
             ? tr([
-                "Ativadas neste aparelho. Os avisos chegam mesmo com o site fechado.",
-                "On for this device. Notices arrive even with the site closed.",
-                "Activadas en este dispositivo. Los avisos llegan incluso con el sitio cerrado.",
-                "Activées sur cet appareil. Les avis arrivent même site fermé.",
+                "As notificações estão bloqueadas para este site. Libere nas configurações do navegador (ícone do cadeado) e recarregue a página.",
+                "Notifications are blocked for this site. Allow them in the browser settings (padlock icon) and reload.",
+                "Las notificaciones están bloqueadas para este sitio. Permítelas en el navegador (candado) y recarga.",
+                "Les notifications sont bloquées pour ce site. Autorisez-les dans le navigateur (cadenas) et rechargez.",
               ])
-            : tr([
-                "Desativadas neste aparelho.",
-                "Off on this device.",
-                "Desactivadas en este dispositivo.",
-                "Désactivées sur cet appareil.",
-              ]);
+            : state.on
+              ? tr([
+                  "Ativadas neste aparelho. Os avisos chegam mesmo com o site fechado.",
+                  "On for this device. Notices arrive even with the site closed.",
+                  "Activadas en este dispositivo. Los avisos llegan incluso con el sitio cerrado.",
+                  "Activées sur cet appareil. Les avis arrivent même site fermé.",
+                ])
+              : tr([
+                  "Desativadas neste aparelho.",
+                  "Off on this device.",
+                  "Desactivadas en este dispositivo.",
+                  "Désactivées sur cet appareil.",
+                ]);
 
   return (
     <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6 shadow-xs">
