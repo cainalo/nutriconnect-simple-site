@@ -206,7 +206,7 @@ export function UsersSection({ me }: { me: string }) {
               "Nom, @utilisateur ou e-mail…",
             ])}
           />
-          <div className="no-scrollbar flex max-w-full gap-1.5 overflow-x-auto">
+          <div className="flex max-w-full flex-wrap gap-1.5">
             {FILTERS.map(([id, label]) => (
               <button
                 key={id}

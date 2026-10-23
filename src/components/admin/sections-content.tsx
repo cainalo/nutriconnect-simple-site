@@ -208,7 +208,7 @@ export function PostsSection() {
             "Texte, titre ou auteur…",
           ])}
         />
-        <div className="no-scrollbar flex max-w-full gap-1.5 overflow-x-auto">
+        <div className="flex max-w-full flex-wrap gap-1.5">
           {(
             [
               ["todos", ["Todas", "All", "Todas", "Toutes"]],
