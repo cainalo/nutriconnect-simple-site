@@ -37,8 +37,9 @@ jobs:
       - name: Tipos
         run: npx tsc --noEmit -p .
 
+      # Só regras de código: a formatação depende da versão do prettier de cada máquina.
       - name: Lint
-        run: npx eslint src tests scripts
+        run: npx eslint src tests scripts --rule "prettier/prettier: off"
 
       - name: Testes de unidade
         run: npm test
