@@ -29,6 +29,7 @@ import {
   SquarePlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
 import { composeCaption, type Draft, type PreviewMode } from "@/components/admin/social/use-art";
 
 const NAME = "NutriConnect";
@@ -129,6 +130,7 @@ function Carousel({
   dark?: boolean;
   onIndex?: (i: number) => void;
 }) {
+  const tr = useTr();
   const [i, setIdx] = useState(0);
   const setI = (f: (x: number) => number) => {
     const next = f(i);
@@ -180,7 +182,7 @@ function Carousel({
               type="button"
               onClick={() => go(-1)}
               className="absolute left-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-white/85 text-neutral-800 opacity-0 shadow transition group-hover:opacity-100"
-              aria-label="Anterior"
+              aria-label={tr(["Anterior", "Previous", "Anterior", "Précédent"])}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -190,7 +192,7 @@ function Carousel({
               type="button"
               onClick={() => go(1)}
               className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-white/85 text-neutral-800 opacity-0 shadow transition group-hover:opacity-100"
-              aria-label="Próxima"
+              aria-label={tr(["Próxima", "Next", "Siguiente", "Suivante"])}
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -225,6 +227,7 @@ function LikeButton({
   size?: number;
   filledClass?: string;
 }) {
+  const tr = useTr();
   const [on, setOn] = useState(false);
   return (
     <button
@@ -232,7 +235,7 @@ function LikeButton({
       onClick={() => setOn((v) => !v)}
       className={cn("transition active:scale-90", className)}
       aria-pressed={on}
-      aria-label="Curtir"
+      aria-label={tr(["Curtir", "Like", "Me gusta", "J’aime"])}
     >
       <Heart
         className={cn(on ? cn(filledClass, "st-pop") : "")}
@@ -256,6 +259,7 @@ function Caption({
   tagClass: string;
   prefix?: ReactNode;
 }) {
+  const tr = useTr();
   const [open, setOpen] = useState(false);
   const long = text.length > 110 || text.split("\n").length > lines;
   return (
@@ -272,7 +276,7 @@ function Caption({
       </div>
       {long && !open && (
         <button type="button" onClick={() => setOpen(true)} className="opacity-60">
-          mais
+          {tr(["mais", "more", "más", "plus"])}
         </button>
       )}
     </div>
@@ -282,6 +286,7 @@ function Caption({
 // ───────────────────────────── Instagram ─────────────────────────────
 
 function InstagramFeed({ d, images, handle }: { d: Draft; images: string[]; handle: string }) {
+  const tr = useTr();
   const [slide, setSlide] = useState(0);
   return (
     <Phone>
@@ -308,15 +313,26 @@ function InstagramFeed({ d, images, handle }: { d: Draft; images: string[]; hand
           </span>
           <Bookmark className="h-[22px] w-[22px]" />
         </div>
-        <p className="px-3 pt-2 text-[13px] font-semibold">1.284 curtidas</p>
+        <p className="px-3 pt-2 text-[13px] font-semibold">
+          {tr(["1.284 curtidas", "1,284 likes", "1.284 Me gusta", "1 284 J’aime"])}
+        </p>
         <Caption
           text={composeCaption(d)}
           className="px-3 pt-1 text-[13px] leading-snug"
           tagClass="text-[#00376b]"
           prefix={<span className="mr-1 font-semibold">{handle}</span>}
         />
-        <p className="px-3 pt-1 text-[13px] text-neutral-500">Ver todos os 36 comentários</p>
-        <p className="px-3 pb-6 pt-1 text-[10px] uppercase tracking-wide text-neutral-400">agora</p>
+        <p className="px-3 pt-1 text-[13px] text-neutral-500">
+          {tr([
+            "Ver todos os 36 comentários",
+            "View all 36 comments",
+            "Ver los 36 comentarios",
+            "Afficher les 36 commentaires",
+          ])}
+        </p>
+        <p className="px-3 pb-6 pt-1 text-[10px] uppercase tracking-wide text-neutral-400">
+          {tr(["agora", "now", "ahora", "maintenant"])}
+        </p>
       </div>
       <IgTabBar />
     </Phone>
@@ -334,6 +350,7 @@ function IgTabBar() {
 }
 
 function InstagramStory({ d, images, handle }: { d: Draft; images: string[]; handle: string }) {
+  const tr = useTr();
   const [i, setI] = useState(0);
   const n = Math.max(images.length, 1);
   return (
@@ -348,13 +365,13 @@ function InstagramStory({ d, images, handle }: { d: Draft; images: string[]; han
           type="button"
           className="absolute inset-y-0 left-0 w-1/3"
           onClick={() => setI((x) => Math.max(0, x - 1))}
-          aria-label="Anterior"
+          aria-label={tr(["Anterior", "Previous", "Anterior", "Précédent"])}
         />
         <button
           type="button"
           className="absolute inset-y-0 right-0 w-2/3"
           onClick={() => setI((x) => Math.min(n - 1, x + 1))}
-          aria-label="Próximo"
+          aria-label={tr(["Próximo", "Next", "Siguiente", "Suivant"])}
         />
       </div>
       <div className="relative z-10 flex gap-1 px-2 pt-1">
@@ -372,12 +389,14 @@ function InstagramStory({ d, images, handle }: { d: Draft; images: string[]; han
       <div className="relative z-10 flex items-center gap-2 px-3 pt-2.5">
         <Avatar size={30} />
         <span className="text-[13px] font-semibold">{handle}</span>
-        <span className="text-[12px] text-white/70">agora</span>
+        <span className="text-[12px] text-white/70">
+          {tr(["agora", "now", "ahora", "maintenant"])}
+        </span>
       </div>
       <div className="flex-1" />
       <div className="relative z-10 flex items-center gap-3 px-3 pb-5">
         <span className="flex-1 rounded-full border border-white/70 px-4 py-2 text-[12px] text-white/90">
-          Enviar mensagem
+          {tr(["Enviar mensagem", "Send message", "Enviar mensaje", "Envoyer un message"])}
         </span>
         <LikeButton className="text-white" size={24} />
         <Send className="h-6 w-6" />
@@ -396,6 +415,7 @@ function SideAction({ icon, label }: { icon: ReactNode; label?: string }) {
 }
 
 function InstagramReels({ d, images, handle }: { d: Draft; images: string[]; handle: string }) {
+  const tr = useTr();
   return (
     <Phone dark>
       <div className="absolute inset-0">
@@ -417,7 +437,7 @@ function InstagramReels({ d, images, handle }: { d: Draft; images: string[]; han
             <Avatar size={30} />
             <span className="text-[13px] font-semibold">{handle}</span>
             <span className="rounded-md border border-white/80 px-2 py-0.5 text-[11px] font-semibold">
-              Seguir
+              {tr(["Seguir", "Follow", "Seguir", "Suivre"])}
             </span>
           </div>
           <Caption
@@ -429,7 +449,7 @@ function InstagramReels({ d, images, handle }: { d: Draft; images: string[]; han
           <p className="mt-2 flex items-center gap-1.5 text-[11px]">
             <Music2 className="h-3 w-3" />
             <span className="st-marquee inline-block max-w-[150px] overflow-hidden whitespace-nowrap">
-              Áudio original · {NAME}
+              {tr(["Áudio original", "Original audio", "Audio original", "Son original"])} · {NAME}
             </span>
           </p>
         </div>
@@ -448,6 +468,7 @@ function InstagramReels({ d, images, handle }: { d: Draft; images: string[]; han
 // ───────────────────────────── TikTok ─────────────────────────────
 
 function TikTok({ d, images, handle }: { d: Draft; images: string[]; handle: string }) {
+  const tr = useTr();
   return (
     <Phone dark>
       <div className="absolute inset-0">
@@ -459,8 +480,12 @@ function TikTok({ d, images, handle }: { d: Draft; images: string[]; handle: str
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/75" />
       </div>
       <div className="relative z-10 flex justify-center gap-4 pt-1 text-[14px] font-semibold">
-        <span className="text-white/60">Seguindo</span>
-        <span className="border-b-2 border-white pb-1">Para você</span>
+        <span className="text-white/60">
+          {tr(["Seguindo", "Following", "Siguiendo", "Abonnements"])}
+        </span>
+        <span className="border-b-2 border-white pb-1">
+          {tr(["Para você", "For You", "Para ti", "Pour toi"])}
+        </span>
       </div>
       <div className="flex-1" />
       <div className="relative z-10 flex items-end gap-3 px-3 pb-4">
@@ -475,7 +500,7 @@ function TikTok({ d, images, handle }: { d: Draft; images: string[]; handle: str
           <p className="mt-2 flex items-center gap-1.5 text-[11px]">
             <Music2 className="h-3 w-3" />
             <span className="st-marquee inline-block max-w-[150px] overflow-hidden whitespace-nowrap">
-              som original - {NAME}
+              {tr(["som original", "original sound", "sonido original", "son original"])} - {NAME}
             </span>
           </p>
         </div>
@@ -494,7 +519,7 @@ function TikTok({ d, images, handle }: { d: Draft; images: string[]; handle: str
                 filledClass="fill-[#fe2c55] text-[#fe2c55]"
               />
             }
-            label="24,5 mil"
+            label={tr(["24,5 mil", "24.5K", "24,5 mil", "24,5 k"])}
           />
           <SideAction icon={<MessageCircle className="h-7 w-7 fill-white" />} label="482" />
           <SideAction icon={<Bookmark className="h-7 w-7 fill-white" />} label="3.106" />
@@ -511,6 +536,7 @@ function TikTok({ d, images, handle }: { d: Draft; images: string[]; handle: str
 // ───────────────────────────── Facebook ─────────────────────────────
 
 function Facebook({ d, images, handle }: { d: Draft; images: string[]; handle: string }) {
+  const tr = useTr();
   return (
     <Phone>
       <div className="flex shrink-0 items-center justify-between px-3 pb-2">
@@ -527,7 +553,7 @@ function Facebook({ d, images, handle }: { d: Draft; images: string[]; handle: s
             <div className="flex-1 leading-tight">
               <p className="text-[13px] font-semibold">{NAME}</p>
               <p className="flex items-center gap-1 text-[11px] text-neutral-500">
-                Agora · <Globe className="h-3 w-3" />
+                {tr(["Agora", "Now", "Ahora", "Maintenant"])} · <Globe className="h-3 w-3" />
               </p>
             </div>
             <Ellipsis className="h-4 w-4 text-neutral-500" />
@@ -549,17 +575,26 @@ function Facebook({ d, images, handle }: { d: Draft; images: string[]; handle: s
               </span>
               128
             </span>
-            <span className="truncate">12 comentários · 4 compartilhamentos</span>
+            <span className="truncate">
+              {tr([
+                "12 comentários · 4 compartilhamentos",
+                "12 comments · 4 shares",
+                "12 comentarios · 4 veces compartido",
+                "12 commentaires · 4 partages",
+              ])}
+            </span>
           </div>
           <div className="mx-3 flex justify-around border-t border-neutral-200 py-2 text-[12px] font-semibold text-neutral-600">
             <span className="flex items-center gap-1">
-              <ThumbsUp className="h-4 w-4" /> Curtir
+              <ThumbsUp className="h-4 w-4" /> {tr(["Curtir", "Like", "Me gusta", "J’aime"])}
             </span>
             <span className="flex items-center gap-1">
-              <MessageCircle className="h-4 w-4" /> Comentar
+              <MessageCircle className="h-4 w-4" />{" "}
+              {tr(["Comentar", "Comment", "Comentar", "Commenter"])}
             </span>
             <span className="flex items-center gap-1">
-              <Share2 className="h-4 w-4" /> Compartilhar
+              <Share2 className="h-4 w-4" />{" "}
+              {tr(["Compartilhar", "Share", "Compartir", "Partager"])}
             </span>
           </div>
         </div>
@@ -572,12 +607,13 @@ function Facebook({ d, images, handle }: { d: Draft; images: string[]; handle: s
 // ───────────────────────────── LinkedIn ─────────────────────────────
 
 function LinkedIn({ d, images }: { d: Draft; images: string[] }) {
+  const tr = useTr();
   return (
     <Phone>
       <div className="flex shrink-0 items-center gap-2 px-3 pb-2">
         <Avatar size={26} />
         <span className="flex-1 rounded-md bg-[#edf3f8] px-3 py-1.5 text-[11px] text-neutral-500">
-          Pesquisar
+          {tr(["Pesquisar", "Search", "Buscar", "Rechercher"])}
         </span>
       </div>
       <div className="st-scroll st-fade flex-1 overflow-y-auto bg-[#f4f2ee]">
@@ -588,12 +624,21 @@ function LinkedIn({ d, images }: { d: Draft; images: string[] }) {
             </span>
             <div className="flex-1 leading-tight">
               <p className="text-[13px] font-semibold">{NAME}</p>
-              <p className="text-[11px] text-neutral-500">12.480 seguidores</p>
+              <p className="text-[11px] text-neutral-500">
+                {tr([
+                  "12.480 seguidores",
+                  "12,480 followers",
+                  "12.480 seguidores",
+                  "12 480 abonnés",
+                ])}
+              </p>
               <p className="flex items-center gap-1 text-[11px] text-neutral-500">
-                Agora · <Globe className="h-3 w-3" />
+                {tr(["Agora", "Now", "Ahora", "Maintenant"])} · <Globe className="h-3 w-3" />
               </p>
             </div>
-            <span className="text-[13px] font-semibold text-[#0a66c2]">+ Seguir</span>
+            <span className="text-[13px] font-semibold text-[#0a66c2]">
+              + {tr(["Seguir", "Follow", "Seguir", "Suivre"])}
+            </span>
           </div>
           <Caption
             text={composeCaption(d)}
@@ -612,10 +657,17 @@ function LinkedIn({ d, images }: { d: Draft; images: string[] }) {
             <span className="-ml-1.5 grid h-4 w-4 place-items-center rounded-full bg-[#df704d] text-white ring-2 ring-white">
               <Heart className="h-2.5 w-2.5 fill-current" />
             </span>
-            <span className="ml-1">342 · 28 comentários</span>
+            <span className="ml-1">
+              342 · {tr(["28 comentários", "28 comments", "28 comentarios", "28 commentaires"])}
+            </span>
           </div>
           <div className="mx-3 flex justify-around border-t border-neutral-200 py-2 text-[11px] font-semibold text-neutral-600">
-            {["Gostei", "Comentar", "Compartilhar", "Enviar"].map((l) => (
+            {[
+              tr(["Gostei", "Like", "Recomendar", "J’aime"]),
+              tr(["Comentar", "Comment", "Comentar", "Commenter"]),
+              tr(["Compartilhar", "Repost", "Compartir", "Republier"]),
+              tr(["Enviar", "Send", "Enviar", "Envoyer"]),
+            ].map((l) => (
               <span key={l}>{l}</span>
             ))}
           </div>
@@ -628,6 +680,7 @@ function LinkedIn({ d, images }: { d: Draft; images: string[] }) {
 // ───────────────────────────── X ─────────────────────────────
 
 function XPost({ d, images, handle }: { d: Draft; images: string[]; handle: string }) {
+  const tr = useTr();
   const text = composeCaption(d);
   const over = text.length > 280;
   return (
@@ -644,7 +697,9 @@ function XPost({ d, images, handle }: { d: Draft; images: string[]; handle: stri
             <p className="flex items-center gap-1 text-[13px]">
               <span className="font-bold">{NAME}</span>
               <BadgeCheck className="h-4 w-4 fill-sky-500 text-white" />
-              <span className="truncate text-neutral-500">@{handle} · agora</span>
+              <span className="truncate text-neutral-500">
+                @{handle} · {tr(["agora", "now", "ahora", "maintenant"])}
+              </span>
             </p>
             <p className="mt-1 whitespace-pre-line break-words text-[13px] leading-snug">
               <Rich text={over ? `${text.slice(0, 280)}` : text} tagClass="text-sky-500" />
@@ -668,14 +723,19 @@ function XPost({ d, images, handle }: { d: Draft; images: string[]; handle: stri
                 <LikeButton size={16} filledClass="fill-pink-600 text-pink-600" /> 310
               </span>
               <span className="flex items-center gap-1 text-[11px]">
-                <BarChart3 className="h-4 w-4" /> 9,8 mil
+                <BarChart3 className="h-4 w-4" /> {tr(["9,8 mil", "9.8K", "9,8 mil", "9,8 k"])}
               </span>
             </div>
           </div>
         </div>
         {over && (
           <p className="mx-3 mt-3 rounded-xl bg-red-50 p-2 text-[11px] text-red-600">
-            Passou de 280 caracteres: o trecho marcado não cabe num post só (vire um fio).
+            {tr([
+              "Passou de 280 caracteres: o trecho marcado não cabe num post só (vire um fio).",
+              "Over 280 characters: the highlighted part doesn’t fit in a single post (make it a thread).",
+              "Pasó de 280 caracteres: el fragmento marcado no cabe en un solo post (conviértelo en un hilo).",
+              "Plus de 280 caractères : le passage surligné ne tient pas dans un seul post (faites-en un fil).",
+            ])}
           </p>
         )}
       </div>
@@ -686,6 +746,7 @@ function XPost({ d, images, handle }: { d: Draft; images: string[]; handle: stri
 // ───────────────────────────── YouTube ─────────────────────────────
 
 function YouTube({ d, images }: { d: Draft; images: string[] }) {
+  const tr = useTr();
   const shorts = d.format === "reels" || d.format === "story";
   if (shorts) {
     return (
@@ -706,15 +767,21 @@ function YouTube({ d, images }: { d: Draft; images: string[] }) {
               <Avatar size={28} />
               <span className="text-[13px] font-semibold">@nutriconnect</span>
               <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-black">
-                Inscrever-se
+                {tr(["Inscrever-se", "Subscribe", "Suscribirse", "S’abonner"])}
               </span>
             </div>
             <p className="mt-2 line-clamp-2 text-[13px]">{d.title || d.hook}</p>
           </div>
           <div className="flex flex-col items-center gap-4">
-            <SideAction icon={<ThumbsUp className="h-6 w-6 fill-white" />} label="5,2 mil" />
+            <SideAction
+              icon={<ThumbsUp className="h-6 w-6 fill-white" />}
+              label={tr(["5,2 mil", "5.2K", "5,2 mil", "5,2 k"])}
+            />
             <SideAction icon={<MessageCircle className="h-6 w-6 fill-white" />} label="128" />
-            <SideAction icon={<Share2 className="h-6 w-6" />} label="Compartilhar" />
+            <SideAction
+              icon={<Share2 className="h-6 w-6" />}
+              label={tr(["Compartilhar", "Share", "Compartir", "Partager"])}
+            />
           </div>
         </div>
       </Phone>
@@ -743,9 +810,14 @@ function YouTube({ d, images }: { d: Draft; images: string[] }) {
           <Avatar size={34} />
           <div className="min-w-0">
             <p className="line-clamp-2 text-[14px] font-semibold leading-snug">
-              {d.title || d.hook || "Título do vídeo"}
+              {d.title ||
+                d.hook ||
+                tr(["Título do vídeo", "Video title", "Título del video", "Titre de la vidéo"])}
             </p>
-            <p className="mt-1 text-[11px] text-neutral-500">{NAME} · 0 visualizações · agora</p>
+            <p className="mt-1 text-[11px] text-neutral-500">
+              {NAME} · {tr(["0 visualizações", "0 views", "0 visualizaciones", "0 vue"])} ·{" "}
+              {tr(["agora", "now", "ahora", "maintenant"])}
+            </p>
           </div>
         </div>
         <Caption
