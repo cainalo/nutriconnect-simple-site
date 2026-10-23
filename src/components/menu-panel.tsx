@@ -2,6 +2,7 @@
 // de orçamento, a pessoa troca o que quiser (outra ideia, uma receita guardada ou escrevendo) e a
 // semana vira uma lista de compras única, agrupada por seção, na lista da conta.
 import { useState, type FormEvent } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -712,16 +713,16 @@ export function MenuPanel() {
     }
   };
 
-  const redoAll = () => {
+  const redoAll = async () => {
     if (
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Trocar todas as refeições da semana por novas ideias da Nina?",
           "Replace every meal this week with new ideas from Nina?",
           "¿Cambiar todas las comidas de la semana por nuevas ideas de Nina?",
           "Remplacer tous les repas de la semaine par de nouvelles idées de Nina ?",
         ]),
-      )
+      ))
     )
       return;
     void ask(allSlots);
@@ -753,20 +754,20 @@ export function MenuPanel() {
     persist(next);
   };
 
-  const leftover = (day: number) => {
+  const leftover = async (day: number) => {
     const dinner = meals[slotKey(day, "jantar")];
     if (!dinner || day >= 6) return;
     const key = slotKey(day + 1, "almoco");
     if (
       meals[key] &&
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           `Trocar o almoço de amanhã (${meals[key]!.title}) pela sobra?`,
           `Replace tomorrow's lunch (${meals[key]!.title}) with the leftovers?`,
           `¿Cambiar el almuerzo de mañana (${meals[key]!.title}) por lo que sobra?`,
           `Remplacer le déjeuner de demain (${meals[key]!.title}) par les restes ?`,
         ]),
-      )
+      ))
     )
       return;
     // Sem ingredientes: a sobra não entra de novo na lista de compras.

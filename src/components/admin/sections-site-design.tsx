@@ -2,6 +2,7 @@
 // "Testar" aplica só neste navegador; "Publicar" grava para todo mundo. Modelos de post, regras de
 // rolagem e layouts não mudam. A personalização de cada pessoa continua valendo por cima.
 import { useEffect, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Check, Eye, Moon, Sun, Upload } from "lucide-react";
 import { Badge, Panel, btnCls, btnPrimary } from "@/components/admin/admin-ui";
 import { useSaveSiteConfig, useSiteConfigs } from "@/lib/site-config";
@@ -175,16 +176,16 @@ export function SiteDesignSection() {
                   type="button"
                   className={btnPrimary}
                   disabled={isSaved || save.isPending}
-                  onClick={() => {
+                  onClick={async () => {
                     if (
-                      !window.confirm(
+                      !(await siteConfirm(
                         tr([
                           `Publicar o design "${d.name}" para todo o site?`,
                           `Publish the "${d.name}" design for the whole site?`,
                           `¿Publicar el diseño "${d.name}" para todo el sitio?`,
                           `Publier le design « ${d.name} » pour tout le site ?`,
                         ]),
-                      )
+                      ))
                     )
                       return;
                     save.mutate(

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, Minus, Plus, Target, Trash2 } from "lucide-react";
 import * as records from "@/lib/clinical/records";
@@ -157,7 +158,9 @@ function GoalCheckinCard({
             type="button"
             className={cn(buttonGhost, "px-2")}
             aria-label={t("common.remove")}
-            onClick={() => window.confirm(t("goals.deleteConfirm")) && remove.mutate(undefined)}
+            onClick={async () =>
+              (await siteConfirm(t("goals.deleteConfirm"))) && remove.mutate(undefined)
+            }
           >
             <Trash2 className="h-4 w-4" />
           </button>

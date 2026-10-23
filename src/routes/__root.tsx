@@ -29,6 +29,7 @@ import { installTitleTranslation } from "../lib/page-titles";
 import { listenAppLinks } from "@/lib/native";
 import { BackToTop } from "@/components/back-to-top";
 import { KidModeGate } from "@/components/kid-mode-gate";
+import { ConfirmHost } from "@/components/confirm-action";
 import { onIdentityChange } from "@/lib/auth";
 import { resetSessionCache } from "@/lib/session-cache";
 import { useTr } from "@/components/settings-ui";
@@ -218,6 +219,7 @@ function RootComponent() {
       </FeatureGate>
       <ConsentGate />
       <KidModeGate />
+      <ConfirmHost />
       <HeroCinematic />
       <AccessibilityTools />
       <AnnouncementBar />

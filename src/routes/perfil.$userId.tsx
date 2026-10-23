@@ -1,4 +1,5 @@
 import { td } from "@/lib/i18n/data";
+import { siteConfirm } from "@/components/confirm-action";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
@@ -256,17 +257,17 @@ function PublicProfilePage() {
     setPanel(null);
     setSelectedId(null);
   };
-  const cancelEditing = () => {
+  const cancelEditing = async () => {
     if (
       dirty &&
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Descartar as mudanças que você ainda não salvou?",
           "Discard the changes you haven't saved?",
           "¿Descartar los cambios sin guardar?",
           "Abandonner les modifications non enregistrées ?",
         ]),
-      )
+      ))
     ) {
       return;
     }
@@ -288,16 +289,16 @@ function PublicProfilePage() {
       setPanel(null);
     }
   };
-  const resetPage = () => {
+  const resetPage = async () => {
     if (
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Voltar ao perfil padrão? Os blocos e o tema atuais serão trocados (você ainda pode cancelar antes de salvar).",
           "Go back to the default profile? Current blocks and theme will be replaced (you can still cancel before saving).",
           "¿Volver al perfil estándar? Se reemplazarán los bloques y el tema actuales (aún puedes cancelar antes de guardar).",
           "Revenir au profil par défaut ? Les blocs et le thème actuels seront remplacés (vous pouvez encore annuler avant d'enregistrer).",
         ]),
-      )
+      ))
     )
       return;
     setDraft({ ...defaultPage(isProfessional), header: { ...DEFAULT_HEADER } });

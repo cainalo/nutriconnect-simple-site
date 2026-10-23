@@ -1,4 +1,5 @@
 import { useScrollHint } from "@/hooks/use-scroll-hint";
+import { siteConfirm } from "@/components/confirm-action";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -196,7 +197,7 @@ function NinaPage() {
   sendRef.current = (text) => void sendText(text);
 
   const clear = async () => {
-    if (!window.confirm(t("nina.clearConfirm"))) return;
+    if (!(await siteConfirm(t("nina.clearConfirm")))) return;
     await supabase.from("nina_messages").delete().eq("user_id", user.id);
     await queryClient.invalidateQueries({ queryKey: historyKey });
   };

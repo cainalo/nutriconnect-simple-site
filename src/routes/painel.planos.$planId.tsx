@@ -1,4 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { sitePrompt } from "@/components/confirm-action";
+import { siteConfirm } from "@/components/confirm-action";
 import { ArrowLeft, BookmarkPlus, Copy, FileDown, Send, Trash2, Utensils } from "lucide-react";
 import { toast } from "sonner";
 import { useTr } from "@/components/settings-ui";
@@ -141,8 +143,8 @@ function MealPlanPage() {
               type="button"
               className={buttonSecondary}
               disabled={saveTemplate.isPending}
-              onClick={() => {
-                const name = window.prompt(
+              onClick={async () => {
+                const name = await sitePrompt(
                   tr([
                     "Nome do modelo (sem dados do paciente):",
                     "Template name (no patient data):",
@@ -182,7 +184,9 @@ function MealPlanPage() {
             <button
               type="button"
               className={buttonDanger}
-              onClick={() => window.confirm(t("plan.deleteConfirm")) && remove.mutate(undefined)}
+              onClick={async () =>
+                (await siteConfirm(t("plan.deleteConfirm"))) && remove.mutate(undefined)
+              }
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -192,7 +196,9 @@ function MealPlanPage() {
               type="button"
               className={buttonPrimary}
               disabled={publish.isPending || plan.meals.every((m) => m.items.length === 0)}
-              onClick={() => window.confirm(t("plan.publishConfirm")) && publish.mutate(undefined)}
+              onClick={async () =>
+                (await siteConfirm(t("plan.publishConfirm"))) && publish.mutate(undefined)
+              }
             >
               <Send className="h-4 w-4" /> {t("plan.publish")}
             </button>

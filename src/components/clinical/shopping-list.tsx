@@ -1,6 +1,7 @@
 // Lista de compras gerada do plano alimentar: soma as quantidades diárias de cada alimento (sem as
 // substituições) para o número de dias escolhido. O que já foi comprado fica marcado neste aparelho.
 import { useEffect, useMemo, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Check, ShoppingBasket, Trash2 } from "lucide-react";
 import { useTr } from "@/components/appearance-editor";
 import { BuyAtMarket } from "@/components/buy-at-market";
@@ -104,9 +105,9 @@ export function ShoppingList({ plan }: { plan: FullMealPlan }) {
             <button
               type="button"
               className={cn(buttonGhost, "h-8 px-2 text-xs text-muted-foreground")}
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
+                  await siteConfirm(
                     tr([
                       "Desmarcar todos os itens?",
                       "Uncheck all items?",

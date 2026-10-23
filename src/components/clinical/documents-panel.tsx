@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { FileImage, FileText, FolderOpen, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import * as care from "@/lib/clinical/care";
@@ -138,7 +139,9 @@ export function DocumentsPanel({
                       type="button"
                       className={buttonGhost}
                       aria-label={t("common.remove")}
-                      onClick={() => window.confirm(t("docs.deleteConfirm")) && remove.mutate(d)}
+                      onClick={async () =>
+                        (await siteConfirm(t("docs.deleteConfirm"))) && remove.mutate(d)
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

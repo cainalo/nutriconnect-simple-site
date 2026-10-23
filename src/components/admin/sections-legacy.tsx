@@ -1,4 +1,5 @@
 import { td } from "@/lib/i18n/data";
+import { sitePrompt } from "@/components/confirm-action";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Check, X } from "lucide-react";
@@ -473,16 +474,16 @@ function TeleconsultReview() {
                 type="button"
                 className="inline-flex items-center gap-1 rounded-full border border-destructive/40 px-3 py-1.5 text-xs font-semibold text-destructive"
                 disabled={review.isPending}
-                onClick={() => {
+                onClick={async () => {
                   const reason =
-                    window.prompt(
+                    (await sitePrompt(
                       tr([
                         "Motivo da recusa (o profissional vê):",
                         "Reason for declining (the professional sees it):",
                         "Motivo del rechazo (lo ve el profesional):",
                         "Motif du refus (visible par le professionnel) :",
                       ]),
-                    ) ?? "";
+                    )) ?? "";
                   if (reason.trim()) review.mutate({ id: c.id, approve: false, reason });
                 }}
               >

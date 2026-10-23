@@ -1,6 +1,7 @@
 // O que a IA barrou antes de publicar: conteúdo, foto, motivo e quem tentou. O administrador mantém a
 // decisão ou libera (a IA errou: a publicação/comentário vai ao ar em nome da pessoa).
 import { useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { useQuery } from "@tanstack/react-query";
 import { Bot, CalendarDays, Check, ImageOff, Send, ShieldBan } from "lucide-react";
 import {
@@ -256,9 +257,9 @@ function RejectionRow({ r }: { r: Rejection }) {
               type="button"
               className={btnPrimary}
               disabled={busy}
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
+                  await siteConfirm(
                     r.kind === "post"
                       ? tr([
                           "Publicar este conteúdo em nome da pessoa? Ela será avisada.",

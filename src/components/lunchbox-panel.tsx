@@ -3,6 +3,7 @@
 // Nina ou com ideias prontas e manda os ingredientes para a lista de compras. A criança vê o lanche
 // do dia na trilha e diz se gostou.
 import { useEffect, useState, type FormEvent } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -737,9 +738,9 @@ function KidWeek({ kid }: { kid: TrailProfile }) {
           ) : (
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
+                  await siteConfirm(
                     tr([
                       "Trocar todos os lanches da semana por novas ideias da Nina?",
                       "Replace every snack this week with new ideas from Nina?",

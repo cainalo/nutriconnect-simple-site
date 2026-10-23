@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { siteConfirm } from "@/components/confirm-action";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, Download, Pencil, ShieldAlert } from "lucide-react";
@@ -82,14 +83,14 @@ function ContaPage() {
 
   const handleSignOutEverywhere = async () => {
     if (
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Sair de todos os aparelhos, inclusive este?",
           "Sign out of all devices, including this one?",
           "¿Cerrar sesión en todos los dispositivos, incluido este?",
           "Se déconnecter de tous les appareils, y compris celui-ci ?",
         ]),
-      )
+      ))
     )
       return;
     await supabase.auth.signOut({ scope: "global" });

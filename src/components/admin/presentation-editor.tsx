@@ -2,6 +2,7 @@
 // em tela cheia. Clicar num texto abre o campo para editar; clicar numa foto troca a imagem.
 // Tudo fica em rascunho até "Publicar".
 import { useEffect, useMemo, useRef, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -434,16 +435,16 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
     setSelectedBlock(null);
   };
 
-  const deleteCustom = (id: string) => {
+  const deleteCustom = async (id: string) => {
     if (
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Excluir este slide? Essa mudança vale depois de publicar.",
           "Delete this slide? The change takes effect after publishing.",
           "¿Eliminar esta diapositiva? El cambio se aplica después de publicar.",
           "Supprimer cette diapositive ? Le changement s'applique après la publication.",
         ]),
-      )
+      ))
     )
       return;
     setLayout((cur) => ({
@@ -496,35 +497,35 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
     return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   };
 
-  const changeLocale = (next: Locale) => {
+  const changeLocale = async (next: Locale) => {
     if (next === locale) return;
     if (
       dirty &&
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Há alterações não salvas. Trocar de idioma mesmo assim?",
           "There are unsaved changes. Switch language anyway?",
           "Hay cambios sin guardar. ¿Cambiar de idioma de todos modos?",
           "Des modifications ne sont pas enregistrées. Changer de langue quand même ?",
         ]),
-      )
+      ))
     )
       return;
     setLocale(next);
     setTarget(null);
   };
 
-  const close = () => {
+  const close = async () => {
     if (
       dirty &&
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Há alterações não salvas. Sair do editor mesmo assim?",
           "There are unsaved changes. Leave the editor anyway?",
           "Hay cambios sin guardar. ¿Salir del editor de todos modos?",
           "Des modifications ne sont pas enregistrées. Quitter l'éditeur quand même ?",
         ]),
-      )
+      ))
     )
       return;
     onClose();
@@ -1019,16 +1020,16 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                 <button
                   type="button"
                   className={btnCls}
-                  onClick={() => {
+                  onClick={async () => {
                     if (
-                      !window.confirm(
+                      !(await siteConfirm(
                         tr([
                           "Voltar a ordem, os ocultos, as exclusões e os papéis de parede ao original? Seus slides novos continuam.",
                           "Reset the order, hidden slides, deletions and wallpapers to the original? Your new slides stay.",
                           "¿Volver el orden, las ocultas, las eliminaciones y los fondos al original? Tus diapositivas nuevas se mantienen.",
                           "Rétablir l'ordre, les masquées, les suppressions et les fonds d'origine ? Vos nouvelles diapositives restent.",
                         ]),
-                      )
+                      ))
                     )
                       return;
                     setLayout((cur) => ({

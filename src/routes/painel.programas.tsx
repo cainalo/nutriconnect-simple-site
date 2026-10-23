@@ -2,6 +2,7 @@
 // vendas. Liberada a partir do nível 3 (pro_features "loja_programas"); a cobrança usa a mesma conta
 // de recebimento (Stripe Connect) do perfil de membros.
 import { useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -564,9 +565,9 @@ function ModulesEditor({ programId }: { programId: string }) {
               type="button"
               className="p-1 text-muted-foreground hover:text-destructive"
               aria-label={tr(["Apagar", "Delete", "Borrar", "Supprimer"])}
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
+                  await siteConfirm(
                     tr([
                       "Apagar este módulo?",
                       "Delete this module?",

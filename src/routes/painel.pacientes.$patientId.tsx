@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useConfirm } from "@/components/confirm-action";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, CalendarDays, Mail, MessageCircle, Phone, Plus, Sparkles } from "lucide-react";
 import { useTr } from "@/components/settings-ui";
@@ -93,6 +94,7 @@ function PatientRecordPage() {
   const profession = professionKey(me.data?.profession);
 
   const end = useClinicalMutation((id: string) => api.endLink(id), { success: t("link.ended") });
+  const [ask, confirmDialog] = useConfirm();
 
   if (people.isLoading || links.isLoading) return <Loading />;
   if (!link) {
@@ -151,7 +153,8 @@ function PatientRecordPage() {
               {isActive && <NinaCareBadge patientId={patientId} />}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          {/* No celular: duas ações lado a lado e "encerrar" embaixo, na largura toda. */}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             {isActive && (
               <button type="button" className={buttonPrimary} onClick={() => setCreating(true)}>
                 <Plus className="h-4 w-4" /> {t("schedule.new")}
@@ -163,15 +166,23 @@ function PatientRecordPage() {
             {isActive && (
               <button
                 type="button"
-                className={buttonGhost}
+                className={`${buttonGhost} col-span-2`}
                 disabled={end.isPending}
-                onClick={() => window.confirm(t("record.endConfirm")) && end.mutate(link.id)}
+                onClick={async () => {
+                  const ok = await ask({
+                    title: t("record.endConfirm"),
+                    confirmLabel: t("link.end"),
+                    danger: true,
+                  });
+                  if (ok) end.mutate(link.id);
+                }}
               >
                 {t("link.end")}
               </button>
             )}
           </div>
         </div>
+        {confirmDialog}
         {!isActive && (
           <p className="mt-3 rounded-xl bg-secondary px-3 py-2 text-xs text-muted-foreground">
             {t("record.readOnly")}

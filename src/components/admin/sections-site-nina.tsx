@@ -1,6 +1,7 @@
 // Nina: histórico dos modelos (abrir, girar, ver as ações e escolher qual o site usa) e personalização
 // da aparência (cores, cabelo, roupa, acessórios). Tudo fica em platform_settings ("site_nina").
 import { useEffect, useMemo, useRef, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Check, Eye, Paintbrush, RotateCcw, Save, Star, Trash2 } from "lucide-react";
 import { Badge, Panel, btnCls, btnDanger, btnPrimary, inputCls } from "@/components/admin/admin-ui";
 import { NinaLive } from "@/components/nina-live";
@@ -142,16 +143,16 @@ export function SiteNinaSection() {
 
   const use = (model: NinaModel) => publish({ ...config, active: model });
 
-  const remove = (s: SavedNinaModel) => {
+  const remove = async (s: SavedNinaModel) => {
     if (
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           `Excluir "${s.name}" do histórico?`,
           `Delete "${s.name}" from the history?`,
           `¿Eliminar "${s.name}" del historial?`,
           `Supprimer « ${s.name} » de l'historique ?`,
         ]),
-      )
+      ))
     )
       return;
     publish({ ...config, saved: config.saved.filter((x) => x.id !== s.id) });

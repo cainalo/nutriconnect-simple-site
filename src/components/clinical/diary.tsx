@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useRef, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Camera,
@@ -744,7 +745,9 @@ function EntryCard({
                 type="button"
                 className={cn(buttonGhost, "px-2 py-2 rounded-xl")}
                 aria-label={t("common.remove")}
-                onClick={() => window.confirm(t("diary.deleteConfirm")) && remove.mutate(undefined)}
+                onClick={async () =>
+                  (await siteConfirm(t("diary.deleteConfirm"))) && remove.mutate(undefined)
+                }
               >
                 <Trash2 className="h-4 w-4 opacity-50 transition-opacity hover:opacity-100" />
               </button>

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { siteConfirm } from "@/components/confirm-action";
 import { useMemo, useState } from "react";
 import {
   BadgeCheck,
@@ -1418,9 +1419,9 @@ function NotificacoesPage() {
                 <button
                   type="button"
                   disabled={clearResolved.isPending}
-                  onClick={() => {
+                  onClick={async () => {
                     if (
-                      window.confirm(
+                      await siteConfirm(
                         tr([
                           "Apagar todas as notificações resolvidas?",
                           "Delete all resolved notifications?",

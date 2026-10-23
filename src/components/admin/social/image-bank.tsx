@@ -1,6 +1,7 @@
 // Banco de imagens do editor: fotos curadas do NutriConnect (por categoria) e a biblioteca da equipe
 // (envio comprimido para o Storage, seleção e exclusão). Clicar numa foto coloca ela na arte.
 import { useRef, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { toast } from "sonner";
 import { Check, ImagePlus, Loader2, Trash2 } from "lucide-react";
 import {
@@ -190,16 +191,16 @@ export function ImageBank({
               items={team.data ?? []}
               value={value}
               onPick={onPick}
-              onDelete={(m) => {
+              onDelete={async (m) => {
                 if (
-                  !window.confirm(
+                  !(await siteConfirm(
                     tr([
                       "Apagar esta foto da biblioteca da equipe?",
                       "Delete this photo from the team library?",
                       "¿Borrar esta foto de la biblioteca del equipo?",
                       "Supprimer cette photo de la bibliothèque de l’équipe ?",
                     ]),
-                  )
+                  ))
                 )
                   return;
                 remove.mutate(m.id, {

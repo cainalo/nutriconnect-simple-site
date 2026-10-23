@@ -1,6 +1,9 @@
 import "@/styles.css";
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { ConfirmHost, siteConfirm, sitePrompt } from "@/components/confirm-action";
+// Para testar os diálogos de confirmação nos prints.
+Object.assign(window, { __siteConfirm: siteConfirm, __sitePrompt: sitePrompt });
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRootRoute, createRouter, createMemoryHistory } from "@tanstack/react-router";
 import { Landing } from "@/components/landing";
@@ -317,7 +320,7 @@ function App() {
   return <div className="flex flex-wrap gap-6 p-6">{modes.map((m) => <Cell key={m} mode={m} />)}</div>;
 }
 createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={qc}><App /></QueryClientProvider>,
+  <QueryClientProvider client={qc}><App /><ConfirmHost /></QueryClientProvider>,
 );
 const click = q.get("click");
 // &click=A|B clica em sequência (um botão por vez, pelo texto).

@@ -1,6 +1,7 @@
 // Ligar e desligar partes da plataforma. Desligada: some dos menus e das laterais, e o endereço
 // mostra um aviso. Administradores continuam entrando, com uma faixa avisando.
 import { useMemo, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { useQueryClient } from "@tanstack/react-query";
 import { Save } from "lucide-react";
 import { Badge, Panel, btnPrimary } from "@/components/admin/admin-ui";
@@ -34,18 +35,18 @@ export function SiteFeaturesSection() {
           type="button"
           className={btnPrimary}
           disabled={!dirty || save.isPending}
-          onClick={() => {
+          onClick={async () => {
             const off = FEATURES.filter((f) => !current[f.key]).map((f) => f.label);
             if (
               off.length &&
-              !window.confirm(
+              !(await siteConfirm(
                 tr([
                   `Desligar para todos: ${off.join(", ")}?`,
                   `Turn off for everyone: ${off.join(", ")}?`,
                   `¿Desactivar para todos: ${off.join(", ")}?`,
                   `Désactiver pour tout le monde : ${off.join(", ")} ?`,
                 ]),
-              )
+              ))
             )
               return;
             save.mutate(

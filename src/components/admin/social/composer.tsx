@@ -2,6 +2,7 @@
 // pela IA, texto, visual e publicar); à direita, a prévia ao vivo no formato exato de cada rede.
 // Regra do NutriConnect: nada de emojis — as artes usam ícones e o editor avisa e limpa emojis.
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { toast } from "sonner";
 import {
   AlignLeft,
@@ -399,17 +400,17 @@ export function Composer({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const close = () => {
+  const close = async () => {
     if (
       dirty &&
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Há mudanças não salvas. Sair mesmo assim?",
           "There are unsaved changes. Leave anyway?",
           "Hay cambios sin guardar. ¿Salir de todos modos?",
           "Des modifications ne sont pas enregistrées. Quitter quand même ?",
         ]),
-      )
+      ))
     )
       return;
     onClose();
@@ -717,9 +718,9 @@ export function Composer({
                   onTemplate={saveAsTemplate}
                   onDelete={
                     d.id
-                      ? () => {
+                      ? async () => {
                           if (
-                            window.confirm(
+                            await siteConfirm(
                               tr([
                                 "Apagar este post?",
                                 "Delete this post?",
@@ -971,12 +972,12 @@ function StartStep({
   const list = TEMPLATES.filter((t) => cat === "todos" || t.category === cat);
   const hasContent = !!(d.caption || d.title);
 
-  const apply = (t: SocialTemplate) => {
+  const apply = async (t: SocialTemplate) => {
     if (
       hasContent &&
-      !window.confirm(
+      !(await siteConfirm(
         `${tr(["Usar o modelo", "Use the template", "¿Usar la plantilla", "Utiliser le modèle"])} “${t.name}”? ${tr(["O texto atual será substituído.", "The current text will be replaced.", "El texto actual será reemplazado.", "Le texte actuel sera remplacé."])}`,
-      )
+      ))
     )
       return;
     onApply(draftFromTemplate(t));
@@ -1193,17 +1194,17 @@ function StartStep({
         <div className="mt-3 grid grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               if (
                 hasContent &&
-                !window.confirm(
+                !(await siteConfirm(
                   tr([
                     "Começar do zero? O texto atual será apagado.",
                     "Start from scratch? The current text will be erased.",
                     "¿Empezar desde cero? El texto actual se borrará.",
                     "Repartir de zéro ? Le texte actuel sera effacé.",
                   ]),
-                )
+                ))
               )
                 return;
               onApply({ ...EMPTY_DRAFT, network: d.network, format: d.format });

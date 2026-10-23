@@ -1,6 +1,7 @@
 // Site com fotos ou a versão anterior, com menos imagens. "Testar" vale só neste navegador;
 // "Publicar" grava para todo mundo.
 import { Eye, ImageIcon, ImageOff, Upload } from "lucide-react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Badge, Panel, btnCls, btnPrimary } from "@/components/admin/admin-ui";
 import { useSaveSiteConfig, useSiteConfigs } from "@/lib/site-config";
 import { readSitePhotos, setSitePhotosTest, useSitePhotosTest } from "@/lib/site-photos";
@@ -102,16 +103,16 @@ export function SitePhotosSection() {
                   type="button"
                   className={btnPrimary}
                   disabled={isPublished || save.isPending}
-                  onClick={() => {
+                  onClick={async () => {
                     if (
-                      !window.confirm(
+                      !(await siteConfirm(
                         tr([
                           `Publicar para todos: ${o.title[0]}?`,
                           `Publish for everyone: ${o.title[1]}?`,
                           `¿Publicar para todos: ${o.title[2]}?`,
                           `Publier pour tout le monde : ${o.title[3]} ?`,
                         ]),
-                      )
+                      ))
                     )
                       return;
                     save.mutate(
