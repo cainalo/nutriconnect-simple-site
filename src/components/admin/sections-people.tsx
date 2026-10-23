@@ -44,19 +44,22 @@ import {
 } from "@/lib/admin-api";
 import { initials } from "@/lib/community";
 import { supabase } from "@/integrations/supabase/client";
+import { useTr } from "@/components/settings-ui";
+import type { Names } from "@/lib/appearance-data";
 
 const PAGE = 25;
-const FILTERS = [
-  ["todos", "Todas"],
-  ["pacientes", "Pacientes"],
-  ["profissionais", "Profissionais"],
-  ["admins", "Administradores"],
-  ["suspensos", "Suspensas"],
-] as const;
+const FILTERS: readonly (readonly [string, Names])[] = [
+  ["todos", ["Todas", "All", "Todas", "Toutes"]],
+  ["pacientes", ["Pacientes", "Patients", "Pacientes", "Patients"]],
+  ["profissionais", ["Profissionais", "Professionals", "Profesionales", "Professionnels"]],
+  ["admins", ["Administradores", "Admins", "Administradores", "Administrateurs"]],
+  ["suspensos", ["Suspensas", "Suspended", "Suspendidas", "Suspendues"]],
+];
 
 // ── Pessoas ──────────────────────────────────────────────────────────────────
 
 export function UsersSection({ me }: { me: string }) {
+  const tr = useTr();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<string>("todos");
   const [offset, setOffset] = useState(0);
@@ -87,17 +90,44 @@ export function UsersSection({ me }: { me: string }) {
         missing -= step;
       }
       void adminActions.log("pontuacao_maxima", "profile", u.id, { pontos: 2000 });
-      toast.success(`${u.name} agora está no nível máximo (2.000 pontos).`);
+      toast.success(
+        tr([
+          `${u.name} agora está no nível máximo (2.000 pontos).`,
+          `${u.name} is now at the top level (2,000 points).`,
+          `${u.name} ya está en el nivel máximo (2.000 puntos).`,
+          `${u.name} est maintenant au niveau maximum (2 000 points).`,
+        ]),
+      );
       setMaxScore(null);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Não foi possível ajustar a pontuação.");
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : tr([
+              "Não foi possível ajustar a pontuação.",
+              "Couldn't adjust the score.",
+              "No se pudo ajustar la puntuación.",
+              "Impossible d'ajuster le score.",
+            ]),
+      );
     } finally {
       setMaxBusy(false);
     }
   };
 
-  const suspendAction = useAdminAction(adminActions.setSuspended, "Conta atualizada.");
-  const adminAction = useAdminAction(adminActions.setAdmin, "Permissão atualizada.");
+  const suspendAction = useAdminAction(
+    adminActions.setSuspended,
+    tr(["Conta atualizada.", "Account updated.", "Cuenta actualizada.", "Compte mis à jour."]),
+  );
+  const adminAction = useAdminAction(
+    adminActions.setAdmin,
+    tr([
+      "Permissão atualizada.",
+      "Permission updated.",
+      "Permiso actualizado.",
+      "Droits mis à jour.",
+    ]),
+  );
 
   const exportAll = async () => {
     try {
@@ -132,18 +162,33 @@ export function UsersSection({ me }: { me: string }) {
         total: rows.length,
       });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Não foi possível exportar.");
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : tr([
+              "Não foi possível exportar.",
+              "Couldn't export.",
+              "No se pudo exportar.",
+              "Impossible d'exporter.",
+            ]),
+      );
     }
   };
 
   return (
     <div className="space-y-4">
       <Panel
-        title="Pessoas"
-        hint="Busque por nome, @usuário ou e-mail. Suspenda contas, conceda permissões e exporte a lista."
+        title={tr(["Pessoas", "People", "Personas", "Personnes"])}
+        hint={tr([
+          "Busque por nome, @usuário ou e-mail. Suspenda contas, conceda permissões e exporte a lista.",
+          "Search by name, @username or email. Suspend accounts, grant permissions and export the list.",
+          "Busca por nombre, @usuario o correo. Suspende cuentas, concede permisos y exporta la lista.",
+          "Recherchez par nom, @utilisateur ou e-mail. Suspendez des comptes, accordez des droits et exportez la liste.",
+        ])}
         action={
           <button type="button" onClick={exportAll} className={btnCls}>
-            <Download className="h-3.5 w-3.5" /> Exportar CSV
+            <Download className="h-3.5 w-3.5" />{" "}
+            {tr(["Exportar CSV", "Export CSV", "Exportar CSV", "Exporter en CSV"])}
           </button>
         }
       >
@@ -154,7 +199,12 @@ export function UsersSection({ me }: { me: string }) {
               setQuery(v);
               setOffset(0);
             }}
-            placeholder="Nome, @usuário ou e-mail…"
+            placeholder={tr([
+              "Nome, @usuário ou e-mail…",
+              "Name, @username or email…",
+              "Nombre, @usuario o correo…",
+              "Nom, @utilisateur ou e-mail…",
+            ])}
           />
           <div className="no-scrollbar flex max-w-full gap-1.5 overflow-x-auto">
             {FILTERS.map(([id, label]) => (
@@ -172,7 +222,7 @@ export function UsersSection({ me }: { me: string }) {
                     : "border-border bg-card text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {label}
+                {tr(label)}
               </button>
             ))}
           </div>
@@ -182,9 +232,18 @@ export function UsersSection({ me }: { me: string }) {
           {users.error ? (
             <QueryError error={users.error} />
           ) : users.isLoading ? (
-            <p className="text-sm text-muted-foreground">Carregando…</p>
+            <p className="text-sm text-muted-foreground">
+              {tr(["Carregando…", "Loading…", "Cargando…", "Chargement…"])}
+            </p>
           ) : list.length === 0 ? (
-            <Empty>Nenhuma pessoa encontrada.</Empty>
+            <Empty>
+              {tr([
+                "Nenhuma pessoa encontrada.",
+                "No one found.",
+                "No se encontró a nadie.",
+                "Personne trouvée.",
+              ])}
+            </Empty>
           ) : (
             <ul className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/70">
               {list.map((u) => (
@@ -194,27 +253,50 @@ export function UsersSection({ me }: { me: string }) {
                   </span>
                   <div className="min-w-0 flex-1 basis-56">
                     <p className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-foreground">
-                      <span className="truncate">{u.name || "(sem nome)"}</span>
-                      {u.verified && <Badge tone="info">Profissional</Badge>}
+                      <span className="truncate">
+                        {u.name || tr(["(sem nome)", "(no name)", "(sin nombre)", "(sans nom)"])}
+                      </span>
+                      {u.verified && (
+                        <Badge tone="info">
+                          {tr(["Profissional", "Professional", "Profesional", "Professionnel"])}
+                        </Badge>
+                      )}
                       {u.is_admin && <Badge tone="good">Admin</Badge>}
-                      {u.suspended_at && <Badge tone="bad">Suspensa</Badge>}
+                      {u.suspended_at && (
+                        <Badge tone="bad">
+                          {tr(["Suspensa", "Suspended", "Suspendida", "Suspendue"])}
+                        </Badge>
+                      )}
                       {u.reports_pending > 0 && (
                         <Badge tone="warn">
-                          {u.reports_pending} denúncia{u.reports_pending > 1 ? "s" : ""}
+                          {u.reports_pending}{" "}
+                          {u.reports_pending > 1
+                            ? tr(["denúncias", "reports", "denuncias", "signalements"])
+                            : tr(["denúncia", "report", "denuncia", "signalement"])}
                         </Badge>
                       )}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
-                      @{u.username} · {u.email ?? "sem e-mail"}
+                      @{u.username} ·{" "}
+                      {u.email ?? tr(["sem e-mail", "no email", "sin correo", "sans e-mail"])}
                     </p>
                   </div>
                   <div className="hidden text-right text-xs text-muted-foreground sm:block">
-                    <p>{u.posts_count} publicações</p>
-                    <p>desde {shortDate(u.created_at)}</p>
+                    <p>
+                      {u.posts_count}{" "}
+                      {tr(["publicações", "posts", "publicaciones", "publications"])}
+                    </p>
+                    <p>
+                      {tr(["desde", "since", "desde", "depuis"])} {shortDate(u.created_at)}
+                    </p>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button type="button" className={btnCls} aria-label={`Ações para ${u.name}`}>
+                      <button
+                        type="button"
+                        className={btnCls}
+                        aria-label={`${tr(["Ações para", "Actions for", "Acciones para", "Actions pour"])} ${u.name}`}
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
                     </DropdownMenuTrigger>
@@ -225,7 +307,8 @@ export function UsersSection({ me }: { me: string }) {
                           params={{ userId: u.id }}
                           className="flex cursor-pointer items-center gap-2"
                         >
-                          <ExternalLink className="h-4 w-4" /> Abrir perfil
+                          <ExternalLink className="h-4 w-4" />{" "}
+                          {tr(["Abrir perfil", "Open profile", "Abrir perfil", "Ouvrir le profil"])}
                         </Link>
                       </DropdownMenuItem>
                       {u.email && (
@@ -234,7 +317,13 @@ export function UsersSection({ me }: { me: string }) {
                             href={`mailto:${u.email}`}
                             className="flex cursor-pointer items-center gap-2"
                           >
-                            <Mail className="h-4 w-4" /> Enviar e-mail
+                            <Mail className="h-4 w-4" />{" "}
+                            {tr([
+                              "Enviar e-mail",
+                              "Send email",
+                              "Enviar correo",
+                              "Envoyer un e-mail",
+                            ])}
                           </a>
                         </DropdownMenuItem>
                       )}
@@ -253,7 +342,19 @@ export function UsersSection({ me }: { me: string }) {
                           ) : (
                             <UserX className="h-4 w-4 text-destructive" />
                           )}
-                          {u.suspended_at ? "Reativar conta" : "Suspender conta"}
+                          {u.suspended_at
+                            ? tr([
+                                "Reativar conta",
+                                "Reactivate account",
+                                "Reactivar cuenta",
+                                "Réactiver le compte",
+                              ])
+                            : tr([
+                                "Suspender conta",
+                                "Suspend account",
+                                "Suspender cuenta",
+                                "Suspendre le compte",
+                              ])}
                         </DropdownMenuItem>
                       )}
                       {u.verified && (
@@ -261,7 +362,13 @@ export function UsersSection({ me }: { me: string }) {
                           onClick={() => setMaxScore(u)}
                           className="flex cursor-pointer items-center gap-2"
                         >
-                          <Trophy className="h-4 w-4 text-accent" /> Pontuação máxima (nível 5)
+                          <Trophy className="h-4 w-4 text-accent" />{" "}
+                          {tr([
+                            "Pontuação máxima (nível 5)",
+                            "Top score (level 5)",
+                            "Puntuación máxima (nivel 5)",
+                            "Score maximum (niveau 5)",
+                          ])}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem
@@ -273,7 +380,19 @@ export function UsersSection({ me }: { me: string }) {
                         ) : (
                           <ShieldCheck className="h-4 w-4" />
                         )}
-                        {u.is_admin ? "Remover administrador" : "Tornar administrador"}
+                        {u.is_admin
+                          ? tr([
+                              "Remover administrador",
+                              "Remove admin",
+                              "Quitar administrador",
+                              "Retirer l'administrateur",
+                            ])
+                          : tr([
+                              "Tornar administrador",
+                              "Make admin",
+                              "Hacer administrador",
+                              "Nommer administrateur",
+                            ])}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -287,9 +406,19 @@ export function UsersSection({ me }: { me: string }) {
 
       <ConfirmDialog
         open={!!suspend}
-        title={`Suspender ${suspend?.name ?? ""}?`}
-        description="A pessoa continua podendo entrar e ler, mas não consegue publicar nem comentar. Ela recebe um aviso com o motivo."
-        confirmLabel="Suspender"
+        title={tr([
+          `Suspender ${suspend?.name ?? ""}?`,
+          `Suspend ${suspend?.name ?? ""}?`,
+          `¿Suspender a ${suspend?.name ?? ""}?`,
+          `Suspendre ${suspend?.name ?? ""} ?`,
+        ])}
+        description={tr([
+          "A pessoa continua podendo entrar e ler, mas não consegue publicar nem comentar. Ela recebe um aviso com o motivo.",
+          "The person can still sign in and read, but can't post or comment. They get a notice with the reason.",
+          "La persona puede seguir entrando y leyendo, pero no puede publicar ni comentar. Recibe un aviso con el motivo.",
+          "La personne peut toujours se connecter et lire, mais ne peut ni publier ni commenter. Elle reçoit un avis avec le motif.",
+        ])}
+        confirmLabel={tr(["Suspender", "Suspend", "Suspender", "Suspendre"])}
         danger
         askReason
         busy={suspendAction.isPending}
@@ -304,9 +433,24 @@ export function UsersSection({ me }: { me: string }) {
       />
       <ConfirmDialog
         open={!!maxScore}
-        title={`Dar a pontuação máxima a ${maxScore?.name ?? ""}?`}
-        description="O profissional vai para 2.000 pontos: nível 5 (excelência), taxa de 10% e todas as funções liberadas. O ajuste fica registrado no histórico de pontos."
-        confirmLabel="Dar pontuação máxima"
+        title={tr([
+          `Dar a pontuação máxima a ${maxScore?.name ?? ""}?`,
+          `Give ${maxScore?.name ?? ""} the top score?`,
+          `¿Dar la puntuación máxima a ${maxScore?.name ?? ""}?`,
+          `Donner le score maximum à ${maxScore?.name ?? ""} ?`,
+        ])}
+        description={tr([
+          "O profissional vai para 2.000 pontos: nível 5 (excelência), taxa de 10% e todas as funções liberadas. O ajuste fica registrado no histórico de pontos.",
+          "The professional goes to 2,000 points: level 5 (excellence), a 10% fee and every feature unlocked. The adjustment is recorded in the points history.",
+          "El profesional pasa a 2.000 puntos: nivel 5 (excelencia), comisión del 10 % y todas las funciones desbloqueadas. El ajuste queda registrado en el historial de puntos.",
+          "Le professionnel passe à 2 000 points : niveau 5 (excellence), commission de 10 % et toutes les fonctions débloquées. L'ajustement est enregistré dans l'historique des points.",
+        ])}
+        confirmLabel={tr([
+          "Dar pontuação máxima",
+          "Give top score",
+          "Dar puntuación máxima",
+          "Donner le score maximum",
+        ])}
         busy={maxBusy}
         onClose={() => setMaxScore(null)}
         onConfirm={() => maxScore && void giveMaxScore(maxScore)}
@@ -315,15 +459,39 @@ export function UsersSection({ me }: { me: string }) {
         open={!!toggleAdmin}
         title={
           toggleAdmin?.is_admin
-            ? `Remover ${toggleAdmin?.name} dos administradores?`
-            : `Tornar ${toggleAdmin?.name} administrador?`
+            ? tr([
+                `Remover ${toggleAdmin?.name} dos administradores?`,
+                `Remove ${toggleAdmin?.name} from the admins?`,
+                `¿Quitar a ${toggleAdmin?.name} de los administradores?`,
+                `Retirer ${toggleAdmin?.name} des administrateurs ?`,
+              ])
+            : tr([
+                `Tornar ${toggleAdmin?.name} administrador?`,
+                `Make ${toggleAdmin?.name} an admin?`,
+                `¿Hacer administrador a ${toggleAdmin?.name}?`,
+                `Nommer ${toggleAdmin?.name} administrateur ?`,
+              ])
         }
         description={
           toggleAdmin?.is_admin
-            ? "A pessoa perde o acesso a este painel."
-            : "A pessoa passa a ter acesso total a este painel, inclusive para suspender contas."
+            ? tr([
+                "A pessoa perde o acesso a este painel.",
+                "The person loses access to this panel.",
+                "La persona pierde el acceso a este panel.",
+                "La personne perd l'accès à ce panneau.",
+              ])
+            : tr([
+                "A pessoa passa a ter acesso total a este painel, inclusive para suspender contas.",
+                "The person gets full access to this panel, including suspending accounts.",
+                "La persona pasa a tener acceso total a este panel, incluso para suspender cuentas.",
+                "La personne obtient un accès complet à ce panneau, y compris pour suspendre des comptes.",
+              ])
         }
-        confirmLabel={toggleAdmin?.is_admin ? "Remover" : "Conceder"}
+        confirmLabel={
+          toggleAdmin?.is_admin
+            ? tr(["Remover", "Remove", "Quitar", "Retirer"])
+            : tr(["Conceder", "Grant", "Conceder", "Accorder"])
+        }
         danger={!!toggleAdmin?.is_admin}
         busy={adminAction.isPending}
         onClose={() => setToggleAdmin(null)}
@@ -341,31 +509,43 @@ export function UsersSection({ me }: { me: string }) {
 
 // ── Fale conosco ─────────────────────────────────────────────────────────────
 
-const STATUS_LABEL = {
-  novo: "Nova",
-  em_atendimento: "Em atendimento",
-  resolvido: "Resolvida",
-} as const;
+const STATUS_LABEL: Record<"novo" | "em_atendimento" | "resolvido", Names> = {
+  novo: ["Nova", "New", "Nueva", "Nouveau"],
+  em_atendimento: ["Em atendimento", "In progress", "En atención", "En cours"],
+  resolvido: ["Resolvida", "Resolved", "Resuelta", "Résolu"],
+};
 const STATUS_TONE = { novo: "warn", em_atendimento: "info", resolvido: "good" } as const;
 
 export function ContactSection() {
+  const tr = useTr();
   const messages = useContactMessages();
   const [filter, setFilter] = useState<"todas" | "novo" | "em_atendimento" | "resolvido">("novo");
   const [openId, setOpenId] = useState<string | null>(null);
-  const setStatus = useAdminAction(async (p: { id: string; status: keyof typeof STATUS_LABEL }) => {
-    const { error } = await supabase
-      .from("contact_messages")
-      .update({ status: p.status })
-      .eq("id", p.id);
-    if (error) throw new Error(error.message);
-    void adminActions.log("fale_conosco_status", "contact_message", p.id, { status: p.status });
-  }, "Status atualizado.");
+  const setStatus = useAdminAction(
+    async (p: { id: string; status: keyof typeof STATUS_LABEL }) => {
+      const { error } = await supabase
+        .from("contact_messages")
+        .update({ status: p.status })
+        .eq("id", p.id);
+      if (error) throw new Error(error.message);
+      void adminActions.log("fale_conosco_status", "contact_message", p.id, { status: p.status });
+    },
+    tr(["Status atualizado.", "Status updated.", "Estado actualizado.", "Statut mis à jour."]),
+  );
 
   const all = messages.data ?? [];
   const list = filter === "todas" ? all : all.filter((m) => m.status === filter);
 
   return (
-    <Panel title="Fale conosco" hint="Mensagens enviadas pelo formulário de contato do site.">
+    <Panel
+      title={tr(["Fale conosco", "Contact us", "Contáctanos", "Nous contacter"])}
+      hint={tr([
+        "Mensagens enviadas pelo formulário de contato do site.",
+        "Messages sent through the site's contact form.",
+        "Mensajes enviados por el formulario de contacto del sitio.",
+        "Messages envoyés via le formulaire de contact du site.",
+      ])}
+    >
       <div className="mb-4 flex flex-wrap gap-1.5">
         {(["novo", "em_atendimento", "resolvido", "todas"] as const).map((id) => (
           <button
@@ -379,7 +559,7 @@ export function ContactSection() {
                 : "border-border bg-card text-muted-foreground hover:text-foreground"
             }`}
           >
-            {id === "todas" ? "Todas" : STATUS_LABEL[id]}{" "}
+            {id === "todas" ? tr(["Todas", "All", "Todas", "Tous"]) : tr(STATUS_LABEL[id])}{" "}
             <span className="opacity-60">
               {id === "todas" ? all.length : all.filter((m) => m.status === id).length}
             </span>
@@ -389,9 +569,18 @@ export function ContactSection() {
       {messages.error ? (
         <QueryError error={messages.error} />
       ) : messages.isLoading ? (
-        <p className="text-sm text-muted-foreground">Carregando…</p>
+        <p className="text-sm text-muted-foreground">
+          {tr(["Carregando…", "Loading…", "Cargando…", "Chargement…"])}
+        </p>
       ) : list.length === 0 ? (
-        <Empty>Nenhuma mensagem aqui.</Empty>
+        <Empty>
+          {tr([
+            "Nenhuma mensagem aqui.",
+            "No messages here.",
+            "No hay mensajes aquí.",
+            "Aucun message ici.",
+          ])}
+        </Empty>
       ) : (
         <ul className="space-y-2">
           {list.map((m) => {
@@ -409,7 +598,7 @@ export function ContactSection() {
                       {m.name} · {m.email}
                     </p>
                   </div>
-                  <Badge tone={STATUS_TONE[m.status]}>{STATUS_LABEL[m.status]}</Badge>
+                  <Badge tone={STATUS_TONE[m.status]}>{tr(STATUS_LABEL[m.status])}</Badge>
                   <span className="text-xs text-muted-foreground">{dateTime(m.created_at)}</span>
                 </button>
                 {open && (
@@ -418,17 +607,30 @@ export function ContactSection() {
                       {m.message}
                     </p>
                     {m.phone && (
-                      <p className="mt-2 text-xs text-muted-foreground">Telefone: {m.phone}</p>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {tr(["Telefone:", "Phone:", "Teléfono:", "Téléphone :"])} {m.phone}
+                      </p>
                     )}
                     <div className="mt-4 flex flex-wrap items-center gap-2">
                       <a
                         href={`mailto:${m.email}?subject=${encodeURIComponent("Re: " + m.subject)}`}
                         className={btnCls}
                       >
-                        <Mail className="h-3.5 w-3.5" /> Responder por e-mail
+                        <Mail className="h-3.5 w-3.5" />{" "}
+                        {tr([
+                          "Responder por e-mail",
+                          "Reply by email",
+                          "Responder por correo",
+                          "Répondre par e-mail",
+                        ])}
                       </a>
                       <select
-                        aria-label="Mudar status"
+                        aria-label={tr([
+                          "Mudar status",
+                          "Change status",
+                          "Cambiar estado",
+                          "Changer le statut",
+                        ])}
                         value={m.status}
                         onChange={(e) =>
                           setStatus.mutate({
@@ -440,7 +642,7 @@ export function ContactSection() {
                       >
                         {(Object.keys(STATUS_LABEL) as (keyof typeof STATUS_LABEL)[]).map((s) => (
                           <option key={s} value={s}>
-                            {STATUS_LABEL[s]}
+                            {tr(STATUS_LABEL[s])}
                           </option>
                         ))}
                       </select>
