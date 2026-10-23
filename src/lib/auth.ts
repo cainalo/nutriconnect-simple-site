@@ -2,6 +2,7 @@ import { t } from "./i18n";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import type { ProfessionalInfo, ProfileRole } from "./community";
+import { createIdentityTracker } from "./session-cache";
 
 // Autenticação via Supabase Auth. O usuário logado (perfil + dados privados)
 // fica num cache em memória para que getUser() continue síncrono; mudanças
@@ -33,7 +34,13 @@ let currentUser: AuthUser | null = null;
 let ready = false;
 let initPromise: Promise<void> | null = null;
 
+// Quem está logado mudou (saiu, entrou ou trocou de conta): avisa antes de a tela ser redesenhada,
+// para que dados da sessão anterior (cache de consultas, inclusive clínicas) não apareçam na nova.
+const identity = createIdentityTracker();
+export const onIdentityChange = identity.subscribe;
+
 function emit() {
+  if (ready) identity.update(currentUser?.id ?? null);
   if (typeof window !== "undefined") window.dispatchEvent(new Event(AUTH_EVENT));
 }
 

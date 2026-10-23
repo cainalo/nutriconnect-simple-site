@@ -27,6 +27,8 @@ import { DESIGN_INIT_SCRIPT, useSiteDesign } from "../lib/site-design";
 import { LANG_INIT_SCRIPT, initI18n } from "../lib/i18n";
 import { listenAppLinks } from "@/lib/native";
 import { BackToTop } from "@/components/back-to-top";
+import { onIdentityChange } from "@/lib/auth";
+import { resetSessionCache } from "@/lib/session-cache";
 import { useTr } from "@/components/settings-ui";
 
 function NotFoundComponent() {
@@ -199,6 +201,8 @@ function RootComponent() {
   // App Android: um link do site que abriu o app leva para a página certa (A4).
   useEffect(() => listenAppLinks((path) => void router.history.push(path)), [router]);
   useEffect(() => initI18n(), []);
+  // Conta trocada no mesmo navegador: nada da sessão anterior fica no cache (NC-SEC-018).
+  useEffect(() => onIdentityChange(() => resetSessionCache(queryClient)), [queryClient]);
   useAppearanceSync();
   useAppSounds();
   usePushSync();

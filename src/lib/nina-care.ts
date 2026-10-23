@@ -4,12 +4,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const VERSION = "nina-v1";
-const key = (userId: string) => ["nina-care", userId] as const;
+// A resposta depende de quem pergunta (o próprio paciente ou um profissional com vínculo), então a
+// chave leva os dois: quem vê e de quem é o consentimento.
+const key = (viewer: string, patient: string) => ["nina-care", viewer, patient] as const;
 
 /** Se a pessoa (ou o paciente, na visão da nutri vinculada) autorizou a Nina. */
 export function useNinaCareAllowed(userId: string | undefined, forPatient?: string) {
   return useQuery({
-    queryKey: key(forPatient ?? userId ?? ""),
+    queryKey: key(userId ?? "", forPatient ?? userId ?? ""),
     enabled: !!userId,
     queryFn: async () => {
       const { data, error } = await supabase.rpc(
@@ -33,7 +35,7 @@ export function useSetNinaCare(userId: string | undefined) {
       });
       if (error) throw new Error(error.message);
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: key(userId ?? "") }),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["nina-care", userId ?? ""] }),
   });
 }
 
