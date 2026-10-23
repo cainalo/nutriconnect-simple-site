@@ -1805,6 +1805,17 @@ begin
     end;
   end if;
 
+  -- Higiene de funções (painel de segurança do Supabase, 23/10).
+  r := pg_temp.as_user(null, 'anon', 'select public.setting_int(''fee_percent'', 0)');
+  res := res || jsonb_build_object('teste', 'visitante NÃO lê configurações da plataforma', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
+  r := pg_temp.as_user(a, 'authenticated', 'select public.setting_int(''fee_percent'', 7) is not null');
+  res := res || jsonb_build_object('teste', 'usuário logado lê configuração numérica', 'ok', (r in ('true', 't')), 'obtido', left(r, 100));
+  res := res || jsonb_build_object('teste', 'nenhuma função de gatilho chamável por visitante',
+    'ok', not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                       where n.nspname = 'public' and p.prosecdef and p.prorettype = 'trigger'::regtype
+                         and has_function_privilege('anon', p.oid, 'execute')),
+    'obtido', '');
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end
