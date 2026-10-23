@@ -51,6 +51,7 @@ import {
   Stethoscope,
   Wind,
   X,
+  Loader2,
 } from "lucide-react";
 import type { ProfessionKey } from "@/lib/clinical/professions";
 import { EmojiIcon } from "@/components/emoji-icon";
@@ -2718,7 +2719,39 @@ export function CommunityRouletteCard() {
   const timer = useRef<number | null>(null);
   useEffect(() => () => void (timer.current && window.clearInterval(timer.current)), []);
 
-  if (pool.length === 0) return null;
+  const title = tr([
+    "Sorteie uma comunidade",
+    "Pick a community",
+    "Sortea una comunidad",
+    "Tirez une communauté",
+  ]);
+  // Sem comunidades (ou carregando), o card explica em vez de sumir.
+  if (pool.length === 0) {
+    return (
+      <Panel title={title}>
+        <div className="grid min-h-[5rem] place-items-center rounded-2xl bg-secondary/40 p-3 text-center">
+          {communitiesQuery.isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden />
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {tr([
+                "Ainda não há comunidades para sortear.",
+                "There are no communities to pick yet.",
+                "Todavía no hay comunidades para sortear.",
+                "Il n'y a pas encore de communautés à tirer.",
+              ])}
+            </p>
+          )}
+        </div>
+        <Link
+          to="/comunidades"
+          className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-full border border-border bg-card text-sm font-semibold text-foreground transition hover:bg-secondary"
+        >
+          {tr(["Ver comunidades", "See communities", "Ver comunidades", "Voir les communautés"])}
+        </Link>
+      </Panel>
+    );
+  }
 
   const spin = () => {
     if (spinning) return;
@@ -2738,14 +2771,7 @@ export function CommunityRouletteCard() {
 
   const c = shown !== null ? pool[shown] : null;
   return (
-    <Panel
-      title={tr([
-        "Sorteie uma comunidade",
-        "Pick a community",
-        "Sortea una comunidad",
-        "Tirez une communauté",
-      ])}
-    >
+    <Panel title={title}>
       <div className="grid min-h-[5rem] place-items-center rounded-2xl bg-secondary/40 p-3 text-center">
         {c ? (
           <div className={spinning ? "opacity-60" : "nc-pop-in"}>
