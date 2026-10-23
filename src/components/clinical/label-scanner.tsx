@@ -877,10 +877,10 @@ export function LabelScanner() {
               inputMode="numeric"
               autoComplete="off"
               placeholder={tr([
-                "Ou digite os números (ex.: 7891234567895)",
-                "Or type the digits (e.g. 7891234567895)",
-                "O escribe los números (ej.: 7891234567895)",
-                "Ou saisissez les chiffres (ex. : 7891234567895)",
+                "Ou digite o código",
+                "Or type the code",
+                "O escribe el código",
+                "Ou saisissez le code",
               ])}
               className={cn(inputClass, "flex-1 tabular-nums")}
             />

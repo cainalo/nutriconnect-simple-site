@@ -180,10 +180,10 @@ function ConfiguracoesPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={tr([
-              "Buscar nas configurações (senha, sons, fuso, dados…)",
-              "Search settings (password, sounds, time zone, data…)",
-              "Buscar en ajustes (contraseña, sonidos, zona horaria, datos…)",
-              "Rechercher dans les réglages (mot de passe, sons, fuseau, données…)",
+              "Buscar (senha, sons, fuso…)",
+              "Search (password, sounds…)",
+              "Buscar (contraseña, sonidos…)",
+              "Rechercher (mot de passe, sons…)",
             ])}
             className="w-full rounded-2xl border border-border/70 bg-card py-3 pl-10 pr-4 text-sm text-foreground shadow-xs outline-none focus:border-accent"
           />

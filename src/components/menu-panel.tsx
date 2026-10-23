@@ -896,10 +896,10 @@ export function MenuPanel() {
           onChange={(e) => setWish(e.target.value)}
           maxLength={200}
           placeholder={tr([
-            "Pedido para a Nina (opcional): ex.: sem carne na segunda, marmita para o trabalho",
-            "Request for Nina (optional): e.g. meatless Monday, lunchbox for work",
-            "Pedido para Nina (opcional): ej.: sin carne el lunes, táper para el trabajo",
-            "Demande à Nina (facultatif) : ex. sans viande lundi, gamelle pour le travail",
+            "Pedido para a Nina (opcional)",
+            "Request for Nina (optional)",
+            "Pedido para Nina (opcional)",
+            "Demande à Nina (facultatif)",
           ])}
           className="mt-3 w-full rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground"
         />

@@ -765,7 +765,7 @@ const clinicalPtBR = {
   "finance.netHintOne": "1 pagamento aprovado",
   "finance.gross": "Faturamento bruto",
   "finance.ticket": "ticket médio {value}",
-  "finance.fees": "Taxas da plataforma",
+  "finance.fees": "Taxas",
   "finance.refunded": "{value} estornado(s)",
   "finance.receivable": "A receber",
   "finance.receivableHint": "{n} consultas sem pagamento",

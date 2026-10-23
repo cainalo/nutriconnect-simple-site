@@ -719,7 +719,7 @@ const clinical: Record<ClinicalKey, string> = {
   "finance.netHintOne": "1 approved payment",
   "finance.gross": "Gross revenue",
   "finance.ticket": "average {value}",
-  "finance.fees": "Platform fees",
+  "finance.fees": "Fees",
   "finance.refunded": "{value} refunded",
   "finance.receivable": "To receive",
   "finance.receivableHint": "{n} unpaid appointments",
