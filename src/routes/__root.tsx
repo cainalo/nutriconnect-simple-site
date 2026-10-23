@@ -24,7 +24,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { APPEARANCE_INIT_SCRIPT, initAppearance } from "../lib/appearance";
 import { DESIGN_INIT_SCRIPT, useSiteDesign } from "../lib/site-design";
-import { LANG_INIT_SCRIPT, initI18n } from "../lib/i18n";
+import { LANG_INIT_SCRIPT, LOCALE_EVENT, initI18n, loadLocale } from "../lib/i18n";
+import { installTitleTranslation } from "../lib/page-titles";
 import { listenAppLinks } from "@/lib/native";
 import { BackToTop } from "@/components/back-to-top";
 import { onIdentityChange } from "@/lib/auth";
@@ -201,6 +202,7 @@ function RootComponent() {
   // App Android: um link do site que abriu o app leva para a página certa (A4).
   useEffect(() => listenAppLinks((path) => void router.history.push(path)), [router]);
   useEffect(() => initI18n(), []);
+  useEffect(() => installTitleTranslation(loadLocale, LOCALE_EVENT), []);
   // Conta trocada no mesmo navegador: nada da sessão anterior fica no cache (NC-SEC-018).
   useEffect(() => onIdentityChange(() => resetSessionCache(queryClient)), [queryClient]);
   useAppearanceSync();
