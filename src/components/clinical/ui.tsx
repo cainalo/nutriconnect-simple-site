@@ -1,3 +1,4 @@
+import { useScrollHint } from "@/hooks/use-scroll-hint";
 import type { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -318,8 +319,10 @@ export function Tabs<T extends string>({
     const tabs = e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]');
     tabs[next]?.focus();
   };
+  const scrollRef = useScrollHint<HTMLDivElement>();
   return (
     <div
+      ref={scrollRef}
       role="tablist"
       aria-label={label}
       onKeyDown={onKeyDown}

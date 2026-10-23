@@ -1,3 +1,4 @@
+import { useScrollHint } from "@/hooks/use-scroll-hint";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -62,6 +63,7 @@ interface ChatMessage {
 }
 
 function NinaPage() {
+  const chipsRef = useScrollHint<HTMLDivElement>();
   const photos = useSitePhotos();
   const { user, hydrated } = useRequireAuth();
   const { t, locale } = useI18n();
@@ -320,7 +322,7 @@ function NinaPage() {
         </div>
 
         {/* Só desta página: perguntas para começar a conversa (tocar envia para a Nina). */}
-        <div className="no-scrollbar mb-3 flex shrink-0 gap-2 overflow-x-auto pb-1">
+        <div ref={chipsRef} className="no-scrollbar mb-3 flex shrink-0 gap-2 overflow-x-auto pb-1">
           {NINA_TOPICS.map((q, i) => (
             <button
               key={i}

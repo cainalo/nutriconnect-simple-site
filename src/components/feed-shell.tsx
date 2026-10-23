@@ -7,6 +7,7 @@
 //    baixo / volta ao rolar para cima;
 //  * no celular, a barra de cima e a de baixo recolhem ao rolar para baixo (a logo fica flutuando) e
 //    voltam ao rolar para cima; o feed ocupa a tela toda, por baixo do cabeçalho.
+import { useScrollHint } from "@/hooks/use-scroll-hint";
 import {
   useCallback,
   useEffect,
@@ -47,6 +48,7 @@ function PagesNav({
   onSelect: (index: number) => void;
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const scrollRef = useScrollHint<HTMLDivElement>();
   useEffect(() => {
     refs.current[active]?.scrollIntoView({
       inline: "center",
@@ -56,6 +58,7 @@ function PagesNav({
   }, [active]);
   return (
     <div
+      ref={scrollRef}
       data-pagesnav
       className="no-scrollbar flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-full border border-border/60 bg-card/90 p-1 shadow-soft backdrop-blur"
     >
