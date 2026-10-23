@@ -13,7 +13,8 @@
     "test": "node --test 'tests/unit/*.test.mjs'",
     "audit:quality": "node scripts/auditoria/reconciliar-qualidade.mjs --md",
     "audit:secrets": "python3 scripts/auditoria/varrer-segredos.py",
-    "audit:release": "node scripts/auditoria/checar-lancamento.mjs"
+    "audit:release": "node scripts/auditoria/checar-lancamento.mjs",
+    "test:e2e": "node tests/e2e/smoke.mjs"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
