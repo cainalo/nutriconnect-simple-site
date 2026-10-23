@@ -23,6 +23,7 @@ import {
   tint,
 } from "@/components/admin/social/kit-styles";
 import { PostThumb } from "@/components/admin/social/template-thumb";
+import { useTr } from "@/components/settings-ui";
 
 export function StudioBoard({
   posts,
@@ -33,6 +34,7 @@ export function StudioBoard({
   onOpen: (p: SocialPost) => void;
   onNew: () => void;
 }) {
+  const tr = useTr();
   const update = useUpdatePost();
   const duplicate = useDuplicatePost();
   const [network, setNetwork] = useState<Network | "todas">("todas");
@@ -70,7 +72,12 @@ export function StudioBoard({
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar posts"
+            placeholder={tr([
+              "Buscar posts",
+              "Search posts",
+              "Buscar posts",
+              "Rechercher des posts",
+            ])}
             className={cn(field, "h-10 rounded-full py-0 pl-10")}
           />
         </label>
@@ -92,13 +99,16 @@ export function StudioBoard({
                 style={on ? { background: badgeBg(st?.color ?? "#3f4727") } : undefined}
               >
                 {st && <st.icon className="h-3.5 w-3.5" />}
-                {n === "todas" ? "Todas as redes" : NETWORK_LABEL[n]}
+                {n === "todas"
+                  ? tr(["Todas as redes", "All networks", "Todas las redes", "Tous les réseaux"])
+                  : NETWORK_LABEL[n]}
               </button>
             );
           })}
         </div>
         <button type="button" onClick={onNew} className={cn(btnPrimary, "h-9 px-4 text-xs")}>
-          <Plus className="h-3.5 w-3.5" /> Novo post
+          <Plus className="h-3.5 w-3.5" />{" "}
+          {tr(["Novo post", "New post", "Nuevo post", "Nouveau post"])}
         </button>
       </div>
 
@@ -188,12 +198,22 @@ export function StudioBoard({
                               e.stopPropagation();
                               duplicate.mutate(
                                 { post: p, asTemplate: false },
-                                { onSuccess: () => toast.success("Post duplicado.") },
+                                {
+                                  onSuccess: () =>
+                                    toast.success(
+                                      tr([
+                                        "Post duplicado.",
+                                        "Post duplicated.",
+                                        "Post duplicado.",
+                                        "Post dupliqué.",
+                                      ]),
+                                    ),
+                                },
                               );
                             }}
                             className="ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted-foreground opacity-0 transition hover:bg-secondary hover:text-foreground group-hover:opacity-100"
-                            aria-label="Duplicar"
-                            title="Duplicar"
+                            aria-label={tr(["Duplicar", "Duplicate", "Duplicar", "Dupliquer"])}
+                            title={tr(["Duplicar", "Duplicate", "Duplicar", "Dupliquer"])}
                           >
                             <Copy className="h-3.5 w-3.5" />
                           </button>
@@ -205,7 +225,12 @@ export function StudioBoard({
                 })}
                 {items.length === 0 && (
                   <p className="grid min-h-24 place-items-center rounded-2xl border border-dashed border-border/70 px-4 text-center text-[11px] text-muted-foreground">
-                    Arraste um post para cá
+                    {tr([
+                      "Arraste um post para cá",
+                      "Drag a post here",
+                      "Arrastra un post aquí",
+                      "Faites glisser un post ici",
+                    ])}
                   </p>
                 )}
               </div>

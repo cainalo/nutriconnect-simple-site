@@ -13,6 +13,7 @@ import type { Network, PostFormat } from "@/lib/social-studio.functions";
 import { cn } from "@/lib/utils";
 import { NETWORK_STYLE, STATUS_STYLE, badgeBg, tint } from "@/components/admin/social/kit-styles";
 import { PostThumb } from "@/components/admin/social/template-thumb";
+import { useTr } from "@/components/settings-ui";
 
 /** Card de um post salvo, com a miniatura da arte. */
 export function PostCard({
@@ -27,6 +28,7 @@ export function PostCard({
   /** Linha extra embaixo (ex.: a data agendada). */
   extra?: ReactNode;
 }) {
+  const tr = useTr();
   const net = NETWORK_STYLE[post.network as Network] ?? NETWORK_STYLE.outro;
   const st = STATUS_STYLE[post.status as PostStatus] ?? STATUS_STYLE.rascunho;
   return (
@@ -43,7 +45,9 @@ export function PostCard({
         />
       </div>
       <div className="px-3 py-2.5">
-        <p className="truncate text-xs font-bold text-foreground">{post.title || "Sem título"}</p>
+        <p className="truncate text-xs font-bold text-foreground">
+          {post.title || tr(["Sem título", "Untitled", "Sin título", "Sans titre"])}
+        </p>
         <div className="mt-1.5 flex min-w-0 items-center gap-1.5">
           <span
             className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-white"
