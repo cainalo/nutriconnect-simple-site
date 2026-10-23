@@ -32,8 +32,19 @@ import {
 } from "@/lib/social-studio";
 import type { Network, PostFormat } from "@/lib/social-studio.functions";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
+import { useI18n } from "@/hooks/use-i18n";
+import type { Names } from "@/lib/appearance-data";
 
-const WEEK = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const WEEK: Names[] = [
+  ["Dom", "Sun", "Dom", "Dim"],
+  ["Seg", "Mon", "Lun", "Lun"],
+  ["Ter", "Tue", "Mar", "Mar"],
+  ["Qua", "Wed", "Mié", "Mer"],
+  ["Qui", "Thu", "Jue", "Jeu"],
+  ["Sex", "Fri", "Vie", "Ven"],
+  ["Sáb", "Sat", "Sáb", "Sam"],
+];
 const PINK = "#d6456b";
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -45,6 +56,8 @@ export function CalendarTab({
   /** Novo post já com a data do dia. */
   onNew?: (date: string) => void;
 }) {
+  const tr = useTr();
+  const { locale } = useI18n();
   const posts = useSocialPosts();
   const today = new Date();
   const [cursor, setCursor] = useState(() => ({ y: today.getFullYear(), m: today.getMonth() }));
@@ -74,7 +87,7 @@ export function CalendarTab({
       const d = new Date(c.y, c.m + n, 1);
       return { y: d.getFullYear(), m: d.getMonth() };
     });
-  const monthLabel = first.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  const monthLabel = first.toLocaleDateString(locale, { month: "long", year: "numeric" });
   const monthName = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
   const scheduledCount = [...byDay.values()].reduce((s, l) => s + l.length, 0);
   // Agenda do celular: só os dias com post ou data de saúde.
@@ -100,11 +113,17 @@ export function CalendarTab({
               </h3>
               <p className="text-[11px] text-muted-foreground">
                 {scheduledCount === 0
-                  ? "Nenhum post com data neste mês"
+                  ? tr([
+                      "Nenhum post com data neste mês",
+                      "No posts scheduled this month",
+                      "Ningún post con fecha este mes",
+                      "Aucun post daté ce mois-ci",
+                    ])
                   : scheduledCount === 1
-                    ? "1 post com data"
-                    : `${scheduledCount} posts com data`}
-                {dates.length > 0 && ` · ${dates.length} datas de saúde`}
+                    ? tr(["1 post com data", "1 scheduled post", "1 post con fecha", "1 post daté"])
+                    : `${scheduledCount} ${tr(["posts com data", "scheduled posts", "posts con fecha", "posts datés"])}`}
+                {dates.length > 0 &&
+                  ` · ${dates.length} ${tr(["datas de saúde", "health dates", "fechas de salud", "dates santé"])}`}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-1">
@@ -114,14 +133,19 @@ export function CalendarTab({
                   className={cn(btnSoft, "h-9 px-3 text-xs")}
                   onClick={() => setCursor({ y: today.getFullYear(), m: today.getMonth() })}
                 >
-                  Hoje
+                  {tr(["Hoje", "Today", "Hoy", "Aujourd’hui"])}
                 </button>
               )}
               <button
                 type="button"
                 className={cn(btnIcon, "border border-border/70 bg-card")}
                 onClick={() => move(-1)}
-                aria-label="Mês anterior"
+                aria-label={tr([
+                  "Mês anterior",
+                  "Previous month",
+                  "Mes anterior",
+                  "Mois précédent",
+                ])}
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -129,7 +153,7 @@ export function CalendarTab({
                 type="button"
                 className={cn(btnIcon, "border border-border/70 bg-card")}
                 onClick={() => move(1)}
-                aria-label="Próximo mês"
+                aria-label={tr(["Próximo mês", "Next month", "Mes siguiente", "Mois suivant"])}
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -156,7 +180,7 @@ export function CalendarTab({
           <div className="hidden @2xl:block">
             <div className="grid grid-cols-7 gap-1.5 pb-1 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               {WEEK.map((w) => (
-                <span key={w}>{w}</span>
+                <span key={w[0]}>{tr(w)}</span>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1.5">
@@ -195,7 +219,7 @@ export function CalendarTab({
                           type="button"
                           onClick={() => onNew(dayIso(d))}
                           className="grid h-6 w-6 place-items-center rounded-full bg-accent text-accent-foreground opacity-0 shadow-sm transition focus-visible:opacity-100 group-hover:opacity-100"
-                          aria-label={`Novo post em ${d}/${cursor.m + 1}`}
+                          aria-label={`${tr(["Novo post em", "New post on", "Nuevo post el", "Nouveau post le"])} ${d}/${cursor.m + 1}`}
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
@@ -222,7 +246,12 @@ export function CalendarTab({
           <div className="@2xl:hidden">
             {agenda.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-border/70 px-4 py-6 text-center text-xs text-muted-foreground">
-                Nada marcado neste mês. Abra um post e escolha a data.
+                {tr([
+                  "Nada marcado neste mês. Abra um post e escolha a data.",
+                  "Nothing scheduled this month. Open a post and pick a date.",
+                  "Nada programado este mes. Abre un post y elige la fecha.",
+                  "Rien de prévu ce mois-ci. Ouvrez un post et choisissez la date.",
+                ])}
               </p>
             ) : (
               <ol className="space-y-2">
@@ -247,7 +276,7 @@ export function CalendarTab({
                       >
                         <span className="text-lg font-bold">{d}</span>
                         <span className="mt-0.5 text-[9px] font-bold uppercase">
-                          {WEEK[date.getDay()]}
+                          {tr(WEEK[date.getDay()])}
                         </span>
                       </div>
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -258,7 +287,14 @@ export function CalendarTab({
                           <PostChip key={p.id} post={p} onOpen={() => onOpen(p)} />
                         ))}
                         {isToday(d) && !byDay.has(d) && datesOf(d).length === 0 && (
-                          <span className="text-xs text-muted-foreground">Hoje, sem posts</span>
+                          <span className="text-xs text-muted-foreground">
+                            {tr([
+                              "Hoje, sem posts",
+                              "Today, no posts",
+                              "Hoy, sin posts",
+                              "Aujourd’hui, aucun post",
+                            ])}
+                          </span>
                         )}
                       </div>
                       {onNew && (
@@ -266,7 +302,7 @@ export function CalendarTab({
                           type="button"
                           onClick={() => onNew(dayIso(d))}
                           className="grid h-8 w-8 shrink-0 place-items-center self-center rounded-full bg-accent text-accent-foreground shadow-sm"
-                          aria-label={`Novo post em ${d}/${cursor.m + 1}`}
+                          aria-label={`${tr(["Novo post em", "New post on", "Nuevo post el", "Nouveau post le"])} ${d}/${cursor.m + 1}`}
                         >
                           <Plus className="h-4 w-4" />
                         </button>
@@ -289,7 +325,8 @@ export function CalendarTab({
               );
             })}
             <span className="inline-flex items-center gap-1">
-              <CalendarHeart className="h-3.5 w-3.5" style={{ color: PINK }} /> Data de saúde
+              <CalendarHeart className="h-3.5 w-3.5" style={{ color: PINK }} />{" "}
+              {tr(["Data de saúde", "Health date", "Fecha de salud", "Date santé"])}
             </span>
           </div>
         </section>
@@ -298,16 +335,31 @@ export function CalendarTab({
           <StudioCard
             icon={Inbox}
             color="#3b7bbf"
-            title={`Sem data (${unscheduled.length})`}
-            hint="Abra um post e escolha a data"
+            title={`${tr(["Sem data", "No date", "Sin fecha", "Sans date"])} (${unscheduled.length})`}
+            hint={tr([
+              "Abra um post e escolha a data",
+              "Open a post and pick a date",
+              "Abre un post y elige la fecha",
+              "Ouvrez un post et choisissez la date",
+            ])}
             delay={80}
           >
             {unscheduled.length === 0 ? (
               <EmptyState
                 icon={Inbox}
                 color="#3b7bbf"
-                title="Tudo planejado"
-                text="Todos os posts em andamento já têm data."
+                title={tr([
+                  "Tudo planejado",
+                  "All planned",
+                  "Todo planificado",
+                  "Tout est planifié",
+                ])}
+                text={tr([
+                  "Todos os posts em andamento já têm data.",
+                  "All posts in progress already have a date.",
+                  "Todos los posts en curso ya tienen fecha.",
+                  "Tous les posts en cours ont déjà une date.",
+                ])}
               />
             ) : (
               <ul className="st-thin max-h-[26rem] space-y-1.5 overflow-y-auto pr-1">
@@ -325,7 +377,7 @@ export function CalendarTab({
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-xs font-semibold text-foreground">
-                            {p.title || "Sem título"}
+                            {p.title || tr(["Sem título", "Untitled", "Sin título", "Sans titre"])}
                           </span>
                           <span
                             className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold"
@@ -350,8 +402,18 @@ export function CalendarTab({
             <StudioCard
               icon={CalendarHeart}
               color={PINK}
-              title="Datas de saúde do mês"
-              hint="Ganchos para posts"
+              title={tr([
+                "Datas de saúde do mês",
+                "Health dates this month",
+                "Fechas de salud del mes",
+                "Dates santé du mois",
+              ])}
+              hint={tr([
+                "Ganchos para posts",
+                "Hooks for posts",
+                "Ganchos para posts",
+                "Accroches pour des posts",
+              ])}
               delay={140}
             >
               <ul className="space-y-2">
@@ -394,6 +456,7 @@ function HealthChip({ date }: { date: HealthDate }) {
 }
 
 function PostChip({ post, onOpen }: { post: SocialPost; onOpen: () => void }) {
+  const tr = useTr();
   const st = STATUS_STYLE[post.status as PostStatus] ?? STATUS_STYLE.rascunho;
   const net = NETWORK_STYLE[post.network as Network] ?? NETWORK_STYLE.outro;
   return (
@@ -405,7 +468,9 @@ function PostChip({ post, onOpen }: { post: SocialPost; onOpen: () => void }) {
       style={{ background: tint(st.color, 12), borderLeftColor: st.color }}
     >
       <net.icon className="h-3 w-3 shrink-0" style={{ color: net.color }} />
-      <span className="truncate">{post.title || "Sem título"}</span>
+      <span className="truncate">
+        {post.title || tr(["Sem título", "Untitled", "Sin título", "Sans titre"])}
+      </span>
     </button>
   );
 }
