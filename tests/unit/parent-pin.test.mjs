@@ -35,3 +35,13 @@ test("sem PIN definido, nada confere", async () => {
   assert.equal(pin.hasParentPin("conta-A"), false);
   assert.equal(await pin.checkParentPin("conta-A", "0000"), false);
 });
+
+test("5 erros seguidos bloqueiam por 5 minutos, até com o PIN certo", async () => {
+  await pin.setParentPin("conta-A", "4821");
+  const t0 = 1_000_000;
+  for (let i = 0; i < pin.MAX_TRIES; i++)
+    assert.equal(await pin.checkParentPin("conta-A", "0000", t0), false);
+  assert.ok(pin.pinLockedUntil("conta-A", t0) > t0);
+  assert.equal(await pin.checkParentPin("conta-A", "4821", t0 + 1000), false);
+  assert.equal(await pin.checkParentPin("conta-A", "4821", t0 + pin.LOCK_MS + 1), true);
+});

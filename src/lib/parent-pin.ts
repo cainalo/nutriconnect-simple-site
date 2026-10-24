@@ -28,10 +28,45 @@ export async function setParentPin(userId: string, pin: string) {
   localStorage.setItem(key(userId), await hash(userId, pin));
 }
 
-export async function checkParentPin(userId: string, pin: string) {
+const triesKey = (userId: string) => `nutriconnect_parent_pin_tries:${userId}`;
+export const MAX_TRIES = 5;
+export const LOCK_MS = 5 * 60 * 1000;
+
+/** Até quando o PIN está bloqueado depois de muitos erros (0 = livre). */
+export function pinLockedUntil(userId: string, now = Date.now()): number {
   try {
+    const t = JSON.parse(localStorage.getItem(triesKey(userId)) ?? "null") as {
+      n: number;
+      until: number;
+    } | null;
+    return t && t.until > now ? t.until : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Confere o PIN. Depois de MAX_TRIES erros seguidos, fica bloqueado por LOCK_MS (nem o PIN certo
+ * passa nesse tempo); acertar zera a contagem.
+ */
+export async function checkParentPin(userId: string, pin: string, now = Date.now()) {
+  try {
+    if (pinLockedUntil(userId, now)) return false;
     const saved = localStorage.getItem(key(userId));
-    return !!saved && saved === (await hash(userId, pin));
+    const ok = !!saved && saved === (await hash(userId, pin));
+    if (ok) {
+      localStorage.removeItem(triesKey(userId));
+      return true;
+    }
+    const prev = JSON.parse(localStorage.getItem(triesKey(userId)) ?? "null") as {
+      n: number;
+    } | null;
+    const n = (prev?.n ?? 0) + 1;
+    localStorage.setItem(
+      triesKey(userId),
+      JSON.stringify(n >= MAX_TRIES ? { n: 0, until: now + LOCK_MS } : { n, until: 0 }),
+    );
+    return false;
   } catch {
     return false;
   }
@@ -40,6 +75,7 @@ export async function checkParentPin(userId: string, pin: string) {
 export function clearParentPin(userId: string) {
   try {
     localStorage.removeItem(key(userId));
+    localStorage.removeItem(triesKey(userId));
   } catch {
     // sem armazenamento: nada a apagar
   }

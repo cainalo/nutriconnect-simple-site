@@ -12,6 +12,7 @@ import {
   checkParentPin,
   hasParentPin,
   isValidPin,
+  pinLockedUntil,
   setParentPin,
 } from "@/lib/parent-pin";
 
@@ -330,7 +331,20 @@ function PinStep({
         onDone();
       } else {
         setPin("");
-        toast.error(tr(["PIN errado.", "Wrong PIN.", "PIN incorrecto.", "PIN incorrect."]));
+        const until = pinLockedUntil(userId);
+        if (until) {
+          const min = Math.max(1, Math.ceil((until - Date.now()) / 60000));
+          toast.error(
+            tr([
+              `Muitas tentativas. Tente de novo em ${min} min.`,
+              `Too many tries. Try again in ${min} min.`,
+              `Demasiados intentos. Inténtalo en ${min} min.`,
+              `Trop d'essais. Réessayez dans ${min} min.`,
+            ]),
+          );
+        } else {
+          toast.error(tr(["PIN errado.", "Wrong PIN.", "PIN incorrecto.", "PIN incorrect."]));
+        }
       }
     } finally {
       setBusy(false);
