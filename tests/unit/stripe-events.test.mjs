@@ -3,7 +3,7 @@ import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { loadTs, closeTs } from "../load-ts.mjs";
 
-const { memberStatus, canOverwritePayment, paymentIntentOf } = await loadTs(
+const { memberStatus, canOverwritePayment, paymentIntentOf, must } = await loadTs(
   "supabase/functions/_shared/stripe-events.ts",
 );
 after(closeTs);
@@ -33,4 +33,17 @@ test("payment_intent sai da sessão ou da cobrança", () => {
   assert.equal(paymentIntentOf({ data: { object: { payment_intent: "pi_1" } } }), "pi_1");
   assert.equal(paymentIntentOf({ data: { object: {} } }), null);
   assert.equal(paymentIntentOf({}), null);
+});
+
+test("status desconhecido ou incompleto NÃO dá acesso (NCV7-006)", () => {
+  for (const st of ["incomplete", "paused", "status_novo_qualquer", undefined]) {
+    assert.equal(memberStatus({ status: st }), "inadimplente", String(st));
+  }
+  assert.equal(memberStatus({ status: "trialing" }), "ativa");
+});
+
+test("erro do banco vira exceção (o webhook responde 5xx e o Stripe reenvia)", () => {
+  assert.throws(() => must({ error: { message: "timeout" } }, "payments"), /payments: timeout/);
+  const ok = { data: 1, error: null };
+  assert.equal(must(ok, "payments"), ok);
 });

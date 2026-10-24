@@ -2,17 +2,27 @@
 // tests/unit/stripe-events.test.mjs). O Stripe pode reenviar um evento e entregar eventos fora de
 // ordem; estas regras impedem que um evento atrasado desfaça um estado mais novo.
 
-/** Estado da assinatura de membros a partir do que o Stripe diz agora sobre ela. */
+/**
+ * Estado da assinatura de membros a partir do que o Stripe diz agora sobre ela. Só "active" e
+ * "trialing" dão acesso; um status desconhecido ou incompleto NÃO dá acesso (fica inadimplente
+ * até o Stripe mandar um estado conhecido).
+ */
 export function memberStatus(
   sub: { status?: string; cancel_at_period_end?: boolean },
   eventType?: string,
 ): "ativa" | "cancelando" | "cancelada" | "inadimplente" {
-  if (eventType === "customer.subscription.deleted" || sub.status === "canceled") {
-    return "cancelada";
+  if (eventType === "customer.subscription.deleted") return "cancelada";
+  switch (sub.status) {
+    case "active":
+    case "trialing":
+      return sub.cancel_at_period_end ? "cancelando" : "ativa";
+    case "canceled":
+    case "incomplete_expired":
+      return "cancelada";
+    default:
+      // past_due, unpaid, incomplete, paused e qualquer status novo: sem acesso.
+      return "inadimplente";
   }
-  if (sub.status === "past_due" || sub.status === "unpaid") return "inadimplente";
-  if (sub.status === "incomplete_expired") return "cancelada";
-  return sub.cancel_at_period_end ? "cancelando" : "ativa";
 }
 
 /**
@@ -27,4 +37,10 @@ export function canOverwritePayment(existingStatus: string | null | undefined): 
 export function paymentIntentOf(event: { data?: { object?: Record<string, unknown> } }) {
   const pi = event.data?.object?.payment_intent;
   return typeof pi === "string" ? pi : null;
+}
+
+/** Resposta do Supabase com erro vira exceção (o webhook responde 5xx e o Stripe tenta de novo). */
+export function must<T extends { error: { message: string } | null }>(res: T, what: string): T {
+  if (res.error) throw new Error(`${what}: ${res.error.message}`);
+  return res;
 }

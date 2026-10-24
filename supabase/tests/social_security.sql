@@ -1797,6 +1797,25 @@ begin
     res := res || jsonb_build_object('teste', 'usuário NÃO grava evento do Stripe', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
     r := pg_temp.as_user(null, 'anon', 'select count(*) from public.stripe_events');
     res := res || jsonb_build_object('teste', 'visitante NÃO lê os eventos do Stripe', 'ok', (r like 'ERRO%' or r = '0'), 'obtido', left(r, 100));
+    -- Reserva atômica dos eventos (NCV7-004/005/017).
+    res := res || jsonb_build_object('teste', 'evento novo é reservado',
+      'ok', public.claim_stripe_event('evt_claim', 'checkout.session.completed', 'pi_c') = 'claimed', 'obtido', '');
+    res := res || jsonb_build_object('teste', 'segunda entrega simultânea NÃO processa (busy)',
+      'ok', public.claim_stripe_event('evt_claim', 'checkout.session.completed', 'pi_c') = 'busy', 'obtido', '');
+    perform public.release_stripe_event('evt_claim');
+    res := res || jsonb_build_object('teste', 'depois de falhar e liberar, o reenvio processa',
+      'ok', public.claim_stripe_event('evt_claim', 'checkout.session.completed', 'pi_c') = 'claimed', 'obtido', '');
+    perform public.finish_stripe_event('evt_claim');
+    res := res || jsonb_build_object('teste', 'evento concluído NÃO roda de novo (done)',
+      'ok', public.claim_stripe_event('evt_claim', 'checkout.session.completed', 'pi_c') = 'done', 'obtido', '');
+    perform public.release_stripe_event('evt_claim');
+    res := res || jsonb_build_object('teste', 'liberar NÃO apaga evento concluído',
+      'ok', exists (select 1 from public.stripe_events where id = 'evt_claim' and status = 'concluido'), 'obtido', '');
+    insert into public.stripe_events (id, type, claimed_at) values ('evt_largado', 'invoice.paid', now() - interval '10 minutes');
+    res := res || jsonb_build_object('teste', 'reserva largada há mais de 5 min é retomada',
+      'ok', public.claim_stripe_event('evt_largado', 'invoice.paid', null) = 'claimed', 'obtido', '');
+    r := pg_temp.as_user(a, 'authenticated', 'select public.claim_stripe_event(''evt_x'', ''t'', null)');
+    res := res || jsonb_build_object('teste', 'usuário NÃO reserva evento do Stripe', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
     begin
       insert into public.stripe_events (id, type) values ('evt_sintetico_1', 'charge.refunded');
       res := res || jsonb_build_object('teste', 'mesmo evento NÃO entra duas vezes', 'ok', false, 'obtido', 'inseriu');
