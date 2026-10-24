@@ -97,7 +97,7 @@ export function SiteFeaturesSection() {
                   )}
                 </p>
                 <p className="text-xs text-muted-foreground">{f.description}</p>
-                <p className="mt-0.5 font-mono text-[10px] text-muted-foreground/80">
+                <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
                   {f.paths.join(" · ")}
                 </p>
               </div>

@@ -35,14 +35,16 @@ const tryResolve = (name, extra = []) => {
   }
   return null;
 };
-const pwPath = tryResolve("playwright-core", ["/opt/node-tools"]);
+// E2E_TOOLS: pasta com playwright-core e axe-core em versões fixas (é assim no CI).
+const TOOLS = [process.env.E2E_TOOLS, "/opt/node-tools"].filter(Boolean);
+const pwPath = tryResolve("playwright-core", TOOLS);
 if (!pwPath) {
   console.error("playwright-core não encontrado (npm i -D playwright-core).");
   process.exit(2);
 }
 const { chromium } = req(pwPath);
 const axePath = args.includes("--axe")
-  ? tryResolve("axe-core", ["/opt/node-tools", "/tmp/claude-0/pg"])
+  ? tryResolve("axe-core", [...TOOLS, "/tmp/claude-0/pg"])
   : null;
 const AXE = axePath ? readFileSync(path.join(path.dirname(axePath), "axe.min.js"), "utf8") : null;
 if (args.includes("--axe") && !AXE)
@@ -53,7 +55,7 @@ const executablePath =
   ["/opt/pw-browsers/chromium-1194/chrome-linux/chrome"].find((p) => existsSync(p));
 
 // Páginas: todo arquivo de rota sem parâmetro ($), sem layout de grupo e sem API.
-const SKIP = new Set(["__root", "admin", "api", "sitemap[.]xml"]);
+const SKIP = new Set(["__root", "api", "sitemap[.]xml"]);
 const PAGES =
   opt("pages", null)?.split(",") ??
   readdirSync(path.join(root, "src/routes"))
@@ -61,10 +63,15 @@ const PAGES =
     .map((f) => f.replace(/\.tsx$/, ""))
     .filter((f) => !SKIP.has(f) && !f.startsWith("api."));
 
-spawnSync("npx", ["vite", "build", "--config", ".preview-harness/vite.config.mjs"], {
+// Sem build novo não há teste: nunca roda sobre arquivos antigos.
+const build = spawnSync("npx", ["vite", "build", "--config", ".preview-harness/vite.config.mjs"], {
   cwd: root,
-  stdio: "ignore",
+  stdio: "inherit",
 });
+if (build.status !== 0) {
+  console.error("O build do harness falhou: a varredura não roda.");
+  process.exit(2);
+}
 const server = spawn(
   "npx",
   [

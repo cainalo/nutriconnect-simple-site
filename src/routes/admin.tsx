@@ -137,7 +137,7 @@ function AdminPage() {
             </p>
             {Object.entries(groups).map(([group, items]) => (
               <div key={group}>
-                <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   {group}
                 </p>
                 <ul className="space-y-0.5">

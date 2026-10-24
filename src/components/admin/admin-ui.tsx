@@ -127,7 +127,7 @@ export function StatCard({
           {value}
         </span>
         <span className="mt-1 block text-xs font-medium text-muted-foreground">{label}</span>
-        {sub && <span className="mt-0.5 block text-[11px] text-muted-foreground/80">{sub}</span>}
+        {sub && <span className="mt-0.5 block text-[11px] text-muted-foreground">{sub}</span>}
       </span>
     </Tag>
   );

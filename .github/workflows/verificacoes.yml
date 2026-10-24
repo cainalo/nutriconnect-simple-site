@@ -42,6 +42,9 @@ jobs:
         run: |
           npx eslint src tests scripts --rule "prettier/prettier: off"
 
+      - name: Build do site
+        run: npx vite build
+
       - name: Testes de unidade
         run: npm test
 
@@ -56,3 +59,41 @@ jobs:
           cp "$GITHUB_WORKSPACE/supabase/tests/run-local.mjs" .
           node run-local.mjs "$GITHUB_WORKSPACE" | tee resultado.txt
           grep -q " 0 falharam" resultado.txt
+
+  # Varredura de todas as páginas no navegador (harness com dados sintéticos): 4 designs, claro e
+  # escuro, celular; rolagem lateral, alvos de toque, erros de JavaScript e WCAG (axe-core).
+  telas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install --frozen-lockfile
+
+      # Ferramentas de teste em versões fixas, fora do lockfile do app (que é do Lovable).
+      - name: Playwright e axe-core
+        run: |
+          mkdir -p /tmp/e2e && cd /tmp/e2e
+          npm init -y >/dev/null
+          npm i playwright-core@1.56.1 axe-core@4.10.2 >/dev/null
+          npx playwright-core install --with-deps chromium
+
+      - name: Varredura das telas
+        env:
+          E2E_TOOLS: /tmp/e2e
+        run: |
+          node tests/e2e/smoke.mjs --widths 390 --axe --dark \
+            --designs natural,vibrante,editorial,aurora
+
+      - name: Relatório
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-telas
+          path: tests/e2e/out/
