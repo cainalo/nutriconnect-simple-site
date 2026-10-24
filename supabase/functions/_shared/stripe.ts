@@ -121,7 +121,10 @@ export function updateSubscription(
 }
 
 /** Cancela a assinatura na hora (sem esperar o fim do período). Usado ao excluir a conta. */
-export function cancelSubscriptionNow(id: string): Promise<StripeSubscription> {
+export async function cancelSubscriptionNow(id: string): Promise<StripeSubscription> {
+  // Numa nova tentativa a assinatura pode já estar cancelada: aí não há o que fazer.
+  const current = await getSubscription(id);
+  if (current.status === "canceled" || current.status === "incomplete_expired") return current;
   return call<StripeSubscription>("DELETE", `/subscriptions/${id}`);
 }
 
