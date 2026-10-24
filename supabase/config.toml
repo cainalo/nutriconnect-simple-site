@@ -40,7 +40,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.account-delete]
-verify_jwt = true
+verify_jwt = false
 
 [functions.member-checkout]
 verify_jwt = false

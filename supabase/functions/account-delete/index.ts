@@ -20,6 +20,7 @@ const BUCKETS = [
   "post-images",
   "community-covers",
   "social-media",
+  "ai-rejections",
 ];
 
 serve(async (req) => {
