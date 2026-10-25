@@ -5,10 +5,15 @@ import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BadgeCheck,
+  CalendarDays,
+  Gift,
   HeartPulse,
   LayoutDashboard,
   LogOut,
   Mail,
+  MessageCircle,
+  Palette,
+  PencilLine,
   Settings,
   Shield,
   UserRound,
@@ -63,9 +68,30 @@ export function AccountMenu({
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
+          <Link to="/perfil/editar" className={item}>
+            <PencilLine className="h-4 w-4" />
+            {tr(["Editar perfil", "Edit profile", "Editar perfil", "Modifier le profil"])}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <Link to="/acompanhamento" className={item}>
             <HeartPulse className="h-4 w-4" />
             {tr(["Meu acompanhamento", "My care", "Mi seguimiento", "Mon suivi"])}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/acompanhamento/consultas" className={item}>
+            <CalendarDays className="h-4 w-4" />
+            {tr(["Minhas consultas", "My appointments", "Mis consultas", "Mes rendez-vous"])}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            to={user.professional ? "/painel/mensagens" : "/acompanhamento/mensagens"}
+            className={item}
+          >
+            <MessageCircle className="h-4 w-4" />
+            {tr(["Mensagens", "Messages", "Mensajes", "Messages"])}
           </Link>
         </DropdownMenuItem>
         {user.professional && (
@@ -76,6 +102,17 @@ export function AccountMenu({
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild>
+          <Link to="/recompensas" className={item}>
+            <Gift className="h-4 w-4" />
+            {tr([
+              "Pontos e recompensas",
+              "Points and rewards",
+              "Puntos y recompensas",
+              "Points et récompenses",
+            ])}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         {user.professional ? (
           <DropdownMenuItem asChild>
@@ -92,6 +129,12 @@ export function AccountMenu({
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild>
+          <Link to="/perfil/personalizacao" className={item}>
+            <Palette className="h-4 w-4" />
+            {tr(["Personalização", "Personalization", "Personalización", "Personnalisation"])}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/perfil/configuracoes" className={item}>
             <Settings className="h-4 w-4" />

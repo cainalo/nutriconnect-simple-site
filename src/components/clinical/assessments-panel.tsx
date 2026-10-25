@@ -238,7 +238,7 @@ export function AssessmentForm({
             max={inst.type === "questionnaire" ? inst.max : undefined}
           />
           {outcome.alert && (
-            <p className="flex items-start gap-1.5 text-xs font-medium text-red-700 dark:text-red-300">
+            <p className="flex items-start gap-1.5 text-xs font-medium text-destructive">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               {tr(outcome.alert)}
             </p>
@@ -446,7 +446,7 @@ function History({
                       </span>
                     </div>
                     {d.alert && (
-                      <p className="mt-1 flex items-start gap-1.5 text-xs text-red-700 dark:text-red-300">
+                      <p className="mt-1 flex items-start gap-1.5 text-xs text-destructive">
                         <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                         {tr(d.alert)}
                       </p>

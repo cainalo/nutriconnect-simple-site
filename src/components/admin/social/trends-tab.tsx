@@ -20,6 +20,7 @@ import {
 import { EmptyState, StudioCard } from "@/components/admin/social/kit";
 import { badgeBg, btnPrimary, tint } from "@/components/admin/social/kit-styles";
 import { useI18n } from "@/hooks/use-i18n";
+import { useTr } from "@/components/settings-ui";
 import { upcomingHealthDates } from "@/lib/social-calendar";
 import { seasonNamesPt } from "@/lib/season-data";
 import { useInternalTrends } from "@/lib/social-studio";
@@ -32,6 +33,7 @@ const MEDAL = ["#c58a12", "#8a94a6", "#b4532a"];
 
 export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
   const { locale } = useI18n();
+  const tr = useTr();
   const trends = useInternalTrends();
   const [busy, setBusy] = useState(false);
   const [ops, setOps] = useState<TrendOpportunity[]>([]);
@@ -49,14 +51,38 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
       if ("error" in res)
         toast.error(
           res.error === "limit"
-            ? "A cota de IA de hoje acabou."
-            : "A IA não conseguiu responder agora.",
+            ? tr([
+                "A cota de IA de hoje acabou.",
+                "Today’s AI quota is used up.",
+                "La cuota de IA de hoy se agotó.",
+                "Le quota d’IA du jour est épuisé.",
+              ])
+            : tr([
+                "A IA não conseguiu responder agora.",
+                "The AI couldn’t answer right now.",
+                "La IA no pudo responder ahora.",
+                "L’IA n’a pas pu répondre pour le moment.",
+              ]),
         );
       else if (res.opportunities.length === 0)
-        toast.error("A IA não encontrou oportunidades agora. Tente mais tarde.");
+        toast.error(
+          tr([
+            "A IA não encontrou oportunidades agora. Tente mais tarde.",
+            "The AI didn’t find any opportunities right now. Try again later.",
+            "La IA no encontró oportunidades ahora. Inténtalo más tarde.",
+            "L’IA n’a trouvé aucune opportunité pour le moment. Réessayez plus tard.",
+          ]),
+        );
       else setOps(res.opportunities);
     } catch {
-      toast.error("A IA não conseguiu responder agora.");
+      toast.error(
+        tr([
+          "A IA não conseguiu responder agora.",
+          "The AI couldn’t answer right now.",
+          "La IA no pudo responder ahora.",
+          "L’IA n’a pas pu répondre pour le moment.",
+        ]),
+      );
     } finally {
       setBusy(false);
     }
@@ -67,8 +93,18 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
       <StudioCard
         icon={Lightbulb}
         color={GREEN}
-        title="Oportunidades da semana"
-        hint="A IA cruza o que está em alta no NutriConnect, o calendário de saúde e a estação"
+        title={tr([
+          "Oportunidades da semana",
+          "Opportunities of the week",
+          "Oportunidades de la semana",
+          "Opportunités de la semaine",
+        ])}
+        hint={tr([
+          "A IA cruza o que está em alta no NutriConnect, o calendário de saúde e a estação",
+          "The AI combines what’s trending on NutriConnect, the health calendar and the season",
+          "La IA cruza lo que está en tendencia en NutriConnect, el calendario de salud y la temporada",
+          "L’IA croise ce qui est tendance sur NutriConnect, le calendrier santé et la saison",
+        ])}
         right={
           <button
             type="button"
@@ -78,7 +114,16 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
           >
             <Sparkles className={cn("h-3.5 w-3.5", busy && "animate-spin")} />
             <span className="hidden @md:inline">
-              {busy ? "Pensando…" : ops.length ? "Gerar de novo" : "Gerar oportunidades"}
+              {busy
+                ? tr(["Pensando…", "Thinking…", "Pensando…", "Réflexion…"])
+                : ops.length
+                  ? tr(["Gerar de novo", "Generate again", "Generar de nuevo", "Générer à nouveau"])
+                  : tr([
+                      "Gerar oportunidades",
+                      "Generate opportunities",
+                      "Generar oportunidades",
+                      "Générer des opportunités",
+                    ])}
             </span>
           </button>
         }
@@ -93,11 +138,27 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
           <EmptyState
             icon={Lightbulb}
             color={GREEN}
-            title="Peça as oportunidades da semana"
-            text="Não são tendências ao vivo do Instagram (a rede não libera esses dados): confira também o painel de tendências da própria rede."
+            title={tr([
+              "Peça as oportunidades da semana",
+              "Ask for this week’s opportunities",
+              "Pide las oportunidades de la semana",
+              "Demandez les opportunités de la semaine",
+            ])}
+            text={tr([
+              "Não são tendências ao vivo do Instagram (a rede não libera esses dados): confira também o painel de tendências da própria rede.",
+              "These aren’t live Instagram trends (the network doesn’t share that data): also check the network’s own trends panel.",
+              "No son tendencias en vivo de Instagram (la red no libera esos datos): revisa también el panel de tendencias de la propia red.",
+              "Ce ne sont pas des tendances Instagram en direct (le réseau ne partage pas ces données) : consultez aussi le panneau des tendances du réseau.",
+            ])}
             action={
               <button type="button" className={btnPrimary} onClick={() => void brief()}>
-                <Sparkles className="h-4 w-4" /> Gerar oportunidades
+                <Sparkles className="h-4 w-4" />{" "}
+                {tr([
+                  "Gerar oportunidades",
+                  "Generate opportunities",
+                  "Generar oportunidades",
+                  "Générer des opportunités",
+                ])}
               </button>
             }
           />
@@ -154,7 +215,12 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
                         className="group inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-xs font-bold text-white shadow-sm transition hover:-translate-y-0.5"
                         style={{ background: c }}
                       >
-                        Criar ideias com isto
+                        {tr([
+                          "Criar ideias com isto",
+                          "Create ideas from this",
+                          "Crear ideas con esto",
+                          "Créer des idées à partir de ceci",
+                        ])}
                         <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
                       </button>
                     </div>
@@ -170,15 +236,30 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
         <StudioCard
           icon={Flame}
           color="#d9692a"
-          title="Em alta no NutriConnect"
-          hint="Últimos 14 dias, só publicações públicas fora das comunidades"
+          title={tr([
+            "Em alta no NutriConnect",
+            "Trending on NutriConnect",
+            "En tendencia en NutriConnect",
+            "Tendances sur NutriConnect",
+          ])}
+          hint={tr([
+            "Últimos 14 dias, só publicações públicas fora das comunidades",
+            "Last 14 days, only public posts outside communities",
+            "Últimos 14 días, solo publicaciones públicas fuera de las comunidades",
+            "14 derniers jours, uniquement les publications publiques hors communautés",
+          ])}
           delay={80}
         >
           {trends.error ? (
             <EmptyState
               icon={Flame}
               color="#d6456b"
-              title="Não deu para carregar"
+              title={tr([
+                "Não deu para carregar",
+                "Couldn’t load",
+                "No se pudo cargar",
+                "Chargement impossible",
+              ])}
               text={(trends.error as Error).message}
             />
           ) : !t ? (
@@ -202,7 +283,12 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
                   </span>
                   <span className="min-w-0">
                     <span className="block text-[10px] font-bold uppercase tracking-wider text-[#4f8a4b]">
-                      Tema da semana
+                      {tr([
+                        "Tema da semana",
+                        "Theme of the week",
+                        "Tema de la semana",
+                        "Thème de la semaine",
+                      ])}
                     </span>
                     <span className="block truncate text-sm font-bold text-foreground">
                       {t.theme.title}
@@ -214,7 +300,12 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
               {t.top_tags.length > 0 && (
                 <div>
                   <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Assuntos mais usados
+                    {tr([
+                      "Assuntos mais usados",
+                      "Most used topics",
+                      "Temas más usados",
+                      "Sujets les plus utilisés",
+                    ])}
                   </p>
                   <ul className="space-y-1">
                     {t.top_tags.slice(0, 8).map((x) => (
@@ -243,11 +334,21 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
 
               <div>
                 <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Publicações que mais engajaram
+                  {tr([
+                    "Publicações que mais engajaram",
+                    "Most engaging posts",
+                    "Publicaciones con más interacción",
+                    "Publications les plus engageantes",
+                  ])}
                 </p>
                 {t.top_posts.length === 0 ? (
                   <p className="rounded-2xl border border-dashed border-border/70 px-3 py-4 text-center text-xs text-muted-foreground">
-                    Ainda pouco movimento público.
+                    {tr([
+                      "Ainda pouco movimento público.",
+                      "Little public activity so far.",
+                      "Aún hay poco movimiento público.",
+                      "Encore peu d’activité publique.",
+                    ])}
                   </p>
                 ) : (
                   <ol className="space-y-1.5">
@@ -266,10 +367,16 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
                           {p.title}
                         </span>
                         <span className="inline-flex shrink-0 items-center gap-2 text-[10px] font-semibold text-muted-foreground">
-                          <span className="inline-flex items-center gap-0.5" title="Apoios">
+                          <span
+                            className="inline-flex items-center gap-0.5"
+                            title={tr(["Apoios", "Supports", "Apoyos", "Soutiens"])}
+                          >
                             <Heart className="h-3 w-3 text-[#d6456b]" /> {p.reactions}
                           </span>
-                          <span className="inline-flex items-center gap-0.5" title="Comentários">
+                          <span
+                            className="inline-flex items-center gap-0.5"
+                            title={tr(["Comentários", "Comments", "Comentarios", "Commentaires"])}
+                          >
                             <MessageCircle className="h-3 w-3 text-[#3b7bbf]" /> {p.comments}
                           </span>
                         </span>
@@ -282,7 +389,12 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
               {t.challenges.length > 0 && (
                 <div>
                   <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Desafios mais procurados
+                    {tr([
+                      "Desafios mais procurados",
+                      "Most popular challenges",
+                      "Desafíos más buscados",
+                      "Défis les plus populaires",
+                    ])}
                   </p>
                   <ul className="flex flex-wrap gap-1.5">
                     {t.challenges.map((c) => (
@@ -312,12 +424,29 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
           <StudioCard
             icon={CalendarHeart}
             color="#d6456b"
-            title="Datas de saúde chegando"
-            hint="Deste mês e do próximo"
+            title={tr([
+              "Datas de saúde chegando",
+              "Upcoming health dates",
+              "Fechas de salud próximas",
+              "Dates santé à venir",
+            ])}
+            hint={tr([
+              "Deste mês e do próximo",
+              "This month and next",
+              "De este mes y del próximo",
+              "Ce mois-ci et le suivant",
+            ])}
             delay={140}
           >
             {dates.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Nenhuma data cadastrada para agora.</p>
+              <p className="text-xs text-muted-foreground">
+                {tr([
+                  "Nenhuma data cadastrada para agora.",
+                  "No dates registered for now.",
+                  "No hay fechas registradas por ahora.",
+                  "Aucune date enregistrée pour le moment.",
+                ])}
+              </p>
             ) : (
               <ul className="space-y-2">
                 {dates.map((d) => (
@@ -331,7 +460,7 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
                           <span className="text-sm font-bold">{d.day}</span>
                           <span className="mt-0.5 text-[9px] font-bold uppercase">
                             {new Date(2000, d.month - 1, 1)
-                              .toLocaleDateString("pt-BR", { month: "short" })
+                              .toLocaleDateString(locale, { month: "short" })
                               .replace(".", "")}
                           </span>
                         </>
@@ -355,8 +484,18 @@ export function TrendsTab({ onCreate }: { onCreate: (theme: string) => void }) {
             <StudioCard
               icon={Leaf}
               color="#4f8a4b"
-              title="Na estação (Sudeste)"
-              hint="Frutas, verduras e legumes do mês"
+              title={tr([
+                "Na estação (Sudeste)",
+                "In season (Southeast Brazil)",
+                "De temporada (Sudeste)",
+                "De saison (Sud-Est)",
+              ])}
+              hint={tr([
+                "Frutas, verduras e legumes do mês",
+                "Fruits and vegetables of the month",
+                "Frutas, verduras y hortalizas del mes",
+                "Fruits et légumes du mois",
+              ])}
               delay={200}
             >
               <ul className="flex flex-wrap gap-1.5">

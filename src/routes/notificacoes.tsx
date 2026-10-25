@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { siteConfirm } from "@/components/confirm-action";
 import { useMemo, useState } from "react";
 import {
   BadgeCheck,
@@ -33,6 +34,8 @@ import {
   X,
   ChefHat,
   Video,
+  Star,
+  Gift,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -154,11 +157,14 @@ function categoryOf(type: string): CategoryId {
     ["reacao", "comentario", "seguidor", "amizade_pedido", "amizade_aceita"].includes(type) ||
     type.startsWith("dupla_") ||
     type.startsWith("casa_") ||
-    type.startsWith("evento_")
+    type.startsWith("evento_") ||
+    type.startsWith("desafio_amigo_") ||
+    type === "desafio_forca"
   )
     return "social";
   if (
     type.startsWith("consulta_") ||
+    type.startsWith("exame_") ||
     type.startsWith("acompanhamento_") ||
     [
       "mensagem",
@@ -173,7 +179,8 @@ function categoryOf(type: string): CategoryId {
   ) {
     return "clinical";
   }
-  if (type === "conquista" || type.startsWith("tema_")) return "achievements";
+  if (type === "conquista" || type === "pontos_semana" || type.startsWith("tema_"))
+    return "achievements";
   if (
     type === "conteudo_oculto" ||
     type === "conteudo_liberado" ||
@@ -234,12 +241,21 @@ function describe(
     case "comentario":
       return {
         icon: MessageCircle,
-        text: fill([
-          "{name} comentou na sua publicação",
-          "{name} commented on your post",
-          "{name} comentó tu publicación",
-          "{name} a commenté votre publication",
-        ]),
+        text: fill(
+          data.reply
+            ? [
+                "{name} respondeu ao seu comentário",
+                "{name} replied to your comment",
+                "{name} respondió a tu comentario",
+                "{name} a répondu à votre commentaire",
+              ]
+            : [
+                "{name} comentou na sua publicação",
+                "{name} commented on your post",
+                "{name} comentó tu publicación",
+                "{name} a commenté votre publication",
+              ],
+        ),
         detail: quote(data.comment),
         go: post,
       };
@@ -299,6 +315,97 @@ function describe(
         ]),
         detail: dateOf(data.starts_at, locale),
         go: { to: isPro ? "/painel/agenda" : "/acompanhamento/consultas" },
+      };
+    case "desafio_amigo_convite":
+      return {
+        icon: Trophy,
+        text: fill([
+          "{name} chamou você para um desafio da semana",
+          "{name} invited you to a weekly challenge",
+          "{name} te invitó a un desafío de la semana",
+          "{name} vous invite à un défi de la semaine",
+        ]),
+        go: { to: "/desafios", search: { aba: "amigos" } },
+      };
+    case "desafio_amigo_aceito":
+      return {
+        icon: Trophy,
+        text: fill([
+          "{name} topou o seu desafio",
+          "{name} joined your challenge",
+          "{name} se sumó a tu desafío",
+          "{name} a rejoint votre défi",
+        ]),
+        go: { to: "/desafios", search: { aba: "amigos" } },
+      };
+    case "desafio_forca":
+      return {
+        icon: HandHeart,
+        text: fill([
+          "{name} mandou força para você no desafio",
+          "{name} cheered you on in the challenge",
+          "{name} te envió ánimo en el desafío",
+          "{name} vous encourage dans le défi",
+        ]),
+        go: { to: "/desafios", search: { aba: "amigos" } },
+      };
+    case "consulta_lembrete":
+      return {
+        icon: BellRing,
+        text:
+          data.when === "1h"
+            ? fill([
+                "Sua consulta com {name} começa em menos de 1 hora",
+                "Your appointment with {name} starts in less than 1 hour",
+                "Tu consulta con {name} empieza en menos de 1 hora",
+                "Votre consultation avec {name} commence dans moins d'une heure",
+              ])
+            : fill([
+                "Lembrete: amanhã tem consulta com {name}. Toque para confirmar presença",
+                "Reminder: appointment with {name} tomorrow. Tap to confirm attendance",
+                "Recordatorio: mañana tienes consulta con {name}. Toca para confirmar asistencia",
+                "Rappel : consultation avec {name} demain. Touchez pour confirmer",
+              ]),
+        detail: dateOf(data.starts_at, locale),
+        go: { to: isPro ? "/painel/agenda" : "/acompanhamento/consultas" },
+      };
+    case "consulta_presenca":
+      return {
+        icon: CalendarCheck,
+        text: fill([
+          "{name} confirmou presença na consulta",
+          "{name} confirmed attendance",
+          "{name} confirmó asistencia a la consulta",
+          "{name} a confirmé sa présence",
+        ]),
+        detail: dateOf(data.starts_at, locale),
+        go: { to: "/painel/agenda" },
+      };
+    case "exame_pedido":
+      return {
+        icon: ClipboardList,
+        text: fill([
+          "{name} pediu um exame para você",
+          "{name} requested a test for you",
+          "{name} te pidió un examen",
+          "{name} vous a demandé un examen",
+        ]),
+        detail: [str(data.title), dateOf(data.due_at, locale)].filter(Boolean).join(" · "),
+        go: { to: "/acompanhamento/exames" },
+      };
+    case "exame_lembrete":
+      return {
+        icon: BellRing,
+        text: tr([
+          "Lembrete: você tem exame nas próximas 24 horas",
+          "Reminder: you have a test in the next 24 hours",
+          "Recordatorio: tienes un examen en las próximas 24 horas",
+          "Rappel : vous avez un examen dans les prochaines 24 heures",
+        ]),
+        detail: [str(data.title), dateOf(data.due_at, locale), str(data.location)]
+          .filter(Boolean)
+          .join(" · "),
+        go: { to: "/acompanhamento/exames" },
       };
     case "consulta_cancelada":
       return {
@@ -533,6 +640,17 @@ function describe(
         detail: str(data.title),
         go: { to: "/tema-da-semana" },
       };
+    case "pontos_semana":
+      return {
+        icon: Gift,
+        text: tr([
+          "Seus pontos da semana chegaram: +{n}",
+          "Your points for the week are in: +{n}",
+          "Llegaron tus puntos de la semana: +{n}",
+          "Vos points de la semaine sont arrivés : +{n}",
+        ]).replace("{n}", String(data.points ?? "")),
+        go: { to: "/recompensas" },
+      };
     case "conquista":
       return {
         icon: Trophy,
@@ -650,6 +768,25 @@ function describe(
         ]),
         detail: str(data.title),
         go: { to: "/painel/programas" },
+      };
+    case "consulta_avaliada":
+      return {
+        icon: Star,
+        text: (n.actor_id
+          ? fill([
+              "{name} avaliou a consulta com {n} estrelas",
+              "{name} rated the appointment {n} stars",
+              "{name} calificó la consulta con {n} estrellas",
+              "{name} a noté la consultation {n} étoiles",
+            ])
+          : tr([
+              "Um paciente avaliou a consulta com {n} estrelas",
+              "A patient rated the appointment {n} stars",
+              "Un paciente calificó la consulta con {n} estrellas",
+              "Un patient a noté la consultation {n} étoiles",
+            ])
+        ).replace("{n}", String(data.rating ?? "")),
+        go: { to: "/painel/avaliacoes" },
       };
     case "teleconsulta_aprovada":
       return {
@@ -1282,9 +1419,9 @@ function NotificacoesPage() {
                 <button
                   type="button"
                   disabled={clearResolved.isPending}
-                  onClick={() => {
+                  onClick={async () => {
                     if (
-                      window.confirm(
+                      await siteConfirm(
                         tr([
                           "Apagar todas as notificações resolvidas?",
                           "Delete all resolved notifications?",

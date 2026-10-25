@@ -16,6 +16,8 @@ export default tseslint.config(
       "src/integrations/supabase",
       "supabase/functions",
       ".preview-harness",
+      ".claude",
+      "tests/e2e/out",
     ],
   },
   {

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Home, Loader2, TicketX } from "lucide-react";
+import { Home, Loader2, TicketX, WifiOff } from "lucide-react";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
@@ -34,6 +34,34 @@ function JoinHousePage() {
       {loading ? (
         <div className="grid place-items-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : preview.isError ? (
+        // Falha de rede não é "código inválido": oferece tentar de novo.
+        <div className={card}>
+          <WifiOff className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden />
+          <h1 className="mt-3 text-lg font-bold text-foreground">
+            {tr([
+              "Não foi possível conferir o código",
+              "We couldn't check the code",
+              "No se pudo comprobar el código",
+              "Impossible de vérifier le code",
+            ])}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {tr([
+              "Confira a internet e tente de novo.",
+              "Check your connection and try again.",
+              "Revisa la conexión e inténtalo de nuevo.",
+              "Vérifiez la connexion et réessayez.",
+            ])}
+          </p>
+          <button
+            type="button"
+            onClick={() => void preview.refetch()}
+            className={`${btnSoft} mt-5`}
+          >
+            {tr(["Tentar de novo", "Try again", "Intentar de nuevo", "Réessayer"])}
+          </button>
         </div>
       ) : !house ? (
         <div className={card}>

@@ -590,4 +590,145 @@ export const MORE_QUESTIONS: QuizQuestion[] = [
       "Riz et haricots se complètent en acides aminés : ensemble, une protéine de qualité et bon marché.",
     ],
   },
+  {
+    q: [
+      "Em dias quentes ou de exercício, a necessidade de água:",
+      "On hot days or when exercising, your need for water:",
+      "En días calurosos o con ejercicio, la necesidad de agua:",
+      "Par temps chaud ou pendant le sport, le besoin en eau :",
+    ],
+    options: [
+      ["Aumenta", "Goes up", "Aumenta", "Augmente"],
+      ["Diminui", "Goes down", "Disminuye", "Diminue"],
+      ["Não muda", "Doesn't change", "No cambia", "Ne change pas"],
+    ],
+    answer: 0,
+    why: [
+      "Com calor e suor o corpo perde mais água. Beba ao longo do dia, antes de sentir muita sede.",
+      "Heat and sweat make the body lose more water. Drink through the day, before you get very thirsty.",
+      "Con calor y sudor el cuerpo pierde más agua. Bebe durante el día, antes de tener mucha sed.",
+      "Avec la chaleur et la sueur, le corps perd plus d'eau. Buvez dans la journée, avant d'avoir très soif.",
+    ],
+  },
+  {
+    q: [
+      "Sentir sede indica que:",
+      "Feeling thirsty means that:",
+      "Sentir sed indica que:",
+      "Avoir soif indique que :",
+    ],
+    options: [
+      [
+        "Você bebeu água demais",
+        "You drank too much water",
+        "Bebiste demasiada agua",
+        "Vous avez trop bu",
+      ],
+      [
+        "O corpo já está pedindo água",
+        "Your body is already asking for water",
+        "El cuerpo ya está pidiendo agua",
+        "Le corps réclame déjà de l'eau",
+      ],
+      [
+        "É hora de um refrigerante",
+        "It's time for a soda",
+        "Es hora de una gaseosa",
+        "C'est l'heure d'un soda",
+      ],
+    ],
+    answer: 1,
+    why: [
+      "A sede aparece quando o corpo já começou a perder água. Deixe uma garrafinha por perto.",
+      "Thirst shows up when the body has already started losing water. Keep a bottle nearby.",
+      "La sed aparece cuando el cuerpo ya empezó a perder agua. Ten una botella cerca.",
+      "La soif apparaît quand le corps a déjà commencé à perdre de l'eau. Gardez une gourde à portée.",
+    ],
+  },
 ];
+
+/** Tema de cada pergunta (para jogar só um assunto). */
+export type QuizTopic = "nutrientes" | "rotulos" | "agua" | "dia";
+/** De onde vem a informação da resposta. */
+export type QuizSource = "guia" | "oms" | "anvisa" | "ms" | "taco";
+
+export const QUIZ_SOURCES: Record<QuizSource, Names> = {
+  guia: [
+    "Guia Alimentar para a População Brasileira",
+    "Dietary Guidelines for the Brazilian Population",
+    "Guía Alimentaria para la Población Brasileña",
+    "Guide alimentaire pour la population brésilienne",
+  ],
+  oms: [
+    "Organização Mundial da Saúde (OMS)",
+    "World Health Organization (WHO)",
+    "Organización Mundial de la Salud (OMS)",
+    "Organisation mondiale de la santé (OMS)",
+  ],
+  anvisa: [
+    "Anvisa (regras de rotulagem e higiene)",
+    "Anvisa (Brazilian labeling and hygiene rules)",
+    "Anvisa (normas de etiquetado e higiene)",
+    "Anvisa (règles d'étiquetage et d'hygiène)",
+  ],
+  ms: [
+    "Ministério da Saúde",
+    "Brazilian Ministry of Health",
+    "Ministerio de Salud de Brasil",
+    "Ministère de la Santé du Brésil",
+  ],
+  taco: [
+    "Tabela Brasileira de Composição de Alimentos (TACO)",
+    "Brazilian Food Composition Table (TACO)",
+    "Tabla Brasileña de Composición de Alimentos (TACO)",
+    "Table brésilienne de composition des aliments (TACO)",
+  ],
+};
+
+/** Tema e fonte de cada pergunta, pela pergunta em português. */
+export const QUIZ_META: Record<string, { topic: QuizTopic; src: QuizSource }> = {
+  "Qual destes alimentos é fonte de vitamina C?": { topic: "nutrientes", src: "taco" },
+  "Segundo o Guia Alimentar brasileiro, qual deve ser a base da alimentação?": {
+    topic: "dia",
+    src: "guia",
+  },
+  "Qual destes é uma boa fonte de ferro de origem vegetal?": { topic: "nutrientes", src: "taco" },
+  "As fibras alimentares ajudam principalmente em quê?": { topic: "nutrientes", src: "guia" },
+  "Qual é a melhor bebida para se hidratar no dia a dia?": { topic: "agua", src: "guia" },
+  "Qual destes alimentos é fonte de cálcio?": { topic: "nutrientes", src: "taco" },
+  "Qual destes é um exemplo de ultraprocessado?": { topic: "rotulos", src: "guia" },
+  "Quais nutrientes fornecem energia ao corpo?": { topic: "nutrientes", src: "ms" },
+  "Quanto sal por dia a OMS recomenda, no máximo, para adultos?": { topic: "rotulos", src: "oms" },
+  "Qual destes alimentos tem mais água?": { topic: "agua", src: "taco" },
+  "Cenoura e abóbora são ricas em qual nutriente?": { topic: "nutrientes", src: "taco" },
+  "Qual destes é um alimento ultraprocessado?": { topic: "rotulos", src: "guia" },
+  "No rótulo, em que ordem aparecem os ingredientes?": { topic: "rotulos", src: "anvisa" },
+  "O que significa a lupa na frente das embalagens no Brasil?": {
+    topic: "rotulos",
+    src: "anvisa",
+  },
+  "Como o corpo produz a maior parte da vitamina D?": { topic: "nutrientes", src: "ms" },
+  "O que ajuda o corpo a absorver o ferro do feijão?": { topic: "nutrientes", src: "ms" },
+  "Qual destes tem gordura considerada boa (insaturada)?": { topic: "nutrientes", src: "oms" },
+  "Qual peixe barato é rico em ômega-3?": { topic: "nutrientes", src: "taco" },
+  "Fruta inteira ou suco: qual tem mais fibras?": { topic: "nutrientes", src: "guia" },
+  "Até que idade bebês não devem comer mel?": { topic: "dia", src: "ms" },
+  "Por quanto tempo se recomenda o aleitamento materno exclusivo?": { topic: "dia", src: "oms" },
+  "O que o Guia Alimentar recomenda sobre o jeito de comer?": { topic: "dia", src: "guia" },
+  "Como higienizar verduras que serão comidas cruas?": { topic: "dia", src: "anvisa" },
+  "Qual destes NÃO é uma leguminosa?": { topic: "nutrientes", src: "guia" },
+  "Batata, mandioca e inhame são principalmente fonte de:": { topic: "nutrientes", src: "guia" },
+  "Qual destes é conhecido por ter bastante potássio?": { topic: "nutrientes", src: "taco" },
+  "Qual destes costuma ter mais sódio?": { topic: "rotulos", src: "anvisa" },
+  "Qual é um bom sinal de que você está bem hidratado?": { topic: "agua", src: "ms" },
+  "Por que comprar frutas e verduras da estação?": { topic: "dia", src: "guia" },
+  "O talo do brócolis:": { topic: "dia", src: "guia" },
+  "A vitamina B12 está naturalmente em quais alimentos?": { topic: "nutrientes", src: "ms" },
+  "Pão integral comparado ao pão branco costuma ter:": { topic: "rotulos", src: "anvisa" },
+  "Qual combinação clássica brasileira junta proteínas que se completam?": {
+    topic: "nutrientes",
+    src: "guia",
+  },
+  "Em dias quentes ou de exercício, a necessidade de água:": { topic: "agua", src: "ms" },
+  "Sentir sede indica que:": { topic: "agua", src: "ms" },
+};

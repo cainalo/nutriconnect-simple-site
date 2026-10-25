@@ -24,25 +24,44 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { APPEARANCE_INIT_SCRIPT, initAppearance } from "../lib/appearance";
 import { DESIGN_INIT_SCRIPT, useSiteDesign } from "../lib/site-design";
-import { LANG_INIT_SCRIPT, initI18n } from "../lib/i18n";
+import { LANG_INIT_SCRIPT, LOCALE_EVENT, initI18n, loadLocale } from "../lib/i18n";
+import { installTitleTranslation } from "../lib/page-titles";
 import { listenAppLinks } from "@/lib/native";
 import { BackToTop } from "@/components/back-to-top";
+import { KidModeGate } from "@/components/kid-mode-gate";
+import { ConfirmHost } from "@/components/confirm-action";
+import { onIdentityChange } from "@/lib/auth";
+import { resetSessionCache } from "@/lib/session-cache";
+import { useTr } from "@/components/settings-ui";
 
 function NotFoundComponent() {
+  const tr = useTr();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">
+          {tr([
+            "Página não encontrada",
+            "Page not found",
+            "Página no encontrada",
+            "Page introuvable",
+          ])}
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          {tr([
+            "A página que você procura não existe ou mudou de endereço.",
+            "The page you're looking for doesn't exist or has been moved.",
+            "La página que buscas no existe o cambió de dirección.",
+            "La page que vous cherchez n'existe pas ou a été déplacée.",
+          ])}
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            {tr(["Voltar ao início", "Go home", "Volver al inicio", "Retour à l'accueil"])}
           </Link>
         </div>
       </div>
@@ -53,6 +72,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
+  const tr = useTr();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -61,10 +81,20 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          {tr([
+            "Esta página não carregou",
+            "This page didn't load",
+            "Esta página no cargó",
+            "Cette page ne s'est pas chargée",
+          ])}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          {tr([
+            "Algo deu errado do nosso lado. Tente de novo ou volte ao início.",
+            "Something went wrong on our end. You can try again or head back home.",
+            "Algo salió mal de nuestro lado. Inténtalo de nuevo o vuelve al inicio.",
+            "Un problème est survenu de notre côté. Réessayez ou revenez à l'accueil.",
+          ])}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -74,13 +104,13 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            {tr(["Tentar de novo", "Try again", "Intentar de nuevo", "Réessayer"])}
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            {tr(["Voltar ao início", "Go home", "Volver al inicio", "Retour à l'accueil"])}
           </a>
         </div>
       </div>
@@ -174,6 +204,9 @@ function RootComponent() {
   // App Android: um link do site que abriu o app leva para a página certa (A4).
   useEffect(() => listenAppLinks((path) => void router.history.push(path)), [router]);
   useEffect(() => initI18n(), []);
+  useEffect(() => installTitleTranslation(loadLocale, LOCALE_EVENT), []);
+  // Conta trocada no mesmo navegador: nada da sessão anterior fica no cache (NC-SEC-018).
+  useEffect(() => onIdentityChange(() => resetSessionCache(queryClient)), [queryClient]);
   useAppearanceSync();
   useAppSounds();
   usePushSync();
@@ -185,6 +218,8 @@ function RootComponent() {
         <Outlet />
       </FeatureGate>
       <ConsentGate />
+      <KidModeGate />
+      <ConfirmHost />
       <HeroCinematic />
       <AccessibilityTools />
       <AnnouncementBar />

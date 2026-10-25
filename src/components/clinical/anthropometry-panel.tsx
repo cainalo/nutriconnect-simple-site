@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Plus, Ruler, Trash2 } from "lucide-react";
 import * as records from "@/lib/clinical/records";
 import type { Anthropometric } from "@/lib/clinical/records";
@@ -115,8 +116,8 @@ export function AnthropometryPanel({
                       row={r}
                       heightFallback={lastHeight ? Number(lastHeight) : null}
                       canDelete={!readOnly && r.professional_id === currentProfessionalId}
-                      onDelete={() =>
-                        window.confirm(t("anthro.deleteConfirm")) && remove.mutate(r.id)
+                      onDelete={async () =>
+                        (await siteConfirm(t("anthro.deleteConfirm"))) && remove.mutate(r.id)
                       }
                       locale={locale}
                     />

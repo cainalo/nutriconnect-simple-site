@@ -164,7 +164,7 @@ export function BlocksEditor({ professionalId }: { professionalId: string }) {
   return (
     <Card title={t("blocks.title")}>
       <p className="-mt-2 mb-4 text-xs text-muted-foreground">{t("blocks.hint")}</p>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-[1.4fr_1fr] gap-2 lg:grid-cols-4">
         <Field label={t("blocks.from")}>
           <input
             type="date"

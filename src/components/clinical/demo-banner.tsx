@@ -11,8 +11,8 @@ export function ClinicalDemoBanner() {
   const qc = useQueryClient();
   if (!on) return null;
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
-      <FlaskConical className="h-5 w-5 shrink-0 text-amber-600" />
+    <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
+      <FlaskConical className="h-5 w-5 shrink-0 text-warning" />
       <p className="min-w-0 flex-1 text-foreground">
         <b>{tr(["Modo demonstração", "Demo mode", "Modo demostración", "Mode démonstration"])}:</b>{" "}
         {tr([
@@ -28,7 +28,7 @@ export function ClinicalDemoBanner() {
           setDemoEnabled(false);
           qc.removeQueries({ queryKey: qk.all });
         }}
-        className="cursor-pointer rounded-full border border-amber-500/50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-500/15 dark:text-amber-300"
+        className="cursor-pointer rounded-full border border-warning/50 px-3 py-1.5 text-xs font-semibold text-warning transition hover:bg-warning/15 "
       >
         {tr(["Desligar", "Turn off", "Desactivar", "Désactiver"])}
       </button>

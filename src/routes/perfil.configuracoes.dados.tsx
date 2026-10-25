@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { LEGAL_VERSION } from "@/lib/legal";
 import { useI18n } from "@/hooks/use-i18n";
 import { formatDate } from "@/lib/clinical/format";
+import { DataSummaryButton } from "@/components/data-summary-button";
+import { useConfirm } from "@/components/confirm-action";
 import {
   Row,
   SettingsCard,
@@ -32,17 +34,37 @@ function DadosPage() {
   const tr = useTr();
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
+  const [ask, confirmDialog] = useConfirm();
   const userId = user?.id;
 
   const nina = useQuery({
     queryKey: ["settings", "nina-count", userId],
     enabled: !!userId,
     queryFn: async () => {
-      const { count } = await supabase
-        .from("nina_messages")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId!);
-      return count ?? 0;
+      // Quantas mensagens e de quando são a mais antiga e a mais nova.
+      const [{ count }, first, last] = await Promise.all([
+        supabase
+          .from("nina_messages")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId!),
+        supabase
+          .from("nina_messages")
+          .select("created_at")
+          .eq("user_id", userId!)
+          .order("created_at", { ascending: true })
+          .limit(1),
+        supabase
+          .from("nina_messages")
+          .select("created_at")
+          .eq("user_id", userId!)
+          .order("created_at", { ascending: false })
+          .limit(1),
+      ]);
+      return {
+        count: count ?? 0,
+        oldest: (first.data?.[0]?.created_at as string | undefined) ?? null,
+        newest: (last.data?.[0]?.created_at as string | undefined) ?? null,
+      };
     },
   });
 
@@ -85,17 +107,23 @@ function DadosPage() {
   };
 
   const clearNina = async () => {
-    if (
-      !window.confirm(
-        tr([
-          "Apagar todas as suas conversas com a Nina? Isso não pode ser desfeito.",
-          "Delete all your conversations with Nina? This cannot be undone.",
-          "¿Borrar todas tus conversaciones con Nina? No se puede deshacer.",
-          "Supprimer toutes vos conversations avec Nina ? Action irréversible.",
-        ]),
-      )
-    )
-      return;
+    const ok = await ask({
+      title: tr([
+        "Apagar todas as suas conversas com a Nina?",
+        "Delete all your conversations with Nina?",
+        "¿Borrar todas tus conversaciones con Nina?",
+        "Supprimer toutes vos conversations avec Nina ?",
+      ]),
+      description: tr([
+        "Isso não pode ser desfeito.",
+        "This cannot be undone.",
+        "No se puede deshacer.",
+        "Action irréversible.",
+      ]),
+      confirmLabel: tr(["Apagar agora", "Delete now", "Borrar ahora", "Supprimer maintenant"]),
+      danger: true,
+    });
+    if (!ok) return;
     setBusy("nina");
     const { error } = await supabase.from("nina_messages").delete().eq("user_id", user.id);
     setBusy(null);
@@ -119,7 +147,7 @@ function DadosPage() {
     void qc.invalidateQueries({ queryKey: ["settings", "nina-count"] });
   };
 
-  const clearTrail = () => {
+  const clearTrail = async () => {
     const keys = trailKeys();
     if (keys.length === 0) {
       return void toast.info(
@@ -131,17 +159,23 @@ function DadosPage() {
         ]),
       );
     }
-    if (
-      !window.confirm(
-        tr([
-          "Apagar o progresso da trilha e os perfis infantis salvos neste aparelho? Esses dados ficam só aqui e não podem ser recuperados.",
-          "Delete the trail progress and child profiles saved on this device? This data lives only here and cannot be recovered.",
-          "¿Borrar el progreso de la ruta y los perfiles infantiles guardados en este dispositivo? Estos datos solo están aquí y no se pueden recuperar.",
-          "Supprimer la progression du parcours et les profils enfants enregistrés sur cet appareil ? Ces données ne sont qu'ici et sont irrécupérables.",
-        ]),
-      )
-    )
-      return;
+    const ok = await ask({
+      title: tr([
+        "Apagar o progresso da trilha deste aparelho?",
+        "Delete the trail progress from this device?",
+        "¿Borrar el progreso de la ruta de este dispositivo?",
+        "Supprimer la progression du parcours de cet appareil ?",
+      ]),
+      description: tr([
+        "O progresso e os perfis infantis ficam só aqui e não podem ser recuperados.",
+        "The progress and child profiles live only here and cannot be recovered.",
+        "El progreso y los perfiles infantiles solo están aquí y no se pueden recuperar.",
+        "La progression et les profils enfants ne sont qu'ici et sont irrécupérables.",
+      ]),
+      confirmLabel: tr(["Apagar", "Delete", "Borrar", "Supprimer"]),
+      danger: true,
+    });
+    if (!ok) return;
     for (const k of keys) window.localStorage.removeItem(k);
     toast.success(
       tr([
@@ -163,6 +197,15 @@ function DadosPage() {
           "Conditions et Politique de confidentialité",
         ]);
 
+  // Versões dos termos são datas (AAAA-MM-DD): mostradas por extenso.
+  const versionText = (v: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(v)
+      ? formatDate(v, locale, { day: "numeric", month: "long", year: "numeric" })
+      : v;
+  const ninaCount = nina.data?.count ?? 0;
+  const dayText = (iso: string) =>
+    formatDate(iso, locale, { day: "numeric", month: "short", year: "numeric" });
+
   return (
     <SettingsPage
       title={tr([
@@ -181,28 +224,31 @@ function DadosPage() {
       <SettingsCard
         title={tr(["Meus dados", "My data", "Mis datos", "Mes données"])}
         hint={tr([
-          "Uma cópia de tudo que sabemos sobre a sua conta, em um arquivo JSON.",
-          "A copy of everything we know about your account, as a JSON file.",
-          "Una copia de todo lo que sabemos sobre tu cuenta, en un archivo JSON.",
-          "Une copie de tout ce que nous savons sur votre compte, en fichier JSON.",
+          "Uma cópia de tudo que sabemos sobre a sua conta: em arquivo JSON ou num resumo para ler e salvar em PDF.",
+          "A copy of everything we know about your account: as a JSON file or a readable summary to save as PDF.",
+          "Una copia de todo lo que sabemos sobre tu cuenta: en archivo JSON o en un resumen para leer y guardar en PDF.",
+          "Une copie de tout ce que nous savons sur votre compte : en fichier JSON ou en résumé lisible à enregistrer en PDF.",
         ])}
       >
-        <button
-          type="button"
-          onClick={exportData}
-          disabled={busy === "export"}
-          className={buttonClass}
-        >
-          <Download className="h-3.5 w-3.5" />
-          {busy === "export"
-            ? tr(["Gerando…", "Generating…", "Generando…", "Génération…"])
-            : tr([
-                "Baixar meus dados (JSON)",
-                "Download my data (JSON)",
-                "Descargar mis datos (JSON)",
-                "Télécharger mes données (JSON)",
-              ])}
-        </button>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={exportData}
+            disabled={busy === "export"}
+            className={`${buttonClass} min-h-10 w-full`}
+          >
+            <Download className="h-3.5 w-3.5" />
+            {busy === "export"
+              ? tr(["Gerando…", "Generating…", "Generando…", "Génération…"])
+              : tr([
+                  "Baixar meus dados (JSON)",
+                  "Download my data (JSON)",
+                  "Descargar mis datos (JSON)",
+                  "Télécharger mes données (JSON)",
+                ])}
+          </button>
+          <DataSummaryButton className={`${buttonClass} min-h-10 w-full`} />
+        </div>
       </SettingsCard>
 
       <SettingsCard
@@ -220,12 +266,26 @@ function DadosPage() {
         ])}
       >
         <Row
-          title={`${nina.data ?? 0} ${tr(["mensagens guardadas", "saved messages", "mensajes guardados", "messages enregistrés"])}`}
+          title={
+            ninaCount === 1
+              ? tr([
+                  "1 mensagem guardada",
+                  "1 saved message",
+                  "1 mensaje guardado",
+                  "1 message enregistré",
+                ])
+              : `${ninaCount} ${tr(["mensagens guardadas", "saved messages", "mensajes guardados", "messages enregistrés"])}`
+          }
+          hint={
+            nina.data?.oldest && nina.data.newest
+              ? `${tr(["De", "From", "Del", "Du"])} ${dayText(nina.data.oldest)} ${tr(["a", "to", "al", "au"])} ${dayText(nina.data.newest)}`
+              : undefined
+          }
         >
           <button
             type="button"
             onClick={clearNina}
-            disabled={busy === "nina" || (nina.data ?? 0) === 0}
+            disabled={busy === "nina" || ninaCount === 0}
             className={dangerButtonClass}
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -262,10 +322,10 @@ function DadosPage() {
           "Mes consentements",
         ])}
         hint={tr([
-          `Registro de quando você aceitou os documentos (versão atual: ${LEGAL_VERSION}).`,
-          `Record of when you accepted the documents (current version: ${LEGAL_VERSION}).`,
-          `Registro de cuándo aceptaste los documentos (versión actual: ${LEGAL_VERSION}).`,
-          `Historique de vos acceptations des documents (version actuelle : ${LEGAL_VERSION}).`,
+          `Registro de quando você aceitou os documentos (versão atual: ${versionText(LEGAL_VERSION)}).`,
+          `Record of when you accepted the documents (current version: ${versionText(LEGAL_VERSION)}).`,
+          `Registro de cuándo aceptaste los documentos (versión actual: ${versionText(LEGAL_VERSION)}).`,
+          `Historique de vos acceptations des documents (version actuelle : ${versionText(LEGAL_VERSION)}).`,
         ])}
       >
         {consents.data && consents.data.length > 0 ? (
@@ -280,7 +340,8 @@ function DadosPage() {
                   {c.granted
                     ? tr(["aceito", "accepted", "aceptado", "accepté"])
                     : tr(["revogado", "revoked", "revocado", "révoqué"])}{" "}
-                  · v{c.version} ·{" "}
+                  · {tr(["versão de", "version of", "versión del", "version du"])}{" "}
+                  {versionText(c.version)} ·{" "}
                   {formatDate(c.created_at, locale, {
                     day: "2-digit",
                     month: "short",
@@ -339,6 +400,7 @@ function DadosPage() {
           ])}
         </Link>
       </SettingsCard>
+      {confirmDialog}
     </SettingsPage>
   );
 }

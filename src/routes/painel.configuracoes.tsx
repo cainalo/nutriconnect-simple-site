@@ -63,13 +63,13 @@ function ProfessionalSettingsPage() {
     setForm({
       headline: p.headline ?? "",
       accepting_patients: p.accepting_patients,
-      price: (p.consultation_price_cents / 100).toFixed(2).replace(".", ","),
-      consultation_duration_min: p.consultation_duration_min,
+      price: ((p.consultation_price_cents ?? 0) / 100).toFixed(2).replace(".", ","),
+      consultation_duration_min: p.consultation_duration_min ?? 50,
       offers_online: p.offers_online,
       offers_presential: p.offers_presential,
       address: p.address ?? "",
       online_instructions: p.online_instructions ?? "",
-      timezone: p.timezone,
+      timezone: p.timezone ?? "America/Sao_Paulo",
       specialties: p.specialties ?? [],
     });
   }, [pro.data]);
@@ -167,7 +167,7 @@ function ProfessionalSettingsPage() {
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
-                className="h-4 w-4 accent-[var(--color-primary)]"
+                className="h-5 w-5 accent-[var(--color-primary)]"
                 checked={form.accepting_patients}
                 onChange={(e) => set("accepting_patients", e.target.checked)}
               />
@@ -224,7 +224,7 @@ function ProfessionalSettingsPage() {
               <label className="flex items-center gap-2 text-sm font-semibold">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-[var(--color-primary)]"
+                  className="h-5 w-5 accent-[var(--color-primary)]"
                   checked={form.offers_presential}
                   onChange={(e) => set("offers_presential", e.target.checked)}
                 />
@@ -244,7 +244,7 @@ function ProfessionalSettingsPage() {
               <label className="flex items-center gap-2 text-sm font-semibold">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-[var(--color-primary)]"
+                  className="h-5 w-5 accent-[var(--color-primary)]"
                   checked={form.offers_online}
                   onChange={(e) => set("offers_online", e.target.checked)}
                 />
@@ -271,8 +271,13 @@ function ProfessionalSettingsPage() {
 
         <PaymentsCard professionalId={user.id} />
 
-        <div className="flex justify-end">
-          <button type="submit" className={buttonPrimary} disabled={save.isPending || noModality}>
+        {/* Salvar fica preso no rodapé enquanto a página rola (no celular, acima da barra de baixo). */}
+        <div className="sticky bottom-24 z-20 flex justify-end lg:bottom-4">
+          <button
+            type="submit"
+            className={`${buttonPrimary} shadow-lg`}
+            disabled={save.isPending || noModality}
+          >
             {t("common.save")}
           </button>
         </div>

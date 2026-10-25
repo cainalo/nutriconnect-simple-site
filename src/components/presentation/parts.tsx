@@ -32,7 +32,7 @@ export const PRESENTERS: Presenter[] = [
     name: "Maria Stella",
     leader: true,
     emoji: "🍓",
-    color: "#b4532a",
+    color: "#a64b24",
     gradient: "from-[#faece5] to-[#f0b69b]",
     photo: "/images/presentation/friends.jpg",
     nina: "wave",

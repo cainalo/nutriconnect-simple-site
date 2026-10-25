@@ -1,6 +1,7 @@
 // Parceiro de jornada (N6): sem dupla, mostra os convites e a lista de amigos para convidar; com
 // dupla, o check-in de hoje dos dois, "mandar força", a sequência gentil e o botão de sair.
 import { useState, type FormEvent } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { HandHeart, HeartHandshake, Loader2, LogOut, Send, Sun, UserPlus, X } from "lucide-react";
@@ -484,16 +485,16 @@ function ActivePair({
           type="button"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition hover:text-foreground disabled:opacity-50"
           disabled={leave.isPending}
-          onClick={() => {
+          onClick={async () => {
             if (
-              !window.confirm(
+              !(await siteConfirm(
                 tr([
                   "Sair da dupla? A outra pessoa não recebe aviso.",
                   "Leave the pair? The other person won't be notified.",
                   "¿Salir de la pareja? La otra persona no recibe aviso.",
                   "Quitter le binôme ? L'autre personne ne sera pas prévenue.",
                 ]),
-              )
+              ))
             )
               return;
             leave.mutate(undefined, { onError });

@@ -65,7 +65,14 @@ function SchedulePage() {
     : null;
 
   const today = new Date();
-  const weekLabel = `${formatDate(days[0], locale, { day: "numeric", month: "short" })} – ${formatDate(days[6], locale, { day: "numeric", month: "short", year: "numeric" })}`;
+  // Intervalo curto no formato do idioma ("12–18 de out.", "Oct 12 – 18"); o ano só aparece
+  // quando a semana não é deste ano. Cabe numa linha no celular.
+  const thisYear = days[6].getFullYear() === new Date().getFullYear();
+  const weekLabel = new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    ...(thisYear ? {} : { year: "numeric" }),
+  }).formatRange(days[0], days[6]);
 
   return (
     <>
@@ -105,14 +112,16 @@ function SchedulePage() {
             >
               <ChevronRight className="h-4 w-4" />
             </button>
-            <span className="ml-2 text-sm font-semibold text-foreground">{weekLabel}</span>
+            <span className="ml-2 whitespace-nowrap text-sm font-semibold text-foreground">
+              {weekLabel}
+            </span>
           </div>
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <input
               type="checkbox"
               checked={showCancelled}
               onChange={(e) => setShowCancelled(e.target.checked)}
-              className="h-4 w-4 accent-[var(--color-primary)]"
+              className="h-5 w-5 accent-[var(--color-primary)]"
             />
             {t("schedule.showCancelled")}
           </label>
@@ -125,14 +134,21 @@ function SchedulePage() {
             {days.map((d) => {
               const dayAppts = list.filter((a) => isSameDay(new Date(a.starts_at), d));
               const isToday = isSameDay(d, today);
+              // No celular, dia sem consulta vira uma linha só (a semana não fica uma coluna longa).
+              const empty = dayAppts.length === 0;
               return (
                 <div
                   key={d.toISOString()}
-                  className={cn("min-h-24 p-2 md:min-h-72", isToday && "bg-accent-soft/40")}
+                  className={cn(
+                    "p-2 md:min-h-72",
+                    empty ? "flex items-baseline gap-3 py-2.5 md:block" : "min-h-24",
+                    isToday && "bg-accent-soft/40",
+                  )}
                 >
                   <p
                     className={cn(
-                      "mb-2 text-xs font-semibold uppercase text-muted-foreground",
+                      "text-xs font-semibold uppercase text-muted-foreground",
+                      empty ? "md:mb-2" : "mb-2",
                       isToday && "text-accent",
                     )}
                   >
@@ -140,8 +156,8 @@ function SchedulePage() {
                     <span className="text-base text-foreground">{d.getDate()}</span>
                   </p>
                   <div className="space-y-1.5">
-                    {dayAppts.length === 0 && (
-                      <p className="text-[11px] text-muted-foreground/70 md:hidden">
+                    {empty && (
+                      <p className="text-[11px] text-muted-foreground md:hidden">
                         {t("schedule.free")}
                       </p>
                     )}
@@ -173,7 +189,7 @@ function SchedulePage() {
       </Card>
 
       {user && (
-        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div id="horarios" className="mt-4 grid scroll-mt-24 gap-4 xl:grid-cols-2">
           <AvailabilityEditor professionalId={user.id} />
           <BlocksEditor professionalId={user.id} />
         </div>

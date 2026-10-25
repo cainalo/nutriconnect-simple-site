@@ -7,6 +7,9 @@ export interface Comment {
   postId: string;
   authorId: string;
   authorName: string;
+  authorAvatar?: string;
+  /** Comentário a que este responde (respostas em fio, um nível). */
+  replyTo?: string;
   text: string;
   createdAt: string;
 }

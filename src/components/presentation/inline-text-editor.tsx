@@ -143,7 +143,7 @@ export function InlineTextEditor({
           onDone();
         }
       }}
-      className="absolute z-40 resize-none overflow-hidden rounded-md bg-background/70 outline outline-2 outline-offset-2 outline-[#b4532a] backdrop-blur-[1px]"
+      className="absolute z-40 resize-none overflow-hidden rounded-md bg-background/70 outline outline-2 outline-offset-2 outline-[#a64b24] backdrop-blur-[1px]"
       style={{ ...frame.style, margin: 0, border: 0 }}
     />
   );

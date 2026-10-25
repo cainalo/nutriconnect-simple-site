@@ -1,6 +1,7 @@
 // Grupo familiar "Minha casa" (F1): sem casa, criar ou entrar com código; com casa, a lista de
 // compras da casa em tempo real (quem adicionou, quem comprou), quem mora junto, convites e sair.
 import { useEffect, useState, type FormEvent } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -114,10 +115,10 @@ export function HouseholdPanel() {
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <header className="mb-6">
         <h1
-          data-page-head={mine.data ? undefined : ""}
+          data-page-head={mine.data?.house?.name ? undefined : ""}
           className="text-2xl font-extrabold font-display text-foreground"
         >
-          {mine.data ? (
+          {mine.data?.house?.name ? (
             <span className="inline-flex items-center gap-2">
               <EmojiIcon emoji={mine.data.house.emoji} fallback={Home} tinted className="h-6 w-6" />
               {mine.data.house.name}
@@ -724,9 +725,9 @@ function Members({
                       "Pasar el rol de responsable",
                       "Passer la main",
                     ])}
-                    onClick={() => {
+                    onClick={async () => {
                       if (
-                        window.confirm(
+                        await siteConfirm(
                           tr([
                             `Passar o papel de responsável para ${p?.name ?? ""}?`,
                             `Hand over the lead to ${p?.name ?? ""}?`,
@@ -750,9 +751,9 @@ function Members({
                       "Quitar de la casa",
                       "Retirer",
                     ])}
-                    onClick={() => {
+                    onClick={async () => {
                       if (
-                        window.confirm(
+                        await siteConfirm(
                           tr([
                             `Tirar ${p?.name ?? ""} da casa?`,
                             `Remove ${p?.name ?? ""} from the home?`,
@@ -925,16 +926,16 @@ function LeaveHouse() {
         type="button"
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition hover:text-foreground disabled:opacity-50"
         disabled={leave.isPending}
-        onClick={() => {
+        onClick={async () => {
           if (
-            !window.confirm(
+            !(await siteConfirm(
               tr([
                 "Sair da casa? A sua lista pessoal volta, e o que você pôs na lista da casa fica com ela.",
                 "Leave the home? Your personal list comes back, and what you added to the home list stays.",
                 "¿Salir de la casa? Tu lista personal vuelve, y lo que pusiste en la lista de la casa se queda.",
                 "Quitter la maison ? Votre liste perso revient, et ce que vous avez ajouté reste à la maison.",
               ]),
-            )
+            ))
           )
             return;
           leave.mutate(undefined, { onError });

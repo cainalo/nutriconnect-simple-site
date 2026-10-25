@@ -2,6 +2,7 @@
 // vendas. Liberada a partir do nível 3 (pro_features "loja_programas"); a cobrança usa a mesma conta
 // de recebimento (Stripe Connect) do perfil de membros.
 import { useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -32,6 +33,7 @@ import { useClinicalI18n } from "@/lib/clinical/i18n";
 import { formatMoney } from "@/lib/clinical/format";
 import { useConnectStatus } from "@/lib/social/members-queries";
 import { useProStatus } from "@/lib/social/pro-score-queries";
+import { LockedFeature } from "@/components/clinical/locked-feature";
 import {
   PROGRAM_EMOJIS,
   useDeleteModule,
@@ -76,29 +78,102 @@ function ProgramsPanel() {
 
   if (!unlocked) {
     return (
-      <>
-        <PageHeader title={title} />
-        <Card>
-          <div className="flex items-start gap-3">
-            <Lock className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              {pendingSetup
-                ? tr([
-                    "A loja de programas ainda está sendo ativada no sistema. Volte em instantes.",
-                    "The program store is still being enabled. Please come back shortly.",
-                    "La tienda de programas aún se está activando. Vuelve en un momento.",
-                    "La boutique de programmes est en cours d'activation. Revenez bientôt.",
-                  ])
-                : tr([
-                    "A loja de programas é liberada a partir do nível 3. Continue atendendo, respondendo dúvidas e publicando conteúdo para subir de nível.",
-                    "The program store unlocks at level 3. Keep seeing patients, answering questions and posting to level up.",
-                    "La tienda de programas se libera desde el nivel 3. Sigue atendiendo, respondiendo dudas y publicando para subir de nivel.",
-                    "La boutique de programmes s'ouvre au niveau 3. Continuez à consulter, répondre et publier pour progresser.",
-                  ])}
+      <LockedFeature
+        title={title}
+        levelCode="destaque"
+        status={status.data}
+        pendingSetup={pendingSetup}
+        preview={
+          <div className="rounded-2xl border border-border/70 bg-card p-4">
+            <p className="flex items-center gap-2 text-sm font-bold text-foreground">
+              <EmojiIcon emoji="🥗" className="h-4 w-4 text-primary" />
+              {tr([
+                "4 semanas de lanches sem ultraprocessados",
+                "4 weeks of snacks without ultra-processed food",
+                "4 semanas de meriendas sin ultraprocesados",
+                "4 semaines de collations sans ultra-transformés",
+              ])}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {tr([
+                "8 módulos · pagamento único · R$ 49,00",
+                "8 modules · one-time · R$ 49.00",
+                "8 módulos · pago único · R$ 49,00",
+                "8 modules · paiement unique · 49,00 R$",
+              ])}
+            </p>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
+              <div className="h-full w-2/3 rounded-full bg-primary" />
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {tr([
+                "12 vendas neste mês",
+                "12 sales this month",
+                "12 ventas este mes",
+                "12 ventes ce mois-ci",
+              ])}
             </p>
           </div>
-        </Card>
-      </>
+        }
+        intro={[
+          "Na loja você vende programas prontos (por exemplo, 4 semanas de marmitas) com pagamento único.",
+          "In the store you sell ready-made programs (for example, 4 weeks of meal prep) for a one-time price.",
+          "En la tienda vendes programas listos (por ejemplo, 4 semanas de viandas) con pago único.",
+          "Dans la boutique, vous vendez des programmes prêts (par exemple 4 semaines de repas) en paiement unique.",
+        ]}
+        perks={[
+          {
+            icon: Pencil,
+            title: [
+              "Programas em módulos",
+              "Programs in modules",
+              "Programas por módulos",
+              "Programmes en modules",
+            ],
+            desc: [
+              "Monte etapas com texto, vídeo e tarefas.",
+              "Build steps with text, video and tasks.",
+              "Arma etapas con texto, video y tareas.",
+              "Créez des étapes avec texte, vidéo et tâches.",
+            ],
+          },
+          {
+            icon: ShoppingBag,
+            title: [
+              "Vitrine na loja",
+              "Store listing",
+              "Vitrina en la tienda",
+              "Vitrine en boutique",
+            ],
+            desc: [
+              "Seu programa aparece na loja para todo o site.",
+              "Your program shows up in the site-wide store.",
+              "Tu programa aparece en la tienda de todo el sitio.",
+              "Votre programme apparaît dans la boutique du site.",
+            ],
+          },
+          {
+            icon: Wallet,
+            title: ["Pagamento único", "One-time payment", "Pago único", "Paiement unique"],
+            desc: [
+              "Mesma conta de recebimento do perfil de membros.",
+              "Same payout account as the members profile.",
+              "Misma cuenta de cobro del perfil de miembros.",
+              "Même compte de paiement que le profil membres.",
+            ],
+          },
+          {
+            icon: Percent,
+            title: ["Vendas e taxa", "Sales and fee", "Ventas y tarifa", "Ventes et commission"],
+            desc: [
+              "Acompanhe as vendas; a taxa cai quando você sobe de nível.",
+              "Track sales; the fee drops as you level up.",
+              "Sigue las ventas; la tarifa baja al subir de nivel.",
+              "Suivez les ventes ; la commission baisse avec le niveau.",
+            ],
+          },
+        ]}
+      />
     );
   }
 
@@ -490,9 +565,9 @@ function ModulesEditor({ programId }: { programId: string }) {
               type="button"
               className="p-1 text-muted-foreground hover:text-destructive"
               aria-label={tr(["Apagar", "Delete", "Borrar", "Supprimer"])}
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
+                  await siteConfirm(
                     tr([
                       "Apagar este módulo?",
                       "Delete this module?",

@@ -157,7 +157,15 @@ function Room({ appt, role, userId }: { appt: Appointment; role: CallRole; userI
               `${tr(["Enviei um arquivo", "I sent a file", "Envié un archivo", "J'ai envoyé un fichier"])}: ${title}`,
             );
           } catch (err) {
-            toast.error(err instanceof Error ? err.message : String(err));
+            console.error("consulta: envio do arquivo falhou", err);
+            toast.error(
+              tr([
+                "Não foi possível enviar o arquivo. Confira a internet e tente de novo.",
+                "We couldn't send the file. Check your connection and try again.",
+                "No se pudo enviar el archivo. Revisa la conexión e inténtalo de nuevo.",
+                "Impossible d'envoyer le fichier. Vérifiez la connexion et réessayez.",
+              ]),
+            );
           }
         }
       : undefined;

@@ -120,6 +120,14 @@ export function updateSubscription(
   return call<StripeSubscription>("POST", `/subscriptions/${id}`, params);
 }
 
+/** Cancela a assinatura na hora (sem esperar o fim do período). Usado ao excluir a conta. */
+export async function cancelSubscriptionNow(id: string): Promise<StripeSubscription> {
+  // Numa nova tentativa a assinatura pode já estar cancelada: aí não há o que fazer.
+  const current = await getSubscription(id);
+  if (current.status === "canceled" || current.status === "incomplete_expired") return current;
+  return call<StripeSubscription>("DELETE", `/subscriptions/${id}`);
+}
+
 /** Fim do período corrente de uma assinatura (o campo mudou de lugar entre versões da API). */
 export function periodEnd(sub: StripeSubscription): string | null {
   const ts = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end;

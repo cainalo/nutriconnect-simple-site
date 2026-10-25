@@ -1,6 +1,6 @@
 // Loja de programas (N10): programas à venda dos profissionais e os que a pessoa já comprou.
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Search, ShoppingBag } from "lucide-react";
 import { ProgramCard } from "@/components/program-card";
@@ -110,6 +110,24 @@ function ProgramStore() {
                 "Aún no hay programas a la venta. ¡Vuelve pronto!",
                 "Pas encore de programmes en vente. Revenez bientôt !",
               ])}
+          {!term && (
+            <p className="mx-auto mt-2 max-w-sm text-xs">
+              {tr([
+                "Os programas são criados por profissionais verificados, no painel deles (Loja de programas).",
+                "Programs are created by verified professionals, in their panel (Program store).",
+                "Los programas los crean profesionales verificados, en su panel (Tienda de programas).",
+                "Les programmes sont créés par des professionnels vérifiés, depuis leur espace (Boutique de programmes).",
+              ])}{" "}
+              <Link to="/profissionais" className="font-semibold text-primary hover:underline">
+                {tr([
+                  "Conhecer os profissionais",
+                  "Meet the professionals",
+                  "Conocer a los profesionales",
+                  "Voir les professionnels",
+                ])}
+              </Link>
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

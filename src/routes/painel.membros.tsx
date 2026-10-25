@@ -31,6 +31,7 @@ import {
   useSubscribers,
 } from "@/lib/social/members-queries";
 import { useProStatus } from "@/lib/social/pro-score-queries";
+import { LockedFeature } from "@/components/clinical/locked-feature";
 
 export const Route = createFileRoute("/painel/membros")({
   component: MembersPanel,
@@ -46,42 +47,127 @@ function MembersPanel() {
   const unlocked = status.data?.features.includes("perfil_membros");
   if (!unlocked) {
     return (
-      <>
-        <PageHeader
-          title={tr([
-            "Perfil de membros",
-            "Members profile",
-            "Perfil de miembros",
-            "Profil membres",
-          ])}
-        />
-        <Card>
-          <div className="flex items-start gap-3">
-            <Lock className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-            <div>
-              <p className="font-semibold text-foreground">
+      <LockedFeature
+        title={tr(["Perfil de membros", "Members profile", "Perfil de miembros", "Profil membres"])}
+        levelCode="destaque"
+        status={status.data}
+        preview={
+          <div className="rounded-2xl border border-border/70 bg-card p-4">
+            <p className="flex items-center gap-2 text-sm font-bold text-foreground">
+              <Crown className="h-4 w-4 text-warning" />
+              {tr(["Clube da marmita", "Meal prep club", "Club de la vianda", "Club des repas"])}
+              <span className="ml-auto text-xs font-semibold text-muted-foreground">
+                R$ 19,90/{tr(["mês", "month", "mes", "mois"])}
+              </span>
+            </p>
+            <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+              <li className="flex items-center gap-1.5">
+                <Lock className="h-3 w-3 shrink-0" />
                 {tr([
-                  "Esta função abre no nível Destaque",
-                  "This feature unlocks at the Rising level",
-                  "Esta función se abre en el nivel Destacado",
-                  "Cette fonction s'ouvre au niveau En vue",
+                  "Cardápio da semana com lista de compras",
+                  "Weekly menu with shopping list",
+                  "Menú semanal con lista de compras",
+                  "Menu de la semaine avec liste de courses",
                 ])}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Lock className="h-3 w-3 shrink-0" />
                 {tr([
-                  "Publique, responda perguntas e participe do tema da semana para ganhar pontos. Veja o seu progresso no início do painel.",
-                  "Post, answer questions and join the weekly theme to earn points. See your progress on the panel home.",
-                  "Publica, responde preguntas y participa en el tema de la semana para ganar puntos. Mira tu progreso en el inicio del panel.",
-                  "Publiez, répondez aux questions et participez au thème de la semaine pour gagner des points. Voyez votre progression à l'accueil du panneau.",
+                  "Vídeo: 5 marmitas em 1 hora",
+                  "Video: 5 meal preps in 1 hour",
+                  "Video: 5 viandas en 1 hora",
+                  "Vidéo : 5 repas en 1 heure",
                 ])}
-              </p>
-              <Link to="/painel" className={`${buttonSecondary} mt-3`}>
-                {tr(["Ver meu nível", "See my level", "Ver mi nivel", "Voir mon niveau"])}
-              </Link>
-            </div>
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Lock className="h-3 w-3 shrink-0" />
+                {tr([
+                  "Live mensal de perguntas",
+                  "Monthly Q&A live",
+                  "Directo mensual de preguntas",
+                  "Live mensuel de questions",
+                ])}
+              </li>
+            </ul>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              {tr([
+                "24 assinantes · você recebe R$ 17,91 por assinatura",
+                "24 subscribers · you receive R$ 17.91 each",
+                "24 suscriptores · recibes R$ 17,91 por suscripción",
+                "24 abonnés · vous recevez 17,91 R$ par abonnement",
+              ])}
+            </p>
           </div>
-        </Card>
-      </>
+        }
+        intro={[
+          "Com o perfil de membros, quem gosta do seu trabalho paga uma mensalidade para ver conteúdo só para assinantes.",
+          "With a members profile, people who like your work pay a monthly fee to see subscriber-only content.",
+          "Con el perfil de miembros, quien valora tu trabajo paga una cuota mensual para ver contenido solo para suscriptores.",
+          "Avec le profil membres, ceux qui apprécient votre travail paient un abonnement mensuel pour un contenu réservé.",
+        ]}
+        perks={[
+          {
+            icon: Crown,
+            title: [
+              "Seu plano e seu preço",
+              "Your plan, your price",
+              "Tu plan y tu precio",
+              "Votre offre, votre prix",
+            ],
+            desc: [
+              "Você decide o valor da mensalidade e o que ela inclui.",
+              "You set the monthly price and what it includes.",
+              "Tú decides la cuota y lo que incluye.",
+              "Vous fixez le prix et ce qu'il comprend.",
+            ],
+          },
+          {
+            icon: Lock,
+            title: [
+              "Conteúdo exclusivo",
+              "Exclusive content",
+              "Contenido exclusivo",
+              "Contenu exclusif",
+            ],
+            desc: [
+              "Textos, receitas e vídeos que só assinantes veem.",
+              "Posts, recipes and videos only subscribers see.",
+              "Textos, recetas y videos que solo ven suscriptores.",
+              "Textes, recettes et vidéos réservés aux abonnés.",
+            ],
+          },
+          {
+            icon: Users,
+            title: [
+              "Lista de assinantes",
+              "Subscriber list",
+              "Lista de suscriptores",
+              "Liste des abonnés",
+            ],
+            desc: [
+              "Veja quem assina e desde quando.",
+              "See who subscribes and since when.",
+              "Mira quién se suscribe y desde cuándo.",
+              "Voyez qui est abonné et depuis quand.",
+            ],
+          },
+          {
+            icon: Wallet,
+            title: [
+              "Ganhos todo mês",
+              "Monthly earnings",
+              "Ingresos cada mes",
+              "Revenus chaque mois",
+            ],
+            desc: [
+              "Recebimento pelo Stripe, com a taxa do seu nível.",
+              "Paid through Stripe, with your level's fee.",
+              "Cobro por Stripe, con la tarifa de tu nivel.",
+              "Versements via Stripe, avec la commission de votre niveau.",
+            ],
+          },
+        ]}
+      />
     );
   }
   return <Unlocked userId={user.id} />;

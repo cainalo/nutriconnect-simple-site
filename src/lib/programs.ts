@@ -231,11 +231,15 @@ export function useDeleteModule() {
 /** Abre o pagamento do programa (formulário do Stripe embutido). */
 export async function createProgramCheckout(
   programId: string,
+  /** Código de desconto das recompensas (opcional). */
+  redemptionId?: string,
 ): Promise<{ clientSecret: string; publishableKey: string }> {
   const { data, error } = await supabase.functions.invoke<{
     clientSecret?: string;
     publishableKey?: string;
-  }>("program-checkout", { body: { programId, origin: window.location.origin } });
+  }>("program-checkout", {
+    body: { programId, origin: window.location.origin, redemptionId },
+  });
   if (error) {
     let message = "Não foi possível abrir o pagamento. Tente de novo em instantes.";
     if (error instanceof FunctionsHttpError) {

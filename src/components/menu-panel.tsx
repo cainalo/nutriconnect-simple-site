@@ -2,6 +2,7 @@
 // de orçamento, a pessoa troca o que quiser (outra ideia, uma receita guardada ou escrevendo) e a
 // semana vira uma lista de compras única, agrupada por seção, na lista da conta.
 import { useState, type FormEvent } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ import {
   Sparkles,
   Trash2,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { useTr } from "@/components/settings-ui";
@@ -602,6 +604,52 @@ export function ShoppingSection({ ingredients }: { ingredients: string[] }) {
 
 // ───────────────────────────── Página ─────────────────────────────
 
+/** Um jeito de preencher o cardápio: ícone, título e uma linha explicando. */
+function FillOption({
+  icon: Icon,
+  spin,
+  primary,
+  disabled,
+  onClick,
+  title,
+  hint,
+}: {
+  icon: LucideIcon;
+  spin?: boolean;
+  primary?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  title: string;
+  hint: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "flex min-h-20 flex-col items-start gap-1 rounded-2xl border p-3 text-left transition active:scale-[0.98] disabled:opacity-50",
+        primary
+          ? "border-primary bg-primary text-primary-foreground hover:brightness-110"
+          : "border-border bg-card text-foreground hover:border-primary/40 hover:bg-secondary/40",
+      )}
+    >
+      <span className="flex items-center gap-2 text-sm font-semibold">
+        <Icon className={cn("h-4 w-4 shrink-0", spin && "animate-spin")} />
+        {title}
+      </span>
+      <span
+        className={cn(
+          "text-[11px] leading-snug",
+          primary ? "text-primary-foreground" : "text-muted-foreground",
+        )}
+      >
+        {hint}
+      </span>
+    </button>
+  );
+}
+
 export function MenuPanel() {
   const tr = useTr();
   const { locale } = useI18n();
@@ -665,16 +713,16 @@ export function MenuPanel() {
     }
   };
 
-  const redoAll = () => {
+  const redoAll = async () => {
     if (
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Trocar todas as refeições da semana por novas ideias da Nina?",
           "Replace every meal this week with new ideas from Nina?",
           "¿Cambiar todas las comidas de la semana por nuevas ideas de Nina?",
           "Remplacer tous les repas de la semaine par de nouvelles idées de Nina ?",
         ]),
-      )
+      ))
     )
       return;
     void ask(allSlots);
@@ -706,20 +754,20 @@ export function MenuPanel() {
     persist(next);
   };
 
-  const leftover = (day: number) => {
+  const leftover = async (day: number) => {
     const dinner = meals[slotKey(day, "jantar")];
     if (!dinner || day >= 6) return;
     const key = slotKey(day + 1, "almoco");
     if (
       meals[key] &&
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           `Trocar o almoço de amanhã (${meals[key]!.title}) pela sobra?`,
           `Replace tomorrow's lunch (${meals[key]!.title}) with the leftovers?`,
           `¿Cambiar el almuerzo de mañana (${meals[key]!.title}) por lo que sobra?`,
           `Remplacer le déjeuner de demain (${meals[key]!.title}) par les restes ?`,
         ]),
-      )
+      ))
     )
       return;
     // Sem ingredientes: a sobra não entra de novo na lista de compras.
@@ -849,41 +897,90 @@ export function MenuPanel() {
           onChange={(e) => setWish(e.target.value)}
           maxLength={200}
           placeholder={tr([
-            "Pedido para a Nina (opcional): ex.: sem carne na segunda, marmita para o trabalho",
-            "Request for Nina (optional): e.g. meatless Monday, lunchbox for work",
-            "Pedido para Nina (opcional): ej.: sin carne el lunes, táper para el trabajo",
-            "Demande à Nina (facultatif) : ex. sans viande lundi, gamelle pour le travail",
+            "Pedido para a Nina (opcional)",
+            "Request for Nina (optional)",
+            "Pedido para Nina (opcional)",
+            "Demande à Nina (facultatif)",
           ])}
           className="mt-3 w-full rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground"
         />
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          {empty.length > 0 ? (
-            <button
-              type="button"
-              onClick={() => void ask(empty)}
+        {empty.length > 0 ? (
+          // Três jeitos de preencher, lado a lado e explicados: a Nina (IA) é o principal.
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <FillOption
+              icon={busy.length > 1 ? Loader2 : Sparkles}
+              spin={busy.length > 1}
+              primary
               disabled={busy.length > 0 || menu.isLoading}
-              className={btnPrimary}
-            >
-              {busy.length > 1 ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              {empty.length === allSlots.length
-                ? tr([
-                    "Montar a semana com a Nina",
-                    "Plan the week with Nina",
-                    "Armar la semana con Nina",
-                    "Préparer la semaine avec Nina",
-                  ])
-                : tr([
-                    `Completar com a Nina (${empty.length})`,
-                    `Fill in with Nina (${empty.length})`,
-                    `Completar con Nina (${empty.length})`,
-                    `Compléter avec Nina (${empty.length})`,
-                  ])}
-            </button>
-          ) : (
+              onClick={() => void ask(empty)}
+              title={
+                empty.length === allSlots.length
+                  ? tr([
+                      "Montar a semana com a Nina",
+                      "Plan the week with Nina",
+                      "Armar la semana con Nina",
+                      "Préparer la semaine avec Nina",
+                    ])
+                  : tr([
+                      `Completar com a Nina (${empty.length})`,
+                      `Fill in with Nina (${empty.length})`,
+                      `Completar con Nina (${empty.length})`,
+                      `Compléter avec Nina (${empty.length})`,
+                    ])
+              }
+              hint={tr([
+                "Pratos novos pensados para você e para o pedido acima.",
+                "New dishes made for you and your request above.",
+                "Platos nuevos pensados para ti y para el pedido de arriba.",
+                "De nouveaux plats pensés pour vous et votre demande.",
+              ])}
+            />
+            <FillOption
+              icon={ChefHat}
+              disabled={busy.length > 0 || menu.isLoading}
+              onClick={fillLocal}
+              title={tr([
+                `Com o que já conheço (${empty.length})`,
+                `With what I know (${empty.length})`,
+                `Con lo que ya conozco (${empty.length})`,
+                `Avec ce que je connais (${empty.length})`,
+              ])}
+              hint={tr([
+                "Suas receitas guardadas e pratos de sempre, sem IA.",
+                "Your saved recipes and everyday dishes, no AI.",
+                "Tus recetas guardadas y platos de siempre, sin IA.",
+                "Vos recettes et plats habituels, sans IA.",
+              ])}
+            />
+            <FillOption
+              icon={CalendarClock}
+              disabled={fromPrev.length === 0 || busy.length > 0 || menu.isLoading}
+              onClick={repeatPrev}
+              title={tr([
+                `Repetir a semana anterior (${fromPrev.length})`,
+                `Repeat last week (${fromPrev.length})`,
+                `Repetir la semana anterior (${fromPrev.length})`,
+                `Reprendre la semaine précédente (${fromPrev.length})`,
+              ])}
+              hint={
+                fromPrev.length === 0
+                  ? tr([
+                      "A semana passada está vazia.",
+                      "Last week is empty.",
+                      "La semana pasada está vacía.",
+                      "La semaine dernière est vide.",
+                    ])
+                  : tr([
+                      "Copia os pratos dos mesmos dias.",
+                      "Copies the dishes from the same days.",
+                      "Copia los platos de los mismos días.",
+                      "Copie les plats des mêmes jours.",
+                    ])
+              }
+            />
+          </div>
+        ) : (
+          <div className="mt-4">
             <button type="button" onClick={redoAll} disabled={busy.length > 0} className={btnSoft}>
               {busy.length > 1 ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -892,39 +989,9 @@ export function MenuPanel() {
               )}
               {tr(["Refazer a semana", "Redo the week", "Rehacer la semana", "Refaire la semaine"])}
             </button>
-          )}
-          {empty.length > 0 && (
-            <button
-              type="button"
-              onClick={fillLocal}
-              disabled={busy.length > 0 || menu.isLoading}
-              className={btnSoft}
-            >
-              <ChefHat className="h-4 w-4" />
-              {tr([
-                `Completar sem a Nina (${empty.length})`,
-                `Fill in without Nina (${empty.length})`,
-                `Completar sin Nina (${empty.length})`,
-                `Compléter sans Nina (${empty.length})`,
-              ])}
-            </button>
-          )}
-          {fromPrev.length > 0 && (
-            <button
-              type="button"
-              onClick={repeatPrev}
-              disabled={busy.length > 0 || menu.isLoading}
-              className={btnSoft}
-            >
-              <CalendarClock className="h-4 w-4" />
-              {tr([
-                `Repetir a semana anterior (${fromPrev.length})`,
-                `Repeat last week (${fromPrev.length})`,
-                `Repetir la semana anterior (${fromPrev.length})`,
-                `Reprendre la semaine précédente (${fromPrev.length})`,
-              ])}
-            </button>
-          )}
+          </div>
+        )}
+        <div className="mt-3">
           <span className="text-[11px] text-muted-foreground">
             {used !== null &&
               `${used}/${MENU_DAILY_LIMIT} ${tr(["hoje", "today", "hoy", "aujourd'hui"])} · `}
@@ -938,7 +1005,7 @@ export function MenuPanel() {
         </div>
         <Link
           to="/geladeira"
-          className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent hover:underline"
+          className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-accent hover:underline"
         >
           <Refrigerator className="h-3.5 w-3.5" />
           {tr([
@@ -950,7 +1017,7 @@ export function MenuPanel() {
         </Link>
         <Link
           to="/lancheira"
-          className="ml-4 mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent hover:underline"
+          className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-accent hover:underline"
         >
           <Backpack className="h-3.5 w-3.5" />
           {tr([

@@ -73,19 +73,20 @@
   --muted: #f0ebe1;
   --muted-foreground: #6d6355;
   /* Destaque laranja queimado / terracota acolhedor (CTA, badges e temas) */
-  --accent: #b4532a;
+  --accent: #a64b24;
   --accent-foreground: #fffaf7;
-  --accent-hover: #984420;
+  --accent-hover: #8e3f1d;
   --accent-soft: #faece5;
-  --warning: #c4821a;
-  --warning-foreground: #342508;
+  /* Escuro o bastante para texto sobre branco (AA, 4,9:1). */
+  --warning: #9a6410;
+  --warning-foreground: #fffaf0;
   --destructive: #aa3d2a;
   --destructive-foreground: #fffaf7;
   --border: #e6ded2;
   --input: #e6ded2;
-  --ring: #b4532a;
+  --ring: #a64b24;
   --chart-1: #555f36;
-  --chart-2: #b4532a;
+  --chart-2: #a64b24;
   --chart-3: #8a8848;
   --chart-4: #d88e5b;
   --chart-5: #657551;
@@ -96,7 +97,7 @@
   --sidebar-accent: #e5ded2;
   --sidebar-accent-foreground: #342d24;
   --sidebar-border: #ded5c5;
-  --sidebar-ring: #b4532a;
+  --sidebar-ring: #a64b24;
 }
 
 .dark {
@@ -107,43 +108,53 @@
   --card-foreground: #f6f0e6;
   --popover: #27221b;
   --popover-foreground: #f6f0e6;
-  --primary: #9ba86a;
+  --primary: #adba7c;
   --primary-foreground: #1c2010;
-  --primary-hover: #abb87a;
+  --primary-hover: #bcc78d;
   --primary-soft: #383e23;
   --secondary: #2f2a22;
   --secondary-foreground: #f4eee2;
   --muted: #2f2a22;
   --muted-foreground: #b8ad9c;
-  --accent: #d8764a;
+  --accent: #e8906a;
   --accent-foreground: #221008;
-  --accent-hover: #e5885e;
+  --accent-hover: #f0a07c;
   --accent-soft: #4a281a;
   --warning: #dfa03e;
   --warning-foreground: #221706;
-  --destructive: #d4634f;
+  --destructive: #e27f6b;
   --destructive-foreground: #220b08;
   --border: #423b31;
   --input: #423b31;
-  --ring: #d8764a;
-  --chart-1: #9ba86a;
-  --chart-2: #d8764a;
+  --ring: #e8906a;
+  --chart-1: #adba7c;
+  --chart-2: #e8906a;
   --chart-3: #c2b87a;
   --chart-4: #e8a57e;
   --chart-5: #82946c;
   --sidebar: #242019;
   --sidebar-foreground: #f4eee2;
-  --sidebar-primary: #9ba86a;
+  --sidebar-primary: #adba7c;
   --sidebar-primary-foreground: #1c2010;
   --sidebar-accent: #352e24;
   --sidebar-accent-foreground: #f6f0e6;
   --sidebar-border: #423b31;
-  --sidebar-ring: #d8764a;
+  --sidebar-ring: #e8906a;
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
+  }
+  /* Alvo de toque mínimo de 24 px (WCAG 2.2, 2.5.8) para botões, links em bloco e campos. Fica na
+     camada base: as classes de tamanho de cada componente (h-11, min-h-0…) continuam valendo.
+     Links no meio do texto (display inline) não são afetados. */
+  a[href],
+  button,
+  [role="button"],
+  select,
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="file"]) {
+    min-height: 24px;
   }
   /* Sem barras de rolagem visíveis em nenhuma parte do site (a rolagem segue funcionando
      por mouse, toque e teclado). A classe .no-scrollbar, usada em alguns componentes, não
@@ -2197,16 +2208,18 @@ html[data-design="vibrante"] {
   --card: #ffffff;
   --card-foreground: #14281c;
   --popover: #ffffff;
-  --primary: #15803d;
+  /* Verde escuro o bastante para texto sobre o fundo suave e para texto branco (AA). */
+  --primary: #166534;
   --primary-foreground: #f3fff7;
-  --primary-hover: #116b32;
+  --primary-hover: #14532d;
   --primary-soft: #d6f3df;
   --secondary: #e4f3e8;
   --muted: #e4f3e8;
   --muted-foreground: #4c6556;
-  --accent: #ea580c;
+  /* Laranja escuro o bastante para texto branco e para texto sobre o fundo (AA). */
+  --accent: #b93d0b;
   --accent-foreground: #fff8f3;
-  --accent-hover: #c2410c;
+  --accent-hover: #9a3412;
   --accent-soft: #ffe9d9;
   --border: #d3e8da;
   --input: #d3e8da;
@@ -2314,13 +2327,13 @@ html[data-design="editorial"].dark {
   --secondary: #2c281d;
   --muted: #2c281d;
   --muted-foreground: #aba083;
-  --accent: #d96a5a;
+  --accent: #e5806f;
   --accent-foreground: #230a07;
   --accent-hover: #e58577;
   --accent-soft: #3f1f1a;
   --border: #4a4331;
   --input: #4a4331;
-  --ring: #d96a5a;
+  --ring: #e5806f;
   --sidebar: #211e16;
   --sidebar-accent: #2e2a1e;
   --sidebar-border: #4a4331;
@@ -3299,4 +3312,21 @@ html[data-motion="reduce"] .nc-menu-item {
 /* Popovers (seletor de perfil da trilha, ícones do perfil): mesma caixa, com mais respiro. */
 .nc-popover {
   padding: 1.05rem 0.8rem 0.8rem;
+}
+
+/* Faixas que rolam de lado (useScrollHint): a borda com itens escondidos esmaece. */
+[data-more="right"] {
+  mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+}
+[data-more="left"] {
+  mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent);
+}
+[data-more="both"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 2.5rem,
+    #000 calc(100% - 2.5rem),
+    transparent
+  );
 }

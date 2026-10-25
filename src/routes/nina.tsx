@@ -1,3 +1,5 @@
+import { useScrollHint } from "@/hooks/use-scroll-hint";
+import { siteConfirm } from "@/components/confirm-action";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -62,6 +64,7 @@ interface ChatMessage {
 }
 
 function NinaPage() {
+  const chipsRef = useScrollHint<HTMLDivElement>();
   const photos = useSitePhotos();
   const { user, hydrated } = useRequireAuth();
   const { t, locale } = useI18n();
@@ -194,7 +197,7 @@ function NinaPage() {
   sendRef.current = (text) => void sendText(text);
 
   const clear = async () => {
-    if (!window.confirm(t("nina.clearConfirm"))) return;
+    if (!(await siteConfirm(t("nina.clearConfirm")))) return;
     await supabase.from("nina_messages").delete().eq("user_id", user.id);
     await queryClient.invalidateQueries({ queryKey: historyKey });
   };
@@ -320,7 +323,7 @@ function NinaPage() {
         </div>
 
         {/* Só desta página: perguntas para começar a conversa (tocar envia para a Nina). */}
-        <div className="no-scrollbar mb-3 flex shrink-0 gap-2 overflow-x-auto pb-1">
+        <div ref={chipsRef} className="no-scrollbar mb-3 flex shrink-0 gap-2 overflow-x-auto pb-1">
           {NINA_TOPICS.map((q, i) => (
             <button
               key={i}

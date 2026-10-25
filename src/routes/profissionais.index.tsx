@@ -26,6 +26,8 @@ import type { Names } from "@/lib/appearance-data";
 import { td } from "@/lib/i18n/data";
 import { cn } from "@/lib/utils";
 import { AppScreen } from "@/components/app-screen";
+import { RatingBadge } from "@/components/clinical/reviews";
+import { useRatingSummaries, type RatingSummary } from "@/lib/clinical/reviews";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ProMatchQuiz } from "@/components/pro-match-quiz";
 
@@ -66,6 +68,21 @@ const PROFESSION_FILTERS: { key: ProfessionKey; label: Names; icon: LucideIcon }
   },
 ];
 
+type SortKey = "relevancia" | "nota" | "avaliacoes" | "preco";
+
+const SORTS: { key: SortKey; label: [string, string, string, string] }[] = [
+  { key: "relevancia", label: ["Recomendados", "Recommended", "Recomendados", "Recommandés"] },
+  { key: "nota", label: ["Nota", "Rating", "Nota", "Note"] },
+  { key: "avaliacoes", label: ["Avaliações", "Reviews", "Reseñas", "Avis"] },
+  { key: "preco", label: ["Preço", "Price", "Precio", "Prix"] },
+];
+
+/** Nota "bayesiana": poucas avaliações puxam para 4, para um 5,0 com 1 voto não passar na frente de todos. */
+function weightedRating(s?: RatingSummary) {
+  if (!s || !s.total) return 4;
+  return (s.average * s.total + 4 * 3) / (s.total + 3);
+}
+
 function DirectoryPage() {
   const { t, locale } = useClinicalI18n();
   const tr = useTr();
@@ -81,6 +98,8 @@ function DirectoryPage() {
   );
   const [modality, setModality] = useState<ModalityFilter>("todos");
   const [onlyAccepting, setOnlyAccepting] = useState(true);
+  const [sort, setSort] = useState<SortKey>("relevancia");
+  const ratings = useRatingSummaries();
   const [quizOpen, setQuizOpen] = useState(false);
   // O card "Qual profissional combina com você?" filtra a lista.
   useEffect(() => {
@@ -125,6 +144,23 @@ function DirectoryPage() {
         .some((v) => v!.toLowerCase().includes(q));
     });
   }, [data, query, specialty, profession, modality, onlyAccepting]);
+
+  const sorted = useMemo(() => {
+    const r = (id: string | null) => ratings.data?.get(id ?? "");
+    const list = [...filtered];
+    if (sort === "nota") list.sort((a, b) => (r(b.id)?.average ?? 0) - (r(a.id)?.average ?? 0));
+    else if (sort === "avaliacoes")
+      list.sort((a, b) => (r(b.id)?.total ?? 0) - (r(a.id)?.total ?? 0));
+    else if (sort === "preco")
+      list.sort((a, b) => (a.consultation_price_cents ?? 0) - (b.consultation_price_cents ?? 0));
+    else
+      list.sort(
+        (a, b) =>
+          Number(!!b.accepting_patients) - Number(!!a.accepting_patients) ||
+          weightedRating(r(b.id)) - weightedRating(r(a.id)),
+      );
+    return list;
+  }, [filtered, sort, ratings.data]);
 
   // Só quem está logado vê a vitrine (os perfis não são públicos).
   if (!authHydrated || !user) return <AuthGateLoading />;
@@ -209,7 +245,7 @@ function DirectoryPage() {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           <button
             type="button"
             aria-pressed={profession === null}
@@ -218,7 +254,7 @@ function DirectoryPage() {
               setSpecialty(null);
             }}
             className={cn(
-              "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
+              "col-span-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
               profession === null
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-card text-foreground hover:bg-secondary",
@@ -241,7 +277,7 @@ function DirectoryPage() {
                 setSpecialty(null);
               }}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
+                "inline-flex items-center justify-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
                 profession === key
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-card text-foreground hover:bg-secondary",
@@ -281,10 +317,43 @@ function DirectoryPage() {
           </label>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            {tr([
+              `${sorted.length} profissionais`,
+              `${sorted.length} professionals`,
+              `${sorted.length} profesionales`,
+              `${sorted.length} professionnels`,
+            ])}
+          </p>
+          <div
+            className="flex w-full gap-1 rounded-full border border-border bg-card p-1 sm:w-auto"
+            role="group"
+            aria-label={tr(["Ordenar por", "Sort by", "Ordenar por", "Trier par"])}
+          >
+            {SORTS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={sort === key}
+                onClick={() => setSort(key)}
+                className={cn(
+                  "flex-auto whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-semibold transition",
+                  sort === key
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {tr(label)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
           {isLoading ? (
             <Loading />
-          ) : filtered.length === 0 ? (
+          ) : sorted.length === 0 ? (
             <EmptyState
               icon={Stethoscope}
               photo="/images/presentation/jar-salad.jpg"
@@ -293,7 +362,7 @@ function DirectoryPage() {
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-              {filtered.map((p) => (
+              {sorted.map((p) => (
                 <Link
                   key={p.id}
                   to="/profissionais/$professionalId"
@@ -310,6 +379,7 @@ function DirectoryPage() {
                       <p className="text-xs text-muted-foreground">
                         {td(p.profession, locale)} · {p.council} {p.registration}/{p.uf}
                       </p>
+                      <RatingBadge summary={ratings.data?.get(p.id ?? "")} className="mt-1" />
                       {p.headline && (
                         <p className="mt-1 line-clamp-2 text-sm text-foreground">{p.headline}</p>
                       )}

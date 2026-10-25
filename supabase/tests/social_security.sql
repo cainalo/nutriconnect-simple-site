@@ -1516,6 +1516,354 @@ begin
     end;
   end if;
 
+  -- ------------------------------------------------ AVALIAÇÕES VERIFICADAS (P1)
+  -- P é profissional; B teve consulta com P; F não teve; G é admin.
+  if to_regclass('public.professional_reviews') is not null then
+    declare
+      ap_ok uuid;
+      ap_fut uuid;
+      rv uuid;
+    begin
+      insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality, status)
+      values (p, b, now() - interval '3 days', now() - interval '3 days' + interval '1 hour', 'presencial', 'realizada')
+      returning id into ap_ok;
+      insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality, status)
+      values (p, b, now() + interval '40 days', now() + interval '40 days 1 hour', 'presencial', 'agendada')
+      returning id into ap_fut;
+
+      r := pg_temp.as_user(f, 'authenticated', format('select public.submit_professional_review(%L, 5)', ap_ok));
+      res := res || jsonb_build_object('teste', 'quem não teve a consulta NÃO avalia', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.submit_professional_review(%L, 5)', ap_fut));
+      res := res || jsonb_build_object('teste', 'consulta futura NÃO pode ser avaliada', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.submit_professional_review(%L, 9)', ap_ok));
+      res := res || jsonb_build_object('teste', 'nota fora de 1 a 5 é recusada', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('insert into public.professional_reviews (appointment_id, professional_id, patient_id, rating) values (%L, %L, %L, 5)', ap_ok, p, b));
+      res := res || jsonb_build_object('teste', 'avaliação NÃO entra por insert direto', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.submit_professional_review(%L, 4, ''Muito_atenciosa'')', ap_ok));
+      res := res || jsonb_build_object('teste', 'paciente avalia a consulta que teve',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = p and type = 'consulta_avaliada'),
+        'obtido', left(r, 90));
+      rv := r::uuid;
+      r := pg_temp.as_user(b, 'authenticated', format('select public.submit_professional_review(%L, 5)', ap_ok));
+      res := res || jsonb_build_object('teste', 'segunda avaliação da mesma consulta edita a primeira',
+        'ok', (select count(*) from public.professional_reviews where appointment_id = ap_ok) = 1
+          and (select rating from public.professional_reviews where appointment_id = ap_ok) = 5,
+        'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select average || ''/'' || total from public.professional_rating_summaries() where professional_id = %L', p));
+      res := res || jsonb_build_object('teste', 'média pública conta a avaliação', 'ok', (r = '5.0/1'), 'obtido', r);
+      r := pg_temp.as_user(f, 'authenticated', format('select public.reply_professional_review(%L, ''Obrigada'')', rv));
+      res := res || jsonb_build_object('teste', 'só o profissional avaliado responde', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('select public.reply_professional_review(%L, ''Obrigada'')', rv));
+      res := res || jsonb_build_object('teste', 'profissional responde a avaliação',
+        'ok', r not like 'ERRO%' and (select reply from public.professional_reviews where id = rv) = 'Obrigada', 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', 'select count(*) from public.professional_reviews');
+      res := res || jsonb_build_object('teste', 'terceiro NÃO lê a tabela de avaliações direto', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('select public.admin_set_review_hidden(%L, true)', rv));
+      res := res || jsonb_build_object('teste', 'só a administração oculta avaliação', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', format('select public.admin_set_review_hidden(%L, true)', rv));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.list_professional_reviews(%L)', p));
+      res := res || jsonb_build_object('teste', 'avaliação oculta some da lista pública', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('delete from public.professional_reviews where id = %L', rv));
+      res := res || jsonb_build_object('teste', 'autor apaga a própria avaliação',
+        'ok', not exists (select 1 from public.professional_reviews where id = rv), 'obtido', left(r, 90));
+    end;
+  end if;
+
+  -- ------------------------------------------------ DIÁRIO DE SINTOMAS (X1)
+  -- C é paciente de P (acompanhamento ativo); F é estranho.
+  if to_regclass('public.symptom_logs') is not null then
+    update public.care_links set status = 'ativo' where patient_id = c and professional_id = p;
+    r := pg_temp.as_user(c, 'authenticated', 'insert into public.symptom_logs (patient_id, symptom, intensity) values (auth.uid(), ''azia'', 2)');
+    res := res || jsonb_build_object('teste', 'paciente anota um sintoma', 'ok', r not like 'ERRO%', 'obtido', left(r, 90));
+    r := pg_temp.as_user(c, 'authenticated', format('insert into public.symptom_logs (patient_id, symptom, intensity) values (%L, ''azia'', 2)', b));
+    res := res || jsonb_build_object('teste', 'NÃO anota sintoma em nome de outra pessoa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(c, 'authenticated', 'insert into public.symptom_logs (patient_id, symptom, intensity) values (auth.uid(), ''febre_alta'', 2)');
+    res := res || jsonb_build_object('teste', 'sintoma só da lista', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(c, 'authenticated', 'insert into public.symptom_logs (patient_id, symptom, intensity, felt_at) values (auth.uid(), ''gases'', 1, now() + interval ''2 days'')');
+    res := res || jsonb_build_object('teste', 'sintoma no futuro é recusado', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+    r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.symptom_logs where patient_id = %L', c));
+    res := res || jsonb_build_object('teste', 'estranho NÃO vê os sintomas', 'ok', (r = '0'), 'obtido', r);
+    r := pg_temp.as_user(p, 'authenticated', format('select count(*) from public.symptom_logs where patient_id = %L', c));
+    res := res || jsonb_build_object('teste', 'profissional com acompanhamento ativo vê os sintomas', 'ok', (r = '1'), 'obtido', r);
+    r := pg_temp.as_user(p, 'authenticated', format('delete from public.symptom_logs where patient_id = %L', c));
+    res := res || jsonb_build_object('teste', 'profissional NÃO apaga sintomas do paciente',
+      'ok', (select count(*) from public.symptom_logs where patient_id = c) = 1, 'obtido', left(r, 90));
+  end if;
+
+  -- ------------------------------------------------ LEMBRETES DE CONSULTA E EXAMES (X2)
+  -- C é paciente de P (acompanhamento ativo); F é estranho.
+  if to_regclass('public.exam_reminders') is not null then
+    declare
+      ap24 uuid;
+      ap1 uuid;
+      ex uuid;
+      n_before integer;
+    begin
+      update public.care_links set status = 'ativo' where patient_id = c and professional_id = p;
+      insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality, status)
+      values (p, c, now() + interval '20 hours', now() + interval '21 hours', 'presencial', 'agendada')
+      returning id into ap24;
+      insert into public.appointments (professional_id, patient_id, starts_at, ends_at, modality, status)
+      values (p, c, now() + interval '30 minutes', now() + interval '90 minutes', 'presencial', 'confirmada')
+      returning id into ap1;
+
+      perform public.send_care_reminders();
+      res := res || jsonb_build_object('teste', 'lembrete 24 h antes chega ao paciente',
+        'ok', exists (select 1 from public.notifications where user_id = c and type = 'consulta_lembrete' and entity_id = ap24::text and data ->> 'when' = '24h'),
+        'obtido', '');
+      res := res || jsonb_build_object('teste', 'lembrete 1 h antes chega a paciente e profissional',
+        'ok', (select count(*) from public.notifications where type = 'consulta_lembrete' and entity_id = ap1::text and data ->> 'when' = '1h') = 2,
+        'obtido', '');
+      select count(*) into n_before from public.notifications where type = 'consulta_lembrete';
+      perform public.send_care_reminders();
+      res := res || jsonb_build_object('teste', 'lembrete não repete',
+        'ok', (select count(*) from public.notifications where type = 'consulta_lembrete') = n_before, 'obtido', '');
+
+      r := pg_temp.as_user(f, 'authenticated', format('select public.confirm_attendance(%L)', ap24));
+      res := res || jsonb_build_object('teste', 'só o paciente confirma presença', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('select public.confirm_attendance(%L)', ap24));
+      res := res || jsonb_build_object('teste', 'paciente confirma presença e o profissional é avisado',
+        'ok', r not like 'ERRO%'
+          and (select patient_confirmed_at is not null from public.appointments where id = ap24)
+          and exists (select 1 from public.notifications where user_id = p and type = 'consulta_presenca'),
+        'obtido', left(r, 90));
+      update public.appointments set starts_at = starts_at + interval '2 days', ends_at = ends_at + interval '2 days' where id = ap24;
+      res := res || jsonb_build_object('teste', 'remarcar zera lembretes e confirmação',
+        'ok', (select reminder_24h_at is null and patient_confirmed_at is null from public.appointments where id = ap24),
+        'obtido', '');
+
+      r := pg_temp.as_user(c, 'authenticated', 'insert into public.exam_reminders (patient_id, title, due_at) values (auth.uid(), ''Hemograma'', now() + interval ''5 hours'') returning id');
+      res := res || jsonb_build_object('teste', 'paciente anota um exame', 'ok', r not like 'ERRO%', 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.exam_reminders where patient_id = %L', c));
+      res := res || jsonb_build_object('teste', 'estranho NÃO vê os exames', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(f, 'authenticated', format('insert into public.exam_reminders (patient_id, requested_by, title, due_at) values (%L, auth.uid(), ''Glicemia'', now() + interval ''3 days'')', c));
+      res := res || jsonb_build_object('teste', 'estranho NÃO pede exame', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('insert into public.exam_reminders (patient_id, title, due_at) values (%L, ''Glicemia'', now() + interval ''3 days'')', c));
+      res := res || jsonb_build_object('teste', 'profissional só cria exame como pedido dele', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(p, 'authenticated', format('insert into public.exam_reminders (patient_id, requested_by, title, due_at) values (%L, auth.uid(), ''Glicemia_jejum'', now() + interval ''3 days'')', c));
+      res := res || jsonb_build_object('teste', 'profissional do acompanhamento pede exame e o paciente é avisado',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = c and type = 'exame_pedido'),
+        'obtido', left(r, 90));
+      perform public.send_care_reminders();
+      res := res || jsonb_build_object('teste', 'lembrete do exame nas próximas 24 h',
+        'ok', (select count(*) from public.notifications where user_id = c and type = 'exame_lembrete') = 1, 'obtido', '');
+      r := pg_temp.as_user(c, 'authenticated', 'select (public.export_my_data() -> ''exames_agendados'') is not null');
+      res := res || jsonb_build_object('teste', 'cópia dos dados (LGPD) inclui os exames', 'ok', (r = 't'), 'obtido', left(r, 90));
+    end;
+  end if;
+
+  -- ------------------------------------------------ DESAFIOS ENTRE AMIGOS E LIGA (X3)
+  -- B e C são amigos; A não é amigo de nenhum dos dois (B bloqueou A acima); F é estranho.
+  if to_regclass('public.friend_challenges') is not null then
+    declare
+      ch uuid;
+      today date := (now() at time zone 'America/Sao_Paulo')::date;
+    begin
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''agua'', 3, array[%L]::uuid[])', f));
+      res := res || jsonb_build_object('teste', 'desafio só com amigos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', 'select public.create_friend_challenge(''agua'', 3, array[]::uuid[])');
+      res := res || jsonb_build_object('teste', 'desafio precisa de pelo menos 1 amigo', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select count(*) from public.friends_weekly_league() where user_id = %L', c));
+      res := res || jsonb_build_object('teste', 'amigo sem pontos NÃO aparece na liga (sem lanterninha)', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''agua'', 3, array[%L]::uuid[])', c));
+      res := res || jsonb_build_object('teste', 'cria desafio e o amigo é convidado',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = c and type = 'desafio_amigo_convite'),
+        'obtido', left(r, 90));
+      ch := r::uuid;
+      r := pg_temp.as_user(a, 'authenticated', format('select count(*) from public.friend_challenges where id = %L', ch));
+      res := res || jsonb_build_object('teste', 'quem não está no desafio NÃO o vê', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(a, 'authenticated', format('select public.respond_friend_challenge(%L, true)', ch));
+      res := res || jsonb_build_object('teste', 'só o convidado responde', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('select public.respond_friend_challenge(%L, true)', ch));
+      res := res || jsonb_build_object('teste', 'amigo aceita e quem criou é avisado',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.notifications where user_id = b and type = 'desafio_amigo_aceito'),
+        'obtido', left(r, 90));
+      insert into public.water_days (user_id, day, glasses, goal) values (c, today, 8, 8)
+      on conflict (user_id, day) do update set glasses = 8, goal = 8;
+      r := pg_temp.as_user(b, 'authenticated', format(
+        'select (m ->> ''days'') from public.my_friend_challenges() x, jsonb_array_elements(x.members) m where x.id = %L and (m ->> ''user_id'')::uuid = %L', ch, c));
+      res := res || jsonb_build_object('teste', 'placar conta os dias de água na meta do amigo', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', format('select public.cheer_friend_challenge(%L, %L)', ch, b));
+      res := res || jsonb_build_object('teste', 'mandar força para quem está no desafio', 'ok', (r = 't'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', format('select public.cheer_friend_challenge(%L, %L)', ch, b));
+      res := res || jsonb_build_object('teste', 'força só uma vez por dia', 'ok', (r = 'f'), 'obtido', r);
+      r := pg_temp.as_user(a, 'authenticated', format('select public.cheer_friend_challenge(%L, %L)', ch, b));
+      res := res || jsonb_build_object('teste', 'quem não participa NÃO manda força', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(b, 'authenticated', format('select agua from public.friends_weekly_league() where user_id = %L', c));
+      res := res || jsonb_build_object('teste', 'liga mostra os dias do amigo', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', 'select count(*) from public.friends_weekly_league() where is_me');
+      res := res || jsonb_build_object('teste', 'você sempre aparece na sua liga', 'ok', (r = '1'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', 'select public.set_league_visible(false)');
+      r := pg_temp.as_user(b, 'authenticated', format('select count(*) from public.friends_weekly_league() where user_id = %L', c));
+      res := res || jsonb_build_object('teste', 'quem sai da liga some para os amigos', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''calma'', 2, array[%L]::uuid[])', c));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''trilha'', 2, array[%L]::uuid[])', c));
+      r := pg_temp.as_user(b, 'authenticated', format('select public.create_friend_challenge(''mover'', 2, array[%L]::uuid[])', c));
+      res := res || jsonb_build_object('teste', 'no máximo 3 desafios criados por semana', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.friend_challenge_members where challenge_id = %L', ch));
+      res := res || jsonb_build_object('teste', 'estranho NÃO vê os membros', 'ok', (r = '0'), 'obtido', r);
+    end;
+  end if;
+
+  -- ------------------------------------------------ PONTOS E RECOMPENSAS (X4)
+  -- C ganha pontos pela semana passada; F é estranho; G é admin.
+  if to_regclass('public.reward_points') is not null then
+    declare
+      prev date := public.current_week_start() - 7;
+      rw uuid;
+      new_code text;
+      red uuid;
+    begin
+      insert into public.water_days (user_id, day, glasses, goal) values
+        (c, prev, 8, 8), (c, prev + 1, 8, 8), (c, prev + 2, 3, 8)
+      on conflict (user_id, day) do update set glasses = excluded.glasses, goal = excluded.goal;
+      perform public.award_weekly_points(prev);
+      r := pg_temp.as_user(c, 'authenticated', 'select public.reward_balance()');
+      res := res || jsonb_build_object('teste', 'semana com 2 dias de água na meta vale 20 pontos', 'ok', (r::integer >= 20), 'obtido', r);
+      perform public.award_weekly_points(prev);
+      res := res || jsonb_build_object('teste', 'creditar a semana de novo NÃO duplica',
+        'ok', (select count(*) from public.reward_points where user_id = c and reason = 'semana' and ref = prev::text) = 1, 'obtido', '');
+      res := res || jsonb_build_object('teste', 'aviso de pontos da semana',
+        'ok', exists (select 1 from public.notifications where user_id = c and type = 'pontos_semana'), 'obtido', '');
+      r := pg_temp.as_user(f, 'authenticated', format('select count(*) from public.reward_points where user_id = %L', c));
+      res := res || jsonb_build_object('teste', 'estranho NÃO vê os pontos', 'ok', (r = '0'), 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', 'insert into public.reward_points (user_id, delta, reason, ref) values (auth.uid(), 9999, ''ajuste'', ''x'')');
+      res := res || jsonb_build_object('teste', 'NÃO dá para se dar pontos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', 'insert into public.rewards (kind, title, cost, discount_percent) values (''desconto_programa'', ''Cupom_falso'', 50, 50)');
+      res := res || jsonb_build_object('teste', 'só a administração cria recompensa', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+
+      select id into rw from public.rewards where kind = 'desconto_programa' and active order by position limit 1;
+      r := pg_temp.as_user(c, 'authenticated', format('select public.redeem_reward(%L)', rw));
+      res := res || jsonb_build_object('teste', 'sem pontos suficientes NÃO resgata', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      insert into public.reward_points (user_id, delta, reason, ref) values (c, 1000, 'ajuste', 'teste');
+      r := pg_temp.as_user(c, 'authenticated', format('select public.redeem_reward(%L)', rw));
+      res := res || jsonb_build_object('teste', 'resgata a recompensa e recebe um código', 'ok', (r like 'NC-%'), 'obtido', left(r, 90));
+      new_code := r;
+      select id into red from public.reward_redemptions where reward_redemptions.code = new_code;
+      r := pg_temp.as_user(c, 'authenticated', 'select public.reward_balance()');
+      res := res || jsonb_build_object('teste', 'resgate desconta os pontos',
+        'ok', r::integer = public.reward_balance(c) and public.reward_balance(c) < 1000, 'obtido', r);
+      r := pg_temp.as_user(c, 'authenticated', format('update public.reward_redemptions set status = ''ativo'', expires_at = now() + interval ''10 years'' where id = %L', red));
+      res := res || jsonb_build_object('teste', 'NÃO altera o próprio código',
+        'ok', (select expires_at < now() + interval '1 year' from public.reward_redemptions where id = red), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('select public.use_reward_redemption(%L, ''x'')', red));
+      res := res || jsonb_build_object('teste', 'pessoa NÃO marca o código como usado sozinha', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(c, 'authenticated', format('select public.admin_set_redemption(%L, ''devolver'')', red));
+      res := res || jsonb_build_object('teste', 'só a administração devolve pontos', 'ok', (r like 'ERRO%'), 'obtido', left(r, 90));
+      r := pg_temp.as_user(g, 'authenticated', format('select public.admin_set_redemption(%L, ''devolver'')', red));
+      res := res || jsonb_build_object('teste', 'administração devolve os pontos do código',
+        'ok', r not like 'ERRO%' and exists (select 1 from public.reward_points where user_id = c and reason = 'estorno'), 'obtido', left(r, 90));
+      res := res || jsonb_build_object('teste', 'código usado pelo webhook só uma vez',
+        'ok', public.use_reward_redemption(red, 'compra') = false, 'obtido', '');
+    end;
+  end if;
+
+  -- Respostas em fio nos comentários (reply_to, um nível).
+  if to_regclass('public.comments') is not null
+     and exists (select 1 from information_schema.columns
+                  where table_schema = 'public' and table_name = 'comments' and column_name = 'reply_to') then
+    declare
+      cm_c uuid;
+      cm_a uuid;
+    begin
+      select id into cm_c from public.comments where post_id = post_f and author_id = c limit 1;
+      -- Aprovações da IA (o gatilho exige uma para cada comentário).
+      insert into public.content_approvals (user_id, kind, post_id, body) values
+        (a, 'comment', post_f, 'resposta da Ana'), (a, 'comment', post_p, 'fora'),
+        (b, 'comment', post_f, 'resposta da resposta');
+      r := pg_temp.as_user(a, 'authenticated',
+        format('insert into public.comments (post_id, author_id, body, reply_to) values (%L, %L, ''resposta da Ana'', %L)', post_f, a, cm_c));
+      res := res || jsonb_build_object('teste', 'responde a um comentário do post', 'ok', (r = 'OK:1'), 'obtido', left(r, 100));
+      select id into cm_a from public.comments where post_id = post_f and author_id = a and reply_to = cm_c limit 1;
+      res := res || jsonb_build_object('teste', 'quem foi respondido recebe aviso',
+        'ok', exists (select 1 from public.notifications where user_id = c and type = 'comentario' and actor_id = a and (data ->> 'reply')::boolean),
+        'obtido', '');
+      r := pg_temp.as_user(a, 'authenticated',
+        format('insert into public.comments (post_id, author_id, body, reply_to) values (%L, %L, ''fora'', %L)', post_p, a, cm_c));
+      res := res || jsonb_build_object('teste', 'NÃO responde a comentário de outro post', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
+      r := pg_temp.as_user(b, 'authenticated',
+        format('insert into public.comments (post_id, author_id, body, reply_to) values (%L, %L, ''resposta da resposta'', %L)', post_f, b, cm_a));
+      res := res || jsonb_build_object('teste', 'resposta a resposta fica no mesmo fio',
+        'ok', exists (select 1 from public.comments where author_id = b and post_id = post_f and reply_to = cm_c), 'obtido', left(r, 100));
+    end;
+  end if;
+
+  -- Webhook do Stripe: o registro de eventos não é visível nem gravável por usuários.
+  if to_regclass('public.stripe_events') is not null then
+    insert into public.stripe_events (id, type, payment_intent) values ('evt_sintetico_1', 'charge.refunded', 'pi_sintetico');
+    r := pg_temp.as_user(a, 'authenticated', 'select count(*) from public.stripe_events');
+    res := res || jsonb_build_object('teste', 'usuário NÃO lê os eventos do Stripe', 'ok', (r like 'ERRO%' or r = '0'), 'obtido', left(r, 100));
+    r := pg_temp.as_user(a, 'authenticated', 'insert into public.stripe_events (id, type) values (''evt_falso'', ''checkout.session.completed'')');
+    res := res || jsonb_build_object('teste', 'usuário NÃO grava evento do Stripe', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
+    r := pg_temp.as_user(null, 'anon', 'select count(*) from public.stripe_events');
+    res := res || jsonb_build_object('teste', 'visitante NÃO lê os eventos do Stripe', 'ok', (r like 'ERRO%' or r = '0'), 'obtido', left(r, 100));
+    -- Reserva atômica dos eventos (NCV7-004/005/017).
+    res := res || jsonb_build_object('teste', 'evento novo é reservado',
+      'ok', public.claim_stripe_event('evt_claim', 'checkout.session.completed', 'pi_c') = 'claimed', 'obtido', '');
+    res := res || jsonb_build_object('teste', 'segunda entrega simultânea NÃO processa (busy)',
+      'ok', public.claim_stripe_event('evt_claim', 'checkout.session.completed', 'pi_c') = 'busy', 'obtido', '');
+    perform public.release_stripe_event('evt_claim');
+    res := res || jsonb_build_object('teste', 'depois de falhar e liberar, o reenvio processa',
+      'ok', public.claim_stripe_event('evt_claim', 'checkout.session.completed', 'pi_c') = 'claimed', 'obtido', '');
+    perform public.finish_stripe_event('evt_claim');
+    res := res || jsonb_build_object('teste', 'evento concluído NÃO roda de novo (done)',
+      'ok', public.claim_stripe_event('evt_claim', 'checkout.session.completed', 'pi_c') = 'done', 'obtido', '');
+    perform public.release_stripe_event('evt_claim');
+    res := res || jsonb_build_object('teste', 'liberar NÃO apaga evento concluído',
+      'ok', exists (select 1 from public.stripe_events where id = 'evt_claim' and status = 'concluido'), 'obtido', '');
+    insert into public.stripe_events (id, type, claimed_at) values ('evt_largado', 'invoice.paid', now() - interval '10 minutes');
+    res := res || jsonb_build_object('teste', 'reserva largada há mais de 5 min é retomada',
+      'ok', public.claim_stripe_event('evt_largado', 'invoice.paid', null) = 'claimed', 'obtido', '');
+    r := pg_temp.as_user(a, 'authenticated', 'select public.claim_stripe_event(''evt_x'', ''t'', null)');
+    res := res || jsonb_build_object('teste', 'usuário NÃO reserva evento do Stripe', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
+    begin
+      insert into public.stripe_events (id, type) values ('evt_sintetico_1', 'charge.refunded');
+      res := res || jsonb_build_object('teste', 'mesmo evento NÃO entra duas vezes', 'ok', false, 'obtido', 'inseriu');
+    exception when unique_violation then
+      res := res || jsonb_build_object('teste', 'mesmo evento NÃO entra duas vezes', 'ok', true, 'obtido', '');
+    end;
+  end if;
+
+  -- Higiene de funções (painel de segurança do Supabase, 23/10).
+  r := pg_temp.as_user(null, 'anon', 'select public.setting_int(''fee_percent'', 0)');
+  res := res || jsonb_build_object('teste', 'visitante NÃO lê configurações da plataforma', 'ok', (r like 'ERRO%'), 'obtido', left(r, 100));
+  r := pg_temp.as_user(a, 'authenticated', 'select public.setting_int(''fee_percent'', 7) is not null');
+  res := res || jsonb_build_object('teste', 'usuário logado lê configuração numérica', 'ok', (r in ('true', 't')), 'obtido', left(r, 100));
+  res := res || jsonb_build_object('teste', 'nenhuma função de gatilho chamável por visitante',
+    'ok', not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                       where n.nspname = 'public' and p.prosecdef and p.prorettype = 'trigger'::regtype
+                         and has_function_privilege('anon', p.oid, 'execute')),
+    'obtido', '');
+
+  -- Exclusão da conta (LGPD): assinatura paga ativa bloqueia; sem ela, nada da pessoa fica no banco.
+  -- Fica por último porque apaga a conta A.
+  declare
+    m uuid;
+    restos text := '';
+    col record;
+    n bigint;
+  begin
+    select member_id into m from public.member_subscriptions
+     where status in ('ativa', 'cancelando', 'inadimplente') limit 1;
+    if m is not null then
+      r := pg_temp.as_user(m, 'authenticated', 'select public.delete_my_account()');
+      res := res || jsonb_build_object('teste', 'NÃO exclui a conta com assinatura paga ativa', 'ok', (r like 'ERRO%assinaturas%'), 'obtido', left(r, 120));
+    end if;
+    update public.member_subscriptions set status = 'cancelada' where member_id = a or professional_id = a;
+    r := pg_temp.as_user(a, 'authenticated', 'select public.delete_my_account()');
+    res := res || jsonb_build_object('teste', 'pessoa exclui a própria conta', 'ok', (r not like 'ERRO%'), 'obtido', left(r, 120));
+    for col in
+      select c.table_name, c.column_name from information_schema.columns c
+        join information_schema.tables t on t.table_schema = c.table_schema and t.table_name = c.table_name
+       where c.table_schema = 'public' and t.table_type = 'BASE TABLE' and c.data_type = 'uuid'
+         and c.column_name in ('user_id', 'author_id', 'patient_id', 'member_id', 'buyer_id', 'owner_id', 'id')
+    loop
+      execute format('select count(*) from public.%I where %I = $1', col.table_name, col.column_name) into n using a;
+      if n > 0 then restos := restos || format('%s.%s=%s ', col.table_name, col.column_name, n); end if;
+    end loop;
+    res := res || jsonb_build_object('teste', 'conta excluída não deixa dados da pessoa no banco', 'ok', (restos = ''), 'obtido', left(restos, 300));
+  end;
+
   -- Relatório (o erro desfaz toda a transação).
   raise exception 'RESULTADOS:%', jsonb_pretty(res);
 end

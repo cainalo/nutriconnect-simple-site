@@ -2,6 +2,7 @@ import { t } from "./i18n";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import type { ProfessionalInfo, ProfileRole } from "./community";
+import { createIdentityTracker } from "./session-cache";
 
 // Autenticação via Supabase Auth. O usuário logado (perfil + dados privados)
 // fica num cache em memória para que getUser() continue síncrono; mudanças
@@ -33,7 +34,13 @@ let currentUser: AuthUser | null = null;
 let ready = false;
 let initPromise: Promise<void> | null = null;
 
+// Quem está logado mudou (saiu, entrou ou trocou de conta): avisa antes de a tela ser redesenhada,
+// para que dados da sessão anterior (cache de consultas, inclusive clínicas) não apareçam na nova.
+const identity = createIdentityTracker();
+export const onIdentityChange = identity.subscribe;
+
 function emit() {
+  if (ready) identity.update(currentUser?.id ?? null);
   if (typeof window !== "undefined") window.dispatchEvent(new Event(AUTH_EVENT));
 }
 
@@ -189,6 +196,32 @@ export async function loginUser(email: string, password?: string): Promise<AuthU
   return user;
 }
 
+/** Entrar sem senha: manda um link (e um código de 6 dígitos) para o e-mail de quem já tem conta. */
+export async function requestLoginEmail(email: string, redirectPath = "/espaco") {
+  const { error } = await supabase.auth.signInWithOtp({
+    email: email.toLowerCase().trim(),
+    options: {
+      shouldCreateUser: false,
+      emailRedirectTo:
+        typeof window !== "undefined" ? `${location.origin}${redirectPath}` : undefined,
+    },
+  });
+  if (error) throw new Error(translateAuthError(error.message));
+}
+
+/** Confirma o código de 6 dígitos do e-mail de entrada. */
+export async function verifyLoginCode(email: string, code: string): Promise<AuthUser> {
+  const { error } = await supabase.auth.verifyOtp({
+    email: email.toLowerCase().trim(),
+    token: code.trim(),
+    type: "email",
+  });
+  if (error) throw new Error(t("reset.invalidCode"));
+  const user = await refreshUser();
+  if (!user) throw new Error(t("auth.loginError"));
+  return user;
+}
+
 export async function signOut() {
   const previousId = currentUser?.id;
   await supabase.auth.signOut();
@@ -196,6 +229,14 @@ export async function signOut() {
   emit();
   // O próximo login no mesmo navegador não herda o cache da trilha desta conta.
   if (previousId) void import("./trail-sync").then((m) => m.clearTrailCache(previousId));
+  // O PIN do responsável (perfil infantil) é apagado ao sair: é o caminho de quem o esqueceu.
+  if (previousId) {
+    void import("./parent-pin").then((m) => m.clearParentPin(previousId));
+    // E a próxima entrada começa no perfil do responsável.
+    void import("./trail-profiles").then((m) =>
+      m.setActiveProfileId(previousId, m.ADULT_PROFILE_ID),
+    );
+  }
 }
 
 export async function updateCurrentUser(
@@ -271,8 +312,12 @@ export async function setNewPassword(newPassword: string) {
 }
 
 export async function deleteAccount() {
-  const { error } = await supabase.rpc("delete_my_account");
-  if (error) throw new Error(error.message);
+  // No servidor: cancela assinaturas pagas, apaga os arquivos do Storage e depois a conta.
+  const { data, error } = await supabase.functions.invoke<{ ok?: boolean; error?: string }>(
+    "account-delete",
+    { body: {} },
+  );
+  if (error || !data?.ok) throw new Error(data?.error ?? t("settings.deleteError"));
   await supabase.auth.signOut();
   currentUser = null;
   emit();

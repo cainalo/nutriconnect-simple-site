@@ -40,3 +40,4 @@ supabase/.temp
 
 # Página de teste visual do estúdio (saída do build)
 .preview-harness/out/
+tests/e2e/out/

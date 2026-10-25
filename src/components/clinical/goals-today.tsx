@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, Minus, Plus, Target, Trash2 } from "lucide-react";
 import * as records from "@/lib/clinical/records";
@@ -9,7 +10,7 @@ import { formatNumber } from "@/lib/clinical/format";
 import { useClinicalI18n } from "@/lib/clinical/i18n";
 import { cn } from "@/lib/utils";
 import { GoalForm, WeekStrip } from "./goals-panel";
-import { EmptyState, Loading, buttonGhost, buttonSecondary } from "./ui";
+import { EmptyState, Loading, buttonGhost, buttonPrimary, buttonSecondary } from "./ui";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { useNoNumbers } from "@/lib/no-numbers";
 
@@ -53,7 +54,15 @@ export function TodayGoals({ patientId, compact }: { patientId: string; compact?
         (adding ? (
           <GoalForm patientId={patientId} asProfessional={false} onClose={() => setAdding(false)} />
         ) : (
-          <button type="button" className={buttonSecondary} onClick={() => setAdding(true)}>
+          <button
+            type="button"
+            // Sem metas, criar a própria é a ação principal da página.
+            className={cn(
+              active.length === 0 ? buttonPrimary : buttonSecondary,
+              "w-full sm:w-auto",
+            )}
+            onClick={() => setAdding(true)}
+          >
             <Plus className="h-4 w-4" /> {t("goals.createOwn")}
           </button>
         ))}
@@ -149,7 +158,9 @@ function GoalCheckinCard({
             type="button"
             className={cn(buttonGhost, "px-2")}
             aria-label={t("common.remove")}
-            onClick={() => window.confirm(t("goals.deleteConfirm")) && remove.mutate(undefined)}
+            onClick={async () =>
+              (await siteConfirm(t("goals.deleteConfirm"))) && remove.mutate(undefined)
+            }
           >
             <Trash2 className="h-4 w-4" />
           </button>

@@ -65,6 +65,74 @@ function TemaDaSemanaPage() {
   // Desafio ligado ao tema ativo; sem um, o primeiro da trilha.
   const linkedChallenge = challenges.find((c) => c.themeId === theme?.id) || challenges[0];
 
+  // Acervo de temas anteriores: aparece depois do tema atual e também quando ainda não há tema.
+  const archive = (history.data ?? []).length > 0 && (
+    <section className="border-t border-border pt-10">
+      <div className="mb-6">
+        <h3 className="text-xl font-bold font-display text-foreground">{t("theme.archive")}</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">{t("theme.archiveHint")}</p>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-3">
+        {(history.data ?? []).map((pt, index) => {
+          const ptText =
+            locale !== "pt-BR" && pt.translations[locale]
+              ? {
+                  title: pt.translations[locale].title || pt.title,
+                  summary: pt.translations[locale].description || pt.description,
+                }
+              : { title: pt.title, summary: pt.description };
+          const cover =
+            index === 0
+              ? "/images/hero/kitchen-prep.jpg"
+              : index === 1
+                ? "/images/recipes/default-recipe.jpg"
+                : "/images/communities/friends-dinner.jpg";
+
+          return (
+            <div
+              key={pt.id}
+              className="rounded-2xl border border-border bg-card shadow-xs transition hover:shadow-md overflow-hidden flex flex-col"
+            >
+              <div className="h-32 w-full relative">
+                <img
+                  src={cover}
+                  alt={ptText.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="absolute bottom-3 left-4">
+                  <span className="text-[10px] font-bold text-white/90 drop-shadow-md">
+                    {t("theme.weekOf").replace("{date}", formatWeekStart(pt.weekStart, locale))}
+                  </span>
+                </div>
+              </div>
+              <div className="p-5 flex flex-col flex-1">
+                <h4 className="text-sm font-bold font-display text-foreground mb-2">
+                  {ptText.title}
+                </h4>
+                <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed flex-1">
+                  {ptText.summary}
+                </p>
+                <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+                  <span>
+                    <EmojiIcon emoji={"🥗"} className="mr-1 inline h-3.5 w-3.5 align-[-2px]" />
+                    {pt.recipesCount} {t("theme.recipesCount")}
+                  </span>
+                  <span>
+                    <EmojiIcon emoji={"💬"} className="mr-1 inline h-3.5 w-3.5 align-[-2px]" />
+                    {pt.postsCount} {t("theme.storiesCount")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+
   return (
     <AppScreen>
       <div className="mx-auto w-full max-w-[120rem] px-4 sm:px-6 lg:px-10 py-8">
@@ -88,7 +156,9 @@ function TemaDaSemanaPage() {
               "Le thème de la semaine est en préparation. Revenez bientôt !",
             ])}
           </div>
-        ) : (
+        ) : null}
+        {!themeQuery.isLoading && (!theme || !text) && <div className="mt-10">{archive}</div>}
+        {themeQuery.isLoading || !theme || !text ? null : (
           <div className="space-y-12">
             {/* Bloco Principal do Tema - Editorial */}
             <div className="relative overflow-hidden rounded-3xl border border-accent/30 bg-card shadow-card flex flex-col">
@@ -199,84 +269,7 @@ function TemaDaSemanaPage() {
               </div>
             </div>
 
-            {/* Histórico de Temas Anteriores */}
-            {(history.data ?? []).length > 0 && (
-              <section className="border-t border-border pt-10">
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold font-display text-foreground">
-                    {t("theme.archive")}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("theme.archiveHint")}</p>
-                </div>
-
-                <div className="grid gap-5 sm:grid-cols-3">
-                  {(history.data ?? []).map((pt, index) => {
-                    const ptText =
-                      locale !== "pt-BR" && pt.translations[locale]
-                        ? {
-                            title: pt.translations[locale].title || pt.title,
-                            summary: pt.translations[locale].description || pt.description,
-                          }
-                        : { title: pt.title, summary: pt.description };
-                    const cover =
-                      index === 0
-                        ? "/images/hero/kitchen-prep.jpg"
-                        : index === 1
-                          ? "/images/recipes/default-recipe.jpg"
-                          : "/images/communities/friends-dinner.jpg";
-
-                    return (
-                      <div
-                        key={pt.id}
-                        className="rounded-2xl border border-border bg-card shadow-xs transition hover:shadow-md overflow-hidden flex flex-col"
-                      >
-                        <div className="h-32 w-full relative">
-                          <img
-                            src={cover}
-                            alt={ptText.title}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                          <div className="absolute bottom-3 left-4">
-                            <span className="text-[10px] font-bold text-white/90 drop-shadow-md">
-                              {t("theme.weekOf").replace(
-                                "{date}",
-                                formatWeekStart(pt.weekStart, locale),
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="p-5 flex flex-col flex-1">
-                          <h4 className="text-sm font-bold font-display text-foreground mb-2">
-                            {ptText.title}
-                          </h4>
-                          <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed flex-1">
-                            {ptText.summary}
-                          </p>
-                          <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
-                            <span>
-                              <EmojiIcon
-                                emoji={"🥗"}
-                                className="mr-1 inline h-3.5 w-3.5 align-[-2px]"
-                              />
-                              {pt.recipesCount} {t("theme.recipesCount")}
-                            </span>
-                            <span>
-                              <EmojiIcon
-                                emoji={"💬"}
-                                className="mr-1 inline h-3.5 w-3.5 align-[-2px]"
-                              />
-                              {pt.postsCount} {t("theme.storiesCount")}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
+            {archive}
           </div>
         )}
       </div>

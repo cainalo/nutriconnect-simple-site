@@ -58,13 +58,36 @@ import {
   type SocialAnalysis,
 } from "@/lib/social-studio.functions";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
+import type { Names } from "@/lib/appearance-data";
 
-const METRICS: { key: string; label: string; icon: LucideIcon }[] = [
-  { key: "followers", label: "Seguidores", icon: Users },
-  { key: "posts_per_week", label: "Posts por semana", icon: CalendarClock },
-  { key: "avg_likes", label: "Curtidas (média)", icon: Heart },
-  { key: "avg_comments", label: "Comentários (média)", icon: MessageCircle },
-  { key: "avg_reach", label: "Alcance médio", icon: Eye },
+const METRICS: { key: string; label: Names; icon: LucideIcon }[] = [
+  { key: "followers", label: ["Seguidores", "Followers", "Seguidores", "Abonnés"], icon: Users },
+  {
+    key: "posts_per_week",
+    label: ["Posts por semana", "Posts per week", "Posts por semana", "Posts par semaine"],
+    icon: CalendarClock,
+  },
+  {
+    key: "avg_likes",
+    label: ["Curtidas (média)", "Likes (average)", "Me gusta (promedio)", "J’aime (moyenne)"],
+    icon: Heart,
+  },
+  {
+    key: "avg_comments",
+    label: [
+      "Comentários (média)",
+      "Comments (average)",
+      "Comentarios (promedio)",
+      "Commentaires (moyenne)",
+    ],
+    icon: MessageCircle,
+  },
+  {
+    key: "avg_reach",
+    label: ["Alcance médio", "Average reach", "Alcance promedio", "Portée moyenne"],
+    icon: Eye,
+  },
 ];
 
 type Draft = {
@@ -83,6 +106,7 @@ const fmt = (v: unknown) =>
   typeof v === "number" ? v.toLocaleString("pt-BR") : String(v ?? "").trim();
 
 export function ProfilesTab() {
+  const tr = useTr();
   const profiles = useSocialProfiles();
   const [draft, setDraft] = useState<Draft | null>(null);
   const list = profiles.data ?? [];
@@ -92,9 +116,12 @@ export function ProfilesTab() {
       <div className="flex min-w-0 flex-wrap items-start gap-3">
         <p className="flex min-w-0 flex-1 items-start gap-2 rounded-2xl border border-border/60 bg-card px-3.5 py-2.5 text-xs leading-relaxed text-muted-foreground">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#3b7bbf]" />
-          As redes não deixam ler um perfil só pelo link. Cole a bio, algumas legendas recentes e os
-          números do painel da rede (ou envie um print na hora de analisar): a IA usa isso para o
-          diagnóstico.
+          {tr([
+            "As redes não deixam ler um perfil só pelo link. Cole a bio, algumas legendas recentes e os números do painel da rede (ou envie um print na hora de analisar): a IA usa isso para o diagnóstico.",
+            "Networks don’t let us read a profile from its link alone. Paste the bio, a few recent captions and the numbers from the network’s dashboard (or upload a screenshot when analyzing): the AI uses this for the diagnosis.",
+            "Las redes no permiten leer un perfil solo con el enlace. Pega la bio, algunas descripciones recientes y los números del panel de la red (o sube una captura al analizar): la IA lo usa para el diagnóstico.",
+            "Les réseaux ne permettent pas de lire un profil à partir du seul lien. Collez la bio, quelques légendes récentes et les chiffres du tableau de bord du réseau (ou envoyez une capture au moment de l’analyse) : l’IA s’en sert pour le diagnostic.",
+          ])}
         </p>
         {!draft && (
           <button
@@ -102,7 +129,8 @@ export function ProfilesTab() {
             className={btnPrimary}
             onClick={() => setDraft({ network: "instagram", handle: "", metrics: {} })}
           >
-            <Plus className="h-4 w-4" /> Novo perfil
+            <Plus className="h-4 w-4" />{" "}
+            {tr(["Novo perfil", "New profile", "Nuevo perfil", "Nouveau profil"])}
           </button>
         )}
       </div>
@@ -115,7 +143,12 @@ export function ProfilesTab() {
         <EmptyState
           icon={UserRound}
           color="#d6456b"
-          title="Não deu para carregar os perfis"
+          title={tr([
+            "Não deu para carregar os perfis",
+            "Couldn’t load the profiles",
+            "No se pudieron cargar los perfiles",
+            "Impossible de charger les profils",
+          ])}
           text={(profiles.error as Error).message}
         />
       ) : profiles.isLoading ? (
@@ -124,15 +157,26 @@ export function ProfilesTab() {
         <EmptyState
           icon={UserRound}
           color={OLIVE}
-          title="Nenhum perfil cadastrado"
-          text="Comece pelo Instagram do NutriConnect: com a bio, as legendas e os números, a IA monta o diagnóstico."
+          title={tr([
+            "Nenhum perfil cadastrado",
+            "No profiles added",
+            "Ningún perfil registrado",
+            "Aucun profil enregistré",
+          ])}
+          text={tr([
+            "Comece pelo Instagram do NutriConnect: com a bio, as legendas e os números, a IA monta o diagnóstico.",
+            "Start with NutriConnect’s Instagram: with the bio, captions and numbers, the AI builds the diagnosis.",
+            "Empieza por el Instagram de NutriConnect: con la bio, las descripciones y los números, la IA arma el diagnóstico.",
+            "Commencez par l’Instagram de NutriConnect : avec la bio, les légendes et les chiffres, l’IA établit le diagnostic.",
+          ])}
           action={
             <button
               type="button"
               className={btnPrimary}
               onClick={() => setDraft({ network: "instagram", handle: "", metrics: {} })}
             >
-              <Plus className="h-4 w-4" /> Cadastrar perfil
+              <Plus className="h-4 w-4" />{" "}
+              {tr(["Cadastrar perfil", "Add profile", "Registrar perfil", "Ajouter un profil"])}
             </button>
           }
         />
@@ -168,6 +212,7 @@ export function ProfilesTab() {
 }
 
 function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
+  const tr = useTr();
   const save = useSaveProfile();
   const [d, setD] = useState<Draft>(draft);
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((o) => ({ ...o, [k]: v }));
@@ -178,8 +223,17 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
     <StudioCard
       icon={draft.id ? Pencil : Plus}
       color={st.color}
-      title={draft.id ? `Editar ${draft.handle}` : "Novo perfil"}
-      hint="Quanto mais legendas e números, melhor a análise"
+      title={
+        draft.id
+          ? `${tr(["Editar", "Edit", "Editar", "Modifier"])} ${draft.handle}`
+          : tr(["Novo perfil", "New profile", "Nuevo perfil", "Nouveau profil"])
+      }
+      hint={tr([
+        "Quanto mais legendas e números, melhor a análise",
+        "The more captions and numbers, the better the analysis",
+        "Cuantas más descripciones y números, mejor el análisis",
+        "Plus il y a de légendes et de chiffres, meilleure est l’analyse",
+      ])}
     >
       <form
         className="space-y-4"
@@ -198,7 +252,9 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
             },
             {
               onSuccess: () => {
-                toast.success("Perfil salvo.");
+                toast.success(
+                  tr(["Perfil salvo.", "Profile saved.", "Perfil guardado.", "Profil enregistré."]),
+                );
                 onDone();
               },
               onError: (err) => toast.error((err as Error).message),
@@ -207,7 +263,7 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
         }}
       >
         <div className="min-w-0">
-          <span className={label}>Rede</span>
+          <span className={label}>{tr(["Rede", "Network", "Red", "Réseau"])}</span>
           <div className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 py-0.5">
             {NETWORKS.map((n) => (
               <Pill
@@ -224,7 +280,7 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
         </div>
         <div className="grid min-w-0 gap-3 @2xl:grid-cols-2">
           <label className="min-w-0">
-            <span className={label}>Perfil</span>
+            <span className={label}>{tr(["Perfil", "Profile", "Perfil", "Profil"])}</span>
             <input
               value={d.handle}
               maxLength={80}
@@ -235,7 +291,9 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
             />
           </label>
           <label className="min-w-0">
-            <span className={label}>Link (opcional)</span>
+            <span className={label}>
+              {tr(["Link (opcional)", "Link (optional)", "Enlace (opcional)", "Lien (facultatif)"])}
+            </span>
             <input
               value={d.url ?? ""}
               type="url"
@@ -246,18 +304,32 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
           </label>
         </div>
         <label className="block min-w-0">
-          <span className={label}>Bio e objetivo</span>
+          <span className={label}>
+            {tr(["Bio e objetivo", "Bio and goal", "Bio y objetivo", "Bio et objectif"])}
+          </span>
           <textarea
             value={d.notes ?? ""}
             maxLength={3000}
             rows={3}
             onChange={(e) => set("notes", e.target.value)}
-            placeholder="Bio atual, público que queremos atingir, objetivo da conta…"
+            placeholder={tr([
+              "Bio atual, público que queremos atingir, objetivo da conta…",
+              "Current bio, audience we want to reach, account goal…",
+              "Bio actual, público al que queremos llegar, objetivo de la cuenta…",
+              "Bio actuelle, public visé, objectif du compte…",
+            ])}
             className={cn(field, "resize-y")}
           />
         </label>
         <div className="min-w-0">
-          <span className={label}>Números do painel da rede</span>
+          <span className={label}>
+            {tr([
+              "Números do painel da rede",
+              "Numbers from the network’s dashboard",
+              "Números del panel de la red",
+              "Chiffres du tableau de bord du réseau",
+            ])}
+          </span>
           <div className="grid grid-cols-2 gap-2 @2xl:grid-cols-5">
             {METRICS.map((m) => (
               <label
@@ -266,7 +338,7 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
               >
                 <span className="mb-1 flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">
                   <m.icon className="h-3 w-3 shrink-0" style={{ color: st.color }} />
-                  <span className="truncate">{m.label}</span>
+                  <span className="truncate">{tr(m.label)}</span>
                 </span>
                 <input
                   value={d.metrics[m.key] ?? ""}
@@ -280,13 +352,25 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
           </div>
         </div>
         <label className="block min-w-0">
-          <span className={label}>Legendas recentes</span>
+          <span className={label}>
+            {tr([
+              "Legendas recentes",
+              "Recent captions",
+              "Descripciones recientes",
+              "Légendes récentes",
+            ])}
+          </span>
           <textarea
             value={d.sample_posts ?? ""}
             maxLength={8000}
             rows={6}
             onChange={(e) => set("sample_posts", e.target.value)}
-            placeholder="Cole aqui 5 a 10 legendas recentes (separe com uma linha em branco). Se souber, anote ao lado as curtidas e os comentários de cada uma."
+            placeholder={tr([
+              "Cole aqui 5 a 10 legendas recentes (separe com uma linha em branco). Se souber, anote ao lado as curtidas e os comentários de cada uma.",
+              "Paste 5 to 10 recent captions here (separate them with a blank line). If you know them, note each one’s likes and comments next to it.",
+              "Pega aquí de 5 a 10 descripciones recientes (sepáralas con una línea en blanco). Si los sabes, anota al lado los me gusta y comentarios de cada una.",
+              "Collez ici 5 à 10 légendes récentes (séparées par une ligne vide). Si vous les connaissez, notez à côté les j’aime et les commentaires de chacune.",
+            ])}
             className={cn(field, "resize-y")}
           />
         </label>
@@ -296,10 +380,13 @@ function ProfileForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
             className={btnPrimary}
             disabled={!d.handle.trim() || save.isPending}
           >
-            <Check className="h-4 w-4" /> {save.isPending ? "Salvando…" : "Salvar perfil"}
+            <Check className="h-4 w-4" />{" "}
+            {save.isPending
+              ? tr(["Salvando…", "Saving…", "Guardando…", "Enregistrement…"])
+              : tr(["Salvar perfil", "Save profile", "Guardar perfil", "Enregistrer le profil"])}
           </button>
           <button type="button" className={btnSoft} onClick={onDone}>
-            Cancelar
+            {tr(["Cancelar", "Cancel", "Cancelar", "Annuler"])}
           </button>
         </div>
       </form>
@@ -317,6 +404,7 @@ function ProfileCard({
   onEdit: () => void;
 }) {
   const { locale } = useI18n();
+  const tr = useTr();
   const qc = useQueryClient();
   const remove = useDeleteProfile();
   const [busy, setBusy] = useState(false);
@@ -337,15 +425,35 @@ function ProfileCard({
       if ("error" in res)
         toast.error(
           res.error === "limit"
-            ? "A cota de IA de hoje acabou."
-            : "A IA não conseguiu analisar agora.",
+            ? tr([
+                "A cota de IA de hoje acabou.",
+                "Today’s AI quota is used up.",
+                "La cuota de IA de hoy se agotó.",
+                "Le quota d’IA du jour est épuisé.",
+              ])
+            : tr([
+                "A IA não conseguiu analisar agora.",
+                "The AI couldn’t analyze right now.",
+                "La IA no pudo analizar ahora.",
+                "L’IA n’a pas pu analyser pour le moment.",
+              ]),
         );
       else {
-        toast.success("Diagnóstico pronto.");
+        toast.success(
+          tr(["Diagnóstico pronto.", "Diagnosis ready.", "Diagnóstico listo.", "Diagnostic prêt."]),
+        );
         await qc.invalidateQueries({ queryKey: studioKeys.profiles() });
       }
     } catch (err) {
-      toast.error((err as Error).message || "A IA não conseguiu analisar agora.");
+      toast.error(
+        (err as Error).message ||
+          tr([
+            "A IA não conseguiu analisar agora.",
+            "The AI couldn’t analyze right now.",
+            "La IA no pudo analizar ahora.",
+            "L’IA n’a pas pu analyser pour le moment.",
+          ]),
+      );
     } finally {
       setBusy(false);
     }
@@ -386,7 +494,8 @@ function ProfileCard({
               rel="noreferrer"
               className="inline-flex items-center gap-1 text-[11px] font-semibold text-foreground/70 hover:text-foreground hover:underline"
             >
-              <ExternalLink className="h-3 w-3" /> Abrir perfil
+              <ExternalLink className="h-3 w-3" />{" "}
+              {tr(["Abrir perfil", "Open profile", "Abrir perfil", "Ouvrir le profil"])}
             </a>
           )}
         </div>
@@ -395,27 +504,32 @@ function ProfileCard({
             type="button"
             className={cn(btnIcon, "bg-card/70")}
             onClick={onEdit}
-            aria-label="Editar perfil"
-            title="Editar"
+            aria-label={tr([
+              "Editar perfil",
+              "Edit profile",
+              "Editar perfil",
+              "Modifier le profil",
+            ])}
+            title={tr(["Editar", "Edit", "Editar", "Modifier"])}
           >
             <Pencil className="h-4 w-4" />
           </button>
           {confirmDelete ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-card/90 p-0.5 pl-2.5 text-[11px] font-semibold text-foreground shadow-sm">
-              Apagar?
+              {tr(["Apagar?", "Delete?", "¿Borrar?", "Supprimer ?"])}
               <button
                 type="button"
                 className="h-8 rounded-full bg-destructive px-3 text-[11px] font-bold text-destructive-foreground"
                 onClick={() => remove.mutate(profile.id)}
               >
-                Sim
+                {tr(["Sim", "Yes", "Sí", "Oui"])}
               </button>
               <button
                 type="button"
                 className="h-8 rounded-full px-2 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
                 onClick={() => setConfirmDelete(false)}
               >
-                Não
+                {tr(["Não", "No", "No", "Non"])}
               </button>
             </span>
           ) : (
@@ -423,8 +537,13 @@ function ProfileCard({
               type="button"
               className={cn(btnIcon, "bg-card/70 hover:text-destructive")}
               onClick={() => setConfirmDelete(true)}
-              aria-label="Apagar perfil"
-              title="Apagar"
+              aria-label={tr([
+                "Apagar perfil",
+                "Delete profile",
+                "Borrar perfil",
+                "Supprimer le profil",
+              ])}
+              title={tr(["Apagar", "Delete", "Borrar", "Supprimer"])}
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -446,7 +565,7 @@ function ProfileCard({
                   {fmt(metrics[m.key])}
                 </p>
                 <p className="mt-0.5 truncate text-[10px] font-semibold text-muted-foreground">
-                  {m.label}
+                  {tr(m.label)}
                 </p>
               </li>
             ))}
@@ -461,16 +580,36 @@ function ProfileCard({
             onClick={() => void analyze()}
           >
             <Sparkles className={cn("h-4 w-4", busy && "animate-spin")} />
-            {busy ? "Analisando…" : analysis ? "Analisar de novo" : "Analisar com IA"}
+            {busy
+              ? tr(["Analisando…", "Analyzing…", "Analizando…", "Analyse…"])
+              : analysis
+                ? tr([
+                    "Analisar de novo",
+                    "Analyze again",
+                    "Analizar de nuevo",
+                    "Analyser à nouveau",
+                  ])
+                : tr([
+                    "Analisar com IA",
+                    "Analyze with AI",
+                    "Analizar con IA",
+                    "Analyser avec l’IA",
+                  ])}
           </button>
           <button
             type="button"
             className={btnSoft}
             disabled={busy}
             onClick={() => file.current?.click()}
-            title="Analisar com um print do perfil"
+            title={tr([
+              "Analisar com um print do perfil",
+              "Analyze with a screenshot of the profile",
+              "Analizar con una captura del perfil",
+              "Analyser avec une capture du profil",
+            ])}
           >
-            <Camera className="h-4 w-4" /> Com print
+            <Camera className="h-4 w-4" />{" "}
+            {tr(["Com print", "With screenshot", "Con captura", "Avec capture"])}
           </button>
           <input
             ref={file}
@@ -485,7 +624,8 @@ function ProfileCard({
           />
           {profile.analyzed_at && (
             <span className="text-[11px] text-muted-foreground">
-              Analisado em {dateTime(profile.analyzed_at)}
+              {tr(["Analisado em", "Analyzed on", "Analizado el", "Analysé le"])}{" "}
+              {dateTime(profile.analyzed_at)}
             </span>
           )}
         </div>
@@ -502,8 +642,18 @@ function ProfileCard({
           <EmptyState
             icon={BarChart3}
             color={st.color}
-            title="Ainda sem diagnóstico"
-            text="Toque em Analisar com IA. Quanto mais legendas e números você colar no cadastro, melhor."
+            title={tr([
+              "Ainda sem diagnóstico",
+              "No diagnosis yet",
+              "Aún sin diagnóstico",
+              "Pas encore de diagnostic",
+            ])}
+            text={tr([
+              "Toque em Analisar com IA. Quanto mais legendas e números você colar no cadastro, melhor.",
+              "Tap Analyze with AI. The more captions and numbers you paste into the profile, the better.",
+              "Toca Analizar con IA. Cuantas más descripciones y números pegues en el registro, mejor.",
+              "Touchez Analyser avec l’IA. Plus vous collez de légendes et de chiffres dans la fiche, mieux c’est.",
+            ])}
           />
         )}
       </div>
@@ -512,30 +662,87 @@ function ProfileCard({
 }
 
 function Analysis({ analysis, color }: { analysis: SocialAnalysis; color: string }) {
+  const tr = useTr();
   const [copied, setCopied] = useState(false);
   const lists: { title: string; items: string[]; icon: LucideIcon; color: string }[] = [
-    { title: "Pilares de conteúdo", items: analysis.pilares, icon: Layers, color: "#7a5cc4" },
-    { title: "Pontos fortes", items: analysis.pontos_fortes, icon: ThumbsUp, color: "#2f8a5b" },
-    { title: "O que melhorar", items: analysis.melhorar, icon: Wrench, color: "#d9692a" },
     {
-      title: "Ações de engajamento",
+      title: tr([
+        "Pilares de conteúdo",
+        "Content pillars",
+        "Pilares de contenido",
+        "Piliers de contenu",
+      ]),
+      items: analysis.pilares,
+      icon: Layers,
+      color: "#7a5cc4",
+    },
+    {
+      title: tr(["Pontos fortes", "Strengths", "Puntos fuertes", "Points forts"]),
+      items: analysis.pontos_fortes,
+      icon: ThumbsUp,
+      color: "#2f8a5b",
+    },
+    {
+      title: tr(["O que melhorar", "What to improve", "Qué mejorar", "À améliorer"]),
+      items: analysis.melhorar,
+      icon: Wrench,
+      color: "#d9692a",
+    },
+    {
+      title: tr([
+        "Ações de engajamento",
+        "Engagement actions",
+        "Acciones de interacción",
+        "Actions d’engagement",
+      ]),
       items: analysis.acoes_engajamento,
       icon: Heart,
       color: "#d6456b",
     },
     {
-      title: "Formatos recomendados",
+      title: tr([
+        "Formatos recomendados",
+        "Recommended formats",
+        "Formatos recomendados",
+        "Formats recommandés",
+      ]),
       items: analysis.formatos_recomendados,
       icon: LayoutGrid,
       color: "#3b7bbf",
     },
-    { title: "Metas para 30 dias", items: analysis.metas_30_dias, icon: Target, color: "#c58a12" },
+    {
+      title: tr([
+        "Metas para 30 dias",
+        "30-day goals",
+        "Metas para 30 días",
+        "Objectifs à 30 jours",
+      ]),
+      items: analysis.metas_30_dias,
+      icon: Target,
+      color: "#c58a12",
+    },
   ];
   const blocks: { title: string; text: string; icon: LucideIcon }[] = [
-    { title: "Tom atual", text: analysis.tom_atual, icon: MessageCircle },
-    { title: "Público", text: analysis.publico, icon: Users },
-    { title: "Frequência", text: analysis.frequencia, icon: CalendarClock },
-    { title: "Melhores horários", text: analysis.melhores_horarios, icon: Clock },
+    {
+      title: tr(["Tom atual", "Current tone", "Tono actual", "Ton actuel"]),
+      text: analysis.tom_atual,
+      icon: MessageCircle,
+    },
+    {
+      title: tr(["Público", "Audience", "Público", "Public"]),
+      text: analysis.publico,
+      icon: Users,
+    },
+    {
+      title: tr(["Frequência", "Frequency", "Frecuencia", "Fréquence"]),
+      text: analysis.frequencia,
+      icon: CalendarClock,
+    },
+    {
+      title: tr(["Melhores horários", "Best times", "Mejores horarios", "Meilleurs horaires"]),
+      text: analysis.melhores_horarios,
+      icon: Clock,
+    },
   ];
 
   return (
@@ -602,7 +809,7 @@ function Analysis({ analysis, color }: { analysis: SocialAnalysis; color: string
         >
           <div className="flex items-center justify-between gap-2">
             <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color }}>
-              Bio sugerida
+              {tr(["Bio sugerida", "Suggested bio", "Bio sugerida", "Bio suggérée"])}
             </p>
             <button
               type="button"
@@ -615,7 +822,9 @@ function Analysis({ analysis, color }: { analysis: SocialAnalysis; color: string
               className="inline-flex h-7 items-center gap-1 rounded-full bg-card px-2.5 text-[11px] font-semibold text-foreground shadow-xs"
             >
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-              {copied ? "Copiada" : "Copiar"}
+              {copied
+                ? tr(["Copiada", "Copied", "Copiada", "Copiée"])
+                : tr(["Copiar", "Copy", "Copiar", "Copier"])}
             </button>
           </div>
           <p className="mt-1.5 whitespace-pre-line text-sm text-foreground">

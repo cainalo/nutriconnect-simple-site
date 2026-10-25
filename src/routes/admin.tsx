@@ -7,6 +7,8 @@ import { useI18n } from "@/hooks/use-i18n";
 import { isPlatformAdmin } from "@/lib/community-admin";
 import { useOverview } from "@/lib/admin-api";
 import { SECTIONS, isSectionId, type SectionId } from "@/components/admin/sections";
+import { SectionBoundary } from "@/components/admin/section-boundary";
+import { useTr } from "@/components/settings-ui";
 import { OverviewSection } from "@/components/admin/sections-overview";
 import { ContactSection, UsersSection } from "@/components/admin/sections-people";
 import {
@@ -21,6 +23,7 @@ import { QualitySection } from "@/components/admin/sections-quality";
 import { SiteNinaSection } from "@/components/admin/sections-site-nina";
 import { PresentationSection } from "@/components/admin/sections-presentation";
 import { MarketsSection } from "@/components/admin/sections-markets";
+import { RewardsSection } from "@/components/admin/sections-rewards";
 import { SocialStudioSection } from "@/components/admin/social/studio";
 import {
   AnnouncementsSection,
@@ -50,6 +53,7 @@ export const Route = createFileRoute("/admin")({
 function AdminPage() {
   const { user, hydrated } = useRequireAuth();
   const { t } = useI18n();
+  const tr = useTr();
   const { secao } = Route.useSearch();
   const navigate = useNavigate();
   const section: SectionId = secao ?? "visao";
@@ -82,7 +86,7 @@ function AdminPage() {
     comunidades: o?.communities_attention,
   };
   const groups = SECTIONS.reduce<Record<string, typeof SECTIONS>>((acc, s) => {
-    (acc[s.group] ??= []).push(s);
+    (acc[tr(s.group)] ??= []).push(s);
     return acc;
   }, {});
 
@@ -94,7 +98,12 @@ function AdminPage() {
 
         {/* Menu: lateral no computador (rola por dentro), faixa rolável no celular */}
         <nav
-          aria-label="Seções da administração"
+          aria-label={tr([
+            "Seções da administração",
+            "Admin sections",
+            "Secciones de la administración",
+            "Sections de l'administration",
+          ])}
           className="mb-4 shrink-0 lg:mb-0 lg:flex lg:min-h-0 lg:flex-col"
         >
           <div className="no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 lg:hidden">
@@ -111,7 +120,7 @@ function AdminPage() {
                 }`}
               >
                 <s.icon className="h-3.5 w-3.5" />
-                {s.label}
+                {tr(s.label)}
                 {!!badges[s.id] && (
                   <span className="rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
                     {badges[s.id]}
@@ -123,11 +132,12 @@ function AdminPage() {
 
           <div className="hidden min-h-0 space-y-4 overflow-y-auto overscroll-contain rounded-3xl border border-border/80 bg-card p-3 shadow-xs lg:block">
             <p className="flex items-center gap-2 px-3 pt-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-accent" /> Administração
+              <ShieldCheck className="h-4 w-4 text-accent" />{" "}
+              {tr(["Administração", "Administration", "Administración", "Administration"])}
             </p>
             {Object.entries(groups).map(([group, items]) => (
               <div key={group}>
-                <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   {group}
                 </p>
                 <ul className="space-y-0.5">
@@ -146,7 +156,7 @@ function AdminPage() {
                           }`}
                         >
                           <s.icon className={`h-4 w-4 shrink-0 ${active ? "text-accent" : ""}`} />
-                          <span className="flex-1">{s.label}</span>
+                          <span className="flex-1">{tr(s.label)}</span>
                           {!!badges[s.id] && (
                             <span className="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
                               {badges[s.id]}
@@ -166,38 +176,45 @@ function AdminPage() {
           data-app-main
           className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pb-6"
         >
-          {section === "visao" && <OverviewSection go={go} />}
-          {section === "usuarios" && <UsersSection me={user.id} />}
-          {section === "verificacoes" && <VerificationsSection user={user} />}
-          {section === "contato" && <ContactSection />}
-          {section === "documentacao" && <DocsSection />}
-          {section === "qualidade" && <QualitySection />}
-          {section === "posts" && <PostsSection />}
-          {section === "moderacao" && <ModerationSection />}
-          {section === "ia_barrados" && <AiRejectionsSection />}
-          {section === "comunidades" && <CommunitiesSection />}
-          {section === "temas" && <ThemesSection />}
-          {section === "apresentacao" && <PresentationSection />}
-          {section === "anuncios" && <AnnouncementsSection />}
-          {section === "redes" && <SocialStudioSection />}
-          {section === "site_features" && (
-            <div className="space-y-4">
-              <SiteFeaturesSection />
-              <ClinicalDemoPanel />
-            </div>
-          )}
-          {section === "site_nina" && <SiteNinaSection />}
-          {section === "site_design" && (
-            <div className="space-y-4">
-              <SiteDesignSection />
-              <SitePhotosSection />
-            </div>
-          )}
-          {section === "financeiro" && <FinanceSection />}
-          {section === "mercados" && <MarketsSection />}
-          {section === "ia" && <AiSection />}
-          {section === "config" && <SettingsSection />}
-          {section === "auditoria" && <AuditSection />}
+          {/* Barreira por seção: um erro numa seção não derruba o painel inteiro. */}
+          <SectionBoundary
+            key={section}
+            onHome={section === "visao" ? undefined : () => go("visao")}
+          >
+            {section === "visao" && <OverviewSection go={go} />}
+            {section === "usuarios" && <UsersSection me={user.id} />}
+            {section === "verificacoes" && <VerificationsSection user={user} />}
+            {section === "contato" && <ContactSection />}
+            {section === "documentacao" && <DocsSection />}
+            {section === "qualidade" && <QualitySection />}
+            {section === "posts" && <PostsSection />}
+            {section === "moderacao" && <ModerationSection />}
+            {section === "ia_barrados" && <AiRejectionsSection />}
+            {section === "comunidades" && <CommunitiesSection />}
+            {section === "temas" && <ThemesSection />}
+            {section === "apresentacao" && <PresentationSection />}
+            {section === "anuncios" && <AnnouncementsSection />}
+            {section === "redes" && <SocialStudioSection />}
+            {section === "site_features" && (
+              <div className="space-y-4">
+                <SiteFeaturesSection />
+                <ClinicalDemoPanel />
+              </div>
+            )}
+            {section === "site_nina" && <SiteNinaSection />}
+            {section === "site_design" && (
+              <div className="space-y-4">
+                <SiteDesignSection />
+                <SitePhotosSection />
+              </div>
+            )}
+            {section === "financeiro" && <FinanceSection />}
+            {section === "mercados" && <MarketsSection />}
+            {section === "recompensas" && <RewardsSection />}
+            {section === "ia" && <AiSection />}
+            {section === "config" && <SettingsSection />}
+            {section === "auditoria" && <AuditSection />}
+          </SectionBoundary>
         </div>
       </div>
     </AppScreen>

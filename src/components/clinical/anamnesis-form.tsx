@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { onIdentityChange } from "@/lib/auth";
 import { ClipboardList } from "lucide-react";
 import * as records from "@/lib/clinical/records";
 import type { AnamnesisData } from "@/lib/clinical/records";
@@ -11,6 +12,12 @@ import { useTr } from "@/components/settings-ui";
 import { EXTRA_ANAMNESIS, type ProfessionKey } from "@/lib/clinical/professions";
 
 type Section = keyof Pick<AnamnesisData, "clinicalHistory" | "lifestyle" | "eating">;
+
+// Rascunho não salvo de cada anamnese (profissional + paciente), só na memória desta aba: trocar
+// de aba do prontuário não perde o que foi digitado. Nada vai para o armazenamento do navegador
+// (é dado clínico), e tudo é apagado quando a conta muda.
+const drafts = new Map<string, AnamnesisData>();
+onIdentityChange(() => drafts.clear());
 
 export function AnamnesisForm({
   patientId,
@@ -32,17 +39,33 @@ export function AnamnesisForm({
   const extra = EXTRA_ANAMNESIS[profession];
   const showEating = !["psicologia", "fisioterapia"].includes(profession);
   const query = useAnamnesis(patientId, professionalId);
-  const [data, setData] = useState<AnamnesisData>({});
-  const [dirty, setDirty] = useState(false);
+  const draftKey = `${professionalId}:${patientId}`;
+  const [data, setData] = useState<AnamnesisData>(() => drafts.get(draftKey) ?? {});
+  const [dirty, setDirty] = useState(() => drafts.has(draftKey));
 
   useEffect(() => {
-    if (query.data) setData(query.data.data ?? {});
-  }, [query.data]);
+    if (query.data && !drafts.has(draftKey)) setData(query.data.data ?? {});
+  }, [query.data, draftKey]);
+
+  useEffect(() => {
+    if (dirty) drafts.set(draftKey, data);
+  }, [dirty, data, draftKey]);
+
+  // Fechar ou recarregar a página com alterações não salvas pede confirmação do navegador.
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
 
   const save = useClinicalMutation(() => records.saveAnamnesis(patientId, data), {
     success: t("anamnesis.saved"),
     invalidate: [qk.anamnesis(patientId, professionalId)],
-    onSuccess: () => setDirty(false),
+    onSuccess: () => {
+      drafts.delete(draftKey);
+      setDirty(false);
+    },
   });
 
   const setTop = (key: keyof AnamnesisData, value: unknown) => {
@@ -185,7 +208,7 @@ export function AnamnesisForm({
           <input
             type="checkbox"
             disabled={readOnly}
-            className="h-4 w-4 accent-[var(--color-primary)]"
+            className="h-5 w-5 accent-[var(--color-primary)]"
             checked={!!data.lifestyle?.smoking}
             onChange={(e) => setNested("lifestyle", "smoking", e.target.checked)}
           />
@@ -220,10 +243,23 @@ export function AnamnesisForm({
       {!readOnly && (
         <div
           className={cn(
-            "sticky z-10 flex justify-end",
+            "sticky z-10 flex items-center justify-end gap-3",
             compact ? "bottom-0" : "bottom-20 lg:bottom-4",
           )}
         >
+          {dirty && (
+            <span
+              role="status"
+              className="rounded-full bg-card px-3 py-1.5 text-xs font-semibold text-warning shadow-sm"
+            >
+              {tr([
+                "Alterações não salvas",
+                "Unsaved changes",
+                "Cambios sin guardar",
+                "Modifications non enregistrées",
+              ])}
+            </span>
+          )}
           <button
             type="submit"
             className={cn(buttonPrimary, "shadow-lg")}

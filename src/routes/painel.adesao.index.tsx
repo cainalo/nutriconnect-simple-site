@@ -8,6 +8,7 @@ import {
   Loading,
   PageHeader,
   buttonGhost,
+  buttonPrimary,
 } from "@/components/clinical/ui";
 import { useTr } from "@/components/settings-ui";
 import { useClinicalI18n } from "@/lib/clinical/i18n";
@@ -76,6 +77,17 @@ function AdherencePage() {
                 "Ningún paciente activo",
                 "Aucun patient actif",
               ])}
+              text={tr([
+                "Quando você tiver pacientes em acompanhamento, cada um aparece aqui com uma luz: verde (em dia), amarela (oscilando) ou vermelha (precisa de atenção).",
+                "Once you have patients in follow-up, each one shows here with a light: green (on track), yellow (fluctuating) or red (needs attention).",
+                "Cuando tengas pacientes en seguimiento, cada uno aparece aquí con una luz: verde (al día), amarilla (oscilando) o roja (necesita atención).",
+                "Quand vous aurez des patients suivis, chacun apparaîtra ici avec un voyant : vert (à jour), jaune (irrégulier) ou rouge (à surveiller).",
+              ])}
+              action={
+                <Link to="/painel/pacientes" className={buttonPrimary}>
+                  {tr(["Ver pacientes", "See patients", "Ver pacientes", "Voir les patients"])}
+                </Link>
+              }
             />
           </div>
         ) : (
@@ -88,6 +100,7 @@ function AdherencePage() {
                   <span
                     className={cn("h-3 w-3 shrink-0 rounded-full", LIGHT_STYLE[light])}
                     title={tr(LIGHT_NAMES[light])}
+                    role="img"
                     aria-label={tr(LIGHT_NAMES[light])}
                   />
                   <Avatar name={person?.name ?? "…"} url={person?.avatarUrl} />

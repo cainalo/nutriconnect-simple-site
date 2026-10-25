@@ -245,3 +245,79 @@ Print pelo Edge headless: `"/c/Program Files (x86)/Microsoft/Edge/Application/ms
   `src/lib/social-templates.ts`, `src/lib/social-media.ts`, `src/lib/social-calendar.ts`.
 - Tipos do Supabase (`src/integrations/supabase/types.ts`) foram editados à mão para as tabelas
   novas. **Nunca rode o prettier nesse arquivo** (ele reformata o arquivo inteiro).
+
+## P1 — Avaliações verificadas e ordenação na busca (17/10/2026)
+
+O marketplace já tinha busca, agenda e pagamento; faltavam as avaliações. Migration
+`20261017120000_professional_reviews.sql` (**ainda não aplicada em produção**: aplicar antes de
+subir para a prod; o site funciona sem ela, só sem avaliações). Regras no banco: só o paciente da
+consulta avalia (realizada, ou agendada/confirmada que já terminou; até 90 dias), uma por consulta
+(enviar de novo edita), comentário opcional, "sem o meu nome"; o profissional é avisado
+(`consulta_avaliada`) e responde; a administração oculta (`admin_set_review_hidden`). Leitura
+pública só pelas funções `professional_rating_summaries()` e `list_professional_reviews()` (primeiro
+nome do autor). 13 testes novos no `social_security.sql` (479 no total, 0 falhas).
+Telas: botão Avaliar em Minhas consultas → Anteriores, nota nos cards e no perfil do profissional,
+seção de avaliações no perfil, página `/painel/avaliacoes` para responder, ordenação na busca
+(Recomendados usa média ponderada, para 1 voto 5,0 não passar todos). No modo demonstração do
+admin, o profissional de exemplo tem 3 avaliações. Harness: `?v=reviews&fx=1&owner=1` (e
+`&dialog=1`) mostra a seção com dados de exemplo.
+(O push de `consulta_avaliada` abre `/painel/avaliacoes`: ajustado no `push_claim` da migration do X2.)
+
+## X1 — Diário de sintomas (17/10/2026)
+
+Aba **Sintomas** no Diário (`/acompanhamento/diario?aba=sintomas`) e no Diário do paciente no
+painel (só leitura). Migration `20261017130000_symptom_logs.sql` (**ainda não aplicada em
+produção**; sem ela a aba fica vazia e anotar dá erro): 12 sintomas fixos, intensidade 1–3, hora
+(não aceita futuro), nota; mesmas regras do diário alimentar (paciente escreve; profissional com
+acompanhamento ativo lê). 7 testes no `social_security.sql` (486 no total, 0 falhas).
+Relações (`findRelations` em `src/lib/clinical/symptoms.ts`, sem IA): grupos de alimentos achados
+por palavras no texto das refeições; para cada sintoma com 3+ anotações, mostra o grupo comido
+entre 30 min e 24 h antes em pelo menos metade das vezes e 1,5× acima do comum nos dias de diário.
+Sempre com o aviso "pode ser coincidência; não corte alimentos por conta própria". Teste da lógica:
+script esbuild (10 casos, ver a sessão de 17/10). Resumo para a consulta: copiar/compartilhar.
+
+## X2 — Lembretes de consulta e de exames (17/10/2026)
+
+Migration `20261017140000_care_reminders.sql` (**ainda não aplicada em produção**). Função
+`send_care_reminders()` no pg_cron a cada 10 min: consulta 24 h antes (paciente, com "confirmar
+presença") e 1 h antes (paciente e profissional); exame 24 h antes. Avisos são notificações
+(`consulta_lembrete`, `consulta_presenca`, `exame_pedido`, `exame_lembrete`) e viram push pelo fluxo
+de sempre. Remarcar zera os lembretes e a confirmação. `confirm_attendance()` grava
+`appointments.patient_confirmed_at` (selo "Paciente confirmou presença" para o profissional).
+Tabela `exam_reminders`: paciente anota; o profissional com acompanhamento ativo pede (sempre como
+`requested_by` dele). A migration também refaz `export_my_data()` (LGPD) com avaliações, sintomas e
+exames, e `push_claim()` (links do push de exame e de avaliação). 13 testes (499 no total).
+**Edge Function `push-send` mudou** (textos dos avisos novos): publicar de novo junto com a subida.
+**E-mail:** o projeto não tem provedor de e-mail. Para mandar os lembretes por e-mail, criar conta
+num provedor (ex.: Resend), guardar a chave como segredo das Edge Functions e fazer uma função que
+leia as mesmas notificações.
+
+## X3 — Desafios com amigos e liga da semana (18/10/2026)
+
+Aba **Com amigos** em Desafios (`/desafios?aba=amigos`; as abas viraram grade 2×2 no celular).
+Migration `20261017150000_friend_challenges.sql` (**ainda não aplicada em produção**): tudo conta
+DIAS na semana (domingo a sábado, Brasília) a partir do que já existe: `water_days` na meta, hábitos
+`veg`/`homemade`/`move` em `daily_checkins`, `mindful_meals`, dias com XP na trilha
+(`_activity_days`, só uso interno). Desafio: `create_friend_challenge` (1 a 7 amigos, até 3 por
+semana), `respond_friend_challenge`, `my_friend_challenges` (placar), `cheer_friend_challenge`
+(1 força por pessoa por dia). Liga: `friends_weekly_league` (você + amigos com
+`user_settings.league_visible`; quem tem 0 ponto não aparece para os outros). Avisos
+`desafio_amigo_convite`, `desafio_amigo_aceito`, `desafio_forca` (categoria social; push abre a aba).
+16 testes (515 no total). Harness: `?v=page&p=desafios.index&fx=1&click=Com amigos`.
+
+## X4 — Pontos e recompensas (18/10/2026)
+
+Página `/recompensas` (no menu do site e no cartão da liga) e Admin → **Recompensas**. Migration
+`20261018100000_reward_points.sql` (**ainda não aplicada em produção**): `reward_points` (livro de
+pontos, sem duplicar: `unique (user_id, reason, ref)`), `rewards` (cadastro da equipe) e
+`reward_redemptions` (códigos `NC-XXXXXXXX` com validade). `award_weekly_points()` no pg_cron toda
+segunda 6h UTC: 10 pontos por dia da liga da semana anterior + 50 por desafio com amigos cumprido;
+aviso `pontos_semana` (conquistas). `redeem_reward()` trava o saldo da pessoa, desconta e gera o
+código. Recompensa inicial: 10% de desconto num programa por 600 pontos (a equipe muda no admin).
+**Desconto de programa:** a Edge Function `program-checkout` aceita `redemptionId`; o desconto é
+`min(preço × %, taxa da plataforma)` e sai só da taxa (o profissional recebe o mesmo). O
+`stripe-webhook` grava a taxa real (`fee_cents`) e marca o código como usado. **As duas Edge
+Functions mudaram: publicar de novo junto com a subida.** Limite conhecido: dois pagamentos abertos ao
+mesmo tempo com o mesmo código passam os dois (o segundo não marca o código); perda pequena.
+A migration também refaz `notification_category()` e `export_my_data()` (LGPD: desafios, pontos e
+recompensas). 14 testes (529 no total). Harness: `?v=page&p=recompensas&fx=1`.

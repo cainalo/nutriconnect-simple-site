@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, Info, ShieldAlert, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useTr } from "@/components/settings-ui";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Announcement {
@@ -36,6 +37,7 @@ const STYLE = {
 
 export function AnnouncementBar() {
   const { user } = useAuth();
+  const tr = useTr();
   const [dismissed, setDismissed] = useState<string[]>([]);
   useEffect(() => setDismissed(readDismissed()), []);
 
@@ -140,7 +142,12 @@ export function AnnouncementBar() {
               type="button"
               onClick={() => dismiss(a.id)}
               className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-              aria-label="Dispensar aviso"
+              aria-label={tr([
+                "Dispensar aviso",
+                "Dismiss notice",
+                "Descartar aviso",
+                "Ignorer l'avis",
+              ])}
             >
               <X className="h-4 w-4" />
             </button>

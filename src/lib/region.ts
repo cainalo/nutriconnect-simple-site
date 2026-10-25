@@ -69,3 +69,8 @@ export function applyRegion(
   }
   return [locale, out];
 }
+
+/** Primeiro dia da semana escolhido: 1 = segunda (padrão), 0 = domingo. */
+export function weekStartsOn(): 0 | 1 {
+  return region().weekStart === "sun" ? 0 : 1;
+}

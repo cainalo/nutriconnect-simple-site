@@ -1,6 +1,9 @@
 import "@/styles.css";
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { ConfirmHost, siteConfirm, sitePrompt } from "@/components/confirm-action";
+// Para testar os diálogos de confirmação nos prints.
+Object.assign(window, { __siteConfirm: siteConfirm, __sitePrompt: sitePrompt });
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRootRoute, createRouter, createMemoryHistory } from "@tanstack/react-router";
 import { Landing } from "@/components/landing";
@@ -243,7 +246,9 @@ function PageDemo() {
   const root = createRootRoute({ component: () => <><Comp /><BackToTop /></> });
   // Endereço real da página (comunidades.index → /comunidades), para a faixa de título aparecer.
   const path = "/" + (q.get("p") ?? "funcoes").split(".").filter((x) => x !== "index" && !x.startsWith("$")).join("/");
-  const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: [path] }) });
+  // &busca=secao%3Dusuarios → abre a página com ?secao=usuarios (para páginas que leem a busca).
+  const busca = q.get("busca");
+  const router = createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: [busca ? `${path}?${busca}` : path] }) });
   return <RouterProvider router={router} />;
 }
 // v=card&c=HabitCheckinCard → um card de Funções sozinho (&click=<texto do botão> para clicar).
@@ -255,7 +260,11 @@ function CardDemo() {
 // v=post → um PostCard real (fileira de ações: conversa, apoiar, compartilhar…).
 import { PostCard } from "@/components/community-cards";
 function PostDemo() {
-  const post = { id: "p1", type: "experiencia", title: "Arroz de forno com legumes", text: "Uma receita simples para o dia a dia.", authorName: "Maria Silva", authorId: "u2", createdAt: new Date().toISOString(), comments: [], supports: ["a", "b"], likes: [], preparedBy: [], pinned: false, tags: [] };
+  const post = { id: "p1", type: "experiencia", title: "Arroz de forno com legumes", text: "Uma receita simples para o dia a dia.", authorName: "Maria Silva", authorId: "u2", createdAt: new Date().toISOString(), comments: q.get("comments") ? [
+    { id: "c1", postId: "p1", authorId: "u3", authorName: "Juliana Prado", text: "Fiz ontem e ficou ótimo! Troquei a abobrinha por berinjela.", createdAt: new Date().toISOString() },
+    { id: "c2", postId: "p1", authorId: "u1", authorName: "Maria Silva", text: "Que bom! Vou testar com berinjela também.", createdAt: new Date().toISOString(), replyTo: "c1" },
+    { id: "c3", postId: "p1", authorId: "u4", authorName: "Marcos Lima", text: "Quanto tempo de forno?", createdAt: new Date().toISOString() },
+  ] : [], supports: ["a", "b"], likes: [], preparedBy: [], pinned: false, tags: [] };
   return <RouterApp><div className="mx-auto max-w-md p-4"><PostCard post={post as any} /></div></RouterApp>;
 }
 // v=docs / v=quality → Admin: Documentação e Qualidade, sozinhos.
@@ -263,6 +272,22 @@ import { DocsSection } from "@/components/admin/sections-docs";
 import { QualitySection } from "@/components/admin/sections-quality";
 // v=photos → painel "Imagens do site" do admin, sozinho.
 import { SitePhotosSection } from "@/components/admin/sections-site-photos";
+// v=reviews → avaliações (P1) do profissional de demonstração; &dialog=1 abre o formulário.
+import { setDemoEnabled, DEMO_PRO } from "@/lib/clinical/demo";
+import { ProReviewsSection, ReviewDialog } from "@/components/clinical/reviews";
+import { useRatingSummaries } from "@/lib/clinical/reviews";
+if (q.get("demo")) setDemoEnabled(true);
+function ReviewsDemo() {
+  const s = useRatingSummaries();
+  return (
+    <RouterApp>
+      <div className="mx-auto max-w-2xl p-4">
+        <div className="rounded-2xl border bg-card p-5"><ProReviewsSection proId={DEMO_PRO} summary={s.data?.get(DEMO_PRO)} isOwner={!!q.get("owner")} /></div>
+        {q.get("dialog") && <ReviewDialog appointmentId="a1" proName="Ana Paula" open onOpenChange={() => {}} />}
+      </div>
+    </RouterApp>
+  );
+}
 function App() {
   if (v === "card") return <CardDemo />;
   if (v === "photos") return wrap(<SitePhotosSection />);
@@ -270,6 +295,7 @@ function App() {
   if (v === "quality") return <RouterApp><div className="p-4"><QualitySection /></div></RouterApp>;
   if (v === "post") return <PostDemo />;
   if (v === "page") return <PageDemo />;
+  if (v === "reviews") return <ReviewsDemo />;
   if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);
   if (v === "calendar") return wrap(<CalendarTab onOpen={() => {}} onNew={() => {}} />);
   if (v === "trends") return wrap(<TrendsTab onCreate={() => {}} />);
@@ -294,13 +320,14 @@ function App() {
   return <div className="flex flex-wrap gap-6 p-6">{modes.map((m) => <Cell key={m} mode={m} />)}</div>;
 }
 createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={qc}><App /></QueryClientProvider>,
+  <QueryClientProvider client={qc}><App /><ConfirmHost /></QueryClientProvider>,
 );
 const click = q.get("click");
-if (click) setTimeout(() => {
-  const b = [...document.querySelectorAll("button")].find((x) => x.textContent?.trim() === click);
+// &click=A|B clica em sequência (um botão por vez, pelo texto).
+if (click) click.split("|").forEach((label, i) => setTimeout(() => {
+  const b = [...document.querySelectorAll("button")].find((x) => x.textContent?.trim() === label);
   b?.click();
-}, 1200);
+}, 1200 + i * 700));
 if (q.get("dbg")) setTimeout(() => {
   const w = innerWidth; const out: string[] = ["vw=" + w + " docW=" + document.documentElement.scrollWidth];
   document.querySelectorAll("body *").forEach((el) => {

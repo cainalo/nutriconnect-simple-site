@@ -8,7 +8,7 @@ import { useProfessionalMap } from "@/lib/social/professionals-queries";
 import { CATEGORIES } from "@/lib/community";
 import { communityCover, type RemoteCommunity } from "@/lib/social/communities";
 import { resetCommunityFilters, useCommunityFilters } from "@/lib/community-filters";
-import { CommunityCategoriesCard, CommunitySearchCard } from "@/components/rail-cards";
+import { CommunityFiltersBar } from "@/components/rail-cards";
 import { useCommunities } from "@/lib/social/communities-queries";
 import { useI18n } from "@/hooks/use-i18n";
 import { EmptyPhoto } from "@/components/clinical/ui";
@@ -85,9 +85,8 @@ function ComunidadesPage() {
       )}
 
       <div className={showFeatured ? "mt-12 border-t border-border pt-12" : ""}>
-        <div className="mb-6 grid items-start gap-4 md:grid-cols-2">
-          <CommunitySearchCard />
-          <CommunityCategoriesCard />
+        <div className="mb-6">
+          <CommunityFiltersBar />
         </div>
 
         <section className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">

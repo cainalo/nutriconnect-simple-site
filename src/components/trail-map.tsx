@@ -284,6 +284,7 @@ function TrailWalker({
   const size = 68;
   const px = (x / 100) * width + (left ? -size - 58 : 58);
   const mood: MascotMood = moving ? "cheer" : "idle";
+  const tr = useTr();
   return (
     <div
       className="pointer-events-none absolute z-30"
@@ -297,7 +298,7 @@ function TrailWalker({
       <Mascot id={guide} mood={mood} size={size} flip={!left} />
       {!moving && (
         <span className="nc-pop absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-card px-2 py-0.5 text-[10px] font-black text-foreground shadow-md">
-          Vamos!
+          {tr(["Vamos!", "Let's go!", "¡Vamos!", "C'est parti !"])}
         </span>
       )}
     </div>

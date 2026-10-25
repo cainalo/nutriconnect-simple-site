@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
 import { useAppearance } from "@/hooks/use-appearance";
 import { useI18n } from "@/hooks/use-i18n";
 import { LOCALES } from "@/lib/i18n";
 import { TIME_ZONES, applyRegion } from "@/lib/region";
-import type { DateFormat, TimeFormat } from "@/lib/appearance";
+import type { DateFormat, TimeFormat, WeekStart } from "@/lib/appearance";
 import { localeMeta } from "@/lib/i18n";
-import { Row, SettingsCard, SettingsPage, selectClass, useTr } from "@/components/settings-ui";
+import { SettingsCard, SettingsPage, selectClass, useTr } from "@/components/settings-ui";
 
 export const Route = createFileRoute("/perfil/configuracoes/idioma")({
   head: () => ({ meta: [{ title: "Idioma e região — NutriConnect" }] }),
@@ -98,6 +99,32 @@ function IdiomaPage() {
     },
   ];
 
+  // Nome de cada idioma no idioma atual (só aparece embaixo quando difere do nome próprio).
+  const NAME_HERE: Record<string, [string, string, string, string]> = {
+    "pt-BR": [
+      "Português (Brasil)",
+      "Portuguese (Brazil)",
+      "Portugués (Brasil)",
+      "Portugais (Brésil)",
+    ],
+    en: ["Inglês", "English", "Inglés", "Anglais"],
+    es: ["Espanhol", "Spanish", "Español", "Espagnol"],
+    fr: ["Francês", "French", "Francés", "Français"],
+  };
+  const weekOptions: { id: WeekStart; label: string }[] = [
+    { id: "mon", label: tr(["Segunda-feira", "Monday", "Lunes", "Lundi"]) },
+    { id: "sun", label: tr(["Domingo", "Sunday", "Domingo", "Dimanche"]) },
+  ];
+  const field = (id: string, label: string, control: ReactNode, hint?: string) => (
+    <div className="min-w-0">
+      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-foreground">
+        {label}
+      </label>
+      {control}
+      {hint && <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>}
+    </div>
+  );
+
   return (
     <SettingsPage
       title={tr(["Idioma e região", "Language and region", "Idioma y región", "Langue et région"])}
@@ -129,7 +156,11 @@ function IdiomaPage() {
                   </span>
                   <span>
                     <span className="block text-sm font-bold text-foreground">{l.name}</span>
-                    <span className="block text-[11px] text-muted-foreground">{l.namePt}</span>
+                    {tr(NAME_HERE[l.id]) !== l.name && (
+                      <span className="block text-[11px] text-muted-foreground">
+                        {tr(NAME_HERE[l.id])}
+                      </span>
+                    )}
                   </span>
                 </span>
                 {active && <Check className="h-5 w-5 shrink-0 text-accent" />}
@@ -148,59 +179,93 @@ function IdiomaPage() {
           "S'applique aux dates et heures affichées sur le site. Enregistré sur votre compte.",
         ])}
       >
-        <Row title={tr(["Formato da data", "Date format", "Formato de fecha", "Format de date"])}>
-          <select
-            aria-label="date format"
-            value={a.dateFormat}
-            onChange={(e) => update({ dateFormat: e.target.value as DateFormat })}
-            className={`${selectClass} max-w-[16rem]`}
-          >
-            {dateOptions.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
+        {/* Rótulo em cima de cada campo e as caixas com a mesma largura */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          {field(
+            "fmt-date",
+            tr(["Formato da data", "Date format", "Formato de fecha", "Format de date"]),
+            <select
+              id="fmt-date"
+              value={a.dateFormat}
+              onChange={(e) => update({ dateFormat: e.target.value as DateFormat })}
+              className={`${selectClass} w-full`}
+            >
+              {dateOptions.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>,
+          )}
+          {field(
+            "fmt-time",
+            tr(["Formato da hora", "Time format", "Formato de hora", "Format de l'heure"]),
+            <select
+              id="fmt-time"
+              value={a.timeFormat}
+              onChange={(e) => update({ timeFormat: e.target.value as TimeFormat })}
+              className={`${selectClass} w-full`}
+            >
+              {timeOptions.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>,
+          )}
+          {field(
+            "fmt-zone",
+            tr(["Fuso horário", "Time zone", "Zona horaria", "Fuseau horaire"]),
+            <select
+              id="fmt-zone"
+              value={a.timeZone}
+              onChange={(e) => update({ timeZone: e.target.value })}
+              className={`${selectClass} w-full`}
+            >
+              <option value="auto">
+                {tr(["Automático", "Automatic", "Automático", "Automatique"])}
               </option>
-            ))}
-          </select>
-        </Row>
-        <Row title={tr(["Formato da hora", "Time format", "Formato de hora", "Format de l'heure"])}>
-          <select
-            aria-label="time format"
-            value={a.timeFormat}
-            onChange={(e) => update({ timeFormat: e.target.value as TimeFormat })}
-            className={selectClass}
-          >
-            {timeOptions.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </Row>
-        <Row
-          title={tr(["Fuso horário", "Time zone", "Zona horaria", "Fuseau horaire"])}
-          hint={tr([
-            "Automático usa o fuso do seu aparelho.",
-            "Automatic uses your device's time zone.",
-            "Automático usa la zona horaria de tu dispositivo.",
-            "Automatique utilise le fuseau de votre appareil.",
-          ])}
-        >
-          <select
-            aria-label="time zone"
-            value={a.timeZone}
-            onChange={(e) => update({ timeZone: e.target.value })}
-            className={`${selectClass} max-w-[14rem]`}
-          >
-            <option value="auto">
-              {tr(["Automático", "Automatic", "Automático", "Automatique"])}
-            </option>
-            {TIME_ZONES.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.label}
-              </option>
-            ))}
-          </select>
-        </Row>
+              {TIME_ZONES.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {z.label}
+                </option>
+              ))}
+            </select>,
+            tr([
+              "Automático usa o fuso do seu aparelho.",
+              "Automatic uses your device's time zone.",
+              "Automático usa la zona horaria de tu dispositivo.",
+              "Automatique utilise le fuseau de votre appareil.",
+            ]),
+          )}
+          {field(
+            "fmt-week",
+            tr([
+              "Primeiro dia da semana",
+              "First day of the week",
+              "Primer día de la semana",
+              "Premier jour de la semaine",
+            ]),
+            <select
+              id="fmt-week"
+              value={a.weekStart}
+              onChange={(e) => update({ weekStart: e.target.value as WeekStart })}
+              className={`${selectClass} w-full`}
+            >
+              {weekOptions.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>,
+            tr([
+              "Vale para a agenda e o resumo da semana do painel.",
+              "Applies to the schedule and the dashboard's week summary.",
+              "Vale para la agenda y el resumen semanal del panel.",
+              "S'applique à l'agenda et au résumé de la semaine du tableau de bord.",
+            ]),
+          )}
+        </div>
         <p className="rounded-xl bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
           {tr(["Exemplo:", "Example:", "Ejemplo:", "Exemple :"])}{" "}
           <span className="font-semibold text-foreground">{sample}</span>

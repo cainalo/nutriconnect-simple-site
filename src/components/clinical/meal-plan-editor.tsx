@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { ArrowDown, ArrowUp, CornerDownRight, Plus, Trash2 } from "lucide-react";
 import * as records from "@/lib/clinical/records";
 import type { FullMealPlan, MealPlanItem, MealWithItems } from "@/lib/clinical/records";
@@ -254,8 +255,8 @@ function MealEditor({
             type="button"
             className={buttonGhost}
             aria-label={t("plan.deleteMeal")}
-            onClick={() =>
-              (meal.items.length === 0 || window.confirm(t("plan.deleteMealConfirm"))) &&
+            onClick={async () =>
+              (meal.items.length === 0 || (await siteConfirm(t("plan.deleteMealConfirm")))) &&
               removeMeal.mutate(undefined)
             }
           >

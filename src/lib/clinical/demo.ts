@@ -437,6 +437,9 @@ export const demo = {
       meeting_url: null,
       price_cents: 18000,
       patient_notes: null,
+      patient_confirmed_at: null,
+      reminder_1h_at: null,
+      reminder_24h_at: null,
       summary_for_patient:
         status === "realizada" ? "Retorno: manter o plano e incluir o lanche da tarde." : null,
       cancel_reason: null,

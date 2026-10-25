@@ -41,6 +41,50 @@ export const CATALOG_B: CatalogItem[] = [
     howTo: ["Abra Desafios", "Escolha um desafio e toque em Participar"],
   },
   {
+    id: "desafios-amigos",
+    kind: "funcionalidade",
+    area: "social",
+    title: "Desafios com amigos e liga da semana",
+    route: "/desafios?aba=amigos",
+    audience: "Quem tem amigos no site",
+    summary:
+      "Metas de dias na semana feitas junto com amigos e uma liga gentil, que conta os dias em que cada um cuidou de si.",
+    features: [
+      "6 metas: água na meta, verduras, comida de casa, movimento, refeição com calma e trilha",
+      "Convidar de 1 a 7 amigos; cada um topa ou não; até 3 desafios criados por semana",
+      "Placar em dias com barra de progresso e Mandar força (um aviso por pessoa por dia)",
+      "Liga da semana: pódio e pontos dos amigos; quem não pontuou não aparece (sem lanterninha)",
+      "Interruptor Aparecer para os amigos; ninguém vê dados de saúde, só dias",
+    ],
+    howTo: [
+      "Abra Desafios → Com amigos",
+      "Toque em Novo desafio, escolha a meta, os dias e os amigos",
+      "Acompanhe o placar e mande força",
+    ],
+  },
+  {
+    id: "recompensas",
+    kind: "funcao",
+    area: "social",
+    title: "Pontos e recompensas",
+    route: "/recompensas",
+    audience: "Quem tem conta",
+    summary:
+      "Pontos pela semana cuidando de si (10 por dia da liga, +50 por desafio com amigos cumprido), trocados por recompensas.",
+    features: [
+      "Saldo, prévia da semana e histórico de pontos",
+      "Recompensas cadastradas pela equipe: desconto num programa da Loja ou brinde de parceiro",
+      "Troca com confirmação e código NC-XXXXXXXX com validade",
+      "Cupom aparece na compra do programa; o desconto sai da taxa da plataforma",
+      "Admin → Recompensas: criar, editar, ver códigos, marcar brinde entregue, devolver pontos",
+    ],
+    howTo: [
+      "Abra Pontos e recompensas no menu",
+      "Toque em Trocar numa recompensa e confirme",
+      "Use o código na compra do programa ou com o parceiro",
+    ],
+  },
+  {
     id: "desafio",
     kind: "funcionalidade",
     area: "trilha",
@@ -104,7 +148,8 @@ export const CATALOG_B: CatalogItem[] = [
       "Busca por nome, especialidade ou estado",
       "Filtros por profissão, on-line/presencial e “só quem está recebendo pacientes”",
       "Quiz Descobrir a nutri ideal",
-      "Cards com preço (ou gratuita), modalidade e selo de verificado",
+      "Cards com preço (ou gratuita), modalidade, selo de verificado e nota das avaliações",
+      "Ordenar por recomendados, nota, número de avaliações ou preço",
     ],
     howTo: ["Abra Encontrar profissional", "Filtre e toque num profissional para ver a página"],
     shot: true,
@@ -123,8 +168,31 @@ export const CATALOG_B: CatalogItem[] = [
       "Escolher horário, deixar recado e Agendar e pagar",
       "Pedir acompanhamento (ligação de paciente)",
       "Plano de membros e programas do profissional",
+      "Avaliações verificadas de pacientes, com a resposta do profissional",
     ],
     howTo: ["Escolha um horário livre", "Toque em Agendar e pagar", "Pague para confirmar"],
+  },
+  {
+    id: "avaliacoes",
+    kind: "funcionalidade",
+    area: "cuidado",
+    title: "Avaliações verificadas",
+    route: "/acompanhamento/consultas",
+    audience: "Quem teve consulta pelo site",
+    summary:
+      "Depois da consulta, o paciente dá de 1 a 5 estrelas e pode comentar; a nota aparece na busca e no perfil do profissional.",
+    features: [
+      "Só quem teve a consulta avalia (uma por consulta, até 90 dias depois)",
+      "Comentário opcional e opção de publicar sem o nome",
+      "Editar ou apagar a própria avaliação",
+      "Média, barras por nota e lista no perfil do profissional",
+      "Profissional é avisado e responde; a administração pode ocultar",
+    ],
+    howTo: [
+      "Abra Minhas consultas → Anteriores",
+      "Toque em Avaliar na consulta",
+      "Escolha as estrelas, escreva se quiser e envie",
+    ],
   },
   {
     id: "combina",
@@ -264,6 +332,27 @@ export const CATALOG_B: CatalogItem[] = [
     shot: true,
   },
   {
+    id: "sintomas",
+    kind: "funcionalidade",
+    area: "cuidado",
+    title: "Diário de sintomas",
+    route: "/acompanhamento/diario?aba=sintomas",
+    audience: "Pacientes (o profissional do acompanhamento lê)",
+    summary:
+      "Anotar o que sentiu (12 sintomas, intensidade e hora) e ver relações possíveis com o que comeu nas 24 h antes, para levar à consulta.",
+    features: [
+      "12 sintomas em grade, intensidade leve/médio/forte, agora ou há 1, 3, 6 h ou outro horário",
+      "Relações possíveis: grupo de alimento que aparece antes do sintoma bem mais que o comum (sem IA, src/lib/clinical/symptoms.ts)",
+      "Resumo para a consulta: contagem por sintoma e relações; copiar ou compartilhar",
+      "O profissional vê os sintomas e as relações na aba Diário do paciente",
+    ],
+    howTo: [
+      "Abra Diário → Sintomas",
+      "Toque no sintoma, escolha a intensidade e quando, e toque em Anotar",
+      "Antes da consulta, toque em Copiar resumo",
+    ],
+  },
+  {
     id: "metas",
     kind: "funcao",
     area: "cuidado",
@@ -339,6 +428,8 @@ export const CATALOG_B: CatalogItem[] = [
     features: [
       "Abas Próximas e Histórico; agendar consulta",
       "Entrar na sala, pagar agora, remarcar e cancelar (com política de reembolso)",
+      "Lembretes 24 h e 1 h antes (no site e por push) e Confirmar presença nos 2 dias antes",
+      "Avaliar as consultas que já aconteceram",
     ],
     howTo: ["Abra Consultas", "Toque em Entrar na sala na hora marcada"],
   },
@@ -368,8 +459,13 @@ export const CATALOG_B: CatalogItem[] = [
     features: [
       "Enviar PDF ou imagem até 20 MB com título, tipo, data e observação",
       "Abrir e remover documentos",
+      "Próximos exames com data, local e orientações; lembrete 24 h antes; marcar como feito",
+      "O profissional do acompanhamento pede exames (o paciente é avisado na hora)",
     ],
-    howTo: ["Toque em Enviar arquivo", "Preencha os dados e envie"],
+    howTo: [
+      "Toque em Anotar exame, preencha e salve",
+      "Toque em Enviar arquivo para mandar o resultado",
+    ],
   },
   {
     id: "nina",

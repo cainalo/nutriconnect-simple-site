@@ -20,6 +20,7 @@ import {
   useVerifications,
 } from "@/lib/social/professionals-queries";
 import { useI18n } from "@/hooks/use-i18n";
+import { useTr } from "@/components/settings-ui";
 import { AppScreen } from "@/components/app-screen";
 
 export const Route = createFileRoute("/verificacao")({
@@ -169,6 +170,7 @@ function Label({
 
 function VerificationForm({ userId, userName }: { userId: string; userName: string }) {
   const { t } = useI18n();
+  const tr = useTr();
   const refresh = useRefreshProfessionals();
   const [fullName, setFullName] = useState(userName);
   const [profession, setProfession] = useState<string>(PROFESSIONS[0].label);
@@ -239,6 +241,34 @@ function VerificationForm({ userId, userName }: { userId: string; userName: stri
     >
       <h2 className="font-display text-lg font-bold text-foreground">{t("verify.formTitle")}</h2>
 
+      {/* Os três passos, marcados conforme a pessoa preenche. */}
+      <ol className="grid grid-cols-3 gap-2" aria-label={t("verify.formTitle")}>
+        {[
+          { label: STEP_NAMES[0], done: !!fullName.trim() && !!registration.trim() },
+          { label: STEP_NAMES[1], done: !!documentImage && !!selfieImage },
+          { label: STEP_NAMES[2], done: declared },
+        ].map((st, i) => (
+          <li
+            key={i}
+            className={`flex items-center gap-2 rounded-xl border px-2.5 py-2 text-xs font-semibold ${
+              st.done
+                ? "border-primary/40 bg-primary/10 text-foreground"
+                : "border-border text-muted-foreground"
+            }`}
+          >
+            <span
+              className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] ${
+                st.done ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
+              }`}
+            >
+              {st.done ? "✓" : i + 1}
+            </span>
+            {tr(st.label)}
+          </li>
+        ))}
+      </ol>
+
+      <StepHeading n={1} label={tr(STEP_NAMES[0])} />
       <div className="grid gap-4 sm:grid-cols-2">
         <Label text={t("verify.fullName")} hint={t("verify.fullNameHint")}>
           <input
@@ -327,6 +357,7 @@ function VerificationForm({ userId, userName }: { userId: string; userName: stri
         />
       </Label>
 
+      <StepHeading n={2} label={tr(STEP_NAMES[1])} />
       <div className="grid gap-4 sm:grid-cols-2">
         <ImageUpload
           label={t("verify.docLabel")}
@@ -342,12 +373,13 @@ function VerificationForm({ userId, userName }: { userId: string; userName: stri
         />
       </div>
 
+      <StepHeading n={3} label={tr(STEP_NAMES[2])} />
       <label className="flex items-start gap-2.5 text-xs leading-relaxed text-foreground">
         <input
           type="checkbox"
           checked={declared}
           onChange={(e) => setDeclared(e.target.checked)}
-          className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]"
+          className="mt-0.5 h-5 w-5 accent-[var(--color-primary)]"
         />
         <span>{t("verify.declare")}</span>
       </label>
@@ -416,5 +448,22 @@ function ImageUpload({
         </button>
       )}
     </div>
+  );
+}
+
+const STEP_NAMES: [string, string, string, string][] = [
+  ["Dados", "Details", "Datos", "Données"],
+  ["Documentos", "Documents", "Documentos", "Documents"],
+  ["Envio", "Submit", "Envío", "Envoi"],
+];
+
+function StepHeading({ n, label }: { n: number; label: string }) {
+  return (
+    <h3 className="flex items-center gap-2 border-t border-border/60 pt-5 text-sm font-bold text-foreground first-of-type:border-0">
+      <span className="grid h-6 w-6 place-items-center rounded-full bg-accent text-[11px] text-accent-foreground">
+        {n}
+      </span>
+      {label}
+    </h3>
   );
 }

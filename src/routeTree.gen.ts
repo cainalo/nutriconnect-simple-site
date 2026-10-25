@@ -35,6 +35,7 @@ import { Route as ParceiroRouteImport } from './routes/parceiro'
 import { Route as PersonagensLabRouteImport } from './routes/personagens-lab'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ProgramasRouteImport } from './routes/programas'
+import { Route as RecompensasRouteImport } from './routes/recompensas'
 import { Route as RecuperarSenhaRouteImport } from './routes/recuperar-senha'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TemaDaSemanaRouteImport } from './routes/tema-da-semana'
@@ -61,6 +62,7 @@ import { Route as EventoEventIdRouteImport } from './routes/evento.$eventId'
 import { Route as PagamentoAppointmentIdRouteImport } from './routes/pagamento.$appointmentId'
 import { Route as PainelIndexRouteImport } from './routes/painel.index'
 import { Route as PainelAgendaRouteImport } from './routes/painel.agenda'
+import { Route as PainelAvaliacoesRouteImport } from './routes/painel.avaliacoes'
 import { Route as PainelConfiguracoesRouteImport } from './routes/painel.configuracoes'
 import { Route as PainelFinanceiroRouteImport } from './routes/painel.financeiro'
 import { Route as PainelMembrosRouteImport } from './routes/painel.membros'
@@ -219,6 +221,11 @@ const ProgramasRoute = ProgramasRouteImport.update({
   path: '/programas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecompensasRoute = RecompensasRouteImport.update({
+  id: '/recompensas',
+  path: '/recompensas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecuperarSenhaRoute = RecuperarSenhaRouteImport.update({
   id: '/recuperar-senha',
   path: '/recuperar-senha',
@@ -347,6 +354,11 @@ const PainelIndexRoute = PainelIndexRouteImport.update({
 const PainelAgendaRoute = PainelAgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
+  getParentRoute: () => PainelRoute,
+} as any)
+const PainelAvaliacoesRoute = PainelAvaliacoesRouteImport.update({
+  id: '/avaliacoes',
+  path: '/avaliacoes',
   getParentRoute: () => PainelRoute,
 } as any)
 const PainelConfiguracoesRoute = PainelConfiguracoesRouteImport.update({
@@ -520,6 +532,7 @@ export interface FileRoutesByFullPath {
   '/personagens-lab': typeof PersonagensLabRoute
   '/privacidade': typeof PrivacidadeRoute
   '/programas': typeof ProgramasRouteWithChildren
+  '/recompensas': typeof RecompensasRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
   '/sobre': typeof SobreRoute
   '/tema-da-semana': typeof TemaDaSemanaRoute
@@ -541,6 +554,7 @@ export interface FileRoutesByFullPath {
   '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
+  '/painel/avaliacoes': typeof PainelAvaliacoesRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
@@ -595,6 +609,7 @@ export interface FileRoutesByTo {
   '/parceiro': typeof ParceiroRoute
   '/personagens-lab': typeof PersonagensLabRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/recompensas': typeof RecompensasRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
   '/sobre': typeof SobreRoute
   '/tema-da-semana': typeof TemaDaSemanaRoute
@@ -616,6 +631,7 @@ export interface FileRoutesByTo {
   '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
+  '/painel/avaliacoes': typeof PainelAvaliacoesRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
@@ -676,6 +692,7 @@ export interface FileRoutesById {
   '/personagens-lab': typeof PersonagensLabRoute
   '/privacidade': typeof PrivacidadeRoute
   '/programas': typeof ProgramasRouteWithChildren
+  '/recompensas': typeof RecompensasRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
   '/sobre': typeof SobreRoute
   '/tema-da-semana': typeof TemaDaSemanaRoute
@@ -697,6 +714,7 @@ export interface FileRoutesById {
   '/evento/$eventId': typeof EventoEventIdRoute
   '/pagamento/$appointmentId': typeof PagamentoAppointmentIdRoute
   '/painel/agenda': typeof PainelAgendaRoute
+  '/painel/avaliacoes': typeof PainelAvaliacoesRoute
   '/painel/configuracoes': typeof PainelConfiguracoesRoute
   '/painel/financeiro': typeof PainelFinanceiroRoute
   '/painel/membros': typeof PainelMembrosRoute
@@ -759,6 +777,7 @@ export interface FileRouteTypes {
     | '/personagens-lab'
     | '/privacidade'
     | '/programas'
+    | '/recompensas'
     | '/recuperar-senha'
     | '/sobre'
     | '/tema-da-semana'
@@ -780,6 +799,7 @@ export interface FileRouteTypes {
     | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
+    | '/painel/avaliacoes'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
@@ -834,6 +854,7 @@ export interface FileRouteTypes {
     | '/parceiro'
     | '/personagens-lab'
     | '/privacidade'
+    | '/recompensas'
     | '/recuperar-senha'
     | '/sobre'
     | '/tema-da-semana'
@@ -855,6 +876,7 @@ export interface FileRouteTypes {
     | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
+    | '/painel/avaliacoes'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
@@ -914,6 +936,7 @@ export interface FileRouteTypes {
     | '/personagens-lab'
     | '/privacidade'
     | '/programas'
+    | '/recompensas'
     | '/recuperar-senha'
     | '/sobre'
     | '/tema-da-semana'
@@ -935,6 +958,7 @@ export interface FileRouteTypes {
     | '/evento/$eventId'
     | '/pagamento/$appointmentId'
     | '/painel/agenda'
+    | '/painel/avaliacoes'
     | '/painel/configuracoes'
     | '/painel/financeiro'
     | '/painel/membros'
@@ -996,6 +1020,7 @@ export interface RootRouteChildren {
   PersonagensLabRoute: typeof PersonagensLabRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ProgramasRoute: typeof ProgramasRouteWithChildren
+  RecompensasRoute: typeof RecompensasRoute
   RecuperarSenhaRoute: typeof RecuperarSenhaRoute
   SobreRoute: typeof SobreRoute
   TemaDaSemanaRoute: typeof TemaDaSemanaRoute
@@ -1200,6 +1225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProgramasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recompensas': {
+      id: '/recompensas'
+      path: '/recompensas'
+      fullPath: '/recompensas'
+      preLoaderRoute: typeof RecompensasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recuperar-senha': {
       id: '/recuperar-senha'
       path: '/recuperar-senha'
@@ -1380,6 +1412,13 @@ declare module '@tanstack/react-router' {
       path: '/agenda'
       fullPath: '/painel/agenda'
       preLoaderRoute: typeof PainelAgendaRouteImport
+      parentRoute: typeof PainelRoute
+    }
+    '/painel/avaliacoes': {
+      id: '/painel/avaliacoes'
+      path: '/avaliacoes'
+      fullPath: '/painel/avaliacoes'
+      preLoaderRoute: typeof PainelAvaliacoesRouteImport
       parentRoute: typeof PainelRoute
     }
     '/painel/configuracoes': {
@@ -1644,6 +1683,7 @@ const DesafiosRouteWithChildren = DesafiosRoute._addFileChildren(
 
 interface PainelRouteChildren {
   PainelAgendaRoute: typeof PainelAgendaRoute
+  PainelAvaliacoesRoute: typeof PainelAvaliacoesRoute
   PainelConfiguracoesRoute: typeof PainelConfiguracoesRoute
   PainelFinanceiroRoute: typeof PainelFinanceiroRoute
   PainelMembrosRoute: typeof PainelMembrosRoute
@@ -1659,6 +1699,7 @@ interface PainelRouteChildren {
 
 const PainelRouteChildren: PainelRouteChildren = {
   PainelAgendaRoute: PainelAgendaRoute,
+  PainelAvaliacoesRoute: PainelAvaliacoesRoute,
   PainelConfiguracoesRoute: PainelConfiguracoesRoute,
   PainelFinanceiroRoute: PainelFinanceiroRoute,
   PainelMembrosRoute: PainelMembrosRoute,
@@ -1737,6 +1778,7 @@ const rootRouteChildren: RootRouteChildren = {
   PersonagensLabRoute: PersonagensLabRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ProgramasRoute: ProgramasRouteWithChildren,
+  RecompensasRoute: RecompensasRoute,
   RecuperarSenhaRoute: RecuperarSenhaRoute,
   SobreRoute: SobreRoute,
   TemaDaSemanaRoute: TemaDaSemanaRoute,

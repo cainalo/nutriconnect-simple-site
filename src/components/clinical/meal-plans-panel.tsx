@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, Plus, Trash2, Utensils } from "lucide-react";
 import {
@@ -185,9 +186,9 @@ function NewPlanDialog({ patientId, onClose }: { patientId: string; onClose: () 
                       "Borrar plantilla",
                       "Supprimer le modèle",
                     ])}
-                    onClick={() => {
+                    onClick={async () => {
                       if (
-                        window.confirm(
+                        await siteConfirm(
                           tr([
                             `Apagar o modelo "${template.title}"? Os planos já criados com ele continuam.`,
                             `Delete the template "${template.title}"? Plans already created from it stay.`,

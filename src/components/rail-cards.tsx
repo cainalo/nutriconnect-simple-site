@@ -99,7 +99,8 @@ function useTr() {
 
 const linkRow =
   "flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium text-foreground transition hover:bg-secondary";
-const smallLink = "text-[11px] font-semibold text-primary hover:underline";
+const smallLink =
+  "inline-flex min-h-6 min-w-6 items-center justify-center text-[11px] font-semibold text-primary hover:underline";
 
 export function useAdultTrailProgress(userId: string | undefined) {
   const [progress, setProgress] = useState<TrailProgress | null>(null);
@@ -1089,7 +1090,7 @@ export function ProTasksCard() {
         "Consultations à clôturer",
       ],
       to: "/painel/agenda",
-      tone: "text-amber-600 dark:text-amber-400",
+      tone: "text-warning",
     },
     {
       n: requests,
@@ -1474,37 +1475,35 @@ export function SearchTipsCard() {
 
 // ───────────────────────────── Filtros da lista de comunidades ─────────────────────────────
 
-/** Busca por nome, descrição ou categoria; filtra a lista da página Comunidades. */
-export function CommunitySearchCard() {
+/** Busca e categorias num cartão só (topo da página Comunidades): ocupa menos no celular. */
+export function CommunityFiltersBar() {
   const { t } = useI18n();
-  const { query } = useCommunityFilters();
+  const { query, category } = useCommunityFilters();
   return (
-    <Panel title={t("common.search")}>
-      <input
-        type="text"
-        placeholder={t("comunidades.searchPlaceholder")}
-        value={query}
-        onChange={(e) => setCommunityFilters({ query: e.target.value })}
-        className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-      />
-    </Panel>
-  );
-}
-
-/** Categorias temáticas; filtra a lista da página Comunidades. */
-export function CommunityCategoriesCard() {
-  const { t } = useI18n();
-  const { category } = useCommunityFilters();
-  return (
-    <Panel title={t("comunidades.categories")}>
-      <div className="flex flex-wrap gap-2">
+    <div className="rounded-3xl border border-border/70 bg-card p-3 shadow-xs sm:p-4">
+      <label className="relative block">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="search"
+          placeholder={t("comunidades.searchPlaceholder")}
+          aria-label={t("common.search")}
+          value={query}
+          onChange={(e) => setCommunityFilters({ query: e.target.value })}
+          className="w-full rounded-full border border-input bg-background py-2.5 pl-10 pr-4 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </label>
+      <div
+        className="mt-3 flex flex-wrap gap-1.5"
+        role="group"
+        aria-label={t("comunidades.categories")}
+      >
         {["Todas", ...CATEGORIES].map((c) => (
           <button
             key={c}
             type="button"
             aria-pressed={category === c}
             onClick={() => setCommunityFilters({ category: c })}
-            className={`cursor-pointer rounded-full px-4 py-2 text-xs font-medium transition ${
+            className={`cursor-pointer rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
               category === c
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "bg-secondary text-secondary-foreground hover:bg-muted"
@@ -1514,6 +1513,6 @@ export function CommunityCategoriesCard() {
           </button>
         ))}
       </div>
-    </Panel>
+    </div>
   );
 }

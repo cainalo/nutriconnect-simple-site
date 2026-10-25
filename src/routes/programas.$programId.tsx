@@ -1,9 +1,10 @@
 // Página de um programa da loja (N10): quem ainda não comprou vê a descrição e paga ali mesmo (Stripe
 // embutido); quem comprou (e o profissional) vê os módulos e marca o que já fez.
 import { useEffect, useState } from "react";
+import { PaymentError } from "@/components/payment-error";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle2, Circle, Loader2, Lock, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, Loader2, Lock, ShieldCheck, Gift } from "lucide-react";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -18,6 +19,7 @@ import {
 } from "@/lib/programs";
 import { cardsByIds } from "@/lib/social/api";
 import { cn } from "@/lib/utils";
+import { activeDiscounts, useMyRedemptions } from "@/lib/rewards";
 import { EmojiIcon } from "@/components/emoji-icon";
 
 export const Route = createFileRoute("/programas/$programId")({
@@ -147,6 +149,10 @@ function ProgramPage() {
 
 function Buy({ programId, price }: { programId: string; price: string }) {
   const tr = useTr();
+  const { user } = useAuth();
+  const redemptions = useMyRedemptions(user?.id);
+  const coupons = activeDiscounts(redemptions.data ?? []);
+  const [coupon, setCoupon] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [stripe, setStripe] = useState<StripeModules | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -158,7 +164,7 @@ function Buy({ programId, price }: { programId: string; price: string }) {
     void (async () => {
       try {
         const [{ clientSecret: secret, publishableKey }, js, react] = await Promise.all([
-          createProgramCheckout(programId),
+          createProgramCheckout(programId, coupon ?? undefined),
           import("@stripe/stripe-js"),
           import("@stripe/react-stripe-js"),
         ]);
@@ -176,7 +182,7 @@ function Buy({ programId, price }: { programId: string; price: string }) {
     return () => {
       cancelled = true;
     };
-  }, [open, programId]);
+  }, [open, programId, coupon]);
 
   if (!open) {
     return (
@@ -193,6 +199,50 @@ function Buy({ programId, price }: { programId: string; price: string }) {
         <button type="button" className={btnPrimary} onClick={() => setOpen(true)}>
           {tr(["Comprar por", "Buy for", "Comprar por", "Acheter pour"])} {price}
         </button>
+        {coupons.length > 0 && (
+          <div className="w-full border-t border-border/60 pt-3">
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-foreground">
+              <Gift className="h-4 w-4 text-accent" />
+              {tr([
+                "Usar um cupom das suas recompensas?",
+                "Use a coupon from your rewards?",
+                "¿Usar un cupón de tus recompensas?",
+                "Utiliser un bon de vos récompenses ?",
+              ])}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {coupons.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  aria-pressed={coupon === c.id}
+                  onClick={() => setCoupon(coupon === c.id ? null : c.id)}
+                  className={cn(
+                    "min-h-11 rounded-full border px-3 text-xs font-semibold transition",
+                    coupon === c.id
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tr([
+                    `${c.rewards?.discount_percent}% de desconto · ${c.code}`,
+                    `${c.rewards?.discount_percent}% off · ${c.code}`,
+                    `${c.rewards?.discount_percent}% de descuento · ${c.code}`,
+                    `${c.rewards?.discount_percent} % de réduction · ${c.code}`,
+                  ])}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {tr([
+                "O valor com desconto aparece no pagamento. O profissional recebe o mesmo valor.",
+                "The discounted price shows at checkout. The professional is paid the same.",
+                "El precio con descuento aparece en el pago. El profesional recibe lo mismo.",
+                "Le prix réduit s'affiche au paiement. Le professionnel reçoit le même montant.",
+              ])}
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -203,7 +253,7 @@ function Buy({ programId, price }: { programId: string; price: string }) {
         {tr(["Pagamento seguro", "Secure payment", "Pago seguro", "Paiement sécurisé"])}
       </p>
       {error ? (
-        <p className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</p>
+        <PaymentError detail={error} />
       ) : stripe && clientSecret ? (
         <stripe.Provider
           stripe={stripe.stripePromise}

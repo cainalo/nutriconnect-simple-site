@@ -13,6 +13,7 @@ import {
   Search,
   Trash2,
   X,
+  Scale,
 } from "lucide-react";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
@@ -644,7 +645,7 @@ function History({
                 checked={on}
                 onChange={() => onToggle(s.id)}
                 aria-label={tr(["Comparar", "Compare", "Comparar", "Comparer"])}
-                className="h-4 w-4 accent-[var(--color-primary)]"
+                className="h-5 w-5 accent-[var(--color-primary)]"
               />
             )}
             <button
@@ -876,10 +877,10 @@ export function LabelScanner() {
               inputMode="numeric"
               autoComplete="off"
               placeholder={tr([
-                "Ou digite os números (ex.: 7891234567895)",
-                "Or type the digits (e.g. 7891234567895)",
-                "O escribe los números (ej.: 7891234567895)",
-                "Ou saisissez les chiffres (ex. : 7891234567895)",
+                "Ou digite o código",
+                "Or type the code",
+                "O escribe el código",
+                "Ou saisissez le code",
               ])}
               className={cn(inputClass, "flex-1 tabular-nums")}
             />
@@ -938,7 +939,18 @@ export function LabelScanner() {
       <Card
         title={tr(["Histórico", "History", "Historial", "Historique"])}
         action={
-          selected.length > 0 ? (
+          selected.length === 0 ? (
+            // Sem nada marcado, o atalho deixa claro que dá para comparar dois produtos.
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+              <Scale className="h-3.5 w-3.5" />
+              {tr([
+                "Marque 2 para comparar",
+                "Tick 2 to compare",
+                "Marca 2 para comparar",
+                "Cochez-en 2 pour comparer",
+              ])}
+            </span>
+          ) : selected.length > 0 ? (
             <span className="text-[11px] text-muted-foreground">
               {selected.length === 1
                 ? tr([

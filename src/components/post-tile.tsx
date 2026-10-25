@@ -179,7 +179,7 @@ export function PostTile({
         <Icon className="h-3.5 w-3.5" />
       </span>
       {hot && (
-        <span className="absolute bottom-1.5 right-1.5 grid h-5 w-5 place-items-center rounded-full bg-card/90 text-orange-500 shadow-xs sm:bottom-2.5 sm:right-2.5">
+        <span className="absolute bottom-1.5 right-1.5 grid h-5 w-5 place-items-center rounded-full bg-card/90 text-accent shadow-xs sm:bottom-2.5 sm:right-2.5">
           <EmojiIcon emoji="🔥" className="h-3 w-3" />
         </span>
       )}

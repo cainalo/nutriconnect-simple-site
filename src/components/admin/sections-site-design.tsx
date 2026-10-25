@@ -2,12 +2,15 @@
 // "Testar" aplica só neste navegador; "Publicar" grava para todo mundo. Modelos de post, regras de
 // rolagem e layouts não mudam. A personalização de cada pessoa continua valendo por cima.
 import { useEffect, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Check, Eye, Moon, Sun, Upload } from "lucide-react";
 import { Badge, Panel, btnCls, btnPrimary } from "@/components/admin/admin-ui";
 import { useSaveSiteConfig, useSiteConfigs } from "@/lib/site-config";
 import { applySiteDesign, readSiteDesign, SITE_DESIGNS, type SiteDesign } from "@/lib/site-design";
+import { useTr } from "@/components/settings-ui";
 
 function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
+  const tr = useTr();
   const s = d.swatch;
   const bg = dark ? s.darkBg : s.bg;
   const card = dark ? s.darkCard : s.card;
@@ -30,10 +33,15 @@ function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
         className="text-[15px] font-bold leading-tight"
         style={{ fontFamily: d.headingFont, textAlign: "left" }}
       >
-        Bom dia, Maria
+        {tr(["Bom dia, Maria", "Good morning, Maria", "Buenos días, María", "Bonjour, Maria"])}
       </p>
       <p className="mt-0.5 text-[10px] opacity-70" style={{ textAlign: "left" }}>
-        3 hábitos hoje · sequência de 5 dias
+        {tr([
+          "3 hábitos hoje · sequência de 5 dias",
+          "3 habits today · 5-day streak",
+          "3 hábitos hoy · racha de 5 días",
+          "3 habitudes aujourd'hui · série de 5 jours",
+        ])}
       </p>
       <div className="mt-2.5 grid grid-cols-2 gap-2">
         {[s.primary, s.accent].map((c, i) => (
@@ -65,7 +73,7 @@ function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
                 borderRadius: d.id === "editorial" ? 2 : 999,
               }}
             >
-              Abrir
+              {tr(["Abrir", "Open", "Abrir", "Ouvrir"])}
             </div>
           </div>
         ))}
@@ -75,6 +83,7 @@ function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
 }
 
 export function SiteDesignSection() {
+  const tr = useTr();
   const configs = useSiteConfigs();
   const save = useSaveSiteConfig();
   const saved = readSiteDesign(configs.data?.site_design);
@@ -86,12 +95,29 @@ export function SiteDesignSection() {
 
   return (
     <Panel
-      title="Design do site"
-      hint="Escolha o visual completo do NutriConnect. Vale para todas as pessoas, em todas as páginas; quem personalizou a própria aparência mantém as suas escolhas por cima. Modelos de post, rolagem e layouts não mudam."
+      title={tr(["Design do site", "Site design", "Diseño del sitio", "Design du site"])}
+      hint={tr([
+        "Escolha o visual completo do NutriConnect. Vale para todas as pessoas, em todas as páginas; quem personalizou a própria aparência mantém as suas escolhas por cima. Modelos de post, rolagem e layouts não mudam.",
+        "Choose NutriConnect's complete look. It applies to everyone, on every page; people who customized their own appearance keep their choices on top. Post templates, scrolling and layouts don't change.",
+        "Elige el aspecto completo de NutriConnect. Se aplica a todas las personas, en todas las páginas; quien personalizó su propia apariencia mantiene sus elecciones por encima. Las plantillas de publicación, el desplazamiento y los diseños no cambian.",
+        "Choisissez l'apparence complète de NutriConnect. Elle s'applique à tout le monde, sur toutes les pages ; ceux qui ont personnalisé leur apparence gardent leurs choix par-dessus. Les modèles de publication, le défilement et les mises en page ne changent pas.",
+      ])}
       action={
         <button type="button" className={btnCls} onClick={() => setDark((v) => !v)}>
           {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-          Miniaturas no modo {dark ? "claro" : "escuro"}
+          {dark
+            ? tr([
+                "Miniaturas no modo claro",
+                "Thumbnails in light mode",
+                "Miniaturas en modo claro",
+                "Miniatures en mode clair",
+              ])
+            : tr([
+                "Miniaturas no modo escuro",
+                "Thumbnails in dark mode",
+                "Miniaturas en modo oscuro",
+                "Miniatures en mode sombre",
+              ])}
         </button>
       }
     >
@@ -110,8 +136,21 @@ export function SiteDesignSection() {
               <div className="min-w-0">
                 <p className="flex flex-wrap items-center gap-2 text-sm font-bold">
                   {d.name}
-                  {isSaved && <Badge tone="good">Em uso no site</Badge>}
-                  {isTesting && <Badge tone="warn">Testando aqui</Badge>}
+                  {isSaved && (
+                    <Badge tone="good">
+                      {tr([
+                        "Em uso no site",
+                        "In use on the site",
+                        "En uso en el sitio",
+                        "Utilisé sur le site",
+                      ])}
+                    </Badge>
+                  )}
+                  {isTesting && (
+                    <Badge tone="warn">
+                      {tr(["Testando aqui", "Testing here", "Probando aquí", "Test en cours ici"])}
+                    </Badge>
+                  )}
                 </p>
                 <p className="text-xs font-semibold text-accent">{d.tagline}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{d.description}</p>
@@ -125,14 +164,30 @@ export function SiteDesignSection() {
                     setTesting(d.id === saved ? null : d.id);
                   }}
                 >
-                  <Eye className="h-3.5 w-3.5" /> Testar neste navegador
+                  <Eye className="h-3.5 w-3.5" />{" "}
+                  {tr([
+                    "Testar neste navegador",
+                    "Test in this browser",
+                    "Probar en este navegador",
+                    "Tester dans ce navigateur",
+                  ])}
                 </button>
                 <button
                   type="button"
                   className={btnPrimary}
                   disabled={isSaved || save.isPending}
-                  onClick={() => {
-                    if (!window.confirm(`Publicar o design "${d.name}" para todo o site?`)) return;
+                  onClick={async () => {
+                    if (
+                      !(await siteConfirm(
+                        tr([
+                          `Publicar o design "${d.name}" para todo o site?`,
+                          `Publish the "${d.name}" design for the whole site?`,
+                          `¿Publicar el diseño "${d.name}" para todo el sitio?`,
+                          `Publier le design « ${d.name} » pour tout le site ?`,
+                        ]),
+                      ))
+                    )
+                      return;
                     save.mutate(
                       { key: "site_design", value: d.id === "natural" ? null : { id: d.id } },
                       { onSuccess: () => setTesting(null) },
@@ -141,11 +196,18 @@ export function SiteDesignSection() {
                 >
                   {isSaved ? (
                     <>
-                      <Check className="h-3.5 w-3.5" /> Publicado
+                      <Check className="h-3.5 w-3.5" />{" "}
+                      {tr(["Publicado", "Published", "Publicado", "Publié"])}
                     </>
                   ) : (
                     <>
-                      <Upload className="h-3.5 w-3.5" /> Publicar no site
+                      <Upload className="h-3.5 w-3.5" />{" "}
+                      {tr([
+                        "Publicar no site",
+                        "Publish on the site",
+                        "Publicar en el sitio",
+                        "Publier sur le site",
+                      ])}
                     </>
                   )}
                 </button>

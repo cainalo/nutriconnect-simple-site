@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from "react";
 import type { MascotMood } from "@/components/mascots";
+import { useTr } from "@/components/settings-ui";
 
 /**
  * Nutri Nina: personagem com aparência 3D (volume por gradientes, luz e sombra) e movimentos próprios:
@@ -16,6 +17,7 @@ const INK = "#3a2416";
 
 export function Nina3D({ mood = "idle", bust = false }: { mood?: MascotMood; bust?: boolean }) {
   const uid = useId().replace(/:/g, "");
+  const tr = useTr();
   const ref = useRef<SVGSVGElement>(null);
   const g = (name: string) => `${name}-${uid}`;
   const ref_ = (name: string) => `url(#${g(name)})`;
@@ -273,7 +275,7 @@ export function Nina3D({ mood = "idle", bust = false }: { mood?: MascotMood; bus
             fill="#64748b"
             fontFamily="sans-serif"
           >
-            Nutricionista
+            {tr(["Nutricionista", "Nutritionist", "Nutricionista", "Nutritionniste"])}
           </text>
         </g>
 
@@ -315,7 +317,7 @@ export function Nina3D({ mood = "idle", bust = false }: { mood?: MascotMood; bus
               fill="#ffffff"
               fontFamily="sans-serif"
             >
-              Plano alimentar
+              {tr(["Plano alimentar", "Meal plan", "Plan alimentario", "Plan alimentaire"])}
             </text>
             {/* Pirâmide alimentar */}
             <path d="M175 178 L164 202 L186 202Z" fill="#e9573f" />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { FileText, Loader2, Lock, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { draftSoapNote } from "@/lib/pro-ai.functions";
@@ -83,8 +84,8 @@ export function NotesPanel({ patientId, readOnly }: { patientId: string; readOnl
                         type="button"
                         className={buttonGhost}
                         aria-label={t("common.remove")}
-                        onClick={() =>
-                          window.confirm(t("notes.deleteConfirm")) && remove.mutate(n.id)
+                        onClick={async () =>
+                          (await siteConfirm(t("notes.deleteConfirm"))) && remove.mutate(n.id)
                         }
                       >
                         <Trash2 className="h-4 w-4" />
@@ -138,7 +139,8 @@ function NoteForm({
 
   /** Organiza anotações soltas em SOAP com a IA. Só preenche os campos: quem salva é o profissional. */
   const draft = async () => {
-    if (SOAP.some((k) => values[k].trim()) && !window.confirm(t("ai.soap.overwrite"))) return;
+    if (SOAP.some(async (k) => values[k].trim()) && !(await siteConfirm(t("ai.soap.overwrite"))))
+      return;
     setDrafting(true);
     try {
       const res = await draftSoapNote({ data: { patientId, text: rough, locale } });

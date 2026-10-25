@@ -589,7 +589,7 @@ const clinical: Record<ClinicalKey, string> = {
   "patientPlan.next": "Prochain repas",
   "patientPlan.empty": "Vous n'avez pas encore de plan alimentaire",
   "patientPlan.emptyText":
-    "Après la consultation, le plan publié par votre professionnel apparaît ici.",
+    "Après la consultation, le plan de votre professionnel s'affiche ici : les repas du jour avec les quantités, des alternatives et des conseils. Vous pouvez le télécharger en PDF et cocher ce que vous avez suivi.",
   "patientPlan.archivedNotice":
     "Ceci est une version précédente de votre plan, conservée pour consultation.",
   "patientPlan.history": "Versions du plan",
@@ -620,6 +620,7 @@ const clinical: Record<ClinicalKey, string> = {
   "diary.deleted": "Entrée supprimée.",
   "diary.deleteConfirm": "Supprimer cette entrée du journal ?",
   "diary.today": "Aujourd'hui",
+  "diary.yesterday": "Hier",
   "diary.empty": "Aucune entrée dans le journal",
   "diary.emptyOwner": "Commencez par noter votre prochain repas. Une photo suffit.",
   "diary.emptyPro": "Le patient n'a encore enregistré aucun repas.",
@@ -730,7 +731,7 @@ const clinical: Record<ClinicalKey, string> = {
   "finance.netHintOne": "1 paiement approuvé",
   "finance.gross": "Chiffre d'affaires brut",
   "finance.ticket": "panier moyen {value}",
-  "finance.fees": "Frais de la plateforme",
+  "finance.fees": "Frais",
   "finance.refunded": "{value} remboursé(s)",
   "finance.receivable": "À encaisser",
   "finance.receivableHint": "{n} consultations non payées",

@@ -1,5 +1,6 @@
 // Assinatura do perfil de membros de um profissional. O formulário do Stripe fica embutido na página.
 import { useEffect, useState } from "react";
+import { PaymentError } from "@/components/payment-error";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, CheckCircle2, Lock } from "lucide-react";
 import { AuthGateLoading } from "@/components/site-chrome";
@@ -165,7 +166,7 @@ function SubscribePage() {
                 {tr(["Pagamento seguro", "Secure payment", "Pago seguro", "Paiement sécurisé"])}
               </div>
               {error ? (
-                <p className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</p>
+                <PaymentError detail={error} />
               ) : stripe && clientSecret ? (
                 <stripe.Provider
                   stripe={stripe.stripePromise}

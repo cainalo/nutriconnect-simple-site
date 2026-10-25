@@ -3,7 +3,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json, Tables, TablesInsert } from "@/integrations/supabase/types";
-import type { Names } from "@/lib/appearance-data";
+import { pickName, type Names } from "@/lib/appearance-data";
+import { loadLocale } from "@/lib/i18n";
 import type { Network, PostFormat, PostIdea } from "@/lib/social-studio.functions";
 
 export type SocialProfile = Tables<"social_profiles">;
@@ -11,30 +12,43 @@ export type SocialPost = Tables<"social_posts">;
 export type PostStatus = "ideia" | "rascunho" | "aprovado" | "agendado" | "publicado";
 export type Slide = { title: string; text: string };
 
-export const NETWORK_LABEL: Record<Network, string> = {
-  instagram: "Instagram",
-  tiktok: "TikTok",
-  facebook: "Facebook",
-  linkedin: "LinkedIn",
-  youtube: "YouTube",
-  x: "X",
-  outro: "Outra",
-};
-export const FORMAT_LABEL: Record<PostFormat, string> = {
-  post: "Post",
-  carrossel: "Carrossel",
-  reels: "Reels",
-  story: "Story",
-  video: "Vídeo",
-  texto: "Texto",
-};
-export const STATUS_LABEL: Record<PostStatus, string> = {
-  ideia: "Ideia",
-  rascunho: "Rascunho",
-  aprovado: "Aprovado",
-  agendado: "Agendado",
-  publicado: "Publicado",
-};
+/**
+ * Nomes de rede, formato e status no idioma escolhido. Cada mapa continua sendo um
+ * Record<chave, string> para quem usa; a leitura devolve o nome no idioma atual.
+ */
+function localized<K extends string>(names: Record<K, Names>): Record<K, string> {
+  return new Proxy(names, {
+    get: (target, key) => {
+      const n = target[key as K];
+      return n ? pickName(n, loadLocale()) : undefined;
+    },
+  }) as unknown as Record<K, string>;
+}
+
+export const NETWORK_LABEL = localized<Network>({
+  instagram: ["Instagram", "Instagram", "Instagram", "Instagram"],
+  tiktok: ["TikTok", "TikTok", "TikTok", "TikTok"],
+  facebook: ["Facebook", "Facebook", "Facebook", "Facebook"],
+  linkedin: ["LinkedIn", "LinkedIn", "LinkedIn", "LinkedIn"],
+  youtube: ["YouTube", "YouTube", "YouTube", "YouTube"],
+  x: ["X", "X", "X", "X"],
+  outro: ["Outra", "Other", "Otra", "Autre"],
+});
+export const FORMAT_LABEL = localized<PostFormat>({
+  post: ["Post", "Post", "Post", "Post"],
+  carrossel: ["Carrossel", "Carousel", "Carrusel", "Carrousel"],
+  reels: ["Reels", "Reels", "Reels", "Reels"],
+  story: ["Story", "Story", "Story", "Story"],
+  video: ["Vídeo", "Video", "Video", "Vidéo"],
+  texto: ["Texto", "Text", "Texto", "Texte"],
+});
+export const STATUS_LABEL = localized<PostStatus>({
+  ideia: ["Ideia", "Idea", "Idea", "Idée"],
+  rascunho: ["Rascunho", "Draft", "Borrador", "Brouillon"],
+  aprovado: ["Aprovado", "Approved", "Aprobado", "Approuvé"],
+  agendado: ["Agendado", "Scheduled", "Programado", "Programmé"],
+  publicado: ["Publicado", "Published", "Publicado", "Publié"],
+});
 export const STATUSES = Object.keys(STATUS_LABEL) as PostStatus[];
 export const ERROR_TEXT: Record<string, Names> = {
   forbidden: [

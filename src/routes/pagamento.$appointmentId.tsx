@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { PaymentError } from "@/components/payment-error";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, CalendarClock, CheckCircle2, Clock, Lock, MapPin, Video } from "lucide-react";
@@ -11,6 +12,7 @@ import { usePeople } from "@/lib/clinical/queries";
 import { createCheckoutSession } from "@/lib/clinical/payments";
 import { useClinicalI18n } from "@/lib/clinical/i18n";
 import { formatDate, formatMoney, formatTime } from "@/lib/clinical/format";
+import { useTr } from "@/components/settings-ui";
 
 export const Route = createFileRoute("/pagamento/$appointmentId")({
   head: () => ({ meta: [{ title: "Pagamento da consulta — NutriConnect" }] }),
@@ -95,6 +97,7 @@ function PagamentoPage() {
   const { appointmentId } = Route.useParams();
   const { user, hydrated } = useRequireAuth();
   const { locale } = useClinicalI18n();
+  const tr = useTr();
 
   const appt = useQuery({
     queryKey: ["payment-page", "appointment", appointmentId],
@@ -161,13 +164,19 @@ function PagamentoPage() {
       <main className="mx-auto flex w-full max-w-5xl min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 lg:py-3">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
           <h1 className="font-display text-2xl font-extrabold tracking-tight">
-            Pagamento da consulta
+            {tr([
+              "Pagamento da consulta",
+              "Appointment payment",
+              "Pago de la consulta",
+              "Paiement de la consultation",
+            ])}
           </h1>
           <Link
             to="/acompanhamento/consultas"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> Minhas consultas
+            <ArrowLeft className="h-4 w-4" />{" "}
+            {tr(["Minhas consultas", "My appointments", "Mis consultas", "Mes consultations"])}
           </Link>
         </div>
 
@@ -176,36 +185,96 @@ function PagamentoPage() {
             <Loading />
           </div>
         ) : !a || a.patient_id !== user.id ? (
-          <Notice title="Consulta não encontrada">
-            Não encontramos essa consulta na sua conta.
+          <Notice
+            title={tr([
+              "Consulta não encontrada",
+              "Appointment not found",
+              "Consulta no encontrada",
+              "Consultation introuvable",
+            ])}
+          >
+            {tr([
+              "Não encontramos essa consulta na sua conta.",
+              "We couldn't find this appointment in your account.",
+              "No encontramos esta consulta en tu cuenta.",
+              "Nous n'avons pas trouvé cette consultation dans votre compte.",
+            ])}
           </Notice>
         ) : a.status !== "aguardando_pagamento" &&
           !["agendada", "confirmada"].includes(a.status) ? (
-          <Notice title="Esta consulta não está aguardando pagamento">
-            O horário pode ter sido cancelado ou já ter passado.
+          <Notice
+            title={tr([
+              "Esta consulta não está aguardando pagamento",
+              "This appointment is not awaiting payment",
+              "Esta consulta no está esperando pago",
+              "Cette consultation n'attend pas de paiement",
+            ])}
+          >
+            {tr([
+              "O horário pode ter sido cancelado ou já ter passado.",
+              "The slot may have been cancelled or already passed.",
+              "El horario puede haberse cancelado o ya haber pasado.",
+              "Le créneau a peut-être été annulé ou est déjà passé.",
+            ])}
           </Notice>
         ) : ["agendada", "confirmada"].includes(a.status) ? (
           <div className="mt-8 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary-soft/50 p-5">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
-              <p className="font-semibold">Pagamento confirmado!</p>
-              <p className="mt-1 text-sm text-muted-foreground">Sua consulta está agendada.</p>
+              <p className="font-semibold">
+                {tr([
+                  "Pagamento confirmado!",
+                  "Payment confirmed!",
+                  "¡Pago confirmado!",
+                  "Paiement confirmé !",
+                ])}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {tr([
+                  "Sua consulta está agendada.",
+                  "Your appointment is booked.",
+                  "Tu consulta está agendada.",
+                  "Votre consultation est réservée.",
+                ])}
+              </p>
               <Link
                 to="/acompanhamento/consultas"
                 className="mt-3 inline-block rounded-full bg-accent px-5 py-2 text-sm font-semibold text-accent-foreground"
               >
-                Ver minhas consultas
+                {tr([
+                  "Ver minhas consultas",
+                  "See my appointments",
+                  "Ver mis consultas",
+                  "Voir mes consultations",
+                ])}
               </Link>
             </div>
           </div>
         ) : expired ? (
-          <Notice title="O tempo para pagar acabou">
-            O horário foi liberado. Escolha um novo horário para agendar.
+          <Notice
+            title={tr([
+              "O tempo para pagar acabou",
+              "Time to pay has run out",
+              "Se acabó el tiempo para pagar",
+              "Le délai de paiement est écoulé",
+            ])}
+          >
+            {tr([
+              "O horário foi liberado. Escolha um novo horário para agendar.",
+              "The slot was released. Pick a new time to book.",
+              "El horario se liberó. Elige un nuevo horario para agendar.",
+              "Le créneau a été libéré. Choisissez un nouvel horaire.",
+            ])}
             <Link
               to="/profissionais"
               className="mt-3 block w-fit rounded-full bg-accent px-5 py-2 text-sm font-semibold text-accent-foreground"
             >
-              Buscar profissionais
+              {tr([
+                "Buscar profissionais",
+                "Find professionals",
+                "Buscar profesionales",
+                "Trouver des professionnels",
+              ])}
             </Link>
           </Notice>
         ) : (
@@ -214,20 +283,24 @@ function PagamentoPage() {
             <aside className="min-h-0 space-y-3 lg:overflow-y-auto">
               <section className="rounded-2xl border border-border/70 bg-card p-4 shadow-xs">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Resumo
+                  {tr(["Resumo", "Summary", "Resumen", "Résumé"])}
                 </h2>
                 <div className="mt-3 flex items-center gap-3">
                   <Avatar name={pro?.name ?? "…"} url={pro?.avatarUrl} size="md" />
                   <div className="min-w-0">
                     <p className="truncate font-display font-bold">{pro?.name ?? "…"}</p>
-                    <p className="text-xs text-muted-foreground">Consulta de nutrição</p>
+                    <p className="text-xs text-muted-foreground">
+                      {tr(["Consulta", "Appointment", "Consulta", "Consultation"])}
+                    </p>
                   </div>
                 </div>
                 <dl className="mt-4 space-y-2.5 text-sm">
                   <div className="flex items-start gap-2.5">
                     <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                     <div>
-                      <dt className="sr-only">Data e hora</dt>
+                      <dt className="sr-only">
+                        {tr(["Data e hora", "Date and time", "Fecha y hora", "Date et heure"])}
+                      </dt>
                       <dd className="font-medium capitalize">
                         {formatDate(a.starts_at, locale, {
                           weekday: "long",
@@ -247,9 +320,13 @@ function PagamentoPage() {
                       <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                     )}
                     <div>
-                      <dt className="sr-only">Modalidade</dt>
+                      <dt className="sr-only">
+                        {tr(["Modalidade", "Format", "Modalidad", "Modalité"])}
+                      </dt>
                       <dd className="font-medium">
-                        {a.modality === "online" ? "On-line" : "Presencial"}
+                        {a.modality === "online"
+                          ? tr(["On-line", "Online", "En línea", "En ligne"])
+                          : tr(["Presencial", "In person", "Presencial", "En présentiel"])}
                       </dd>
                       {a.modality !== "online" && a.location && (
                         <dd className="text-muted-foreground">{a.location}</dd>
@@ -258,7 +335,9 @@ function PagamentoPage() {
                   </div>
                 </dl>
                 <div className="mt-4 flex items-end justify-between border-t border-border/60 pt-3">
-                  <span className="text-sm text-muted-foreground">Total</span>
+                  <span className="text-sm text-muted-foreground">
+                    {tr(["Total", "Total", "Total", "Total"])}
+                  </span>
                   <span className="font-display text-2xl font-extrabold text-foreground">
                     {formatMoney(a.price_cents, locale)}
                   </span>
@@ -267,23 +346,54 @@ function PagamentoPage() {
 
               <section className="rounded-2xl border border-accent/30 bg-accent-soft/60 p-3">
                 <p className="flex items-center gap-2 text-sm font-semibold text-accent">
-                  <Clock className="h-4 w-4" /> Horário reservado por {mm}:{ss}
+                  <Clock className="h-4 w-4" />{" "}
+                  {tr([
+                    `Horário reservado por ${mm}:${ss}`,
+                    `Slot held for ${mm}:${ss}`,
+                    `Horario reservado por ${mm}:${ss}`,
+                    `Créneau réservé pendant ${mm}:${ss}`,
+                  ])}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Depois disso o horário é liberado para outras pessoas.
+                  {tr([
+                    "Depois disso o horário é liberado para outras pessoas.",
+                    "After that the slot is released to other people.",
+                    "Después el horario se libera para otras personas.",
+                    "Ensuite, le créneau est libéré pour d'autres personnes.",
+                  ])}
                 </p>
               </section>
 
               <p className="px-1 text-[11px] leading-snug text-muted-foreground">
-                Pagamento seguro pelo Stripe: não guardamos os dados do seu cartão.
+                {tr([
+                  "Pagamento seguro pelo Stripe: não guardamos os dados do seu cartão.",
+                  "Secure payment by Stripe: we don't store your card details.",
+                  "Pago seguro con Stripe: no guardamos los datos de tu tarjeta.",
+                  "Paiement sécurisé par Stripe : nous ne conservons pas vos données de carte.",
+                ])}
                 <br />
-                Cancelamento com pelo menos 24 horas de antecedência dá direito ao estorno. Veja os{" "}
+                {tr([
+                  "Cancelamento com pelo menos 24 horas de antecedência dá direito ao estorno. Veja os",
+                  "Cancelling at least 24 hours ahead gives you a refund. See the",
+                  "Cancelar con al menos 24 horas de antelación da derecho al reembolso. Mira los",
+                  "Une annulation au moins 24 heures avant donne droit au remboursement. Voir les",
+                ])}{" "}
                 <Link to="/termos" className="underline">
-                  Termos de Uso
+                  {tr([
+                    "Termos de Uso",
+                    "Terms of Use",
+                    "Términos de Uso",
+                    "Conditions d'utilisation",
+                  ])}
                 </Link>{" "}
-                e a{" "}
+                {tr(["e a", "and the", "y la", "et la"])}{" "}
                 <Link to="/privacidade" className="underline">
-                  Política de Privacidade
+                  {tr([
+                    "Política de Privacidade",
+                    "Privacy Policy",
+                    "Política de Privacidad",
+                    "Politique de confidentialité",
+                  ])}
                 </Link>
                 .
               </p>
@@ -292,13 +402,19 @@ function PagamentoPage() {
             {/* Formulário do Stripe */}
             <section className="flex min-h-0 flex-col rounded-2xl border border-border/70 bg-card p-4 shadow-xs">
               <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-                <Lock className="h-4 w-4 text-primary" /> Pagamento seguro
+                <Lock className="h-4 w-4 text-primary" />{" "}
+                {tr(["Pagamento seguro", "Secure payment", "Pago seguro", "Paiement sécurisé"])}
                 <span className="ml-auto text-xs font-normal text-muted-foreground">
-                  Processado pelo Stripe
+                  {tr([
+                    "Processado pelo Stripe",
+                    "Processed by Stripe",
+                    "Procesado por Stripe",
+                    "Traité par Stripe",
+                  ])}
                 </span>
               </div>
               {error ? (
-                <p className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</p>
+                <PaymentError detail={error} />
               ) : stripe && clientSecret ? (
                 <FitToHeight>
                   <stripe.Provider

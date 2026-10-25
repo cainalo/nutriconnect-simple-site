@@ -1,11 +1,20 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, ChevronDown, Plus, ShieldCheck, Trash2, UserRound } from "lucide-react";
+import { Check, ChevronDown, KeyRound, Plus, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Mascot } from "@/components/mascots";
 import { CHARACTERS, type CharacterId, type TrailProfile } from "@/lib/learning-trail";
 import { KID_AVATARS, MAX_KID_PROFILES } from "@/lib/trail-profiles";
 import { useI18n } from "@/hooks/use-i18n";
+import { useTr } from "@/components/settings-ui";
+import {
+  PIN_LENGTH,
+  checkParentPin,
+  hasParentPin,
+  isValidPin,
+  pinLockedUntil,
+  setParentPin,
+} from "@/lib/parent-pin";
 
 /** Avatar redondo do perfil: o responsável usa um ícone; a criança usa o personagem escolhido. */
 export function ProfileAvatar({ profile, size = 36 }: { profile: TrailProfile; size?: number }) {
@@ -36,12 +45,15 @@ export function ProfileAvatar({ profile, size = 36 }: { profile: TrailProfile; s
  * (sem rede social): o perfil infantil só mostra as trilhas, com visual e conteúdo próprios.
  */
 export function ProfileSwitcher({
+  userId,
   profiles,
   active,
   onSelect,
   onAddKid,
   onRemoveKid,
 }: {
+  /** Conta do responsável (o PIN é por conta). */
+  userId: string;
   profiles: TrailProfile[];
   active: TrailProfile;
   onSelect: (id: string) => void;
@@ -51,30 +63,28 @@ export function ProfileSwitcher({
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [name, setName] = useState("");
-  const [avatar, setAvatar] = useState<CharacterId>("lipe");
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  /** Troca que espera o PIN: "check" para sair do perfil infantil, "set" para criar o PIN. */
+  const [pinStep, setPinStep] = useState<{ target: string; mode: "check" | "set" } | null>(null);
   const kids = profiles.filter((p) => p.kind === "kid");
+  const kidMode = active.kind === "kid";
 
   const reset = () => {
     setAdding(false);
-    setName("");
-    setAvatar("lipe");
     setConfirmId(null);
+    setPinStep(null);
   };
 
-  const create = () => {
-    if (!name.trim()) {
-      toast.error(t("ps.enterName"));
-      return;
+  const choose = (p: TrailProfile) => {
+    if (p.id === active.id) return setOpen(false);
+    // Sair do perfil infantil pede o PIN do responsável.
+    if (kidMode && hasParentPin(userId)) return setPinStep({ target: p.id, mode: "check" });
+    // Primeira vez entrando num perfil infantil: o responsável cria o PIN antes.
+    if (!kidMode && p.kind === "kid" && !hasParentPin(userId)) {
+      return setPinStep({ target: p.id, mode: "set" });
     }
-    try {
-      onAddKid(name, avatar);
-      toast.success(t("ps.created").replace("{name}", name.trim()));
-      reset();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : t("ps.createError"));
-    }
+    onSelect(p.id);
+    setOpen(false);
   };
 
   return (
@@ -115,10 +125,7 @@ export function ProfileSwitcher({
               <li key={p.id} className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => {
-                    onSelect(p.id);
-                    setOpen(false);
-                  }}
+                  onClick={() => choose(p)}
                   className={`flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-left transition ${
                     isActive ? "bg-primary-soft/60" : "hover:bg-secondary"
                   }`}
@@ -137,6 +144,7 @@ export function ProfileSwitcher({
                   {isActive && <Check className="h-4 w-4 shrink-0 text-primary" />}
                 </button>
                 {p.kind === "kid" &&
+                  !kidMode &&
                   (confirmId === p.id ? (
                     <button
                       type="button"
@@ -163,77 +171,44 @@ export function ProfileSwitcher({
           })}
         </ul>
 
-        <div className="mt-2 border-t border-border pt-2">
-          {adding ? (
-            <div className="space-y-3 rounded-xl bg-secondary/40 p-3">
-              <label className="block">
-                <span className="mb-1 block text-xs font-bold text-foreground">
-                  {t("ps.kidName")}
+        {pinStep && (
+          <PinStep
+            userId={userId}
+            mode={pinStep.mode}
+            onDone={() => {
+              onSelect(pinStep.target);
+              reset();
+              setOpen(false);
+            }}
+            onCancel={() => setPinStep(null)}
+          />
+        )}
+
+        {!kidMode && !pinStep && (
+          <div className="mt-2 border-t border-border pt-2">
+            {adding ? (
+              <KidProfileForm
+                onCreate={(n, a) => {
+                  onAddKid(n, a);
+                  reset();
+                }}
+                onCancel={reset}
+              />
+            ) : (
+              <button
+                type="button"
+                disabled={kids.length >= MAX_KID_PROFILES}
+                onClick={() => setAdding(true)}
+                className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold text-primary transition hover:bg-primary-soft/50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-primary-soft">
+                  <Plus className="h-4 w-4" />
                 </span>
-                <input
-                  autoFocus
-                  value={name}
-                  maxLength={24}
-                  onChange={(e) => setName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && create()}
-                  placeholder={t("ps.kidNamePh")}
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                />
-              </label>
-              <div>
-                <span className="mb-1.5 block text-xs font-bold text-foreground">
-                  {t("ps.pickFriend")}
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {KID_AVATARS.map((id) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => setAvatar(id)}
-                      aria-label={CHARACTERS[id].name}
-                      aria-pressed={avatar === id}
-                      className={`grid h-12 w-12 cursor-pointer place-items-center overflow-hidden rounded-xl border-2 bg-card transition ${
-                        avatar === id
-                          ? "border-primary shadow-md"
-                          : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      <Mascot id={id} size={42} style={{ animation: "none" }} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={create}
-                  className="flex-1 cursor-pointer rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground transition hover:brightness-110"
-                >
-                  {t("ps.create")}
-                </button>
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary"
-                >
-                  {t("common.cancel")}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              disabled={kids.length >= MAX_KID_PROFILES}
-              onClick={() => setAdding(true)}
-              className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold text-primary transition hover:bg-primary-soft/50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-primary-soft">
-                <Plus className="h-4 w-4" />
-              </span>
-              {kids.length >= MAX_KID_PROFILES ? t("ps.limit") : t("ps.addKid")}
-            </button>
-          )}
-        </div>
+                {kids.length >= MAX_KID_PROFILES ? t("ps.limit") : t("ps.addKid")}
+              </button>
+            )}
+          </div>
+        )}
 
         <p className="mt-2 flex gap-2 rounded-lg bg-secondary/50 p-2.5 text-[11px] leading-snug text-muted-foreground">
           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
@@ -241,5 +216,209 @@ export function ProfileSwitcher({
         </p>
       </PopoverContent>
     </Popover>
+  );
+}
+
+/** Formulário de novo perfil infantil (nome e personagem). Usado na Trilha e na Lancheira. */
+export function KidProfileForm({
+  onCreate,
+  onCancel,
+}: {
+  onCreate: (name: string, avatar: CharacterId) => void;
+  onCancel?: () => void;
+}) {
+  const { t } = useI18n();
+  const [name, setName] = useState("");
+  const [avatar, setAvatar] = useState<CharacterId>("lipe");
+
+  const create = () => {
+    if (!name.trim()) {
+      toast.error(t("ps.enterName"));
+      return;
+    }
+    try {
+      onCreate(name, avatar);
+      toast.success(t("ps.created").replace("{name}", name.trim()));
+      setName("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("ps.createError"));
+    }
+  };
+
+  return (
+    <div className="space-y-3 rounded-xl bg-secondary/40 p-3">
+      <label className="block">
+        <span className="mb-1 block text-xs font-bold text-foreground">{t("ps.kidName")}</span>
+        <input
+          autoFocus
+          value={name}
+          maxLength={24}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && create()}
+          placeholder={t("ps.kidNamePh")}
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
+        />
+      </label>
+      <div>
+        <span className="mb-1.5 block text-xs font-bold text-foreground">{t("ps.pickFriend")}</span>
+        <div className="flex flex-wrap gap-2">
+          {KID_AVATARS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setAvatar(id)}
+              aria-label={CHARACTERS[id].name}
+              aria-pressed={avatar === id}
+              className={`grid h-12 w-12 cursor-pointer place-items-center overflow-hidden rounded-xl border-2 bg-card transition ${
+                avatar === id ? "border-primary shadow-md" : "border-border hover:border-primary/40"
+              }`}
+            >
+              <Mascot id={id} size={42} style={{ animation: "none" }} />
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={create}
+          className="flex-1 cursor-pointer rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground transition hover:brightness-110"
+        >
+          {t("ps.create")}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary"
+          >
+            {t("common.cancel")}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Pede (ou cria) o PIN de 4 dígitos do responsável. */
+function PinStep({
+  userId,
+  mode,
+  onDone,
+  onCancel,
+}: {
+  userId: string;
+  mode: "check" | "set";
+  onDone: () => void;
+  onCancel: () => void;
+}) {
+  const tr = useTr();
+  const [pin, setPin] = useState("");
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    if (!isValidPin(pin)) {
+      toast.error(
+        tr(["Use 4 números.", "Use 4 digits.", "Usa 4 números.", "Utilisez 4 chiffres."]),
+      );
+      return;
+    }
+    setBusy(true);
+    try {
+      if (mode === "set") {
+        await setParentPin(userId, pin);
+        onDone();
+      } else if (await checkParentPin(userId, pin)) {
+        onDone();
+      } else {
+        setPin("");
+        const until = pinLockedUntil(userId);
+        if (until) {
+          const min = Math.max(1, Math.ceil((until - Date.now()) / 60000));
+          toast.error(
+            tr([
+              `Muitas tentativas. Tente de novo em ${min} min.`,
+              `Too many tries. Try again in ${min} min.`,
+              `Demasiados intentos. Inténtalo en ${min} min.`,
+              `Trop d'essais. Réessayez dans ${min} min.`,
+            ]),
+          );
+        } else {
+          toast.error(tr(["PIN errado.", "Wrong PIN.", "PIN incorrecto.", "PIN incorrect."]));
+        }
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-2 space-y-3 rounded-xl border border-border bg-secondary/40 p-3">
+      <p className="flex items-start gap-2 text-sm font-bold text-foreground">
+        <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+        {mode === "set"
+          ? tr([
+              "Crie um PIN do responsável",
+              "Create a guardian PIN",
+              "Crea un PIN del responsable",
+              "Créez un code PIN du responsable",
+            ])
+          : tr([
+              "PIN do responsável",
+              "Guardian PIN",
+              "PIN del responsable",
+              "Code PIN du responsable",
+            ])}
+      </p>
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        {mode === "set"
+          ? tr([
+              "Ele será pedido para sair do perfil infantil, para a criança não voltar sozinha ao seu perfil. Fica só neste aparelho.",
+              "It will be asked to leave the kid profile, so the child can't go back to your profile alone. It stays on this device only.",
+              "Se pedirá para salir del perfil infantil, para que el niño no vuelva solo a tu perfil. Queda solo en este dispositivo.",
+              "Il sera demandé pour quitter le profil enfant, pour que l'enfant ne revienne pas seul à votre profil. Il reste sur cet appareil.",
+            ])
+          : tr([
+              "Esqueceu? Saia da conta e entre de novo: o PIN é apagado.",
+              "Forgot it? Sign out and sign in again: the PIN is cleared.",
+              "¿Lo olvidaste? Cierra sesión y vuelve a entrar: el PIN se borra.",
+              "Oublié ? Déconnectez-vous puis reconnectez-vous : le code est effacé.",
+            ])}
+      </p>
+      <input
+        autoFocus
+        inputMode="numeric"
+        autoComplete="off"
+        type="password"
+        maxLength={PIN_LENGTH}
+        value={pin}
+        onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+        onKeyDown={(e) => e.key === "Enter" && void submit()}
+        aria-label={tr([
+          "PIN de 4 números",
+          "4-digit PIN",
+          "PIN de 4 números",
+          "Code PIN à 4 chiffres",
+        ])}
+        className="w-full rounded-lg border border-border bg-card px-3 py-2 text-center text-lg tracking-[0.5em] outline-none focus:border-primary"
+      />
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void submit()}
+          className="min-h-10 flex-1 cursor-pointer rounded-lg bg-primary text-sm font-bold text-primary-foreground transition hover:brightness-110 disabled:opacity-60"
+        >
+          {mode === "set"
+            ? tr(["Salvar PIN", "Save PIN", "Guardar PIN", "Enregistrer le code"])
+            : tr(["Entrar", "Continue", "Entrar", "Continuer"])}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="min-h-10 cursor-pointer rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary"
+        >
+          {tr(["Cancelar", "Cancel", "Cancelar", "Annuler"])}
+        </button>
+      </div>
+    </div>
   );
 }

@@ -10,6 +10,8 @@ import {
   ShieldCheck,
   Users,
   Activity,
+  Star,
+  Mail,
 } from "lucide-react";
 import { AuthGateLoading, SiteHeader } from "@/components/site-chrome";
 import { ClinicalLayout, type ClinicalNavItem } from "@/components/clinical/layout";
@@ -79,6 +81,11 @@ function ProfessionalPanelLayout() {
     },
     { to: "/painel/financeiro", label: t("panelNav.finance"), icon: Wallet },
     {
+      to: "/painel/avaliacoes",
+      label: tr(["Avaliações", "Reviews", "Reseñas", "Avis"]),
+      icon: Star,
+    },
+    {
       to: "/painel/membros",
       label: tr(["Membros", "Members", "Miembros", "Membres"]),
       icon: Crown,
@@ -87,6 +94,16 @@ function ProfessionalPanelLayout() {
       to: "/painel/programas",
       label: tr(["Programas", "Programs", "Programas", "Programmes"]),
       icon: ShoppingBag,
+    },
+    {
+      to: "/convites",
+      label: tr([
+        "Convites de comunidades",
+        "Community invitations",
+        "Invitaciones de comunidades",
+        "Invitations des communautés",
+      ]),
+      icon: Mail,
     },
     { to: "/painel/configuracoes", label: t("panelNav.settings"), icon: Settings },
   ];

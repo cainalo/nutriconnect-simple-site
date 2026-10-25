@@ -68,10 +68,10 @@ export function EspacoIntro({ themeTitle }: { themeTitle?: string | null }) {
   if (design === "vibrante") {
     return (
       <section className="mb-6 overflow-hidden rounded-[2rem] bg-primary p-5 text-primary-foreground shadow-card">
-        <p className="!text-left font-display text-2xl font-black text-white sm:text-3xl">
+        <p className="!text-left font-display text-2xl font-black text-primary-foreground sm:text-3xl">
           {greeting}, {name}!
         </p>
-        <p className="mt-1 !text-left text-sm text-white/85">
+        <p className="mt-1 !text-left text-sm text-primary-foreground">
           {themeTitle
             ? tr([
                 "Tema da semana: ",
@@ -91,7 +91,7 @@ export function EspacoIntro({ themeTitle }: { themeTitle?: string | null }) {
             <Link
               key={s.to}
               to={s.to}
-              className="flex flex-col items-start gap-2 rounded-2xl bg-white/15 p-3 text-xs font-bold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/25"
+              className="flex flex-col items-start gap-2 rounded-2xl bg-primary-foreground/15 p-3 text-xs font-bold text-primary-foreground backdrop-blur transition hover:-translate-y-0.5 hover:bg-primary-foreground/25"
             >
               <s.icon className="h-5 w-5" />
               {tr(s.label)}

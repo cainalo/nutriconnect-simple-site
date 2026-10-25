@@ -7,7 +7,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Apple,
+  Bell,
+  BellRing,
   Carrot,
+  Check,
   CheckCircle2,
   ChefHat,
   Droplets,
@@ -24,6 +27,8 @@ import {
   Dices,
   Flame,
   Lightbulb,
+  BookOpen,
+  XCircle,
   MessageCircle,
   Pause,
   Play,
@@ -46,11 +51,18 @@ import {
   Stethoscope,
   Wind,
   X,
+  Loader2,
 } from "lucide-react";
 import type { ProfessionKey } from "@/lib/clinical/professions";
 import { EmojiIcon } from "@/components/emoji-icon";
 import { HABIT_CATALOG, MAX_HABITS, MIN_HABITS, useHabitChoice } from "@/lib/habits";
-import { MORE_QUESTIONS, type QuizQuestion } from "@/lib/quiz-questions";
+import {
+  MORE_QUESTIONS,
+  QUIZ_META,
+  QUIZ_SOURCES,
+  type QuizQuestion,
+  type QuizTopic,
+} from "@/lib/quiz-questions";
 import { MORE_TIPS, type TipTheme } from "@/lib/daily-tips";
 import { guessSection } from "@/lib/aisles";
 import { SECTION_NAMES } from "@/lib/menu";
@@ -76,6 +88,7 @@ import {
   weekStartDay,
 } from "@/lib/checkins";
 import { useCommunities } from "@/lib/social/communities-queries";
+import { createReminder, deleteReminder, listReminders } from "@/lib/push";
 import { useI18n } from "@/hooks/use-i18n";
 import { pickName, type Names } from "@/lib/appearance-data";
 import { td } from "@/lib/i18n/data";
@@ -608,6 +621,38 @@ const BASE_QUESTIONS: Question[] = [
 ];
 
 const QUESTIONS: Question[] = [...BASE_QUESTIONS, ...MORE_QUESTIONS];
+
+/** Aparência de cada tema do quiz (ícone e cor do design). */
+const QUIZ_TOPICS: Record<
+  QuizTopic,
+  { icon: LucideIcon; name: Names; tile: string; text: string }
+> = {
+  nutrientes: {
+    icon: Apple,
+    name: ["Nutrientes", "Nutrients", "Nutrientes", "Nutriments"],
+    tile: "bg-primary/15 text-primary",
+    text: "text-primary",
+  },
+  rotulos: {
+    icon: Search,
+    name: ["Rótulos", "Labels", "Etiquetas", "Étiquettes"],
+    tile: "bg-accent/15 text-accent",
+    text: "text-accent",
+  },
+  agua: {
+    icon: Droplets,
+    name: ["Água", "Water", "Agua", "Eau"],
+    tile: "bg-chart-5/20 text-foreground",
+    text: "text-muted-foreground",
+  },
+  dia: {
+    icon: Utensils,
+    name: ["Dia a dia", "Daily life", "Día a día", "Quotidien"],
+    tile: "bg-warning/15 text-warning",
+    text: "text-warning",
+  },
+};
+const QUIZ_TOPIC_ORDER: QuizTopic[] = ["nutrientes", "rotulos", "agua", "dia"];
 const ROUND = 5;
 const SEEN_KEY = "nc_quiz_seen";
 
@@ -630,11 +675,13 @@ function shuffleOptions(q: Question): Question {
   };
 }
 
-/** Rodada nova: primeiro as perguntas que a pessoa ainda não viu neste aparelho. */
-function newRound(): Question[] {
+/** Rodada nova (de um tema, ou de todos): primeiro as perguntas que a pessoa ainda não viu
+ *  neste aparelho. */
+function newRound(topic: QuizTopic | null): Question[] {
   const seen = new Set(readSeen());
-  const fresh = shuffled(QUESTIONS.filter((q) => !seen.has(q.q[0])));
-  const old = shuffled(QUESTIONS.filter((q) => seen.has(q.q[0])));
+  const pool = topic ? QUESTIONS.filter((q) => QUIZ_META[q.q[0]]?.topic === topic) : QUESTIONS;
+  const fresh = shuffled(pool.filter((q) => !seen.has(q.q[0])));
+  const old = shuffled(pool.filter((q) => seen.has(q.q[0])));
   const round = [...fresh, ...old].slice(0, ROUND);
   try {
     const next = [
@@ -667,6 +714,7 @@ export function QuizCard() {
   // Recorde dos últimos 30 dias (cada dia guarda o melhor resultado do dia).
   const best = Math.max(0, ...(checkins.data ?? []).map((c) => c.quiz_best ?? 0));
   const [burst, fire] = useBurst();
+  const [topic, setTopic] = useState<QuizTopic | null>(null);
   const [round, setRound] = useState<Question[]>(() => QUESTIONS.slice(0, ROUND));
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -674,9 +722,11 @@ export function QuizCard() {
   const finished = index >= ROUND;
 
   // Sorteia a rodada só no navegador (evita diferença com o HTML do servidor).
-  useEffect(() => setRound(newRound()), []);
+  useEffect(() => setRound(newRound(null)), []);
 
   const q = round[Math.min(index, ROUND - 1)];
+  const meta = QUIZ_META[q.q[0]];
+  const look = QUIZ_TOPICS[meta?.topic ?? "nutrientes"];
 
   const choose = (i: number) => {
     if (picked !== null) return;
@@ -702,8 +752,9 @@ export function QuizCard() {
     }
   };
 
-  const again = () => {
-    setRound(newRound());
+  const again = (t: QuizTopic | null = topic) => {
+    setTopic(t);
+    setRound(newRound(t));
     setIndex(0);
     setPicked(null);
     setScore(0);
@@ -716,16 +767,41 @@ export function QuizCard() {
       action={
         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
           <Trophy className="h-3 w-3" />
-          {best}/{ROUND}
-          <span className="sr-only">
-            {tr(["recorde do mês", "best this month", "récord del mes", "record du mois"])}
-          </span>
+          {tr(["Recorde do mês", "Best this month", "Récord del mes", "Record du mois"])} {best}/
+          {ROUND}
         </span>
       }
     >
       <Burst id={burst} />
+      <div
+        className="mb-3 grid grid-cols-5 gap-1"
+        role="group"
+        aria-label={tr(["Tema do quiz", "Quiz topic", "Tema del quiz", "Thème du quiz"])}
+      >
+        {([null, ...QUIZ_TOPIC_ORDER] as (QuizTopic | null)[]).map((t) => {
+          const info = t ? QUIZ_TOPICS[t] : null;
+          const Icon = info?.icon ?? Shuffle;
+          const on = topic === t;
+          return (
+            <button
+              key={t ?? "todas"}
+              type="button"
+              aria-pressed={on}
+              onClick={() => again(t)}
+              className={`flex min-h-[2.75rem] cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 text-[10px] font-semibold leading-tight transition active:scale-95 ${
+                on
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary/60 text-foreground hover:bg-secondary"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" aria-hidden />
+              {tr(info?.name ?? ["Todos", "All", "Todos", "Tous"])}
+            </button>
+          );
+        })}
+      </div>
       {finished ? (
-        <div className="py-2 text-center">
+        <div className="py-2 text-center" role="status">
           <p className="text-3xl font-black text-foreground">
             {score}/{ROUND}
           </p>
@@ -746,7 +822,7 @@ export function QuizCard() {
                     "Et si vous revoyiez le parcours d'apprentissage ?",
                   ])}
           </p>
-          <button type="button" className={`${primaryBtn} mt-3`} onClick={again}>
+          <button type="button" className={`${primaryBtn} mt-3 min-h-10`} onClick={() => again()}>
             <RotateCcw className="h-3.5 w-3.5" />
             {tr(["Jogar de novo", "Play again", "Jugar de nuevo", "Rejouer"])}
           </button>
@@ -754,7 +830,22 @@ export function QuizCard() {
       ) : (
         <div>
           <Bar value={index + (picked !== null ? 1 : 0)} max={ROUND} />
-          <p className="mt-3 text-sm font-semibold leading-snug text-foreground">{tr(q.q)}</p>
+          <div className="mt-3 flex items-start gap-2.5">
+            <span
+              className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${look.tile}`}
+              aria-hidden
+            >
+              <look.icon className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <p className={`text-[10px] font-bold uppercase tracking-wider ${look.text}`}>
+                {tr(look.name)} · {Math.min(index + 1, ROUND)}/{ROUND}
+              </p>
+              <p className="text-left text-sm font-semibold leading-snug text-foreground">
+                {tr(q.q)}
+              </p>
+            </div>
+          </div>
           <div className="mt-3 space-y-2">
             {q.options.map((opt, i) => {
               const isAnswer = i === q.answer;
@@ -762,7 +853,7 @@ export function QuizCard() {
                 picked === null
                   ? "border-border/70 bg-secondary/40 hover:bg-secondary"
                   : isAnswer
-                    ? "border-emerald-500/50 bg-emerald-500/15 text-foreground"
+                    ? "border-primary/60 bg-primary/15 text-foreground"
                     : i === picked
                       ? "border-destructive/50 bg-destructive/10 text-foreground"
                       : "border-border/50 bg-secondary/20 opacity-60";
@@ -772,25 +863,68 @@ export function QuizCard() {
                   type="button"
                   disabled={picked !== null}
                   onClick={() => choose(i)}
-                  className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-left text-xs font-medium transition active:scale-[0.98] disabled:cursor-default ${state}`}
+                  className={`flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-medium transition active:scale-[0.98] disabled:cursor-default ${state}`}
                 >
-                  {tr(opt)}
+                  <span className="flex-1">{tr(opt)}</span>
+                  {picked !== null && isAnswer && (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                  )}
+                  {picked !== null && !isAnswer && i === picked && (
+                    <XCircle className="h-4 w-4 shrink-0 text-destructive" aria-hidden />
+                  )}
+                  {picked !== null && (isAnswer || i === picked) && (
+                    <span className="sr-only">
+                      {isAnswer
+                        ? tr([
+                            "(resposta certa)",
+                            "(right answer)",
+                            "(respuesta correcta)",
+                            "(bonne réponse)",
+                          ])
+                        : tr([
+                            "(sua resposta, errada)",
+                            "(your answer, wrong)",
+                            "(tu respuesta, incorrecta)",
+                            "(votre réponse, fausse)",
+                          ])}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
-          {picked !== null && (
-            <div className="nc-pop-in mt-3 rounded-xl bg-accent-soft/60 p-3 text-xs leading-relaxed text-foreground">
-              {tr(q.why)}
-              <div className="mt-2 text-right">
-                <button type="button" className={primaryBtn} onClick={next}>
-                  {index + 1 >= ROUND
-                    ? tr(["Ver resultado", "See result", "Ver resultado", "Voir le résultat"])
-                    : tr(["Próxima", "Next", "Siguiente", "Suivante"])}
-                </button>
+          <div aria-live="polite">
+            {picked !== null && (
+              <div className="nc-pop-in mt-3 rounded-xl bg-accent-soft/60 p-3 text-xs leading-relaxed text-foreground">
+                <p className="text-left">
+                  <strong>
+                    {picked === q.answer
+                      ? tr(["Certo!", "Right!", "¡Correcto!", "Exact !"])
+                      : tr([
+                          "Não foi dessa vez.",
+                          "Not this time.",
+                          "Esta vez no.",
+                          "Pas cette fois.",
+                        ])}
+                  </strong>{" "}
+                  {tr(q.why)}
+                </p>
+                {meta && (
+                  <p className="mt-1.5 flex items-center gap-1 text-left text-[10px] text-muted-foreground">
+                    <BookOpen className="h-3 w-3 shrink-0" aria-hidden />
+                    {tr(["Fonte", "Source", "Fuente", "Source"])}: {tr(QUIZ_SOURCES[meta.src])}
+                  </p>
+                )}
+                <div className="mt-2 text-right">
+                  <button type="button" className={`${primaryBtn} min-h-10`} onClick={next}>
+                    {index + 1 >= ROUND
+                      ? tr(["Ver resultado", "See result", "Ver resultado", "Voir le résultat"])
+                      : tr(["Próxima", "Next", "Siguiente", "Suivante"])}
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </Panel>
@@ -2226,6 +2360,121 @@ function weekDays(monday: string): string[] {
   });
 }
 
+/** Compromissos pequenos e concretos. O do tema da semana é escolhido pelas palavras do título;
+ *  sem tema, vale o primeiro (uma fruta por dia); tema sem palavra conhecida, um por semana. */
+const PLEDGES: { match: RegExp; icon: LucideIcon; title: Names; action: Names }[] = [
+  {
+    match: /frut/,
+    icon: Apple,
+    title: ["Uma fruta por dia", "One fruit a day", "Una fruta al día", "Un fruit par jour"],
+    action: [
+      "Coma uma fruta inteira por dia: no café, no lanche ou de sobremesa.",
+      "Eat one whole fruit a day: at breakfast, as a snack or for dessert.",
+      "Come una fruta entera al día: en el desayuno, la merienda o de postre.",
+      "Mangez un fruit entier par jour : au petit-déjeuner, au goûter ou en dessert.",
+    ],
+  },
+  {
+    match: /agua|hidrat|beber|bebida/,
+    icon: Droplets,
+    title: [
+      "Água ao longo do dia",
+      "Water through the day",
+      "Agua durante el día",
+      "De l'eau dans la journée",
+    ],
+    action: [
+      "Beba um copo de água ao acordar e outro em cada refeição.",
+      "Drink a glass of water when you wake up and one at each meal.",
+      "Bebe un vaso de agua al despertar y otro en cada comida.",
+      "Buvez un verre d'eau au réveil et un autre à chaque repas.",
+    ],
+  },
+  {
+    match: /verdur|legum|hortali|salad|cor|feira|estac/,
+    icon: LeafyGreen,
+    title: ["Prato com cor", "A colorful plate", "Plato con color", "Une assiette colorée"],
+    action: [
+      "Ponha um legume ou uma verdura no almoço e no jantar.",
+      "Add a vegetable or greens to lunch and dinner.",
+      "Pon una verdura en el almuerzo y en la cena.",
+      "Ajoutez un légume au déjeuner et au dîner.",
+    ],
+  },
+  {
+    match: /rotul|ultra|process|industri|sodio|acucar/,
+    icon: Search,
+    title: ["De olho no rótulo", "Eye on the label", "Ojo a la etiqueta", "L'œil sur l'étiquette"],
+    action: [
+      "Leia o rótulo de um produto antes de pô-lo no carrinho.",
+      "Read the label of one product before putting it in the cart.",
+      "Lee la etiqueta de un producto antes de ponerlo en el carrito.",
+      "Lisez l'étiquette d'un produit avant de le mettre dans le panier.",
+    ],
+  },
+  {
+    match: /cozinh|receit|marmit|caseir|panela/,
+    icon: ChefHat,
+    title: ["Comida de casa", "Home cooking", "Comida casera", "Cuisine maison"],
+    action: [
+      "Prepare em casa pelo menos uma refeição por dia.",
+      "Cook at least one meal a day at home.",
+      "Prepara en casa al menos una comida al día.",
+      "Préparez au moins un repas par jour à la maison.",
+    ],
+  },
+  {
+    match: /calma|atenc|tela|mesa|companhia|consciente/,
+    icon: Utensils,
+    title: ["Comer com calma", "Eat calmly", "Comer con calma", "Manger en douceur"],
+    action: [
+      "Faça uma refeição por dia sem telas, devagar e à mesa.",
+      "Have one meal a day without screens, slowly and at the table.",
+      "Haz una comida al día sin pantallas, despacio y a la mesa.",
+      "Prenez un repas par jour sans écran, lentement et à table.",
+    ],
+  },
+];
+
+const PLEDGE_REMINDER_URL = "/funcoes#compromisso";
+
+/** Lembrete diário do compromisso (20h), na lista de lembretes da conta (aviso no aparelho). */
+function usePledgeReminder(userId: string | undefined) {
+  const [on, setOn] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!userId) return;
+    listReminders().then(
+      (list) => setOn(list.some((r) => r.url === PLEDGE_REMINDER_URL)),
+      () => setOn(false),
+    );
+  }, [userId]);
+  const toggle = async (next: boolean, title: string, body: string) => {
+    if (!userId || busy) return false;
+    setBusy(true);
+    try {
+      const current = (await listReminders()).filter((r) => r.url === PLEDGE_REMINDER_URL);
+      if (next && current.length === 0)
+        await createReminder(userId, {
+          kind: "desafio",
+          title,
+          body,
+          time_of_day: "20:00",
+          url: PLEDGE_REMINDER_URL,
+        });
+      if (!next) await Promise.all(current.map((r) => deleteReminder(r.id)));
+      setOn(next);
+      return true;
+    } catch (err) {
+      toast.error((err as Error).message);
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
+  return { on, busy, toggle };
+}
+
 export function WeeklyPledgeCard() {
   const tr = useTr();
   const { locale } = useI18n();
@@ -2233,6 +2482,7 @@ export function WeeklyPledgeCard() {
   const theme = useActiveTheme();
   const checkins = useCheckins(user?.id);
   const save = useSaveCheckin(user?.id);
+  const reminder = usePledgeReminder(user?.id);
   const [burst, fire] = useBurst();
   const week = weekStartDay();
   const dates = useMemo(() => weekDays(week), [week]);
@@ -2241,15 +2491,28 @@ export function WeeklyPledgeCard() {
   const todayIndex = (new Date().getDay() + 6) % 7;
   const labels = useMemo(
     () =>
-      dates.map((d) =>
-        new Intl.DateTimeFormat(locale, { weekday: "short" })
-          .format(new Date(d + "T12:00:00"))
-          .replace(".", ""),
-      ),
+      dates.map((d) => {
+        const date = new Date(d + "T12:00:00");
+        return {
+          short: new Intl.DateTimeFormat(locale, { weekday: "short" })
+            .format(date)
+            .replace(".", ""),
+          long: new Intl.DateTimeFormat(locale, { weekday: "long" }).format(date),
+        };
+      }),
     [dates, locale],
   );
 
-  const title = theme.data ? themeText(theme.data, locale).title : null;
+  const themeTitle = theme.data ? themeText(theme.data, locale).title : null;
+  // Compromisso concreto: o que combina com o tema; sem tema, uma fruta por dia.
+  const pledge = useMemo(() => {
+    if (!themeTitle) return PLEDGES[0];
+    const hay = plain(theme.data?.title ?? themeTitle);
+    const byTheme = PLEDGES.find((p) => p.match.test(hay));
+    if (byTheme) return byTheme;
+    const n = Math.floor(new Date(week + "T12:00:00").getTime() / (7 * 86400000));
+    return PLEDGES[n % PLEDGES.length];
+  }, [themeTitle, theme.data, week]);
   // Semanas anteriores (as 4 antes desta): quantos dias com o compromisso em cada uma.
   const past = useMemo(
     () =>
@@ -2279,6 +2542,36 @@ export function WeeklyPledgeCard() {
     }
   };
 
+  const toggleReminder = async () => {
+    const next = !reminder.on;
+    const ok = await reminder.toggle(
+      next,
+      tr([
+        "Compromisso da semana",
+        "Weekly pledge",
+        "Compromiso de la semana",
+        "Engagement de la semaine",
+      ]),
+      tr(pledge.action),
+    );
+    if (ok)
+      toast.success(
+        next
+          ? tr([
+              "Lembrete ligado: todo dia às 20h, nos aparelhos com notificações ativas.",
+              "Reminder on: every day at 8 pm, on devices with notifications on.",
+              "Recordatorio activado: todos los días a las 20 h, en dispositivos con notificaciones.",
+              "Rappel activé : tous les jours à 20 h, sur les appareils aux notifications activées.",
+            ])
+          : tr([
+              "Lembrete desligado.",
+              "Reminder off.",
+              "Recordatorio desactivado.",
+              "Rappel désactivé.",
+            ]),
+      );
+  };
+
   return (
     <Panel
       title={tr([
@@ -2290,13 +2583,34 @@ export function WeeklyPledgeCard() {
       className="relative"
     >
       <Burst id={burst} />
-      {title && <p className="mb-3 text-sm font-semibold leading-snug text-foreground">{title}</p>}
+      <div className="mb-3 flex gap-3 rounded-2xl bg-accent/10 p-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent text-accent-foreground">
+          <pledge.icon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          {themeTitle && (
+            <p className="text-[10px] font-bold uppercase tracking-wider text-accent">
+              {tr([
+                "Tema da semana",
+                "Theme of the week",
+                "Tema de la semana",
+                "Thème de la semaine",
+              ])}
+              : {themeTitle}
+            </p>
+          )}
+          <p className="text-sm font-bold leading-snug text-foreground">{tr(pledge.title)}</p>
+          <p className="mt-0.5 text-left text-xs leading-snug text-muted-foreground">
+            {tr(pledge.action)}
+          </p>
+        </div>
+      </div>
       <p className="mb-2 text-[11px] text-muted-foreground">
         {tr([
-          "Toque nos dias em que você praticou:",
-          "Tap the days you practiced:",
-          "Toca los días que practicaste:",
-          "Touchez les jours où vous avez pratiqué :",
+          "Marque os dias em que cumpriu:",
+          "Check the days you did it:",
+          "Marca los días en que lo cumpliste:",
+          "Cochez les jours où vous l'avez fait :",
         ])}
       </p>
       <div className="grid grid-cols-7 gap-1.5">
@@ -2310,7 +2624,8 @@ export function WeeklyPledgeCard() {
               disabled={future}
               onClick={() => toggle(i)}
               aria-pressed={on}
-              className={`grid h-12 cursor-pointer place-items-center rounded-xl border text-[10px] font-bold uppercase transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 ${
+              aria-label={label.long}
+              className={`flex h-12 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl border text-[10px] font-bold uppercase transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 ${
                 on
                   ? "border-accent bg-accent text-accent-foreground"
                   : i === todayIndex
@@ -2318,7 +2633,8 @@ export function WeeklyPledgeCard() {
                     : "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary"
               }`}
             >
-              <span>{on ? "✓" : label.slice(0, 3)}</span>
+              {on && <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />}
+              <span aria-hidden>{label.short.slice(0, 3)}</span>
             </button>
           );
         })}
@@ -2357,13 +2673,32 @@ export function WeeklyPledgeCard() {
           </div>
         </div>
       )}
-      <Link
-        to="/tema-da-semana"
-        className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
-      >
-        <Target className="h-3 w-3" />
-        {tr(["Ver o tema", "See the theme", "Ver el tema", "Voir le thème"])}
-      </Link>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <Link
+          to="/tema-da-semana"
+          className="inline-flex min-h-[2rem] items-center gap-1 text-[11px] font-bold text-primary hover:underline"
+        >
+          <Target className="h-3 w-3" />
+          {tr(["Ver o tema", "See the theme", "Ver el tema", "Voir le thème"])}
+        </Link>
+        {user && (
+          <button
+            type="button"
+            onClick={() => void toggleReminder()}
+            disabled={reminder.on === null || reminder.busy}
+            aria-pressed={!!reminder.on}
+            className={`${iconBtn} min-h-[2rem] disabled:opacity-60 ${reminder.on ? "!bg-accent !text-accent-foreground" : ""}`}
+          >
+            {reminder.on ? <BellRing className="h-3 w-3" /> : <Bell className="h-3 w-3" />}
+            {tr([
+              "Lembrete diário às 20h",
+              "Daily reminder at 8 pm",
+              "Recordatorio diario a las 20 h",
+              "Rappel quotidien à 20 h",
+            ])}
+          </button>
+        )}
+      </div>
     </Panel>
   );
 }
@@ -2384,7 +2719,39 @@ export function CommunityRouletteCard() {
   const timer = useRef<number | null>(null);
   useEffect(() => () => void (timer.current && window.clearInterval(timer.current)), []);
 
-  if (pool.length === 0) return null;
+  const title = tr([
+    "Sorteie uma comunidade",
+    "Pick a community",
+    "Sortea una comunidad",
+    "Tirez une communauté",
+  ]);
+  // Sem comunidades (ou carregando), o card explica em vez de sumir.
+  if (pool.length === 0) {
+    return (
+      <Panel title={title}>
+        <div className="grid min-h-[5rem] place-items-center rounded-2xl bg-secondary/40 p-3 text-center">
+          {communitiesQuery.isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden />
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {tr([
+                "Ainda não há comunidades para sortear.",
+                "There are no communities to pick yet.",
+                "Todavía no hay comunidades para sortear.",
+                "Il n'y a pas encore de communautés à tirer.",
+              ])}
+            </p>
+          )}
+        </div>
+        <Link
+          to="/comunidades"
+          className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-full border border-border bg-card text-sm font-semibold text-foreground transition hover:bg-secondary"
+        >
+          {tr(["Ver comunidades", "See communities", "Ver comunidades", "Voir les communautés"])}
+        </Link>
+      </Panel>
+    );
+  }
 
   const spin = () => {
     if (spinning) return;
@@ -2404,14 +2771,7 @@ export function CommunityRouletteCard() {
 
   const c = shown !== null ? pool[shown] : null;
   return (
-    <Panel
-      title={tr([
-        "Sorteie uma comunidade",
-        "Pick a community",
-        "Sortea una comunidad",
-        "Tirez une communauté",
-      ])}
-    >
+    <Panel title={title}>
       <div className="grid min-h-[5rem] place-items-center rounded-2xl bg-secondary/40 p-3 text-center">
         {c ? (
           <div className={spinning ? "opacity-60" : "nc-pop-in"}>

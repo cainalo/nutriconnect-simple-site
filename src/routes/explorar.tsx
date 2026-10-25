@@ -289,7 +289,7 @@ function ExplorarPage() {
             type="checkbox"
             checked={onlyPros}
             onChange={(e) => setOnlyPros(e.target.checked)}
-            className="h-4 w-4 accent-[var(--color-accent)]"
+            className="h-5 w-5 accent-[var(--color-accent)]"
           />
           {t("explore.people.onlyPros")}
         </label>

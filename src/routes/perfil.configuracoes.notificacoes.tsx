@@ -80,7 +80,7 @@ function NotificacoesPage() {
           </h2>
           <p className="mt-1 text-[11px] text-muted-foreground">
             {tr([
-              "Escolha de que tipo de aviso você quer ser notificado(a). Avisos de moderação sobre o seu conteúdo sempre chegam.",
+              "Escolha quais avisos receber. Avisos de moderação sobre o seu conteúdo sempre chegam.",
               "Choose which kinds of notices you want. Moderation notices about your content always arrive.",
               "Elige qué tipos de aviso quieres recibir. Los avisos de moderación sobre tu contenido siempre llegan.",
               "Choisissez les types d'avis que vous souhaitez. Les avis de modération sur votre contenu arrivent toujours.",
@@ -204,14 +204,14 @@ function NotificacoesPage() {
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {tr(["Das", "From", "Desde", "De"])}
                 <Select
-                  label="from"
+                  label={tr(["Das", "From", "Desde", "De"])}
                   value={ap.quietFrom}
                   options={HOURS}
                   onChange={(quietFrom) => updateAppearance({ quietFrom })}
                 />
                 {tr(["às", "to", "hasta", "à"])}
                 <Select
-                  label="to"
+                  label={tr(["Às", "To", "Hasta", "À"])}
                   value={ap.quietTo}
                   options={HOURS}
                   onChange={(quietTo) => updateAppearance({ quietTo })}

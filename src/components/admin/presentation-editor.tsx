@@ -2,6 +2,7 @@
 // em tela cheia. Clicar num texto abre o campo para editar; clicar numa foto troca a imagem.
 // Tudo fica em rascunho até "Publicar".
 import { useEffect, useMemo, useRef, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -49,6 +50,7 @@ import {
   type PresentationKey,
   type PresentationLayout,
 } from "@/lib/presentation-content";
+import { useTr } from "@/components/settings-ui";
 
 const ADMIN_KEY = ["admin", "presentation"] as const;
 const PUBLIC_KEY = ["presentation", "published"] as const;
@@ -86,6 +88,7 @@ export type PresentationCall =
   "admin_presentation_save_draft" | "admin_presentation_publish" | "admin_presentation_discard";
 
 export function usePresentationAction() {
+  const tr = useTr();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (v: { name: PresentationCall; args: Record<string, unknown>; ok?: string }) =>
@@ -95,7 +98,17 @@ export function usePresentationAction() {
       void qc.invalidateQueries({ queryKey: ADMIN_KEY });
       void qc.invalidateQueries({ queryKey: PUBLIC_KEY });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
+    onError: (e) =>
+      toast.error(
+        e instanceof Error
+          ? e.message
+          : tr([
+              "Não foi possível salvar.",
+              "Couldn't save.",
+              "No se pudo guardar.",
+              "Impossible d'enregistrer.",
+            ]),
+      ),
   });
 }
 
@@ -127,6 +140,7 @@ type Snapshot = {
 };
 
 export function PresentationEditor({ onClose }: { onClose: () => void }) {
+  const tr = useTr();
   const rows = usePresentationRows();
   const act = usePresentationAction();
   const [locale, setLocale] = useState<Locale>("pt-BR");
@@ -248,13 +262,13 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
       await act.mutateAsync({
         name: "admin_presentation_save_draft",
         args: { p_key: locale, p_draft: overrides },
-        ok: "Rascunho salvo.",
+        ok: tr(["Rascunho salvo.", "Draft saved.", "Borrador guardado.", "Brouillon enregistré."]),
       });
     if (layoutDirty)
       await act.mutateAsync({
         name: "admin_presentation_save_draft",
         args: { p_key: "layout", p_draft: layout },
-        ok: "Rascunho salvo.",
+        ok: tr(["Rascunho salvo.", "Draft saved.", "Borrador guardado.", "Brouillon enregistré."]),
       });
   };
 
@@ -276,7 +290,12 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
       await act.mutateAsync({
         name: "admin_presentation_publish",
         args: { p_key: "layout" },
-        ok: "Apresentação publicada.",
+        ok: tr([
+          "Apresentação publicada.",
+          "Presentation published.",
+          "Presentación publicada.",
+          "Présentation publiée.",
+        ]),
       });
     });
 
@@ -285,12 +304,22 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
       await act.mutateAsync({
         name: "admin_presentation_discard",
         args: { p_key: locale },
-        ok: "Rascunho descartado.",
+        ok: tr([
+          "Rascunho descartado.",
+          "Draft discarded.",
+          "Borrador descartado.",
+          "Brouillon abandonné.",
+        ]),
       });
       await act.mutateAsync({
         name: "admin_presentation_discard",
         args: { p_key: "layout" },
-        ok: "Rascunho descartado.",
+        ok: tr([
+          "Rascunho descartado.",
+          "Draft discarded.",
+          "Borrador descartado.",
+          "Brouillon abandonné.",
+        ]),
       });
       setWorks((cur) => {
         const next = { ...cur };
@@ -406,8 +435,18 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
     setSelectedBlock(null);
   };
 
-  const deleteCustom = (id: string) => {
-    if (!window.confirm("Excluir este slide? Essa mudança vale depois de publicar.")) return;
+  const deleteCustom = async (id: string) => {
+    if (
+      !(await siteConfirm(
+        tr([
+          "Excluir este slide? Essa mudança vale depois de publicar.",
+          "Delete this slide? The change takes effect after publishing.",
+          "¿Eliminar esta diapositiva? El cambio se aplica después de publicar.",
+          "Supprimer cette diapositive ? Le changement s'applique après la publication.",
+        ]),
+      ))
+    )
+      return;
     setLayout((cur) => ({
       ...cur,
       custom: cur.custom.filter((s) => s.id !== id),
@@ -423,11 +462,25 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
 
   const uploadBlockImage = async (file: File): Promise<string | null> => {
     if (!PHOTO_TYPES.includes(file.type)) {
-      toast.error("Use uma imagem JPEG, PNG ou WebP.");
+      toast.error(
+        tr([
+          "Use uma imagem JPEG, PNG ou WebP.",
+          "Use a JPEG, PNG or WebP image.",
+          "Usa una imagen JPEG, PNG o WebP.",
+          "Utilisez une image JPEG, PNG ou WebP.",
+        ]),
+      );
       return null;
     }
     if (file.size > MAX_PHOTO_BYTES) {
-      toast.error("A imagem passa de 3 MB.");
+      toast.error(
+        tr([
+          "A imagem passa de 3 MB.",
+          "The image is over 3 MB.",
+          "La imagen supera los 3 MB.",
+          "L'image dépasse 3 Mo.",
+        ]),
+      );
       return null;
     }
     const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
@@ -436,27 +489,67 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
       .from(BUCKET)
       .upload(path, file, { contentType: file.type, upsert: false });
     if (error) {
-      toast.error(`Não foi possível enviar a imagem: ${error.message}`);
+      toast.error(
+        `${tr(["Não foi possível enviar a imagem:", "Couldn't upload the image:", "No se pudo subir la imagen:", "Impossible d'envoyer l'image :"])} ${error.message}`,
+      );
       return null;
     }
     return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   };
 
-  const changeLocale = (next: Locale) => {
+  const changeLocale = async (next: Locale) => {
     if (next === locale) return;
-    if (dirty && !window.confirm("Há alterações não salvas. Trocar de idioma mesmo assim?")) return;
+    if (
+      dirty &&
+      !(await siteConfirm(
+        tr([
+          "Há alterações não salvas. Trocar de idioma mesmo assim?",
+          "There are unsaved changes. Switch language anyway?",
+          "Hay cambios sin guardar. ¿Cambiar de idioma de todos modos?",
+          "Des modifications ne sont pas enregistrées. Changer de langue quand même ?",
+        ]),
+      ))
+    )
+      return;
     setLocale(next);
     setTarget(null);
   };
 
-  const close = () => {
-    if (dirty && !window.confirm("Há alterações não salvas. Sair do editor mesmo assim?")) return;
+  const close = async () => {
+    if (
+      dirty &&
+      !(await siteConfirm(
+        tr([
+          "Há alterações não salvas. Sair do editor mesmo assim?",
+          "There are unsaved changes. Leave the editor anyway?",
+          "Hay cambios sin guardar. ¿Salir del editor de todos modos?",
+          "Des modifications ne sont pas enregistrées. Quitter l'éditeur quand même ?",
+        ]),
+      ))
+    )
+      return;
     onClose();
   };
 
   const uploadPhoto = async (index: number, file: File) => {
-    if (!PHOTO_TYPES.includes(file.type)) return toast.error("Use uma foto JPEG, PNG ou WebP.");
-    if (file.size > MAX_PHOTO_BYTES) return toast.error("A foto passa de 3 MB.");
+    if (!PHOTO_TYPES.includes(file.type))
+      return toast.error(
+        tr([
+          "Use uma foto JPEG, PNG ou WebP.",
+          "Use a JPEG, PNG or WebP photo.",
+          "Usa una foto JPEG, PNG o WebP.",
+          "Utilisez une photo JPEG, PNG ou WebP.",
+        ]),
+      );
+    if (file.size > MAX_PHOTO_BYTES)
+      return toast.error(
+        tr([
+          "A foto passa de 3 MB.",
+          "The photo is over 3 MB.",
+          "La foto supera los 3 MB.",
+          "La photo dépasse 3 Mo.",
+        ]),
+      );
     const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const path = `team/${index}-${Date.now()}.${ext}`;
     setUploading(index);
@@ -464,18 +557,37 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
       .from(BUCKET)
       .upload(path, file, { contentType: file.type, upsert: false });
     setUploading(null);
-    if (error) return toast.error(`Não foi possível enviar a foto: ${error.message}`);
+    if (error)
+      return toast.error(
+        `${tr(["Não foi possível enviar a foto:", "Couldn't upload the photo:", "No se pudo subir la foto:", "Impossible d'envoyer la photo :"])} ${error.message}`,
+      );
     const url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
     setLayout((cur) => ({ ...cur, avatars: { ...cur.avatars, [String(index)]: url } }));
-    toast.success("Foto trocada. Publique para aparecer para todos.");
+    toast.success(
+      tr([
+        "Foto trocada. Publique para aparecer para todos.",
+        "Photo changed. Publish to show it to everyone.",
+        "Foto cambiada. Publica para que la vean todos.",
+        "Photo changée. Publiez pour qu'elle apparaisse pour tous.",
+      ]),
+    );
   };
 
   if (rows.error) {
     return (
       <div className="fixed inset-0 z-[60] grid place-items-center bg-background p-6 text-sm">
-        <p>{rows.error instanceof Error ? rows.error.message : "Não foi possível carregar."}</p>
+        <p>
+          {rows.error instanceof Error
+            ? rows.error.message
+            : tr([
+                "Não foi possível carregar.",
+                "Couldn't load.",
+                "No se pudo cargar.",
+                "Impossible de charger.",
+              ])}
+        </p>
         <button type="button" className={btnCls} onClick={onClose}>
-          Fechar
+          {tr(["Fechar", "Close", "Cerrar", "Fermer"])}
         </button>
       </div>
     );
@@ -483,7 +595,12 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
   if (rows.isLoading || !rows.data) {
     return (
       <div className="fixed inset-0 z-[60] grid place-items-center bg-background text-sm text-muted-foreground">
-        Carregando a apresentação…
+        {tr([
+          "Carregando a apresentação…",
+          "Loading the presentation…",
+          "Cargando la presentación…",
+          "Chargement de la présentation…",
+        ])}
       </div>
     );
   }
@@ -521,23 +638,47 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
         {/* Barra do editor, logo abaixo do cabeçalho da apresentação */}
         <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-amber-500/40 bg-amber-50 px-3 py-2 text-xs text-foreground dark:bg-amber-950/80">
           <span className="rounded-full bg-amber-500 px-2 py-0.5 font-bold text-white">
-            Editando
+            {tr(["Editando", "Editing", "Editando", "Modification"])}
           </span>
           <span className="text-muted-foreground">
-            {dirty || pending ? "Alterações não publicadas" : "Tudo publicado"} · clique num texto
-            ou numa foto para editar
+            {dirty || pending
+              ? tr([
+                  "Alterações não publicadas",
+                  "Unpublished changes",
+                  "Cambios sin publicar",
+                  "Modifications non publiées",
+                ])
+              : tr([
+                  "Tudo publicado",
+                  "Everything published",
+                  "Todo publicado",
+                  "Tout est publié",
+                ])}{" "}
+            ·{" "}
+            {tr([
+              "clique num texto ou numa foto para editar",
+              "click a text or photo to edit it",
+              "haz clic en un texto o una foto para editar",
+              "cliquez sur un texte ou une photo pour le modifier",
+            ])}
           </span>
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <button type="button" className={btnCls} onClick={() => setAddOpen((o) => !o)}>
-              <Plus className="h-3.5 w-3.5" /> Novo slide
+              <Plus className="h-3.5 w-3.5" />{" "}
+              {tr(["Novo slide", "New slide", "Nueva diapositiva", "Nouvelle diapositive"])}
             </button>
             <button
               type="button"
               className={btnCls}
               onClick={undo}
               disabled={past.current.length === 0}
-              aria-label="Desfazer"
-              title="Desfazer (Ctrl+Z)"
+              aria-label={tr(["Desfazer", "Undo", "Deshacer", "Annuler"])}
+              title={tr([
+                "Desfazer (Ctrl+Z)",
+                "Undo (Ctrl+Z)",
+                "Deshacer (Ctrl+Z)",
+                "Annuler (Ctrl+Z)",
+              ])}
             >
               <Undo2 className="h-3.5 w-3.5" />
             </button>
@@ -546,13 +687,25 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
               className={btnCls}
               onClick={redo}
               disabled={future.current.length === 0}
-              aria-label="Refazer"
-              title="Refazer (Ctrl+Y)"
+              aria-label={tr(["Refazer", "Redo", "Rehacer", "Rétablir"])}
+              title={tr([
+                "Refazer (Ctrl+Y)",
+                "Redo (Ctrl+Y)",
+                "Rehacer (Ctrl+Y)",
+                "Rétablir (Ctrl+Y)",
+              ])}
             >
               <Redo2 className="h-3.5 w-3.5" />
             </button>
             <button type="button" className={btnCls} onClick={() => setDrawer((d) => !d)}>
-              {drawer ? "Fechar ordem" : "Ordem dos slides"}
+              {drawer
+                ? tr(["Fechar ordem", "Close order", "Cerrar orden", "Fermer l'ordre"])
+                : tr([
+                    "Ordem dos slides",
+                    "Slide order",
+                    "Orden de las diapositivas",
+                    "Ordre des diapositives",
+                  ])}
             </button>
             <button
               type="button"
@@ -560,7 +713,7 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
               onClick={() => void discard()}
               disabled={act.isPending || !pending || dirty}
             >
-              Descartar
+              {tr(["Descartar", "Discard", "Descartar", "Abandonner"])}
             </button>
             <button
               type="button"
@@ -568,7 +721,12 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
               onClick={() => void run(saveAll)}
               disabled={act.isPending || !dirty}
             >
-              Salvar rascunho
+              {tr([
+                "Salvar rascunho",
+                "Save draft",
+                "Guardar borrador",
+                "Enregistrer le brouillon",
+              ])}
             </button>
             <button
               type="button"
@@ -576,10 +734,21 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
               onClick={() => void publish()}
               disabled={act.isPending || (!dirty && !pending)}
             >
-              Publicar
+              {tr(["Publicar", "Publish", "Publicar", "Publier"])}
             </button>
-            <button type="button" className={btnCls} onClick={close} aria-label="Fechar editor">
-              <X className="h-3.5 w-3.5" /> Fechar editor
+            <button
+              type="button"
+              className={btnCls}
+              onClick={close}
+              aria-label={tr([
+                "Fechar editor",
+                "Close editor",
+                "Cerrar editor",
+                "Fermer l'éditeur",
+              ])}
+            >
+              <X className="h-3.5 w-3.5" />{" "}
+              {tr(["Fechar editor", "Close editor", "Cerrar editor", "Fermer l'éditeur"])}
             </button>
           </div>
         </div>
@@ -589,7 +758,9 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
           {/* Criar slide: parte e modelo pronto */}
           {addOpen && (
             <div className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-soft">
-              <p className="text-sm font-semibold">Novo slide</p>
+              <p className="text-sm font-semibold">
+                {tr(["Novo slide", "New slide", "Nueva diapositiva", "Nouvelle diapositive"])}
+              </p>
               <select
                 className={inputCls}
                 value={addPart}
@@ -616,14 +787,14 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
               </div>
               <div className="flex justify-end gap-2">
                 <button type="button" className={btnCls} onClick={() => setAddOpen(false)}>
-                  Cancelar
+                  {tr(["Cancelar", "Cancel", "Cancelar", "Annuler"])}
                 </button>
                 <button
                   type="button"
                   className={btnPrimary}
                   onClick={() => addCustom(addPart, addTemplate)}
                 >
-                  Criar slide
+                  {tr(["Criar slide", "Create slide", "Crear diapositiva", "Créer la diapositive"])}
                 </button>
               </div>
             </div>
@@ -653,19 +824,28 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                   type="button"
                   className={btnCls}
                   onClick={() => setTarget(null)}
-                  aria-label="Fechar"
+                  aria-label={tr(["Fechar", "Close", "Cerrar", "Fermer"])}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Digite direto no slide. Enter termina, Esc desfaz. Mantenha campos entre chaves,
-                como {"{n}"} ou {"{fee}"}.
+                {tr([
+                  "Digite direto no slide. Enter termina, Esc desfaz. Mantenha campos entre chaves, como {n} ou {fee}.",
+                  "Type right on the slide. Enter finishes, Esc undoes. Keep fields in braces, like {n} or {fee}.",
+                  "Escribe directamente en la diapositiva. Enter termina, Esc deshace. Mantén los campos entre llaves, como {n} o {fee}.",
+                  "Tapez directement sur la diapositive. Entrée valide, Échap annule. Gardez les champs entre accolades, comme {n} ou {fee}.",
+                ])}
               </p>
               {item && itemList && (
                 <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
                   <span className="text-xs font-semibold text-muted-foreground">
-                    Item {item.index + 1} de {itemList.length}
+                    {tr([
+                      `Item ${item.index + 1} de ${itemList.length}`,
+                      `Item ${item.index + 1} of ${itemList.length}`,
+                      `Elemento ${item.index + 1} de ${itemList.length}`,
+                      `Élément ${item.index + 1} sur ${itemList.length}`,
+                    ])}
                   </span>
                   <button
                     type="button"
@@ -679,7 +859,12 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                       ];
                       setWork((c) => setPath(c, item.listPath, next));
                     }}
-                    aria-label="Subir item"
+                    aria-label={tr([
+                      "Subir item",
+                      "Move item up",
+                      "Subir elemento",
+                      "Monter l'élément",
+                    ])}
                   >
                     <ArrowUp className="h-3.5 w-3.5" />
                   </button>
@@ -695,7 +880,12 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                       ];
                       setWork((c) => setPath(c, item.listPath, next));
                     }}
-                    aria-label="Descer item"
+                    aria-label={tr([
+                      "Descer item",
+                      "Move item down",
+                      "Bajar elemento",
+                      "Descendre l'élément",
+                    ])}
                   >
                     <ArrowDown className="h-3.5 w-3.5" />
                   </button>
@@ -712,7 +902,13 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                       setWork((c) => setPath(c, item.listPath, next));
                     }}
                   >
-                    <Plus className="h-3.5 w-3.5" /> Adicionar item depois
+                    <Plus className="h-3.5 w-3.5" />{" "}
+                    {tr([
+                      "Adicionar item depois",
+                      "Add item after",
+                      "Añadir elemento después",
+                      "Ajouter un élément après",
+                    ])}
                   </button>
                   <button
                     type="button"
@@ -729,7 +925,8 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                       setTarget(null);
                     }}
                   >
-                    <Trash2 className="h-3.5 w-3.5" /> Remover item
+                    <Trash2 className="h-3.5 w-3.5" />{" "}
+                    {tr(["Remover item", "Remove item", "Quitar elemento", "Retirer l'élément"])}
                   </button>
                 </div>
               )}
@@ -740,12 +937,15 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
           {target?.kind === "photo" && (
             <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
               <div className="mb-3 flex items-center justify-between">
-                <p className="font-semibold">Foto de {PRESENTERS[target.index].name}</p>
+                <p className="font-semibold">
+                  {tr(["Foto de", "Photo of", "Foto de", "Photo de"])}{" "}
+                  {PRESENTERS[target.index].name}
+                </p>
                 <button
                   type="button"
                   className={btnCls}
                   onClick={() => setTarget(null)}
-                  aria-label="Fechar"
+                  aria-label={tr(["Fechar", "Close", "Cerrar", "Fermer"])}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -765,7 +965,9 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                 <div className="flex flex-col gap-2">
                   <label className={`${btnPrimary} cursor-pointer`}>
                     <Upload className="h-3.5 w-3.5" />
-                    {uploading === target.index ? "Enviando…" : "Trocar foto"}
+                    {uploading === target.index
+                      ? tr(["Enviando…", "Uploading…", "Subiendo…", "Envoi…"])
+                      : tr(["Trocar foto", "Change photo", "Cambiar foto", "Changer la photo"])}
                     <input
                       type="file"
                       accept={PHOTO_TYPES.join(",")}
@@ -790,7 +992,12 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                         })
                       }
                     >
-                      Usar a foto do código
+                      {tr([
+                        "Usar a foto do código",
+                        "Use the built-in photo",
+                        "Usar la foto del código",
+                        "Utiliser la photo d'origine",
+                      ])}
                     </button>
                   )}
                 </div>
@@ -802,15 +1009,27 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
           {drawer && (
             <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
               <div className="mb-3 flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold">Ordem e slides</p>
+                <p className="text-sm font-semibold">
+                  {tr([
+                    "Ordem e slides",
+                    "Order and slides",
+                    "Orden y diapositivas",
+                    "Ordre et diapositives",
+                  ])}
+                </p>
                 <button
                   type="button"
                   className={btnCls}
-                  onClick={() => {
+                  onClick={async () => {
                     if (
-                      !window.confirm(
-                        "Voltar a ordem, os ocultos, as exclusões e os papéis de parede ao original? Seus slides novos continuam.",
-                      )
+                      !(await siteConfirm(
+                        tr([
+                          "Voltar a ordem, os ocultos, as exclusões e os papéis de parede ao original? Seus slides novos continuam.",
+                          "Reset the order, hidden slides, deletions and wallpapers to the original? Your new slides stay.",
+                          "¿Volver el orden, las ocultas, las eliminaciones y los fondos al original? Tus diapositivas nuevas se mantienen.",
+                          "Rétablir l'ordre, les masquées, les suppressions et les fonds d'origine ? Vos nouvelles diapositives restent.",
+                        ]),
+                      ))
                     )
                       return;
                     setLayout((cur) => ({
@@ -822,11 +1041,22 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                     }));
                   }}
                 >
-                  <RotateCcw className="h-3 w-3" /> Restaurar original
+                  <RotateCcw className="h-3 w-3" />{" "}
+                  {tr([
+                    "Restaurar original",
+                    "Restore original",
+                    "Restaurar original",
+                    "Rétablir l'original",
+                  ])}
                 </button>
               </div>
               <p className="mb-3 text-[11px] text-muted-foreground">
-                Os slides mudam de posição só dentro da própria parte. A capa nunca some.
+                {tr([
+                  "Os slides mudam de posição só dentro da própria parte. A capa nunca some.",
+                  "Slides only move within their own part. The cover never disappears.",
+                  "Las diapositivas solo cambian de posición dentro de su propia parte. La portada nunca desaparece.",
+                  "Les diapositives ne bougent qu'à l'intérieur de leur propre partie. La couverture ne disparaît jamais.",
+                ])}
               </p>
               {PRESENTERS.map((p, part) => {
                 const items = orderSlides(
@@ -858,7 +1088,7 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                               <select
                                 className="max-w-[7rem] rounded-md border border-border bg-background px-1 py-0.5 text-[10px]"
                                 value={layout.backgrounds[s.id] ?? ""}
-                                aria-label={`Papel de parede de ${label}`}
+                                aria-label={`${tr(["Papel de parede de", "Wallpaper for", "Fondo de", "Fond de"])} ${label}`}
                                 onChange={(e) =>
                                   setLayout((cur) => {
                                     const backgrounds = { ...cur.backgrounds };
@@ -868,7 +1098,9 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                                   })
                                 }
                               >
-                                <option value="">Padrão</option>
+                                <option value="">
+                                  {tr(["Padrão", "Default", "Predeterminado", "Par défaut"])}
+                                </option>
                                 {BACKGROUNDS.map((bg) => (
                                   <option key={bg.id} value={bg.id}>
                                     {bg.label}
@@ -880,7 +1112,7 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                               {label}
                               {deleted && (
                                 <span className="ml-1 text-[10px] text-muted-foreground">
-                                  (excluído)
+                                  {tr(["(excluído)", "(deleted)", "(eliminada)", "(supprimée)"])}
                                 </span>
                               )}
                             </span>
@@ -888,7 +1120,7 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                               type="button"
                               className={btnCls}
                               disabled={i === 0}
-                              aria-label={`Subir ${label}`}
+                              aria-label={`${tr(["Subir", "Move up", "Subir", "Monter"])} ${label}`}
                               onClick={() => {
                                 const ids = items.map((x) => x.id);
                                 [ids[i - 1], ids[i]] = [ids[i], ids[i - 1]];
@@ -904,7 +1136,7 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                               type="button"
                               className={btnCls}
                               disabled={i === items.length - 1}
-                              aria-label={`Descer ${label}`}
+                              aria-label={`${tr(["Descer", "Move down", "Bajar", "Descendre"])} ${label}`}
                               onClick={() => {
                                 const ids = items.map((x) => x.id);
                                 [ids[i + 1], ids[i]] = [ids[i], ids[i + 1]];
@@ -920,7 +1152,7 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                               type="button"
                               className={btnCls}
                               disabled={s.id === "capa" || last || deleted}
-                              aria-label={hidden ? `Mostrar ${label}` : `Esconder ${label}`}
+                              aria-label={`${hidden ? tr(["Mostrar", "Show", "Mostrar", "Afficher"]) : tr(["Esconder", "Hide", "Ocultar", "Masquer"])} ${label}`}
                               onClick={() =>
                                 setLayout((cur) => ({
                                   ...cur,
@@ -940,8 +1172,13 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                               <button
                                 type="button"
                                 className={btnCls}
-                                aria-label={`Criar cópia editável de ${label}`}
-                                title="Cria um slide editável com os textos deste"
+                                aria-label={`${tr(["Criar cópia editável de", "Create editable copy of", "Crear copia editable de", "Créer une copie modifiable de"])} ${label}`}
+                                title={tr([
+                                  "Cria um slide editável com os textos deste",
+                                  "Creates an editable slide with this one's texts",
+                                  "Crea una diapositiva editable con los textos de esta",
+                                  "Crée une diapositive modifiable avec les textes de celle-ci",
+                                ])}
                                 onClick={() => copyFromPronto(s.id, label, part)}
                               >
                                 <Copy className="h-3 w-3" />
@@ -951,7 +1188,7 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                               <button
                                 type="button"
                                 className={btnCls}
-                                aria-label={`Restaurar ${label}`}
+                                aria-label={`${tr(["Restaurar", "Restore", "Restaurar", "Restaurer"])} ${label}`}
                                 onClick={() =>
                                   setLayout((cur) => ({
                                     ...cur,
@@ -959,18 +1196,29 @@ export function PresentationEditor({ onClose }: { onClose: () => void }) {
                                   }))
                                 }
                               >
-                                <RotateCcw className="h-3 w-3" /> Restaurar
+                                <RotateCcw className="h-3 w-3" />{" "}
+                                {tr(["Restaurar", "Restore", "Restaurar", "Restaurer"])}
                               </button>
                             ) : !custom && s.id !== "capa" ? (
                               <button
                                 type="button"
                                 className={btnDanger}
                                 disabled={last}
-                                aria-label={`Excluir ${label}`}
+                                aria-label={`${tr(["Excluir", "Delete", "Eliminar", "Supprimer"])} ${label}`}
                                 title={
                                   last
-                                    ? "Cada parte precisa de pelo menos um slide"
-                                    : "Excluir (pode restaurar)"
+                                    ? tr([
+                                        "Cada parte precisa de pelo menos um slide",
+                                        "Each part needs at least one slide",
+                                        "Cada parte necesita al menos una diapositiva",
+                                        "Chaque partie a besoin d'au moins une diapositive",
+                                      ])
+                                    : tr([
+                                        "Excluir (pode restaurar)",
+                                        "Delete (can be restored)",
+                                        "Eliminar (se puede restaurar)",
+                                        "Supprimer (restaurable)",
+                                      ])
                                 }
                                 onClick={() =>
                                   setLayout((cur) => ({ ...cur, deleted: [...cur.deleted, s.id] }))

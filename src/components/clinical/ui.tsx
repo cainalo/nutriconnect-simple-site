@@ -1,3 +1,4 @@
+import { useScrollHint } from "@/hooks/use-scroll-hint";
 import type { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -196,18 +197,19 @@ export function Stat({
   return (
     <div className="group relative overflow-hidden rounded-[1.75rem] border border-border/50 bg-card/60 p-5 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-white/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-white/5" />
-      <div className="flex items-start justify-between gap-3 relative z-10">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent shadow-sm transition-transform duration-300 group-hover:scale-110">
-          <Icon className="h-5 w-5" />
+      <div className="relative z-10 flex items-center gap-2">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent shadow-sm transition-transform duration-300 group-hover:scale-110">
+          <Icon className="h-4 w-4" />
         </span>
+        {/* Sem justificar: rótulo curto em coluna estreita ficava com buracos entre as palavras. */}
+        <p className="!text-left text-xs font-semibold leading-tight text-muted-foreground">
+          {label}
+        </p>
       </div>
-      <p className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground relative z-10">
+      <p className="relative z-10 mt-3 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
         {value}
       </p>
-      {hint && (
-        <p className="mt-1 text-xs text-muted-foreground opacity-80 relative z-10">{hint}</p>
-      )}
+      {hint && <p className="mt-1 text-xs text-muted-foreground relative z-10">{hint}</p>}
     </div>
   );
 }
@@ -293,31 +295,59 @@ export function Tabs<T extends string>({
   value,
   onChange,
   items,
+  label,
+  className,
 }: {
   value: T;
   onChange: (v: T) => void;
   items: { value: T; label: string; count?: number }[];
+  /** Nome do grupo de abas para leitor de tela. */
+  label?: string;
+  className?: string;
 }) {
+  // Padrão de abas acessível: setas esquerda/direita, Home e End trocam de aba.
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const i = items.findIndex((it) => it.value === value);
+    let next = -1;
+    if (e.key === "ArrowRight") next = (i + 1) % items.length;
+    else if (e.key === "ArrowLeft") next = (i - 1 + items.length) % items.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = items.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    onChange(items[next].value);
+    const tabs = e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    tabs[next]?.focus();
+  };
+  const scrollRef = useScrollHint<HTMLDivElement>();
   return (
-    <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scroll-smooth">
+    <div
+      ref={scrollRef}
+      role="tablist"
+      aria-label={label}
+      onKeyDown={onKeyDown}
+      className={cn("mb-6 flex gap-1.5 overflow-x-auto pb-2 scroll-smooth sm:gap-2", className)}
+    >
       {items.map((item) => (
         <button
           key={item.value}
           type="button"
+          role="tab"
           onClick={() => onChange(item.value)}
-          aria-pressed={value === item.value}
+          aria-selected={value === item.value}
+          tabIndex={value === item.value ? 0 : -1}
           className={cn(
-            "relative shrink-0 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300",
+            "relative min-h-10 shrink-0 rounded-full px-3.5 py-2 text-sm font-bold transition-all duration-300 sm:px-5 sm:py-2.5",
             value === item.value
-              ? "bg-accent text-accent-foreground shadow-md scale-105"
-              : "bg-secondary/80 text-muted-foreground hover:bg-secondary hover:text-foreground hover:scale-[1.02]",
+              ? "bg-accent text-accent-foreground shadow-md"
+              : "bg-secondary/80 text-muted-foreground hover:bg-secondary hover:text-foreground",
           )}
         >
           {item.label}
           {item.count !== undefined && (
             <span
               className={cn(
-                "ml-2 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-black",
+                "ml-1.5 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-black sm:ml-2",
                 value === item.value
                   ? "bg-accent-foreground/20 text-accent-foreground"
                   : "bg-muted text-muted-foreground",

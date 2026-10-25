@@ -2,7 +2,7 @@ import { td } from "@/lib/i18n/data";
 import { ProfileCard } from "@/components/rail-cards";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Award, BookOpen, Flame, UserRound, Users } from "lucide-react";
+import { Award, BookOpen, Flame, Trophy, UserRound, Users } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ChallengeCard } from "@/components/community-cards";
 import {
@@ -48,6 +48,7 @@ import { KidLunchboxToday, LunchboxLink } from "@/components/lunchbox-panel";
 import { useI18n } from "@/hooks/use-i18n";
 import type { DictKey } from "@/lib/i18n";
 import { EmojiIcon } from "@/components/emoji-icon";
+import { FriendsTab } from "@/components/friend-challenges";
 
 export const Route = createFileRoute("/desafios/")({
   head: () => ({
@@ -60,15 +61,19 @@ export const Route = createFileRoute("/desafios/")({
       },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { aba?: "amigos" } => ({
+    aba: search.aba === "amigos" ? "amigos" : undefined,
+  }),
   component: DesafiosIndexPage,
 });
 
-type Tab = "trilha" | "populares" | "comunidades";
+type Tab = "trilha" | "populares" | "comunidades" | "amigos";
 
 const TABS: { key: Tab; label: DictKey; icon: React.ReactNode }[] = [
   { key: "trilha", label: "dz.tab.trail", icon: <BookOpen className="h-4 w-4" /> },
   { key: "populares", label: "dz.tab.popular", icon: <Flame className="h-4 w-4" /> },
   { key: "comunidades", label: "dz.tab.communities", icon: <Users className="h-4 w-4" /> },
+  { key: "amigos", label: "dz.tab.friends", icon: <Trophy className="h-4 w-4" /> },
 ];
 
 function DesafiosIndexPage() {
@@ -80,7 +85,8 @@ function DesafiosIndexPage() {
   const challenges = useMemo(() => challengesQuery.data ?? [], [challengesQuery.data]);
   const communities = useMemo(() => myCommunities.data ?? [], [myCommunities.data]);
   const hydrated = !challengesQuery.isLoading;
-  const [tab, setTab] = useState<Tab>("trilha");
+  const { aba } = Route.useSearch();
+  const [tab, setTab] = useState<Tab>(aba ?? "trilha");
 
   const currentUserId = user?.id || "guest";
   const { profiles, active, select, addKid, removeKid } = useTrailProfiles(
@@ -218,6 +224,7 @@ function DesafiosIndexPage() {
           totalLevels={totals.totalLevels}
           profileSlot={
             <ProfileSwitcher
+              userId={user?.id ?? "guest"}
               profiles={profiles}
               active={active}
               onSelect={select}
@@ -227,54 +234,17 @@ function DesafiosIndexPage() {
           }
         />
 
-        {/* Conquistas compactas (só fazem sentido com desafios sociais, no perfil do responsável) */}
-        {active.kind === "adult" && (
-          <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 mb-8 shadow-xs">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <h2 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
-                <Award className="h-4 w-4 text-accent" />
-                <span>{t("dz.achievements")}</span>
-              </h2>
-              <span className="text-[10px] text-muted-foreground font-medium">
-                {totals.levels} {t("dz.levelsAnd")} {completedCount(challenges)}{" "}
-                {t("dz.challengesDone")}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {badges.map((badge) => (
-                <div
-                  key={badge.label}
-                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
-                    badge.achieved
-                      ? "border-accent/40 bg-accent-soft/40"
-                      : "border-border bg-secondary/30 opacity-60"
-                  }`}
-                >
-                  <EmojiIcon
-                    emoji={badge.achieved ? badge.icon : "🔒"}
-                    className={`h-4 w-4 ${badge.achieved ? "text-accent" : "text-muted-foreground"}`}
-                  />
-                  <span className="text-[11px] font-bold text-foreground">{td(badge.label)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Card de nível (o mesmo do perfil), só aqui e em Funções. */}
-        {active.kind === "adult" && (
-          <section className="mb-8 max-w-md">
-            <ProfileCard />
-          </section>
-        )}
-
         {/* Navegação por Abas (perfis infantis não têm rede social: sem desafios ou comunidades) */}
-        <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1 mb-8 overflow-x-auto no-scrollbar">
+        <div
+          className={`mb-8 grid gap-1 rounded-2xl bg-secondary p-1 sm:flex sm:items-center ${
+            active.kind === "adult" ? "grid-cols-2" : "grid-cols-1"
+          }`}
+        >
           {(active.kind === "adult" ? TABS : TABS.filter((tb) => tb.key === "trilha")).map((tb) => (
             <button
               key={tb.key}
               onClick={() => setTab(tb.key)}
-              className={`flex items-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 text-xs font-semibold transition whitespace-nowrap ${
+              className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 sm:px-5 py-2.5 text-center text-xs font-semibold leading-tight transition sm:whitespace-nowrap ${
                 tab === tb.key
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
@@ -283,7 +253,7 @@ function DesafiosIndexPage() {
               {tb.icon}
               <span>{t(tb.label)}</span>
               {tb.key === "populares" && (
-                <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400">
+                <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[9px] font-bold text-warning">
                   {popularChallenges.length}
                 </span>
               )}
@@ -352,7 +322,7 @@ function DesafiosIndexPage() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-lg font-bold font-display text-foreground flex items-center gap-2">
-                      <Flame className="h-5 w-5 text-amber-500" />
+                      <Flame className="h-5 w-5 text-warning" />
                       {t("dz.popularTitle")}
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">{t("dz.popularHint")}</p>
@@ -389,6 +359,9 @@ function DesafiosIndexPage() {
                 )}
               </div>
             )}
+
+            {/* ── ABA: Com amigos (desafios entre amigos e liga da semana) ── */}
+            {tab === "amigos" && active.kind === "adult" && <FriendsTab />}
 
             {/* ── ABA: Das Minhas Comunidades ── */}
             {tab === "comunidades" && active.kind === "adult" && (
@@ -430,6 +403,48 @@ function DesafiosIndexPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* Conquistas e nível depois do conteúdo: no celular o mapa da trilha aparece primeiro. */}
+        {/* Conquistas compactas (só fazem sentido com desafios sociais, no perfil do responsável) */}
+        {active.kind === "adult" && (
+          <div className="mt-10 rounded-3xl border border-border bg-card p-5 sm:p-6 mb-8 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <h2 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
+                <Award className="h-4 w-4 text-accent" />
+                <span>{t("dz.achievements")}</span>
+              </h2>
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {totals.levels} {t("dz.levelsAnd")} {completedCount(challenges)}{" "}
+                {t("dz.challengesDone")}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {badges.map((badge) => (
+                <div
+                  key={badge.label}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
+                    badge.achieved
+                      ? "border-accent/40 bg-accent-soft/40"
+                      : "border-dashed border-border bg-secondary/30 text-muted-foreground"
+                  }`}
+                >
+                  <EmojiIcon
+                    emoji={badge.achieved ? badge.icon : "🔒"}
+                    className={`h-4 w-4 ${badge.achieved ? "text-accent" : "text-muted-foreground"}`}
+                  />
+                  <span className="text-[11px] font-bold text-foreground">{td(badge.label)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Card de nível (o mesmo do perfil), só aqui e em Funções. */}
+        {active.kind === "adult" && (
+          <section className="mb-8 max-w-md">
+            <ProfileCard />
+          </section>
         )}
       </div>
 

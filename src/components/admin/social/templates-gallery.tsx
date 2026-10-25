@@ -12,6 +12,7 @@ import {
   type TemplateCategory,
 } from "@/lib/social-templates";
 import { cn } from "@/lib/utils";
+import { useTr } from "@/components/settings-ui";
 import { ArtIcon, EmptyState } from "@/components/admin/social/kit";
 import { NETWORK_STYLE, badgeBg } from "@/components/admin/social/kit-styles";
 import { PostThumb, TemplateThumb } from "@/components/admin/social/template-thumb";
@@ -29,6 +30,7 @@ export function TemplatesGallery({
   onUseTeam: (p: SocialPost) => void;
   onEditTeam: (p: SocialPost) => void;
 }) {
+  const tr = useTr();
   const [cat, setCat] = useState<Filter>("todos");
   const team = posts.filter((p) => p.is_template);
   const list = TEMPLATES.filter((t) => cat === "todos" || t.category === cat);
@@ -62,9 +64,9 @@ export function TemplatesGallery({
                 <ArtIcon name={CATEGORY_STYLE[c].icon} className="h-3.5 w-3.5" />
               )}
               {c === "todos"
-                ? `Todos (${TEMPLATES.length})`
+                ? `${tr(["Todos", "All", "Todos", "Tous"])} (${TEMPLATES.length})`
                 : c === "equipe"
-                  ? `Da equipe (${team.length})`
+                  ? `${tr(["Da equipe", "Team", "Del equipo", "De l’équipe"])} (${team.length})`
                   : CATEGORY_LABEL[c]}
             </button>
           );
@@ -76,8 +78,18 @@ export function TemplatesGallery({
           <EmptyState
             icon={BookMarked}
             color="#b4532a"
-            title="Nenhum modelo da equipe ainda"
-            text="No editor, em Publicar, use “Salvar como modelo” para guardar os formatos favoritos aqui."
+            title={tr([
+              "Nenhum modelo da equipe ainda",
+              "No team templates yet",
+              "Aún no hay plantillas del equipo",
+              "Aucun modèle de l’équipe pour l’instant",
+            ])}
+            text={tr([
+              "No editor, em Publicar, use “Salvar como modelo” para guardar os formatos favoritos aqui.",
+              "In the editor, under Publish, use “Save as template” to keep your favorite formats here.",
+              "En el editor, en Publicar, usa “Guardar como plantilla” para guardar aquí tus formatos favoritos.",
+              "Dans l’éditeur, sous Publier, utilisez « Enregistrer comme modèle » pour garder vos formats préférés ici.",
+            ])}
           />
         ) : (
           <ul className="grid grid-cols-2 gap-3 @2xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-6">
@@ -113,14 +125,25 @@ export function TemplatesGallery({
                           onClick={() => onUseTeam(p)}
                           className="inline-flex h-8 flex-1 items-center justify-center gap-1 rounded-full bg-accent text-[11px] font-bold text-accent-foreground transition hover:bg-accent/90"
                         >
-                          <Wand2 className="h-3.5 w-3.5" /> Usar
+                          <Wand2 className="h-3.5 w-3.5" />{" "}
+                          {tr(["Usar", "Use", "Usar", "Utiliser"])}
                         </button>
                         <button
                           type="button"
                           onClick={() => onEditTeam(p)}
                           className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border/70 text-muted-foreground transition hover:text-foreground"
-                          aria-label="Editar modelo"
-                          title="Editar modelo"
+                          aria-label={tr([
+                            "Editar modelo",
+                            "Edit template",
+                            "Editar plantilla",
+                            "Modifier le modèle",
+                          ])}
+                          title={tr([
+                            "Editar modelo",
+                            "Edit template",
+                            "Editar plantilla",
+                            "Modifier le modèle",
+                          ])}
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
@@ -157,7 +180,13 @@ export function TemplatesGallery({
                       <net.icon className="h-3.5 w-3.5" />
                     </span>
                     <span className="absolute inset-x-2 bottom-2 flex translate-y-2 items-center justify-center gap-1 rounded-full bg-white/95 py-1.5 text-[11px] font-bold text-neutral-900 opacity-0 shadow-lg transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                      <Sparkles className="h-3 w-3" /> Usar este modelo
+                      <Sparkles className="h-3 w-3" />{" "}
+                      {tr([
+                        "Usar este modelo",
+                        "Use this template",
+                        "Usar esta plantilla",
+                        "Utiliser ce modèle",
+                      ])}
                     </span>
                   </div>
                   <div className="flex flex-1 flex-col p-3">

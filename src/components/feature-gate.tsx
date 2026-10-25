@@ -51,7 +51,7 @@ export function FeatureGate({ children }: { children: ReactNode }) {
     return (
       <>
         {/* Selo flutuante: não ocupa espaço (as telas internas têm a altura exata da tela). */}
-        <div className="pointer-events-none fixed left-1/2 top-2 z-50 flex max-w-[90vw] -translate-x-1/2 items-center gap-2 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white shadow-card">
+        <div className="pointer-events-none fixed left-1/2 top-2 z-50 flex max-w-[90vw] -translate-x-1/2 items-center gap-2 rounded-full bg-warning px-3 py-1.5 text-xs font-semibold text-warning-foreground shadow-card">
           <Power className="h-3.5 w-3.5" /> {feature.label}: {t.admin}
         </div>
         {children}

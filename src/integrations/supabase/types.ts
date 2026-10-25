@@ -419,8 +419,11 @@ export type Database = {
           modality: Database["public"]["Enums"]["appointment_modality"]
           patient_id: string
           patient_joined_at: string | null
+          patient_confirmed_at: string | null
           patient_notes: string | null
           price_cents: number
+          reminder_1h_at: string | null
+          reminder_24h_at: string | null
           professional_id: string
           professional_joined_at: string | null
           starts_at: string
@@ -442,8 +445,11 @@ export type Database = {
           modality: Database["public"]["Enums"]["appointment_modality"]
           patient_id: string
           patient_joined_at?: string | null
+          patient_confirmed_at?: string | null
           patient_notes?: string | null
           price_cents?: number
+          reminder_1h_at?: string | null
+          reminder_24h_at?: string | null
           professional_id: string
           professional_joined_at?: string | null
           starts_at: string
@@ -465,8 +471,11 @@ export type Database = {
           modality?: Database["public"]["Enums"]["appointment_modality"]
           patient_id?: string
           patient_joined_at?: string | null
+          patient_confirmed_at?: string | null
           patient_notes?: string | null
           price_cents?: number
+          reminder_1h_at?: string | null
+          reminder_24h_at?: string | null
           professional_id?: string
           professional_joined_at?: string | null
           starts_at?: string
@@ -1232,6 +1241,7 @@ export type Database = {
           id: string
           pending_review: boolean
           post_id: string
+          reply_to: string | null
         }
         Insert: {
           author_id: string
@@ -1241,6 +1251,7 @@ export type Database = {
           id?: string
           pending_review?: boolean
           post_id: string
+          reply_to?: string | null
         }
         Update: {
           author_id?: string
@@ -1250,6 +1261,7 @@ export type Database = {
           id?: string
           pending_review?: boolean
           post_id?: string
+          reply_to?: string | null
         }
         Relationships: [
           {
@@ -3426,6 +3438,242 @@ export type Database = {
         }
         Relationships: []
       }
+      professional_reviews: {
+        Row: {
+          anonymous: boolean
+          appointment_id: string
+          comment: string | null
+          created_at: string
+          hidden: boolean
+          id: string
+          patient_id: string
+          professional_id: string
+          rating: number
+          replied_at: string | null
+          reply: string | null
+          updated_at: string
+        }
+        Insert: {
+          anonymous?: boolean
+          appointment_id: string
+          comment?: string | null
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          patient_id: string
+          professional_id: string
+          rating: number
+          replied_at?: string | null
+          reply?: string | null
+          updated_at?: string
+        }
+        Update: {
+          anonymous?: boolean
+          appointment_id?: string
+          comment?: string | null
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          patient_id?: string
+          professional_id?: string
+          rating?: number
+          replied_at?: string | null
+          reply?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      symptom_logs: {
+        Row: {
+          created_at: string
+          felt_at: string
+          id: string
+          intensity: number
+          note: string | null
+          patient_id: string
+          symptom: string
+        }
+        Insert: {
+          created_at?: string
+          felt_at?: string
+          id?: string
+          intensity: number
+          note?: string | null
+          patient_id: string
+          symptom: string
+        }
+        Update: {
+          created_at?: string
+          felt_at?: string
+          id?: string
+          intensity?: number
+          note?: string | null
+          patient_id?: string
+          symptom?: string
+        }
+        Relationships: []
+      }
+      exam_reminders: {
+        Row: {
+          created_at: string
+          done_at: string | null
+          due_at: string
+          id: string
+          location: string | null
+          notes: string | null
+          patient_id: string
+          reminded_at: string | null
+          requested_by: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          done_at?: string | null
+          due_at: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          patient_id: string
+          reminded_at?: string | null
+          requested_by?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          done_at?: string | null
+          due_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          patient_id?: string
+          reminded_at?: string | null
+          requested_by?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      reward_points: {
+        Row: {
+          created_at: string
+          delta: number
+          id: number
+          note: string | null
+          reason: string
+          ref: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: number
+          note?: string | null
+          reason: string
+          ref: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: number
+          note?: string | null
+          reason?: string
+          ref?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reward_redemptions: {
+        Row: {
+          code: string
+          cost: number
+          created_at: string
+          expires_at: string
+          id: string
+          reward_id: string
+          status: string
+          used_at: string | null
+          used_ref: string | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          cost: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          reward_id: string
+          status?: string
+          used_at?: string | null
+          used_ref?: string | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          cost?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          reward_id?: string
+          status?: string
+          used_at?: string | null
+          used_ref?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rewards: {
+        Row: {
+          active: boolean
+          cost: number
+          created_at: string
+          description: string
+          discount_percent: number | null
+          id: string
+          kind: string
+          partner_id: string | null
+          position: number
+          stock: number | null
+          title: string
+          valid_days: number
+        }
+        Insert: {
+          active?: boolean
+          cost: number
+          created_at?: string
+          description?: string
+          discount_percent?: number | null
+          id?: string
+          kind: string
+          partner_id?: string | null
+          position?: number
+          stock?: number | null
+          title: string
+          valid_days?: number
+        }
+        Update: {
+          active?: boolean
+          cost?: number
+          created_at?: string
+          description?: string
+          discount_percent?: number | null
+          id?: string
+          kind?: string
+          partner_id?: string | null
+          position?: number
+          stock?: number | null
+          title?: string
+          valid_days?: number
+        }
+        Relationships: []
+      }
       pro_programs: {
         Row: {
           active: boolean
@@ -4831,6 +5079,7 @@ export type Database = {
         Row: {
           appearance: Json | null
           habit_choice: string[] | null
+          league_visible: boolean
           id: string
           locale: string | null
           no_numbers: boolean
@@ -4843,6 +5092,7 @@ export type Database = {
         Insert: {
           appearance?: Json | null
           habit_choice?: string[] | null
+          league_visible?: boolean
           id: string
           locale?: string | null
           no_numbers?: boolean
@@ -4855,6 +5105,7 @@ export type Database = {
         Update: {
           appearance?: Json | null
           habit_choice?: string[] | null
+          league_visible?: boolean
           id?: string
           locale?: string | null
           no_numbers?: boolean
@@ -6040,7 +6291,108 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      confirm_attendance: { Args: { p_appointment: string }; Returns: undefined }
+      cheer_friend_challenge: {
+        Args: { p_challenge: string; p_user: string }
+        Returns: boolean
+      }
+      create_friend_challenge: {
+        Args: {
+          p_friends: string[]
+          p_metric: string
+          p_target: number
+          p_title?: string
+        }
+        Returns: string
+      }
+      friends_weekly_league: {
+        Args: { p_week_start?: string }
+        Returns: {
+          agua: number
+          avatar_url: string
+          caseira: number
+          calma: number
+          is_me: boolean
+          mover: number
+          name: string
+          points: number
+          trilha: number
+          user_id: string
+          username: string
+          verduras: number
+        }[]
+      }
+      my_friend_challenges: {
+        Args: never
+        Returns: {
+          creator_id: string
+          id: string
+          members: Json
+          metric: string
+          my_status: string
+          target: number
+          title: string
+          week_start: string
+        }[]
+      }
+      respond_friend_challenge: {
+        Args: { p_accept: boolean; p_challenge: string }
+        Returns: undefined
+      }
+      set_league_visible: { Args: { p_visible: boolean }; Returns: undefined }
+      admin_set_redemption: {
+        Args: { p_action: string; p_redemption: string }
+        Returns: undefined
+      }
+      redeem_reward: { Args: { p_reward: string }; Returns: string }
+      reward_balance: { Args: { p_user?: string }; Returns: number }
+      reward_week_preview: { Args: never; Returns: number }
       export_my_data: { Args: never; Returns: Json }
+      admin_set_review_hidden: {
+        Args: { p_hidden: boolean; p_review: string }
+        Returns: undefined
+      }
+      can_review_appointment: { Args: { p_appointment: string }; Returns: boolean }
+      list_professional_reviews: {
+        Args: { p_limit?: number; p_offset?: number; p_professional: string }
+        Returns: {
+          author_avatar: string | null
+          author_name: string | null
+          comment: string | null
+          created_at: string
+          id: string
+          mine: boolean
+          rating: number
+          replied_at: string | null
+          reply: string | null
+        }[]
+      }
+      professional_rating_summaries: {
+        Args: never
+        Returns: {
+          average: number
+          professional_id: string
+          r1: number
+          r2: number
+          r3: number
+          r4: number
+          r5: number
+          total: number
+        }[]
+      }
+      reply_professional_review: {
+        Args: { p_reply: string; p_review: string }
+        Returns: undefined
+      }
+      submit_professional_review: {
+        Args: {
+          p_anonymous?: boolean
+          p_appointment: string
+          p_comment?: string
+          p_rating: number
+        }
+        Returns: string
+      }
       f_unaccent: { Args: { "": string }; Returns: string }
       friend_ids: { Args: { p_user?: string }; Returns: string[] }
       friends_weekly_ranking: {

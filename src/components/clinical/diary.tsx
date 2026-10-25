@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useRef, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Camera,
@@ -275,12 +276,35 @@ export function DiaryComposer({ patientId }: { patientId: string }) {
 
           <div className="flex gap-3 sm:flex-col sm:gap-4">
             <Field label={t("diary.date")}>
+              {/* Atalhos Hoje/Ontem: o campo de data segue o formato do navegador, não o do site. */}
+              <div className="mb-2 grid grid-cols-2 gap-2">
+                {[0, 1].map((back) => {
+                  const key = toDateKey(new Date(Date.now() - back * 86_400_000));
+                  return (
+                    <button
+                      key={back}
+                      type="button"
+                      aria-pressed={date === key}
+                      onClick={() => setDate(key)}
+                      className={cn(
+                        "min-h-9 rounded-xl border px-2 text-xs font-semibold transition",
+                        date === key
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {back === 0 ? t("diary.today") : t("diary.yesterday")}
+                    </button>
+                  );
+                })}
+              </div>
               <input
                 type="date"
                 className={cn(inputClass, "rounded-xl py-3")}
                 value={date}
                 max={toDateKey(new Date())}
                 onChange={(e) => setDate(e.target.value)}
+                aria-label={t("diary.date")}
               />
             </Field>
             <Field label={t("diary.time")}>
@@ -721,7 +745,9 @@ function EntryCard({
                 type="button"
                 className={cn(buttonGhost, "px-2 py-2 rounded-xl")}
                 aria-label={t("common.remove")}
-                onClick={() => window.confirm(t("diary.deleteConfirm")) && remove.mutate(undefined)}
+                onClick={async () =>
+                  (await siteConfirm(t("diary.deleteConfirm"))) && remove.mutate(undefined)
+                }
               >
                 <Trash2 className="h-4 w-4 opacity-50 transition-opacity hover:opacity-100" />
               </button>

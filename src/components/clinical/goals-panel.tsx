@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { siteConfirm } from "@/components/confirm-action";
 import { Pause, Play, Plus, Target, Trash2 } from "lucide-react";
 import * as records from "@/lib/clinical/records";
 import type { Goal, GoalCheckin } from "@/lib/clinical/records";
@@ -104,8 +105,8 @@ export function GoalsPanel({ patientId, readOnly }: { patientId: string; readOnl
                         type="button"
                         className={buttonGhost}
                         aria-label={t("common.remove")}
-                        onClick={() =>
-                          window.confirm(t("goals.deleteConfirm")) && remove.mutate(g.id)
+                        onClick={async () =>
+                          (await siteConfirm(t("goals.deleteConfirm"))) && remove.mutate(g.id)
                         }
                       >
                         <Trash2 className="h-4 w-4" />

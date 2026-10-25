@@ -1,4 +1,5 @@
 import { td } from "@/lib/i18n/data";
+import { siteConfirm } from "@/components/confirm-action";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
@@ -20,8 +21,10 @@ import {
   ShieldCheck,
   UserCheck,
   UserX,
+  Share2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { shareContent } from "@/lib/native";
 import { AuthGateLoading } from "@/components/site-chrome";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { useProfessionalMap } from "@/lib/social/professionals-queries";
@@ -254,17 +257,17 @@ function PublicProfilePage() {
     setPanel(null);
     setSelectedId(null);
   };
-  const cancelEditing = () => {
+  const cancelEditing = async () => {
     if (
       dirty &&
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Descartar as mudanças que você ainda não salvou?",
           "Discard the changes you haven't saved?",
           "¿Descartar los cambios sin guardar?",
           "Abandonner les modifications non enregistrées ?",
         ]),
-      )
+      ))
     ) {
       return;
     }
@@ -286,16 +289,16 @@ function PublicProfilePage() {
       setPanel(null);
     }
   };
-  const resetPage = () => {
+  const resetPage = async () => {
     if (
-      !window.confirm(
+      !(await siteConfirm(
         tr([
           "Voltar ao perfil padrão? Os blocos e o tema atuais serão trocados (você ainda pode cancelar antes de salvar).",
           "Go back to the default profile? Current blocks and theme will be replaced (you can still cancel before saving).",
           "¿Volver al perfil estándar? Se reemplazarán los bloques y el tema actuales (aún puedes cancelar antes de guardar).",
           "Revenir au profil par défaut ? Les blocs et le thème actuels seront remplacés (vous pouvez encore annuler avant d'enregistrer).",
         ]),
-      )
+      ))
     )
       return;
     setDraft({ ...defaultPage(isProfessional), header: { ...DEFAULT_HEADER } });
@@ -676,6 +679,7 @@ function PublicProfilePage() {
                           <Pencil className="h-3.5 w-3.5" />
                           <span>{t("profile.editProfile")}</span>
                         </Link>
+                        <ShareProfileButton name={profile.name} />
                         <ShareModal
                           triggerButton={
                             <button
@@ -683,12 +687,13 @@ function PublicProfilePage() {
                               className="rounded-full bg-secondary px-5 py-2 text-xs font-semibold text-foreground hover:bg-muted shadow-xs flex items-center gap-1.5"
                             >
                               <Plus className="h-4 w-4" />
-                              <span>{t("profile.share")}</span>
+                              <span>{tr(["Publicar", "Post", "Publicar", "Publier"])}</span>
                             </button>
                           }
                         />
                       </div>
                     )}
+                    {!isSelf && remote && <ShareProfileButton name={profile.name} />}
                     {!isSelf && remote && (
                       <RelationshipActions
                         userId={userId}
@@ -852,4 +857,31 @@ function ProfileCounts({
         t("profile.followingCount").replace("{n}", String(remote.following_count)),
       ];
   return <p className="mt-1.5 text-xs font-semibold text-foreground">{parts.join(" · ")}</p>;
+}
+
+/** Compartilha o link do perfil (compartilhar do sistema; sem ele, copia o link). */
+function ShareProfileButton({ name }: { name: string }) {
+  const tr = useTr();
+  const share = async () => {
+    const url = window.location.href;
+    if (await shareContent({ title: `${name} — NutriConnect`, url })) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(tr(["Link copiado.", "Link copied.", "Enlace copiado.", "Lien copié."]));
+    } catch {
+      toast.error(url);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={() => void share()}
+      className="flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-xs transition hover:bg-secondary"
+    >
+      <Share2 className="h-3.5 w-3.5" aria-hidden />
+      <span>
+        {tr(["Compartilhar perfil", "Share profile", "Compartir perfil", "Partager le profil"])}
+      </span>
+    </button>
+  );
 }

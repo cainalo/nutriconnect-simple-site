@@ -187,6 +187,21 @@ export const CATALOG_C: CatalogItem[] = [
     howTo: ["Toque em Novo programa", "Crie os módulos", "Toque em Colocar na loja"],
   },
   {
+    id: "painel-avaliacoes",
+    kind: "pagina",
+    area: "profissional",
+    title: "Avaliações recebidas",
+    route: "/painel/avaliacoes",
+    audience: PRO,
+    summary: "Onde o profissional vê a média, as avaliações dos pacientes e responde a cada uma.",
+    features: [
+      "Média, total e barras por nota",
+      "Responder ou editar a resposta de cada avaliação",
+      "Atalho para ver como aparece no perfil público",
+    ],
+    howTo: ["Abra o painel → Avaliações", "Toque em Responder", "Escreva e publique"],
+  },
+  {
     id: "atendimento",
     kind: "funcao",
     area: "profissional",
