@@ -63,6 +63,29 @@ const PAGES =
     .map((f) => f.replace(/\.tsx$/, ""))
     .filter((f) => !SKIP.has(f) && !f.startsWith("api."));
 
+// Rotas com parâmetros: valores sintéticos, sem tokens nem dados de produção.
+const PARAMETERIZED_ROUTES = [
+  { file: "assinar.$professionalId", pattern: "/assinar/$professionalId", path: "/assinar/demo-professional" },
+  { file: "casa.entrar.$code", pattern: "/casa/entrar/$code", path: "/casa/entrar/DEMO123" },
+  { file: "comunidades.$slug", pattern: "/comunidades/$slug", path: "/comunidades/demo-community" },
+  { file: "consulta.$appointmentId", pattern: "/consulta/$appointmentId", path: "/consulta/demo-appointment" },
+  { file: "convite.$code", pattern: "/convite/$code", path: "/convite/DEMO123" },
+  { file: "desafios.$challengeId", pattern: "/desafios/$challengeId", path: "/desafios/demo-challenge" },
+  { file: "evento.$eventId", pattern: "/evento/$eventId", path: "/evento/demo-event" },
+  { file: "pagamento.$appointmentId", pattern: "/pagamento/$appointmentId", path: "/pagamento/demo-appointment" },
+  { file: "painel.adesao.$patientId", pattern: "/painel/adesao/$patientId", path: "/painel/adesao/demo-patient" },
+  { file: "painel.pacientes.$patientId", pattern: "/painel/pacientes/$patientId", path: "/painel/pacientes/demo-patient" },
+  { file: "painel.planos.$planId", pattern: "/painel/planos/$planId", path: "/painel/planos/demo-plan" },
+  { file: "perfil.$userId", pattern: "/perfil/$userId", path: "/perfil/demo-user" },
+  { file: "profissionais.$professionalId", pattern: "/profissionais/$professionalId", path: "/profissionais/demo-professional" },
+  { file: "programas.$programId", pattern: "/programas/$programId", path: "/programas/demo-program" },
+  { file: "receitas.$id", pattern: "/receitas/$id", path: "/receitas/demo-post" },
+];
+const TEST_PAGES = [
+  ...PAGES,
+  ...(args.includes("--params") ? PARAMETERIZED_ROUTES.map((r) => "param:" + r.file) : []),
+];
+
 // Sem build novo não há teste: nunca roda sobre arquivos antigos.
 const build = spawnSync("npx", ["vite", "build", "--config", ".preview-harness/vite.config.mjs"], {
   cwd: root,
@@ -110,8 +133,25 @@ for (const width of WIDTHS) {
   const page = await browser.newPage({ viewport: { width, height: 860 } });
   for (const design of DESIGNS) {
     for (const theme of THEMES) {
-      for (const p of PAGES) {
-        const url = `http://localhost:${PORT}/?v=page&p=${p}&fx=1&d=${design}${theme === "escuro" ? "&dark=1" : ""}`;
+      for (const p of TEST_PAGES) {
+        const routeCase = p.startsWith("param:")
+          ? PARAMETERIZED_ROUTES.find((r) => r.file === p.slice(6))
+          : undefined;
+        const name = routeCase ? routeCase.pattern + " → " + routeCase.path : p;
+        const query = routeCase
+          ? new URLSearchParams({
+              v: "param-route",
+              f: routeCase.file,
+              pattern: routeCase.pattern,
+              path: routeCase.path,
+              fx: "1",
+              d: design,
+            })
+          : null;
+        if (query && theme === "escuro") query.set("dark", "1");
+        const url = routeCase
+          ? "http://localhost:" + PORT + "/?" + query.toString()
+          : `http://localhost:${PORT}/?v=page&p=${encodeURIComponent(p)}&fx=1&d=${design}${theme === "escuro" ? "&dark=1" : ""}`;
         const errors = [];
         page.removeAllListeners("pageerror");
         page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
@@ -126,7 +166,7 @@ for (const width of WIDTHS) {
           navigationProblem =
             err instanceof Error ? err.message.slice(0, 160) : String(err).slice(0, 160);
         }
-        await page.waitForTimeout(800);
+        await page.waitForTimeout(250);
         const r = await page.evaluate(() => {
           const W = innerWidth;
           const small = [
@@ -167,7 +207,7 @@ for (const width of WIDTHS) {
           ...errors.map((e) => `erro JS: ${e}`),
           ...axe.map((a) => `WCAG ${a}`),
         ];
-        report.push({ page: p, design, theme, width, problems });
+        report.push({ page: name, design, theme, width, problems });
         if (problems.length)
           console.log(`✗ ${p} [${design}/${theme}/${width}px]\n    ${problems.join("\n    ")}`);
       }
