@@ -203,7 +203,8 @@ for (const width of WIDTHS) {
               (e) =>
                 `${e.tagName.toLowerCase()}:${(e.getAttribute("aria-label") || e.textContent || "").trim().slice(0, 30)}`,
             );
-          return { hscroll: document.documentElement.scrollWidth > W + 1, small };
+          const harnessError = document.querySelector("[data-e2e-error]")?.textContent?.trim() ?? "";
+          return { hscroll: document.documentElement.scrollWidth > W + 1, small, harnessError };
         });
         let axe = [];
         if (AXE) {
@@ -221,6 +222,7 @@ for (const width of WIDTHS) {
         const problems = [
           ...(navigationProblem ? [`falha ao abrir página: ${navigationProblem}`] : []),
           ...(r.hscroll ? ["rolagem lateral"] : []),
+          ...(r.harnessError ? [`falha do harness: ${r.harnessError.slice(0, 160)}`] : []),
           ...r.small.map((s) => `alvo pequeno ${s}`),
           ...errors.map((e) => `erro JS: ${e}`),
           ...axe.map((a) => `WCAG ${a}`),

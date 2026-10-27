@@ -292,7 +292,7 @@ function ParamRouteDemo() {
       .catch((err) => setProblem(err instanceof Error ? err.message : String(err)));
   }, []);
 
-  if (problem) return <div role="alert" className="p-4 text-sm text-destructive">{problem}</div>;
+  if (problem) return <div data-e2e-error role="alert" className="p-4 text-sm text-destructive">{problem}</div>;
   if (!router) return <div aria-label="Carregando rota de teste" className="p-4 text-sm">Carregando…</div>;
   return <RouterProvider router={router} />;
 }
