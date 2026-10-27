@@ -115,7 +115,15 @@ for (const width of WIDTHS) {
         const errors = [];
         page.removeAllListeners("pageerror");
         page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
-        await page.goto(url, { waitUntil: "networkidle" }).catch(() => {});
+        let navigationProblem = "";
+        try {
+          const response = await page.goto(url, { waitUntil: "networkidle" });
+          if (!response) navigationProblem = "navegação sem resposta HTTP";
+          else if (!response.ok()) navigationProblem = `HTTP ${response.status()}`;
+        } catch (err) {
+          navigationProblem =
+            err instanceof Error ? err.message.slice(0, 160) : String(err).slice(0, 160);
+        }
         await page.waitForTimeout(800);
         const r = await page.evaluate(() => {
           const W = innerWidth;
@@ -151,6 +159,7 @@ for (const width of WIDTHS) {
           });
         }
         const problems = [
+          ...(navigationProblem ? [`falha ao abrir página: ${navigationProblem}`] : []),
           ...(r.hscroll ? ["rolagem lateral"] : []),
           ...r.small.map((s) => `alvo pequeno ${s}`),
           ...errors.map((e) => `erro JS: ${e}`),
