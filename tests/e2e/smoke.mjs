@@ -117,7 +117,9 @@ for (const width of WIDTHS) {
         page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
         let navigationProblem = "";
         try {
-          const response = await page.goto(url, { waitUntil: "networkidle" });
+          // O teste mede layout e acessibilidade, não tráfego de rede: aguardar "networkidle"
+          // prende a varredura a cada imagem/fonte e pode estourar o timeout sem defeito de página.
+          const response = await page.goto(url, { waitUntil: "domcontentloaded" });
           if (!response) navigationProblem = "navegação sem resposta HTTP";
           else if (!response.ok()) navigationProblem = `HTTP ${response.status()}`;
         } catch (err) {
