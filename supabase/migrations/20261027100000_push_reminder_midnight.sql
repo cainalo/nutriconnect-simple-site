@@ -41,7 +41,7 @@ begin
       -- Água: meta do dia batida, sem lembrete.
       continue when r.rkind = 'agua' and exists (
         select 1 from public.water_days w
-         where w.user_id = r.uid and w.day = local_ts::date and w.glasses >= w.goal);
+         where w.user_id = r.uid and w.day = schedule_ts::date and w.glasses >= w.goal);
       user_id := r.uid;
       kind := 'lembrete';
       payload := jsonb_build_object(
