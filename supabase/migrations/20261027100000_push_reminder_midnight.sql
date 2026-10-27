@@ -9,7 +9,7 @@ create or replace function public.reminder_scheduled_occurrence(
   p_days smallint[]
 )
 returns timestamp without time zone
-language plpgsql immutable set search_path = public as $
+language plpgsql immutable set search_path = public as $$
 declare
   occurrence timestamp without time zone;
 begin
@@ -25,7 +25,7 @@ begin
   end if;
   return null;
 end;
-$;
+$$;
 revoke all on function public.reminder_scheduled_occurrence(timestamp without time zone, time without time zone, smallint[]) from public, anon, authenticated;
 
 create or replace function public.push_claim()
