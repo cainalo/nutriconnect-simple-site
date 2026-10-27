@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   checar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
   # Varredura de todas as páginas no navegador (harness com dados sintéticos): 4 designs, claro e
   # escuro, celular; rolagem lateral, alvos de toque, erros de JavaScript e WCAG (axe-core).
   telas:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
