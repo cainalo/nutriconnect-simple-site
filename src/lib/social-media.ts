@@ -3,16 +3,32 @@
 // (só administradores listam, enviam e apagam; migration 20261015140000).
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Names } from "@/lib/appearance-data";
 
 export type MediaCategory = "pratos" | "frutas" | "cafe" | "mercado" | "cozinha" | "bem-estar";
 
-export const MEDIA_CATEGORY_LABEL: Record<MediaCategory, string> = {
-  pratos: "Pratos",
-  frutas: "Frutas e verduras",
-  cafe: "Café e lanches",
-  mercado: "Feira e mercado",
-  cozinha: "Cozinha e pessoas",
-  "bem-estar": "Bem-estar",
+export const MEDIA_CATEGORY_LABEL: Record<MediaCategory, Names> = {
+  pratos: ["Pratos", "Dishes", "Platos", "Plats"],
+  frutas: [
+    "Frutas e verduras",
+    "Fruit and vegetables",
+    "Frutas y verduras",
+    "Fruits et légumes",
+  ],
+  cafe: ["Café e lanches", "Coffee & snacks", "Café y meriendas", "Café et collations"],
+  mercado: [
+    "Feira e mercado",
+    "Market and groceries",
+    "Feria y mercado",
+    "Marché et courses",
+  ],
+  cozinha: [
+    "Cozinha e pessoas",
+    "Cooking and people",
+    "Cocina y personas",
+    "Cuisine et personnes",
+  ],
+  "bem-estar": ["Bem-estar", "Well-being", "Bienestar", "Bien-être"],
 };
 
 export interface MediaItem {

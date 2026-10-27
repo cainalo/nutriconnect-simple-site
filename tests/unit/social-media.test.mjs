@@ -3,7 +3,7 @@ import { test, after, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { loadTs, closeTs } from "../load-ts.mjs";
 
-const { compressToBlob } = await loadTs("src/lib/social-media.ts");
+const { compressToBlob, MEDIA_CATEGORY_LABEL } = await loadTs("src/lib/social-media.ts");
 after(closeTs);
 
 const originalImage = globalThis.Image;
@@ -96,4 +96,14 @@ test("Canvas sem Blob rejeita com mensagem controlada", async () => {
   const fake = fakeBrowser({ encodeFails: true });
   await assert.rejects(compressToBlob({ name: "foto.jpg" }), /Não foi possível ler a imagem/);
   assert.deepEqual(fake.revoked, ["blob:unit-test"]);
+});
+
+test("nomes das seis categorias estão nos quatro idiomas", () => {
+  for (const [category, names] of Object.entries(MEDIA_CATEGORY_LABEL)) {
+    assert.equal(names.length, 4, `${category} deve ter pt-BR, en, es e fr`);
+    assert.ok(names.every((name) => typeof name === "string" && name.trim()), `${category} tem rótulo vazio`);
+  }
+  assert.equal(MEDIA_CATEGORY_LABEL.pratos[1], "Dishes");
+  assert.equal(MEDIA_CATEGORY_LABEL.frutas[2], "Frutas y verduras");
+  assert.equal(MEDIA_CATEGORY_LABEL["bem-estar"][3], "Bien-être");
 });

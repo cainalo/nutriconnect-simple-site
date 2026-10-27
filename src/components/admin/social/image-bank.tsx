@@ -113,7 +113,7 @@ export function ImageBank({
                 >
                   {c === "todas"
                     ? tr(["Todas", "All", "Todas", "Toutes"])
-                    : MEDIA_CATEGORY_LABEL[c]}
+                    : tr(MEDIA_CATEGORY_LABEL[c])}
                 </button>
               ),
             )}
