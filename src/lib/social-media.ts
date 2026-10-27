@@ -168,25 +168,72 @@ export function useDeleteMedia() {
 /** Lê e comprime uma foto para JPEG (lado maior até `max`). */
 export function compressToBlob(file: File, max = 1600, quality = 0.82): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
+    const error = () => new Error("Não foi possível ler a imagem.");
+    let url: string;
+    try {
+      url = URL.createObjectURL(file);
+    } catch {
+      reject(error());
+      return;
+    }
+
     const img = new Image();
+    let settled = false;
+    let released = false;
+    const cleanup = () => {
+      img.onload = null;
+      img.onerror = null;
+      if (!released) {
+        released = true;
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          /* a URL já pode ter sido liberada pelo navegador */
+        }
+      }
+    };
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error());
+    };
+
     img.onload = () => {
-      const r = Math.min(1, max / Math.max(img.width, img.height));
-      const c = document.createElement("canvas");
-      c.width = Math.round(img.width * r);
-      c.height = Math.round(img.height * r);
-      c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      c.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error("Não foi possível ler a imagem."))),
-        "image/jpeg",
-        quality,
-      );
+      if (settled) return;
+      try {
+        const width = img.naturalWidth || img.width;
+        const height = img.naturalHeight || img.height;
+        if (!width || !height || !Number.isFinite(max) || max <= 0) throw error();
+
+        const ratio = Math.min(1, max / Math.max(width, height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(width * ratio));
+        canvas.height = Math.max(1, Math.round(height * ratio));
+        const context = canvas.getContext("2d");
+        if (!context) throw error();
+        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+        cleanup();
+
+        canvas.toBlob(
+          (blob) => {
+            if (settled) return;
+            settled = true;
+            if (blob) resolve(blob);
+            else reject(error());
+          },
+          "image/jpeg",
+          quality,
+        );
+      } catch {
+        fail();
+      }
     };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Não foi possível ler a imagem."));
-    };
-    img.src = url;
+    img.onerror = fail;
+    try {
+      img.src = url;
+    } catch {
+      fail();
+    }
   });
 }
