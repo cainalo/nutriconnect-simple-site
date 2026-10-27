@@ -81,6 +81,24 @@ const PARAMETERIZED_ROUTES = [
   { file: "programas.$programId", pattern: "/programas/$programId", path: "/programas/demo-program" },
   { file: "receitas.$id", pattern: "/receitas/$id", path: "/receitas/demo-post" },
 ];
+
+// Se uma nova rota dinâmica entrar no app, CI exige um caso explícito com parâmetro.
+if (args.includes("--params")) {
+  const actual = readdirSync(path.join(root, "src/routes"))
+    .filter((f) => f.endsWith(".tsx") && f.includes("$"))
+    .map((f) => f.replace(/\.tsx$/, ""))
+    .sort();
+  const declared = PARAMETERIZED_ROUTES.map((r) => r.file).sort();
+  const missing = actual.filter((f) => !declared.includes(f));
+  const stale = declared.filter((f) => !actual.includes(f));
+  if (missing.length || stale.length) {
+    console.error("Cobertura de rotas dinâmicas incompleta.");
+    if (missing.length) console.error("Sem caso: " + missing.join(", "));
+    if (stale.length) console.error("Casos obsoletos: " + stale.join(", "));
+    process.exit(2);
+  }
+}
+
 const TEST_PAGES = [
   ...PAGES,
   ...(args.includes("--params") ? PARAMETERIZED_ROUTES.map((r) => "param:" + r.file) : []),
@@ -209,7 +227,7 @@ for (const width of WIDTHS) {
         ];
         report.push({ page: name, design, theme, width, problems });
         if (problems.length)
-          console.log(`✗ ${p} [${design}/${theme}/${width}px]\n    ${problems.join("\n    ")}`);
+          console.log(`✗ ${name} [${design}/${theme}/${width}px]\n    ${problems.join("\n    ")}`);
       }
     }
   }

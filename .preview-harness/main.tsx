@@ -253,7 +253,7 @@ function ParamRouteDemo() {
     }
 
     void Promise.all([loadPage(), loadExplore()])
-      .then(([mod, exploreMod]: any[]) => {
+      .then(async ([mod, exploreMod]: any[]) => {
         // Rota real sob um root mínimo: Route.useParams() recebe parâmetros do TanStack Router,
         // sem depender de sessão nem banco de produção.
         const root = createRootRoute({ component: () => <Outlet /> });
@@ -276,6 +276,17 @@ function ParamRouteDemo() {
           history: createMemoryHistory({ initialEntries: [path] }),
           defaultPreloadStaleTime: 0,
         });
+        // Resolver a navegação antes de marcar o harness como pronto: rota desconhecida não pode
+        // renderizar uma tela vazia e passar silenciosamente nos testes de layout.
+        await next.load();
+        const matched = next.state.matches.map((match: any) => match.routeId);
+        if (pattern === "/receitas/$id") {
+          if (!matched.includes("/explorar")) {
+            throw new Error("A rota /receitas/$id não redirecionou para /explorar.");
+          }
+        } else if (!matched.includes(pattern)) {
+          throw new Error("TanStack Router não resolveu " + pattern + ". Matches: " + matched.join(", "));
+        }
         setRouter(() => next);
       })
       .catch((err) => setProblem(err instanceof Error ? err.message : String(err)));
