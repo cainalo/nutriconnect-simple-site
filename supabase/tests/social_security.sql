@@ -874,6 +874,7 @@ begin
   declare
     rid uuid;
     n_claim integer;
+    schedule_occurrence timestamp;
   begin
     r := pg_temp.as_user(a, 'authenticated', 'select public.push_subscribe(''https://push.teste.invalid/a1'', ''chave-p256dh'', ''chave-auth'', ''teste'')');
     res := res || jsonb_build_object('teste', 'inscreve o próprio aparelho', 'ok', (r not like 'ERRO%'), 'obtido', left(r, 90));
@@ -896,6 +897,33 @@ begin
     res := res || jsonb_build_object('teste', 'lembrete na hora é entregue', 'ok', (n_claim = 1), 'obtido', n_claim);
     select count(*) into n_claim from public.push_claim() c where c.payload ->> 'tag' = 'lembrete-' || rid;
     res := res || jsonb_build_object('teste', 'lembrete NÃO é entregue duas vezes no mesmo dia', 'ok', (n_claim = 0), 'obtido', n_claim);
+
+    -- Casos determinísticos da janela que cruza a meia-noite (não dependem da hora do CI).
+    schedule_occurrence := public.reminder_scheduled_occurrence(
+      timestamp '2026-10-27 00:10:00',
+      time '23:55',
+      array[1]::smallint[]
+    );
+    res := res || jsonb_build_object(
+      'teste', 'lembrete preserva o dia anterior na janela que cruza meia-noite',
+      'ok', coalesce(
+        schedule_occurrence = timestamp '2026-10-26 23:55:00'
+          and schedule_occurrence > timestamp '2026-10-27 00:10:00' - interval '20 minutes'
+          and schedule_occurrence <= timestamp '2026-10-27 00:10:00',
+        false
+      ),
+      'obtido', coalesce(schedule_occurrence::text, 'NULL')
+    );
+    schedule_occurrence := public.reminder_scheduled_occurrence(
+      timestamp '2026-10-27 00:10:00',
+      time '23:55',
+      array[2]::smallint[]
+    );
+    res := res || jsonb_build_object(
+      'teste', 'lembrete que cruza meia-noite respeita o dia semanal programado',
+      'ok', schedule_occurrence is null,
+      'obtido', coalesce(schedule_occurrence::text, 'NULL')
+    );
 
     -- Aviso do site entra na fila e sai no envio; categoria desligada não vira push.
     -- (um teste anterior desligou a categoria social de A no site; aqui ela volta a valer)

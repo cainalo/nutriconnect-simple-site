@@ -1,6 +1,33 @@
 -- NCV7-021: não perder lembretes quando a janela de 20 minutos cruza a meia-noite.
 -- Compara timestamps locais (e o dia em que o lembrete foi agendado), não só valores TIME.
 -- Preserva o corpo atual de push_claim, incluindo a filtragem de água e os destinos das notificações.
+-- Função pura para calcular a ocorrência agendada mais recente no horário local.
+-- Separada do relógio do banco para que a regressão de meia-noite tenha teste determinístico.
+create or replace function public.reminder_scheduled_occurrence(
+  p_local_now timestamp without time zone,
+  p_time_of_day time without time zone,
+  p_days smallint[]
+)
+returns timestamp without time zone
+language plpgsql immutable set search_path = public as $
+declare
+  occurrence timestamp without time zone;
+begin
+  if p_local_now is null or p_time_of_day is null or p_days is null then
+    return null;
+  end if;
+  occurrence := p_local_now::date + p_time_of_day;
+  if occurrence > p_local_now then
+    occurrence := occurrence - interval '1 day';
+  end if;
+  if extract(dow from occurrence)::smallint = any(p_days) then
+    return occurrence;
+  end if;
+  return null;
+end;
+$;
+revoke all on function public.reminder_scheduled_occurrence(timestamp without time zone, time without time zone, smallint[]) from public, anon, authenticated;
+
 create or replace function public.push_claim()
 returns table (user_id uuid, kind text, payload jsonb)
 language plpgsql security definer set search_path = public as $$
@@ -28,11 +55,8 @@ begin
     local_ts := now() at time zone r.tz;
     -- Converte o horário previsto na ocorrência mais recente (hoje ou ontem). Comparar só TIME
     -- perde lembretes agendados antes da meia-noite quando a janela de 20 minutos cruza o dia.
-    schedule_ts := local_ts::date + r.time_of_day;
-    if schedule_ts > local_ts then
-      schedule_ts := schedule_ts - interval '1 day';
-    end if;
-    if extract(dow from schedule_ts)::smallint = any (r.days)
+    schedule_ts := public.reminder_scheduled_occurrence(local_ts, r.time_of_day, r.days);
+    if schedule_ts is not null
        and schedule_ts <= local_ts
        and schedule_ts > local_ts - interval '20 minutes'
        and r.last_sent_on is distinct from schedule_ts::date then
