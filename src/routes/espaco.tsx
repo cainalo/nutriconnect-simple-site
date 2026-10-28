@@ -132,6 +132,19 @@ function NewspaperGrid({ posts }: { posts: InfiniteFeed["posts"] }) {
   );
 }
 
+/** Cartões-pôster para o feed Editorial Vibrante: manchete ampla e notas em colunas flexíveis. */
+function EditorialPosterGrid({ posts }: { posts: InfiniteFeed["posts"] }) {
+  return (
+    <div data-ev-feed-grid className="ev-feed-grid">
+      {posts.map((post, i) => (
+        <div key={post.id} className={`ev-feed-grid-item ${i === 0 ? "is-lead" : ""}`} data-ev-feed-index={i}>
+          <PostCard post={post} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PostList({ feed, emptyMessage }: { feed: InfiniteFeed; emptyMessage: string }) {
   const { t } = useI18n();
   const design = useDesignId();
@@ -153,7 +166,7 @@ function PostList({ feed, emptyMessage }: { feed: InfiniteFeed; emptyMessage: st
   };
   return (
     <>
-      {design === "editorial" ? <NewspaperGrid posts={posts} /> : <PostMasonry items={items} />}
+      {design === "editorial" ? <NewspaperGrid posts={posts} /> : design === "portico" ? <EditorialPosterGrid posts={posts} /> : <PostMasonry items={items} />}
       {query.hasNextPage && (
         <LoadMoreTrigger onReach={loadMore} pageCount={query.data?.pages.length ?? 0} />
       )}
@@ -240,7 +253,7 @@ function EspacoDeHojePage() {
   };
 
   const filters = (
-    <div className="flex flex-wrap items-center justify-center gap-1 rounded-full border border-border/60 bg-card/90 p-1 shadow-soft backdrop-blur">
+    <div data-ev-feed-filters className="flex flex-wrap items-center justify-center gap-1 rounded-full border border-border/60 bg-card/90 p-1 shadow-soft backdrop-blur">
       {FILTERS.map((f) => (
         <button
           key={f.id}
@@ -280,7 +293,7 @@ function EspacoDeHojePage() {
       content: (
         <>
           {text ? (
-            <div className="mb-6 rounded-3xl border border-accent/30 bg-accent-soft/40 p-6 shadow-xs">
+            <div data-ev-weekly-panel className="mb-6 rounded-3xl border border-accent/30 bg-accent-soft/40 p-6 shadow-xs">
               <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-accent">
                 <CalendarDays className="h-4 w-4" /> {text.badge ?? t("weekly.badge")}
               </p>

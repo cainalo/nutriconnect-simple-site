@@ -72,3 +72,79 @@ test("Documentation explains preview, publishing, visual comparison and how to r
   const docs = await read("../../docs/designs/editorial-vibrante.md");
   for (const term of ["Editorial Vibrante", "Testar neste navegador", "Publicar no site", "Comparação visual", "reverter"]) assert.ok(docs.toLowerCase().includes(term.toLowerCase()), term);
 });
+
+test("Editorial Vibrante has a dedicated top bar, bottom dock, back action, and shared collapse state", async () => {
+  const [chrome, navigation, styles] = await Promise.all([
+    read("../../src/components/site-chrome-designs.tsx"),
+    read("../../src/components/site-nav.tsx"),
+    read("../../src/styles.css"),
+  ]);
+  assert.ok(chrome.includes("export function EditorialVibranteChrome()"));
+  assert.ok(chrome.includes("data-ev-header"));
+  assert.ok(chrome.includes("data-ev-topnav"));
+  assert.ok(chrome.includes("data-ev-bottom-nav"));
+  assert.ok(chrome.includes("const hidden = useHideOnScroll(pathname)"));
+  assert.ok(chrome.includes("data-hidden={hidden}"));
+  assert.ok(chrome.includes("window.history.back()"));
+  assert.ok(chrome.includes("data-ev-back"));
+  assert.ok(navigation.includes("export function useHideOnScroll(pathname: string)"));
+  assert.ok(navigation.includes("CHROME_HIDE_EVENT"));
+  for (const selector of [".ev-header-top", ".ev-topnav-links", ".ev-bottom-dock", ".ev-bottom-create", "[data-ev-back]"]) {
+    assert.ok(styles.includes(selector), selector);
+  }
+  assert.ok(styles.includes("body:has([data-ev-bottom-nav])"));
+  assert.ok(styles.includes("prefers-reduced-motion: reduce"));
+});
+
+test("Editorial Vibrante section pages use a unique masthead and functional components have a designed treatment", async () => {
+  const [pageHead, styles] = await Promise.all([
+    read("../../src/components/design-page-head.tsx"),
+    read("../../src/styles.css"),
+  ]);
+  assert.ok(pageHead.includes("data-ev-page-head"));
+  assert.ok(pageHead.includes("ev-page-masthead"));
+  assert.ok(pageHead.includes("ev-page-visual-stamp"));
+  for (const selector of [".ev-page-title", ".ev-page-annotation", ".nc-menu-item[data-highlighted]", '[role="dialog"]', "html[data-design=\"portico\"] thead"]) {
+    assert.ok(styles.includes(selector), selector);
+  }
+});
+
+test("The home feed has a dedicated Editorial Vibrante intro, poster grid, filters, and reserved space for the bottom dock", async () => {
+  const [intro, feed, styles] = await Promise.all([
+    read("../../src/components/espaco-intro.tsx"),
+    read("../../src/routes/espaco.tsx"),
+    read("../../src/styles.css"),
+  ]);
+  assert.ok(intro.includes('if (design === "portico")'));
+  assert.ok(intro.includes("data-ev-espaco-intro"));
+  assert.ok(intro.includes("ev-feed-shortcut"));
+  assert.ok(feed.includes("function EditorialPosterGrid"));
+  assert.ok(feed.includes("design === \"portico\" ? <EditorialPosterGrid posts={posts} />"));
+  assert.ok(feed.includes("data-ev-feed-filters"));
+  assert.ok(feed.includes("data-ev-weekly-panel"));
+  for (const selector of [".ev-feed-intro-main", ".ev-feed-shortcuts", ".ev-feed-grid-item.is-lead", "[data-ev-feed-filters] button[aria-pressed=\"true\"]"]) {
+    assert.ok(styles.includes(selector), selector);
+  }
+});
+
+test("Editorial Vibrante keeps its distinct section layout when optional photos are disabled", async () => {
+  const [pageHead, styles] = await Promise.all([
+    read("../../src/components/design-page-head.tsx"),
+    read("../../src/styles.css"),
+  ]);
+  const plainStart = pageHead.indexOf("function PlainHead");
+  const plainPorticoStart = pageHead.indexOf('if (design === "portico") {', plainStart);
+  const plainEditorialStart = pageHead.indexOf('if (design === "editorial") {', plainPorticoStart);
+  assert.ok(plainStart >= 0 && plainPorticoStart > plainStart && plainEditorialStart > plainPorticoStart);
+  assert.ok(pageHead.slice(plainPorticoStart, plainEditorialStart).includes("ev-page-visual--plain"));
+  assert.ok(styles.includes(".ev-page-visual--plain::before"));
+  assert.ok(styles.includes(".ev-page-plain-graphic"));
+});
+
+test("Feed reserves room for the mobile dock without leaving a large gap on desktop", async () => {
+  const styles = await read("../../src/styles.css");
+  assert.ok(styles.includes("html[data-design=\"portico\"] main[data-no-bottom-pad] .overflow-y-auto"));
+  assert.ok(styles.includes("padding-bottom: calc(5.8rem + env(safe-area-inset-bottom)) !important"));
+  assert.ok(styles.includes("@media (min-width: 1024px)"));
+  assert.ok(styles.includes("padding-bottom: 2rem !important"));
+});
