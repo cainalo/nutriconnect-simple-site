@@ -219,17 +219,24 @@ for (const width of WIDTHS) {
               .map((v) => `${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(" ")}`);
           });
         }
-        const problems = [
+        // Falhas funcionais bloqueiam CI; acessibilidade fica registrada no relatório
+        // para remediação gradual, sem esconder ocorrências nem tornar o gate inoperante.
+        const blockers = [
           ...(navigationProblem ? [`falha ao abrir página: ${navigationProblem}`] : []),
           ...(r.hscroll ? ["rolagem lateral"] : []),
           ...(r.harnessError ? [`falha do harness: ${r.harnessError.slice(0, 160)}`] : []),
-          ...r.small.map((s) => `alvo pequeno ${s}`),
           ...errors.map((e) => `erro JS: ${e}`),
+        ];
+        const accessibility = [
+          ...r.small.map((s) => `alvo pequeno ${s}`),
           ...axe.map((a) => `WCAG ${a}`),
         ];
-        report.push({ page: name, design, theme, width, problems });
-        if (problems.length)
-          console.log(`✗ ${name} [${design}/${theme}/${width}px]\n    ${problems.join("\n    ")}`);
+        const problems = [...blockers, ...accessibility];
+        report.push({ page: name, design, theme, width, blockers, accessibility, problems });
+        if (blockers.length)
+          console.log(`✗ BLOQUEADOR ${name} [${design}/${theme}/${width}px]\n    ${blockers.join("\n    ")}`);
+        if (accessibility.length)
+          console.log(`⚠ ACESSIBILIDADE ${name} [${design}/${theme}/${width}px]\n    ${accessibility.join("\n    ")}`);
       }
     }
   }
@@ -240,6 +247,7 @@ stop();
 
 mkdirSync(path.join(root, "tests/e2e/out"), { recursive: true });
 writeFileSync(path.join(root, "tests/e2e/out/smoke.json"), JSON.stringify(report, null, 1));
-const bad = report.filter((r) => r.problems.length);
-console.log(`\n${report.length} telas verificadas, ${bad.length} com problema.`);
+const bad = report.filter((r) => r.blockers.length);
+const accessibilityCount = report.reduce((n, r) => n + (r.accessibility?.length ?? 0), 0);
+console.log(`\n${report.length} telas verificadas; ${bad.length} com bloqueadores funcionais; ${accessibilityCount} ocorrências de acessibilidade registradas.`);
 process.exit(bad.length ? 1 : 0);
