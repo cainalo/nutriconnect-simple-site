@@ -117,12 +117,13 @@ test("The home feed has a dedicated Editorial Vibrante intro, poster grid, filte
   ]);
   assert.ok(intro.includes('if (design === "portico")'));
   assert.ok(intro.includes("data-ev-espaco-intro"));
-  assert.ok(intro.includes("ev-feed-shortcut"));
+  assert.ok(!intro.includes("ev-feed-shortcut"));
+  assert.ok(!intro.includes("ev-feed-weekly-link"));
   assert.ok(feed.includes("function EditorialPosterGrid"));
   assert.ok(feed.includes("design === \"portico\" ? <EditorialPosterGrid posts={posts} />"));
   assert.ok(feed.includes("data-ev-feed-filters"));
   assert.ok(feed.includes("data-ev-weekly-panel"));
-  for (const selector of [".ev-feed-intro-main", ".ev-feed-shortcuts", ".ev-feed-grid-item.is-lead", "[data-ev-feed-filters] button[aria-pressed=\"true\"]"]) {
+  for (const selector of [".ev-feed-intro-main", ".ev-feed-theme-inline", ".ev-feed-grid-item.is-lead", "[data-ev-feed-filters] button[aria-pressed=\"true\"]"]) {
     assert.ok(styles.includes(selector), selector);
   }
 });
@@ -147,4 +148,26 @@ test("Feed reserves room for the mobile dock without leaving a large gap on desk
   assert.ok(styles.includes("padding-bottom: calc(5.8rem + env(safe-area-inset-bottom)) !important"));
   assert.ok(styles.includes("@media (min-width: 1024px)"));
   assert.ok(styles.includes("padding-bottom: 2rem !important"));
+});
+test("Editorial Vibrante Espaço shows feed content and feed filters, not navigation cards to other pages", async () => {
+  const [intro, feed, styles] = await Promise.all([
+    read("../../src/components/espaco-intro.tsx"),
+    read("../../src/routes/espaco.tsx"),
+    read("../../src/styles.css"),
+  ]);
+  const start = intro.indexOf('if (design === "portico") {');
+  const end = intro.indexOf("// aurora", start);
+  const branch = intro.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.ok(!branch.includes("<Link"));
+  assert.ok(!branch.includes("SHORTCUTS.map"));
+  assert.ok(!branch.includes("ev-feed-shortcut"));
+  assert.ok(feed.includes('design !== "portico" && ('));
+  assert.ok(feed.includes("data-ev-feed-filters"));
+  assert.ok(feed.includes("FILTERS.map"));
+  assert.ok(styles.includes("grid-template-columns: minmax(0, 1fr);"));
+  assert.ok(styles.includes(".ev-feed-theme-inline"));
+  assert.ok(!styles.includes(".ev-feed-shortcuts"));
+  assert.ok(!styles.includes(".ev-feed-shortcut"));
+  assert.ok(!styles.includes(".ev-feed-weekly-link"));
 });
