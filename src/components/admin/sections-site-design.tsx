@@ -16,6 +16,7 @@ function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
   const card = dark ? s.darkCard : s.card;
   const ink = dark ? "#f4efe6" : s.ink;
   const glass = d.id === "aurora";
+  const portico = d.id === "portico";
   return (
     <div
       className="relative overflow-hidden border border-black/10 p-3"
@@ -44,15 +45,15 @@ function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
         ])}
       </p>
       <div className="mt-2.5 grid grid-cols-2 gap-2">
-        {[s.primary, s.accent].map((c, i) => (
+        {(portico ? [s.primary, s.accent, "#6b3a6e", "#d4a017"] : [s.primary, s.accent]).map((c, i) => (
           <div
             key={c}
             className="p-2"
             style={{
               background: glass ? `${card}${dark ? "99" : "b3"}` : card,
-              border: `1px solid ${ink}${d.id === "editorial" ? "55" : "1f"}`,
+              border: `1px solid ${ink}${d.id === "editorial" || portico ? "55" : "1f"}`,
               borderRadius: Math.min(d.radius, 16),
-              boxShadow: d.id === "editorial" ? "none" : "0 6px 14px -8px rgba(0,0,0,0.35)",
+              boxShadow: d.id === "editorial" || portico ? "none" : "0 6px 14px -8px rgba(0,0,0,0.35)",
               backdropFilter: glass ? "blur(6px)" : undefined,
             }}
           >
@@ -60,7 +61,7 @@ function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
               className="mb-1.5 h-4 w-4"
               style={{
                 background: c,
-                borderRadius: d.id === "editorial" ? 2 : 999,
+                borderRadius: d.id === "editorial" ? 2 : portico ? 3 : 999,
               }}
             />
             <div className="h-1.5 w-4/5 rounded-full" style={{ background: `${ink}40` }} />

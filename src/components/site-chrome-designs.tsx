@@ -340,6 +340,72 @@ function LoginLink() {
   );
 }
 
+// ───────────────────────── Pórtico: masthead editorial contemporâneo ───────────────────────
+
+export function PorticoChrome() {
+  const { user } = useAuth();
+  const { t } = useI18n();
+  const tr = useTr();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const hidden = useHideOnScroll(pathname);
+  const defs = useVisibleDefs();
+
+  const write = user ? (
+    <ShareModal
+      triggerButton={
+        <button type="button" className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary">
+          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+          {tr(["Publicar", "Post", "Publicar", "Publier"])}
+        </button>
+      }
+    />
+  ) : null;
+  const account = user ? (
+    <AccountMenu
+      trigger={
+        <button type="button" className="inline-flex min-h-9 items-center gap-2 rounded-md px-2 text-xs font-semibold text-foreground transition hover:bg-secondary">
+          <Avatar name={user.name} url={user.avatarUrl} className="h-6 w-6 text-[10px]" />
+          <span className="hidden sm:inline">{tr(["Minha conta", "My account", "Mi cuenta", "Mon compte"])}</span>
+        </button>
+      }
+    />
+  ) : (
+    <Link to="/login" className="inline-flex min-h-9 items-center rounded-md border border-primary bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90">
+      {tr(["Entrar", "Sign in", "Entrar", "Connexion"])}
+    </Link>
+  );
+
+  return (
+    <>
+      {user && <AndroidAppBanner />}
+      <header data-site-header data-hidden={hidden} className="sticky top-0 z-40 w-full bg-background transition-transform duration-300 data-[hidden=true]:-translate-y-full">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex min-h-[4.25rem] items-center justify-between gap-3 border-b border-foreground/20 py-2.5">
+            <Link to="/" aria-label={t("nav.homeAria")} className="flex min-w-0 items-center gap-2.5">
+              <span data-portico-mark className="grid h-9 w-9 shrink-0 place-items-center text-lg leading-none">N<span data-portico-star aria-hidden="true" /></span>
+              <Wordmark className="truncate text-base sm:text-lg" />
+            </Link>
+            <p className="hidden max-w-xs text-center text-xs font-medium leading-relaxed text-muted-foreground xl:block">{tr(["Alimentação melhor se constrói em comunidade.", "Better food habits grow in community.", "Los mejores hábitos alimentarios se construyen en comunidad.", "De meilleures habitudes alimentaires se construisent en communauté."])}</p>
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">{write}{account}</div>
+          </div>
+          <nav aria-label={t("nav.mainAria")} className="flex items-stretch gap-1 overflow-x-auto border-b border-border py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {defs.map((def) => (
+              <NavItem key={def.key} def={def}>
+                {({ active, color, unread }) => (
+                  <Link to={def.to} aria-current={active ? "page" : undefined} className={"flex min-h-11 shrink-0 items-center gap-2 border-b-2 border-transparent px-3 py-2 text-xs font-semibold transition-colors sm:px-4 " + (active ? "text-foreground" : "text-muted-foreground hover:text-foreground")} style={active ? { color, borderBottomColor: color, background: "color-mix(in srgb, var(--primary) 7%, transparent)" } : undefined}>
+                    <def.icon className="h-4 w-4" aria-hidden="true" />
+                    <span>{def.label}</span>
+                    {unread > 0 && <span className="ml-0.5 min-w-4 rounded-sm bg-accent px-1 text-center text-[10px] font-bold leading-4 text-accent-foreground">{unread > 99 ? "99+" : unread}</span>}
+                  </Link>
+                )}
+              </NavItem>
+            ))}
+          </nav>
+        </div>
+      </header>
+    </>
+  );
+}
 // ───────────────────────── Editorial: capa de revista ─────────────────────────
 
 export function MastheadChrome() {

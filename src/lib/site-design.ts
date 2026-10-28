@@ -7,7 +7,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useSiteConfigs } from "@/lib/site-config";
 
-export type SiteDesignId = "natural" | "vibrante" | "editorial" | "aurora";
+export type SiteDesignId = "natural" | "vibrante" | "editorial" | "portico" | "aurora";
 
 export interface SiteDesign {
   id: SiteDesignId;
@@ -82,6 +82,24 @@ export const SITE_DESIGNS: SiteDesign[] = [
     },
     radius: 6,
     headingFont: "Old Standard TT, serif",
+  },
+  {
+    id: "portico",
+    name: "Pórtico",
+    tagline: "Editorial contemporâneo",
+    description:
+      "Papel quente, títulos Fraunces, texto Inter Tight, azul-petróleo, terracota, ocre e ameixa. Cards chapados, linhas firmes e ícones lineares — sem vidro, sombras pesadas ou degradês.",
+    swatch: {
+      bg: "#f7efdf",
+      card: "#fff9ef",
+      primary: "#c8402a",
+      accent: "#0f4c5c",
+      ink: "#0f4c5c",
+      darkBg: "#10282e",
+      darkCard: "#143840",
+    },
+    radius: 10,
+    headingFont: '"Fraunces", Georgia, serif',
   },
   {
     id: "aurora",
