@@ -85,8 +85,8 @@ function EmptyState({ message }: { message: string }) {
           </button>
         }
       />
+      {/* No Editorial Vibrante, a navegação entre páginas fica nas barras do app. */}
       {design !== "portico" && (
-        {/* Feed vazio também mostra onde achar gente e conversas para seguir. */}
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Link
             to="/explorar"
