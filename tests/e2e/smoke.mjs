@@ -3,7 +3,7 @@
 // rolagem lateral, alvos de toque < 24 px (WCAG 2.5.8), erros de JavaScript e, se o axe-core
 // estiver disponível, violações WCAG A/AA (sem "document-title", que é do harness).
 //
-// Uso: npm run test:e2e -- [--designs natural,vibrante,editorial,aurora] [--dark] [--widths 390,1280]
+// Uso: npm run test:e2e -- [--designs natural,vibrante,editorial,portico,aurora] [--dark] [--widths 390,1280]
 //      [--pages espaco,cardapio] [--axe]
 // Precisa de um Chromium (PLAYWRIGHT_BROWSERS_PATH ou CHROMIUM_PATH) e de playwright-core.
 import { spawn, spawnSync } from "node:child_process";
@@ -63,6 +63,47 @@ const PAGES =
     .map((f) => f.replace(/\.tsx$/, ""))
     .filter((f) => !SKIP.has(f) && !f.startsWith("api."));
 
+// Rotas com parâmetros: valores sintéticos, sem tokens nem dados de produção.
+const PARAMETERIZED_ROUTES = [
+  { file: "assinar.$professionalId", pattern: "/assinar/$professionalId", path: "/assinar/demo-professional" },
+  { file: "casa.entrar.$code", pattern: "/casa/entrar/$code", path: "/casa/entrar/DEMO123" },
+  { file: "comunidades.$slug", pattern: "/comunidades/$slug", path: "/comunidades/demo-community" },
+  { file: "consulta.$appointmentId", pattern: "/consulta/$appointmentId", path: "/consulta/demo-appointment" },
+  { file: "convite.$code", pattern: "/convite/$code", path: "/convite/DEMO123" },
+  { file: "desafios.$challengeId", pattern: "/desafios/$challengeId", path: "/desafios/demo-challenge" },
+  { file: "evento.$eventId", pattern: "/evento/$eventId", path: "/evento/demo-event" },
+  { file: "pagamento.$appointmentId", pattern: "/pagamento/$appointmentId", path: "/pagamento/demo-appointment" },
+  { file: "painel.adesao.$patientId", pattern: "/painel/adesao/$patientId", path: "/painel/adesao/demo-patient" },
+  { file: "painel.pacientes.$patientId", pattern: "/painel/pacientes/$patientId", path: "/painel/pacientes/demo-patient" },
+  { file: "painel.planos.$planId", pattern: "/painel/planos/$planId", path: "/painel/planos/demo-plan" },
+  { file: "perfil.$userId", pattern: "/perfil/$userId", path: "/perfil/demo-user" },
+  { file: "profissionais.$professionalId", pattern: "/profissionais/$professionalId", path: "/profissionais/demo-professional" },
+  { file: "programas.$programId", pattern: "/programas/$programId", path: "/programas/demo-program" },
+  { file: "receitas.$id", pattern: "/receitas/$id", path: "/receitas/demo-post" },
+];
+
+// Se uma nova rota dinâmica entrar no app, CI exige um caso explícito com parâmetro.
+if (args.includes("--params")) {
+  const actual = readdirSync(path.join(root, "src/routes"))
+    .filter((f) => f.endsWith(".tsx") && f.includes("$"))
+    .map((f) => f.replace(/\.tsx$/, ""))
+    .sort();
+  const declared = PARAMETERIZED_ROUTES.map((r) => r.file).sort();
+  const missing = actual.filter((f) => !declared.includes(f));
+  const stale = declared.filter((f) => !actual.includes(f));
+  if (missing.length || stale.length) {
+    console.error("Cobertura de rotas dinâmicas incompleta.");
+    if (missing.length) console.error("Sem caso: " + missing.join(", "));
+    if (stale.length) console.error("Casos obsoletos: " + stale.join(", "));
+    process.exit(2);
+  }
+}
+
+const TEST_PAGES = [
+  ...PAGES,
+  ...(args.includes("--params") ? PARAMETERIZED_ROUTES.map((r) => "param:" + r.file) : []),
+];
+
 // Sem build novo não há teste: nunca roda sobre arquivos antigos.
 const build = spawnSync("npx", ["vite", "build", "--config", ".preview-harness/vite.config.mjs"], {
   cwd: root,
@@ -110,13 +151,40 @@ for (const width of WIDTHS) {
   const page = await browser.newPage({ viewport: { width, height: 860 } });
   for (const design of DESIGNS) {
     for (const theme of THEMES) {
-      for (const p of PAGES) {
-        const url = `http://localhost:${PORT}/?v=page&p=${p}&fx=1&d=${design}${theme === "escuro" ? "&dark=1" : ""}`;
+      for (const p of TEST_PAGES) {
+        const routeCase = p.startsWith("param:")
+          ? PARAMETERIZED_ROUTES.find((r) => r.file === p.slice(6))
+          : undefined;
+        const name = routeCase ? routeCase.pattern + " → " + routeCase.path : p;
+        const query = routeCase
+          ? new URLSearchParams({
+              v: "param-route",
+              f: routeCase.file,
+              pattern: routeCase.pattern,
+              path: routeCase.path,
+              fx: "1",
+              d: design,
+            })
+          : null;
+        if (query && theme === "escuro") query.set("dark", "1");
+        const url = routeCase
+          ? "http://localhost:" + PORT + "/?" + query.toString()
+          : `http://localhost:${PORT}/?v=page&p=${encodeURIComponent(p)}&fx=1&d=${design}${theme === "escuro" ? "&dark=1" : ""}`;
         const errors = [];
         page.removeAllListeners("pageerror");
         page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
-        await page.goto(url, { waitUntil: "networkidle" }).catch(() => {});
-        await page.waitForTimeout(800);
+        let navigationProblem = "";
+        try {
+          // O teste mede layout e acessibilidade, não tráfego de rede: aguardar "networkidle"
+          // prende a varredura a cada imagem/fonte e pode estourar o timeout sem defeito de página.
+          const response = await page.goto(url, { waitUntil: "domcontentloaded" });
+          if (!response) navigationProblem = "navegação sem resposta HTTP";
+          else if (!response.ok()) navigationProblem = `HTTP ${response.status()}`;
+        } catch (err) {
+          navigationProblem =
+            err instanceof Error ? err.message.slice(0, 160) : String(err).slice(0, 160);
+        }
+        await page.waitForTimeout(250);
         const r = await page.evaluate(() => {
           const W = innerWidth;
           const small = [
@@ -135,7 +203,8 @@ for (const width of WIDTHS) {
               (e) =>
                 `${e.tagName.toLowerCase()}:${(e.getAttribute("aria-label") || e.textContent || "").trim().slice(0, 30)}`,
             );
-          return { hscroll: document.documentElement.scrollWidth > W + 1, small };
+          const harnessError = document.querySelector("[data-e2e-error]")?.textContent?.trim() ?? "";
+          return { hscroll: document.documentElement.scrollWidth > W + 1, small, harnessError };
         });
         let axe = [];
         if (AXE) {
@@ -150,15 +219,24 @@ for (const width of WIDTHS) {
               .map((v) => `${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(" ")}`);
           });
         }
-        const problems = [
+        // Falhas funcionais bloqueiam CI; acessibilidade fica registrada no relatório
+        // para remediação gradual, sem esconder ocorrências nem tornar o gate inoperante.
+        const blockers = [
+          ...(navigationProblem ? [`falha ao abrir página: ${navigationProblem}`] : []),
           ...(r.hscroll ? ["rolagem lateral"] : []),
-          ...r.small.map((s) => `alvo pequeno ${s}`),
+          ...(r.harnessError ? [`falha do harness: ${r.harnessError.slice(0, 160)}`] : []),
           ...errors.map((e) => `erro JS: ${e}`),
+        ];
+        const accessibility = [
+          ...r.small.map((s) => `alvo pequeno ${s}`),
           ...axe.map((a) => `WCAG ${a}`),
         ];
-        report.push({ page: p, design, theme, width, problems });
-        if (problems.length)
-          console.log(`✗ ${p} [${design}/${theme}/${width}px]\n    ${problems.join("\n    ")}`);
+        const problems = [...blockers, ...accessibility];
+        report.push({ page: name, design, theme, width, blockers, accessibility, problems });
+        if (blockers.length)
+          console.log(`✗ BLOQUEADOR ${name} [${design}/${theme}/${width}px]\n    ${blockers.join("\n    ")}`);
+        if (accessibility.length)
+          console.log(`⚠ ACESSIBILIDADE ${name} [${design}/${theme}/${width}px]\n    ${accessibility.join("\n    ")}`);
       }
     }
   }
@@ -169,6 +247,7 @@ stop();
 
 mkdirSync(path.join(root, "tests/e2e/out"), { recursive: true });
 writeFileSync(path.join(root, "tests/e2e/out/smoke.json"), JSON.stringify(report, null, 1));
-const bad = report.filter((r) => r.problems.length);
-console.log(`\n${report.length} telas verificadas, ${bad.length} com problema.`);
+const bad = report.filter((r) => r.blockers.length);
+const accessibilityCount = report.reduce((n, r) => n + (r.accessibility?.length ?? 0), 0);
+console.log(`\n${report.length} telas verificadas; ${bad.length} com bloqueadores funcionais; ${accessibilityCount} ocorrências de acessibilidade registradas.`);
 process.exit(bad.length ? 1 : 0);

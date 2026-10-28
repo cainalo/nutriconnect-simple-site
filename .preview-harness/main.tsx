@@ -5,7 +5,7 @@ import { ConfirmHost, siteConfirm, sitePrompt } from "@/components/confirm-actio
 // Para testar os diálogos de confirmação nos prints.
 Object.assign(window, { __siteConfirm: siteConfirm, __sitePrompt: sitePrompt });
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RouterProvider, createRootRoute, createRouter, createMemoryHistory } from "@tanstack/react-router";
+import { RouterProvider, Outlet, createRootRoute, createRouter, createMemoryHistory } from "@tanstack/react-router";
 import { Landing } from "@/components/landing";
 import { SiteHeader } from "@/components/site-chrome";
 import { Composer } from "@/components/admin/social/composer";
@@ -235,6 +235,68 @@ if (q.get("fridge"))
 const wrap = (el: any) => <div className="st-root mx-auto max-w-[1100px] p-3 sm:p-6">{el}</div>;
 // v=page&p=funcoes → monta o componente da rota src/routes/funcoes.tsx (Supabase simulado e vazio).
 const ROUTES = import.meta.glob("../src/routes/*.tsx");
+
+function ParamRouteDemo() {
+  const [router, setRouter] = useState<any>(null);
+  const [problem, setProblem] = useState("");
+
+  useEffect(() => {
+    const file = q.get("f") ?? "";
+    const pattern = q.get("pattern") ?? "";
+    const path = q.get("path") ?? "";
+    const loadPage = ROUTES["../src/routes/" + file + ".tsx"];
+    const loadExplore = ROUTES["../src/routes/explorar.tsx"];
+
+    if (!file || !pattern.startsWith("/") || !path.startsWith("/") || !loadPage || !loadExplore) {
+      setProblem("Configuração de rota parametrizada inválida.");
+      return;
+    }
+
+    void Promise.all([loadPage(), loadExplore()])
+      .then(async ([mod, exploreMod]: any[]) => {
+        // Rota real sob um root mínimo: Route.useParams() recebe parâmetros do TanStack Router,
+        // sem depender de sessão nem banco de produção.
+        const root = createRootRoute({ component: () => <Outlet /> });
+        const pageRoute = mod.Route.update({
+          id: pattern,
+          path: pattern,
+          getParentRoute: () => root,
+        });
+        // /receitas/$id redireciona para /explorar?post=...; mantenha o destino no harness
+        // para validar a navegação e não transformar o redirect em um falso 404.
+        const exploreRoute = exploreMod.Route.update({
+          id: "/explorar",
+          path: "/explorar",
+          getParentRoute: () => root,
+        });
+        const routeTree = root.addChildren([pageRoute, exploreRoute]);
+        const next = createRouter({
+          routeTree: routeTree as any,
+          context: { queryClient: qc } as any,
+          history: createMemoryHistory({ initialEntries: [path] }),
+          defaultPreloadStaleTime: 0,
+        });
+        // Resolver a navegação antes de marcar o harness como pronto: rota desconhecida não pode
+        // renderizar uma tela vazia e passar silenciosamente nos testes de layout.
+        await next.load();
+        const matched = next.state.matches.map((match: any) => match.routeId);
+        if (pattern === "/receitas/$id") {
+          if (!matched.includes("/explorar")) {
+            throw new Error("A rota /receitas/$id não redirecionou para /explorar.");
+          }
+        } else if (!matched.includes(pattern)) {
+          throw new Error("TanStack Router não resolveu " + pattern + ". Matches: " + matched.join(", "));
+        }
+        setRouter(() => next);
+      })
+      .catch((err) => setProblem(err instanceof Error ? err.message : String(err)));
+  }, []);
+
+  if (problem) return <div data-e2e-error role="alert" className="p-4 text-sm text-destructive">{problem}</div>;
+  if (!router) return <div aria-label="Carregando rota de teste" className="p-4 text-sm">Carregando…</div>;
+  return <RouterProvider router={router} />;
+}
+
 import { BackToTop } from "@/components/back-to-top";
 function PageDemo() {
   const [Comp, setComp] = useState<any>(null);
@@ -294,6 +356,7 @@ function App() {
   if (v === "docs") return <RouterApp><div className="p-4"><DocsSection /></div></RouterApp>;
   if (v === "quality") return <RouterApp><div className="p-4"><QualitySection /></div></RouterApp>;
   if (v === "post") return <PostDemo />;
+  if (v === "param-route") return <ParamRouteDemo />;
   if (v === "page") return <PageDemo />;
   if (v === "reviews") return <ReviewsDemo />;
   if (v === "ideas") return wrap(<IdeasTab onOpen={() => {}} onEditIdea={() => {}} />);

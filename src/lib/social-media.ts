@@ -3,16 +3,32 @@
 // (só administradores listam, enviam e apagam; migration 20261015140000).
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Names } from "@/lib/appearance-data";
 
 export type MediaCategory = "pratos" | "frutas" | "cafe" | "mercado" | "cozinha" | "bem-estar";
 
-export const MEDIA_CATEGORY_LABEL: Record<MediaCategory, string> = {
-  pratos: "Pratos",
-  frutas: "Frutas e verduras",
-  cafe: "Café e lanches",
-  mercado: "Feira e mercado",
-  cozinha: "Cozinha e pessoas",
-  "bem-estar": "Bem-estar",
+export const MEDIA_CATEGORY_LABEL: Record<MediaCategory, Names> = {
+  pratos: ["Pratos", "Dishes", "Platos", "Plats"],
+  frutas: [
+    "Frutas e verduras",
+    "Fruit and vegetables",
+    "Frutas y verduras",
+    "Fruits et légumes",
+  ],
+  cafe: ["Café e lanches", "Coffee & snacks", "Café y meriendas", "Café et collations"],
+  mercado: [
+    "Feira e mercado",
+    "Market and groceries",
+    "Feria y mercado",
+    "Marché et courses",
+  ],
+  cozinha: [
+    "Cozinha e pessoas",
+    "Cooking and people",
+    "Cocina y personas",
+    "Cuisine et personnes",
+  ],
+  "bem-estar": ["Bem-estar", "Well-being", "Bienestar", "Bien-être"],
 };
 
 export interface MediaItem {
@@ -168,25 +184,72 @@ export function useDeleteMedia() {
 /** Lê e comprime uma foto para JPEG (lado maior até `max`). */
 export function compressToBlob(file: File, max = 1600, quality = 0.82): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
+    const error = () => new Error("Não foi possível ler a imagem.");
+    let url: string;
+    try {
+      url = URL.createObjectURL(file);
+    } catch {
+      reject(error());
+      return;
+    }
+
     const img = new Image();
+    let settled = false;
+    let released = false;
+    const cleanup = () => {
+      img.onload = null;
+      img.onerror = null;
+      if (!released) {
+        released = true;
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          /* a URL já pode ter sido liberada pelo navegador */
+        }
+      }
+    };
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error());
+    };
+
     img.onload = () => {
-      const r = Math.min(1, max / Math.max(img.width, img.height));
-      const c = document.createElement("canvas");
-      c.width = Math.round(img.width * r);
-      c.height = Math.round(img.height * r);
-      c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      c.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error("Não foi possível ler a imagem."))),
-        "image/jpeg",
-        quality,
-      );
+      if (settled) return;
+      try {
+        const width = img.naturalWidth || img.width;
+        const height = img.naturalHeight || img.height;
+        if (!width || !height || !Number.isFinite(max) || max <= 0) throw error();
+
+        const ratio = Math.min(1, max / Math.max(width, height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(width * ratio));
+        canvas.height = Math.max(1, Math.round(height * ratio));
+        const context = canvas.getContext("2d");
+        if (!context) throw error();
+        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+        cleanup();
+
+        canvas.toBlob(
+          (blob) => {
+            if (settled) return;
+            settled = true;
+            if (blob) resolve(blob);
+            else reject(error());
+          },
+          "image/jpeg",
+          quality,
+        );
+      } catch {
+        fail();
+      }
     };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Não foi possível ler a imagem."));
-    };
-    img.src = url;
+    img.onerror = fail;
+    try {
+      img.src = url;
+    } catch {
+      fail();
+    }
   });
 }

@@ -26,7 +26,7 @@ import {
   type NavPath,
 } from "@/components/site-nav";
 export { CHROME_HIDE_EVENT };
-import { FloatingChrome, MastheadChrome, SidebarChrome } from "@/components/site-chrome-designs";
+import { FloatingChrome, MastheadChrome, PorticoChrome, SidebarChrome } from "@/components/site-chrome-designs";
 import { useDesignId } from "@/lib/site-design";
 import { AndroidAppBanner } from "@/components/android-app";
 
@@ -399,6 +399,7 @@ export function SiteHeader() {
   const design = useDesignId();
   if (design === "vibrante") return <SidebarChrome />;
   if (design === "editorial") return <MastheadChrome />;
+  if (design === "portico") return <PorticoChrome />;
   if (design === "aurora") return <FloatingChrome />;
   return <NaturalHeader />;
 }
