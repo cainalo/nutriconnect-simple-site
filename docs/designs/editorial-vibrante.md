@@ -44,3 +44,5 @@ As páginas com cabeçalho contextual têm uma composição editorial própria: 
 ### Experiência do feed
 
 O Espaço de Hoje também tem tratamento próprio no Editorial Vibrante: abertura com saudação editorial, destaque da conversa semanal, atalhos em cards-pôster e um feed em grade assimétrica (a primeira publicação ocupa maior área; as seguintes formam uma composição de notas). Os filtros são uma régua segmentada em vez de pílulas genéricas. Em celulares, a grade vira uma coluna, o cabeçalho se reorganiza e a área de rolagem recebe espaço inferior extra para que o dock não esconda o último cartão nem a ação de carregar mais.
+
+A apresentação editorial contextual funciona também com as fotos opcionais desligadas: usa uma composição gráfica própria com anéis e ícone da seção em vez de cair no cabeçalho de outro tema.

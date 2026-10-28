@@ -613,18 +613,21 @@ function PlainHead({ design, head }: { design: string; head: HeadDef }) {
 
   if (design === "portico") {
     return (
-      <div data-design-head className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
-        <div className="nc-tile-in relative flex items-center gap-4 overflow-hidden rounded-[10px] p-5 text-white sm:p-7" style={{ background: "color-mix(in srgb, " + head.color + " 78%, #10282e)" }}>
-          <span className="relative grid h-12 w-12 shrink-0 place-items-center sm:h-14 sm:w-14">
-            <Icon className="h-7 w-7 sm:h-8 sm:w-8" />
-            <span className="absolute -bottom-1 -right-1 h-1.5 w-1.5 rounded-full bg-[#d4a017]" />
-          </span>
-          <div className="relative min-w-0 flex-1"><p className="font-display text-2xl font-semibold leading-tight text-white sm:text-3xl">{tr(head.title)}</p><p className="mt-1 text-sm leading-relaxed text-white/90">{tr(head.text)}</p></div>
-          <svg viewBox="0 0 100 100" aria-hidden="true" className="pointer-events-none absolute -right-3 -top-5 hidden h-32 w-32 opacity-25 sm:block" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M8 70h84M17 70c0-24 14-40 33-40s33 16 33 40M28 70V50c0-14 9-24 22-24s22 10 22 24v20M15 82h70" />
-            <circle cx="50" cy="15" r="3" fill="#d4a017" stroke="none" />
-          </svg>
-        </div>
+      <div data-design-head data-ev-page-head className="nc-tile-in mx-auto w-full max-w-6xl px-4 pt-5 sm:px-6 lg:px-8">
+        <section className="ev-page-masthead ev-page-masthead--plain" aria-label={tr(["Cabeçalho da seção", "Section header", "Cabecera de sección", "En-tête de rubrique"])}>
+          <div className="ev-page-masthead-copy">
+            <div className="ev-page-kicker"><span className="ev-page-kicker-mark" />{tr(["UM ESPAÇO PARA COMPARTILHAR", "A SPACE TO SHARE", "UN ESPACIO PARA COMPARTIR", "UN ESPACE À PARTAGER"])}</div>
+            <p className="ev-page-title">{tr(head.title)}</p>
+            <p className="ev-page-description">{tr(head.text)}</p>
+            <div className="ev-page-annotation"><span>NutriConnect</span><span className="ev-page-annotation-line" /><span>{tr(["ALIMENTAÇÃO EM COMUNIDADE", "FOOD IN COMMUNITY", "ALIMENTACIÓN EN COMUNIDAD", "L’ALIMENTATION EN COMMUNAUTÉ"])}</span></div>
+          </div>
+          <div className="ev-page-visual ev-page-visual--plain" style={{ backgroundColor: head.color }}>
+            <div className="ev-page-visual-number">NC <span>—</span> CADERNO DE COMUNIDADE</div>
+            <div className="ev-page-plain-graphic" aria-hidden="true"><Icon className="h-12 w-12 sm:h-16 sm:w-16" strokeWidth={1.3} /></div>
+            <div className="ev-page-visual-foot">{tr(["IDEIAS QUE NUTREM", "IDEAS THAT NOURISH", "IDEAS QUE NUTREN", "DES IDÉES QUI NOURRISSENT"])}</div>
+          </div>
+        </section>
+        <div className="ev-page-masthead-rule" aria-hidden="true"><span /><span /><span /></div>
       </div>
     );
   }

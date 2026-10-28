@@ -126,3 +126,17 @@ test("The home feed has a dedicated Editorial Vibrante intro, poster grid, filte
     assert.ok(styles.includes(selector), selector);
   }
 });
+
+test("Editorial Vibrante keeps its distinct section layout when optional photos are disabled", async () => {
+  const [pageHead, styles] = await Promise.all([
+    read("../../src/components/design-page-head.tsx"),
+    read("../../src/styles.css"),
+  ]);
+  const plainStart = pageHead.indexOf("function PlainHead");
+  const plainPorticoStart = pageHead.indexOf('if (design === "portico") {', plainStart);
+  const plainEditorialStart = pageHead.indexOf('if (design === "editorial") {', plainPorticoStart);
+  assert.ok(plainStart >= 0 && plainPorticoStart > plainStart && plainEditorialStart > plainPorticoStart);
+  assert.ok(pageHead.slice(plainPorticoStart, plainEditorialStart).includes("ev-page-visual--plain"));
+  assert.ok(styles.includes(".ev-page-visual--plain::before"));
+  assert.ok(styles.includes(".ev-page-plain-graphic"));
+});
