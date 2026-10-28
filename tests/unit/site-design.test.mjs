@@ -27,7 +27,7 @@ test("Pórtico has distinct light and dark palettes and a dedicated navigation",
   assert.match(styles, /html\[data-design="portico"\]\.dark/);
   assert.match(styles, /--background: #f7f6f2/);
   assert.match(styles, /--foreground: #123b46/);
-  assert.match(styles, /\.post-tile:not\(:has\(img\)\)/);
+  assert.match(styles, /\.post-tile:not\(:has\(> img\)\)/);
   assert.match(styles, /--portico-tile-color: var\(--portico-food\)/);
   assert.match(styles, /--font-display: "Fraunces"/);
   assert.match(styles, /--font-sans: "Inter Tight"/);
