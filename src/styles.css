@@ -4464,3 +4464,10 @@ html[data-design="portico"] .ev-page-plain-graphic {
   border-radius: 50%;
   color: white;
 }
+
+@media (min-width: 1024px) {
+  /* O espaço extra pertence apenas ao dock móvel; desktop mantém a margem normal do feed. */
+  html[data-design="portico"] main[data-no-bottom-pad] .overflow-y-auto {
+    padding-bottom: 2rem !important;
+  }
+}

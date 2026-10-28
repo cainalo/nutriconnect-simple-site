@@ -140,3 +140,11 @@ test("Editorial Vibrante keeps its distinct section layout when optional photos 
   assert.ok(styles.includes(".ev-page-visual--plain::before"));
   assert.ok(styles.includes(".ev-page-plain-graphic"));
 });
+
+test("Feed reserves room for the mobile dock without leaving a large gap on desktop", async () => {
+  const styles = await read("../../src/styles.css");
+  assert.ok(styles.includes("html[data-design=\"portico\"] main[data-no-bottom-pad] .overflow-y-auto"));
+  assert.ok(styles.includes("padding-bottom: calc(5.8rem + env(safe-area-inset-bottom)) !important"));
+  assert.ok(styles.includes("@media (min-width: 1024px)"));
+  assert.ok(styles.includes("padding-bottom: 2rem !important"));
+});
