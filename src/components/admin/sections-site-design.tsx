@@ -12,73 +12,44 @@ import { useTr } from "@/components/settings-ui";
 function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
   const tr = useTr();
   const s = d.swatch;
+  const editorialVibrante = d.id === "portico";
   const bg = dark ? s.darkBg : s.bg;
-  const card = dark ? s.darkCard : s.card;
-  const ink = dark ? "#f4efe6" : s.ink;
-  const glass = d.id === "aurora";
-  const portico = d.id === "portico";
+  const surface = dark ? s.darkCard : s.card;
+  const ink = dark ? "#F7EFDF" : s.ink;
+  const posterColors = ["#0F4C5C", "#C8402A", "#6B3A6E", "#556B2F", "#D4A017"];
+  const tileData = [
+    { number: "01", title: tr(["Receitas", "Recipes", "Recetas", "Recettes"]), color: posterColors[0] },
+    { number: "02", title: tr(["Histórias", "Stories", "Historias", "Histoires"]), color: posterColors[1] },
+    { number: "03", title: tr(["Perguntas", "Questions", "Preguntas", "Questions"]), color: posterColors[2] },
+    { number: "04", title: tr(["Comunidade", "Community", "Comunidad", "Communauté"]), color: posterColors[3] },
+    { number: "05", title: tr(["Progresso", "Progress", "Progreso", "Progrès"]), color: posterColors[4] },
+  ];
   return (
-    <div
-      className="relative overflow-hidden border border-black/10 p-3"
-      style={{
-        background: portico ? bg : glass
-          ? `radial-gradient(circle at 15% 10%, ${s.primary}55, transparent 55%), radial-gradient(circle at 90% 90%, ${s.accent}55, transparent 55%), ${bg}`
-          : d.id === "vibrante"
-            ? `linear-gradient(160deg, ${bg}, ${dark ? s.darkBg : "#e8f6ec"})`
-            : bg,
-        borderRadius: Math.min(d.radius, 20),
-        color: ink,
-      }}
-    >
-      <p
-        className="text-[15px] font-bold leading-tight"
-        style={{ fontFamily: d.headingFont, textAlign: "left" }}
-      >
-        {tr(["Bom dia, Maria", "Good morning, Maria", "Buenos días, María", "Bonjour, Maria"])}
-      </p>
-      <p className="mt-0.5 text-[10px] opacity-70" style={{ textAlign: "left" }}>
-        {tr([
-          "3 hábitos hoje · sequência de 5 dias",
-          "3 habits today · 5-day streak",
-          "3 hábitos hoy · racha de 5 días",
-          "3 habitudes aujourd'hui · série de 5 jours",
-        ])}
-      </p>
-      <div className="mt-2.5 grid grid-cols-2 gap-2">
-        {(portico ? [s.primary, s.accent, "#6b3a6e", "#d4a017"] : [s.primary, s.accent]).map((c, i) => (
-          <div
-            key={c}
-            className="p-2"
-            style={{
-              background: portico ? c : glass ? `${card}${dark ? "99" : "b3"}` : card,
-              color: portico ? (c === "#d4a017" ? "#123b46" : "#ffffff") : ink,
-              border: `1px solid ${portico ? c : `${ink}${d.id === "editorial" ? "55" : "1f"}`}`,
-              borderRadius: portico || d.id === "editorial" ? 3 : Math.min(d.radius, 16),
-              boxShadow: "none",
-              backdropFilter: glass ? "blur(6px)" : undefined,
-            }}
-          >
-            <div
-              className="mb-1.5 h-4 w-4"
-              style={{
-                background: portico ? (c === "#d4a017" ? "#123b46" : "#ffffff") : c,
-                borderRadius: portico || d.id === "editorial" ? 2 : 999,
-              }}
-            />
-            <div className="h-1.5 w-4/5 rounded-full" style={{ background: portico ? "currentColor" : `${ink}40` }} />
-            <div className="mt-1 h-1.5 w-3/5 rounded-full" style={{ background: portico ? "currentColor" : `${ink}25` }} />
-            <div
-              className="mt-2 h-4 w-12 text-center text-[8px] font-bold leading-4"
-              style={{
-                background: portico ? "#ffffff" : i ? s.accent : s.primary,
-                color: portico ? (c === "#d4a017" ? "#123b46" : c) : "#fff",
-                borderRadius: portico || d.id === "editorial" ? 2 : 999,
-              }}
-            >
-              {tr(["Abrir", "Open", "Abrir", "Ouvrir"])}
-            </div>
-          </div>
-        ))}
+    <div data-no-design className="relative overflow-hidden border p-3 sm:p-4" style={{ background: bg, borderColor: editorialVibrante ? "#D9C9AF" : `${ink}30`, borderRadius: Math.min(d.radius, 14), color: ink }}>
+      <div className="flex items-center justify-between gap-2 border-b pb-2.5" style={{ borderColor: editorialVibrante ? "#D9C9AF" : `${ink}25` }}>
+        <div className="flex min-w-0 items-center gap-2">
+          {editorialVibrante ? <img src="/brand/nutriconnect-mark.svg" alt="" width="28" height="28" className="h-7 w-7 shrink-0" /> : <span className="grid h-7 w-7 shrink-0 place-items-center text-xs font-bold" style={{ background: s.primary, color: "#fff", borderRadius: Math.min(d.radius, 8) }}>N</span>}
+          <span className="truncate text-xs font-bold" style={{ fontFamily: d.headingFont }}>Nutri<span style={{ color: s.accent }}>Connect</span></span>
+        </div>
+        <span className="shrink-0 text-[8px] font-bold uppercase tracking-[0.13em] opacity-60">{tr(["Comunidade", "Community", "Comunidad", "Communauté"])}</span>
+      </div>
+      <div className="py-3">
+        <p className="mb-1 text-[8px] font-bold uppercase tracking-[0.15em]" style={{ color: editorialVibrante ? "#C8402A" : s.accent }}>{tr(["IDEIAS À MESA", "IDEAS AT THE TABLE", "IDEAS EN LA MESA", "IDÉES À TABLE"])}</p>
+        <p className="text-[19px] font-semibold leading-[1.05] sm:text-[22px]" style={{ fontFamily: d.headingFont }}>{tr(["Alimentação que conecta.", "Food brings us together.", "La alimentación nos conecta.", "L’alimentation nous rassemble."])}</p>
+        <p className="mt-1.5 max-w-sm text-[9px] leading-relaxed opacity-75">{tr(["Receitas, experiências e conversas em um só lugar.", "Recipes, experiences and conversations in one place.", "Recetas, experiencias y conversaciones en un solo lugar.", "Recettes, expériences et conversations au même endroit."])}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+        {tileData.map((tile) => {
+          const tileInk = tile.color === "#D4A017" ? "#10282E" : "#FFF9EF";
+          return <div key={tile.number} className="flex min-h-[54px] flex-col justify-between p-2" style={{ background: editorialVibrante ? tile.color : surface, color: editorialVibrante ? tileInk : ink, border: editorialVibrante ? "1px solid transparent" : `1px solid ${ink}20`, borderRadius: editorialVibrante ? 4 : Math.min(d.radius, 10), boxShadow: "none" }}>
+            <span className="text-[8px] font-semibold opacity-80">{tile.number}</span>
+            <span className="text-[10px] font-bold leading-tight" style={{ fontFamily: editorialVibrante ? d.headingFont : undefined }}>{tile.title}</span>
+          </div>;
+        })}
+      </div>
+      <div className="mt-2 flex items-center justify-between gap-2 border-t pt-2" style={{ borderColor: editorialVibrante ? "#D9C9AF" : `${ink}25` }}>
+        <span className="text-[8px] opacity-70">{tr(["Ideias compartilhadas toda semana", "Ideas shared every week", "Ideas compartidas cada semana", "Des idées partagées chaque semaine"])}</span>
+        <span className="shrink-0 px-2 py-1 text-[8px] font-bold" style={{ background: editorialVibrante ? "#0F4C5C" : s.primary, color: "#FFF9EF", borderRadius: editorialVibrante ? 4 : Math.min(d.radius, 10) }}>{tr(["Explorar", "Explore", "Explorar", "Explorer"])}</span>
       </div>
     </div>
   );
@@ -89,6 +60,8 @@ export function SiteDesignSection() {
   const configs = useSiteConfigs();
   const save = useSaveSiteConfig();
   const saved = readSiteDesign(configs.data?.site_design);
+  const currentDesign = SITE_DESIGNS.find((d) => d.id === saved) ?? SITE_DESIGNS[0]!;
+  const editorialVibrante = SITE_DESIGNS.find((d) => d.id === "portico") ?? SITE_DESIGNS[0]!;
   const [testing, setTesting] = useState<string | null>(null);
   const [dark, setDark] = useState(false);
 
@@ -218,6 +191,22 @@ export function SiteDesignSection() {
           );
         })}
       </ul>
+      <section className="mt-6 border-t border-border pt-5" aria-labelledby="design-comparison-title">
+        <div className="mb-3">
+          <h3 id="design-comparison-title" className="text-base font-bold">{tr(["Comparação visual", "Visual comparison", "Comparación visual", "Comparaison visuelle"])}</h3>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">{tr(["Conteúdo idêntico nos dois exemplos. Compare a composição atual com o sistema de cards-pôster e cores inteiramente preenchidas do Editorial Vibrante.", "Identical content in both examples. Compare the current composition with Editorial Vibrante’s poster cards and full-color surfaces.", "El mismo contenido en ambos ejemplos. Compara la composición actual con las tarjetas póster y superficies de color de Editorial Vibrante.", "Le contenu est identique dans les deux exemples. Comparez la composition actuelle aux cartes-affiches et surfaces en couleur d’Editorial Vibrante."])}</p>
+        </div>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <div className="min-w-0 space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground">{tr(["Tema atual", "Current theme", "Tema actual", "Thème actuel"])} — <span className="text-foreground">{currentDesign.name}</span></p>
+            <Mini d={currentDesign} dark={dark} />
+          </div>
+          <div className="min-w-0 space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground">{tr(["Novo sistema visual", "New visual system", "Nuevo sistema visual", "Nouveau système visuel"])} — <span className="text-foreground">Editorial Vibrante</span></p>
+            <Mini d={editorialVibrante} dark={dark} />
+          </div>
+        </div>
+      </section>
     </Panel>
   );
 }

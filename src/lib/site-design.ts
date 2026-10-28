@@ -85,16 +85,16 @@ export const SITE_DESIGNS: SiteDesign[] = [
   },
   {
     id: "portico",
-    name: "Pórtico",
-    tagline: "Cartões-pôster e cores chapadas",
+    name: "Editorial Vibrante",
+    tagline: "Papel quente, tipografia autoral e cards-pôster",
     description:
-      "Inspirado no visual atual do Portico: cartões grandes de cores fortes, títulos Fraunces, texto Inter Tight, ilustrações e ícones de traço, fundo limpo e movimento curto. Sem jornal antigo, textura pesada ou vidro.",
+      "Uma identidade editorial contemporânea inspirada no sistema visual do Pórtico, adaptada à comunidade de alimentação: papel quente, Fraunces, Inter Tight, cards inteiramente coloridos, traço original de marca e cinco cores funcionais. Sem jornal antigo ou efeitos de vidro.",
     swatch: {
-      bg: "#f7f6f2",
-      card: "#ffffff",
-      primary: "#c8402a",
-      accent: "#0f4c5c",
-      ink: "#123b46",
+      bg: "#F7EFDF",
+      card: "#FFF9EF",
+      primary: "#0F4C5C",
+      accent: "#C8402A",
+      ink: "#0F4C5C",
       darkBg: "#10282e",
       darkCard: "#143840",
     },
@@ -135,6 +135,12 @@ export function applySiteDesign(id: SiteDesignId) {
   const root = document.documentElement;
   if (id === DEFAULT_DESIGN) root.removeAttribute("data-design");
   else root.setAttribute("data-design", id);
+  // O favicon acompanha o tema local/previsualizado; voltar ao tema anterior restaura o original.
+  const favicon = document.getElementById("site-favicon") as HTMLLinkElement | null;
+  if (favicon) {
+    favicon.href = id === "portico" ? "/favicon.svg" : "/favicon.png";
+    favicon.type = id === "portico" ? "image/svg+xml" : "image/png";
+  }
   try {
     if (id === DEFAULT_DESIGN) window.localStorage.removeItem(DESIGN_STORAGE_KEY);
     else window.localStorage.setItem(DESIGN_STORAGE_KEY, id);
@@ -156,7 +162,7 @@ export function useSiteDesign() {
 }
 
 /** Roda antes da primeira pintura: usa o design da última visita para não piscar o padrão. */
-export const DESIGN_INIT_SCRIPT = `(function(){try{var v=localStorage.getItem("${DESIGN_STORAGE_KEY}");if(v&&/^[a-z]{2,20}$/.test(v))document.documentElement.setAttribute("data-design",v);}catch(e){}})();`;
+export const DESIGN_INIT_SCRIPT = `(function(){try{var v=localStorage.getItem("${DESIGN_STORAGE_KEY}");if(v&&/^[a-z]{2,20}$/.test(v)){document.documentElement.setAttribute("data-design",v);var f=document.getElementById("site-favicon");if(f){f.href=v==="portico"?"/favicon.svg":"/favicon.png";f.type=v==="portico"?"image/svg+xml":"image/png";}}}catch(e){}})();`;
 
 /**
  * Design ativo, lido do atributo data-design do <html> (o script de abertura e applySiteDesign o

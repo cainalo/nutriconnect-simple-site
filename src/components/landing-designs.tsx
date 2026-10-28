@@ -825,18 +825,17 @@ export function LandingAurora() {
 export function LandingPortico() {
   const tr = useTr();
   const security = SecurityItems();
-  const posterColors = ["#c8402a", "#245f7a", "#87580c", "#6b3a6e", "#346834", "#8f2f50"];
+  const posterColors = ["#C8402A", "#0F4C5C", "#D4A017", "#6B3A6E", "#556B2F"];
+  const posterInk = posterColors.map((color) => color === "#D4A017" ? "#10282E" : "#FFF9EF");
   return (
     <div data-landing className="min-h-screen bg-background text-foreground [&_p]:text-left">
       <header className="sticky top-0 z-30 border-b border-border bg-background">
         <div className="mx-auto flex min-h-16 max-w-6xl items-center gap-3 px-4 py-2 sm:px-6">
-          <span className="grid h-9 w-9 shrink-0 place-items-center" aria-hidden="true">
-            <svg viewBox="0 0 40 40" width="36" height="36" fill="none">
-              <path d="M7 15h26M10 15c0 8 4.5 13 10 13s10-5 10-13M12 32h16M20 6v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" />
-              <circle cx="20" cy="5" r="2" fill="#c8402a" /><circle cx="8" cy="32" r="2" fill="#6b3a6e" /><circle cx="32" cy="32" r="2" fill="#d4a017" />
-            </svg>
-          </span>
-          <Wordmark className="text-lg sm:text-xl" />
+          <div className="nc-brand-lockup flex min-w-0 items-center gap-2">
+            <img src="/brand/nutriconnect-mark.svg" alt="" width="36" height="36" className="nc-brand-mark" />
+            <img src="/brand/nutriconnect-wordmark.svg" alt="NutriConnect" width="184" height="20" className="nc-brand-wordmark nc-brand-wordmark--light" />
+            <img src="/brand/nutriconnect-wordmark-reverse.svg" alt="" aria-hidden="true" width="184" height="20" className="nc-brand-wordmark nc-brand-wordmark--dark" />
+          </div>
           <nav className="ml-4 hidden items-center gap-5 text-sm font-semibold text-muted-foreground lg:flex">
             <a href="#recursos" className="hover:text-foreground">{tr(COPY.navFeatures)}</a>
             <a href="#profissionais" className="hover:text-foreground">{tr(COPY.navPros)}</a>
@@ -868,8 +867,8 @@ export function LandingPortico() {
               <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-[#0f4c5c] px-4 py-3 text-white"><span className="font-display text-xl font-semibold">{tr(["Uma mesa para todo mundo", "A table for everyone", "Una mesa para todos", "Une table pour tous"])}</span><span className="shrink-0 text-xs font-bold uppercase tracking-wider">NutriConnect</span></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="portico-poster min-h-28 p-4 text-white" style={{ background: "#245f7a" }}><span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">01</span><p className="mt-5 font-display text-xl font-semibold leading-tight">{tr(["Receitas reais", "Real recipes", "Recetas reales", "Recettes réelles"])}</p></div>
-              <div className="portico-poster min-h-28 p-4 text-white" style={{ background: "#346834" }}><span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">02</span><p className="mt-5 font-display text-xl font-semibold leading-tight">{tr(["Hábitos em conjunto", "Habits together", "Hábitos juntos", "Des habitudes ensemble"])}</p></div>
+              <div className="portico-poster min-h-28 p-4 text-white" style={{ background: "#0F4C5C" }}><span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">01</span><p className="mt-5 font-display text-xl font-semibold leading-tight">{tr(["Receitas reais", "Real recipes", "Recetas reales", "Recettes réelles"])}</p></div>
+              <div className="portico-poster min-h-28 p-4 text-white" style={{ background: "#556B2F" }}><span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">02</span><p className="mt-5 font-display text-xl font-semibold leading-tight">{tr(["Hábitos em conjunto", "Habits together", "Hábitos juntos", "Des habitudes ensemble"])}</p></div>
             </div>
           </div>
         </section>
@@ -879,10 +878,10 @@ export function LandingPortico() {
             {FEATURES.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <article key={feature.title[0]} className="portico-poster flex min-h-[14.5rem] flex-col p-5 text-white sm:p-6" style={{ background: posterColors[i % posterColors.length] }}>
-                  <div className="flex items-start justify-between gap-3"><Icon className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" /><span className="text-xs font-semibold tabular-nums text-white/80">{String(i + 1).padStart(2, "0")}</span></div>
+                <article key={feature.title[0]} className="portico-poster flex min-h-[14.5rem] flex-col p-5 sm:p-6" style={{ background: posterColors[i % posterColors.length], color: posterInk[i % posterInk.length] }}>
+                  <div className="flex items-start justify-between gap-3"><Icon className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" /><span className="text-xs font-semibold tabular-nums" style={{ color: posterInk[i % posterInk.length] === "#10282E" ? "rgb(16 40 46 / 0.75)" : "rgb(255 249 239 / 0.82)" }}>{String(i + 1).padStart(2, "0")}</span></div>
                   <h3 className="mt-auto pt-8 font-display text-2xl font-semibold leading-tight">{tr(feature.title)}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/90">{tr(feature.text)}</p>
+                  <p className="mt-2 text-sm leading-relaxed" style={{ color: posterInk[i % posterInk.length] === "#10282E" ? "rgb(16 40 46 / 0.9)" : "rgb(255 249 239 / 0.9)" }}>{tr(feature.text)}</p>
                 </article>
               );
             })}
@@ -893,7 +892,7 @@ export function LandingPortico() {
           <div className="grid gap-3 md:grid-cols-3">
             {STEPS.map((step, i) => (
               <article key={step.title[0]} className="relative rounded-[10px] border border-border bg-card p-5 sm:p-6">
-                <span className="inline-grid h-9 w-9 place-items-center rounded-md text-sm font-bold text-white" style={{ background: posterColors[i] }}>{String(i + 1).padStart(2, "0")}</span>
+                <span className="inline-grid h-9 w-9 place-items-center rounded-md text-sm font-bold" style={{ background: posterColors[i], color: posterInk[i] }}>{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="mt-5 font-display text-2xl font-semibold leading-tight">{tr(step.title)}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tr(step.text)}</p>
               </article>
             ))}
