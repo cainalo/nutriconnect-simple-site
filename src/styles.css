@@ -3692,3 +3692,509 @@ html[data-motion="reduce"][data-design="portico"] :is(.portico-poster, .post-til
   html[data-design="portico"] .nc-brand-wordmark { width: clamp(6.9rem, 32vw, 8.1rem); max-width: 32vw; }
   html[data-design="portico"] .nc-brand-mark { width: 2rem; height: 2rem; }
 }
+
+
+/* ───────────────── Editorial Vibrante: estrutura própria de navegação e páginas ──────────── */
+/* As duas barras usam o mesmo estado data-hidden calculado por useHideOnScroll(pathname).
+   Não duplicamos a lógica de scroll: as páginas com scroller interno continuam a emitir
+   CHROME_HIDE_EVENT, tal como no restante produto. */
+html[data-design="portico"] [data-ev-header] {
+  z-index: 60;
+  background: var(--ev-paper);
+  border-bottom: 0;
+  box-shadow: none;
+}
+html[data-design="portico"] .ev-header-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.15rem;
+  max-width: 88rem;
+  min-height: 4.5rem;
+  margin-inline: auto;
+  padding: 0.7rem clamp(1rem, 3vw, 2.2rem);
+  border-bottom: 1px solid var(--border);
+}
+html[data-design="portico"] .ev-header-leading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.8rem;
+}
+html[data-design="portico"] [data-ev-back] {
+  display: inline-grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--foreground);
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+html[data-design="portico"] [data-ev-back]:hover {
+  border-color: var(--primary);
+  background: var(--ev-raised);
+}
+html[data-design="portico"] [data-ev-back]:active { transform: translateX(-2px); }
+html[data-design="portico"] .ev-header-manifesto {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-family: "Fraunces", "Libre Baskerville", Georgia, serif;
+  font-size: 0.92rem;
+  font-style: italic;
+  line-height: 1.2;
+  text-align: center;
+}
+html[data-design="portico"] .ev-header-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+html[data-design="portico"] .ev-header-action,
+html[data-design="portico"] .ev-icon-action,
+html[data-design="portico"] .ev-account-trigger {
+  display: inline-flex;
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+html[data-design="portico"] .ev-header-action { padding: 0.5rem 0.8rem; }
+html[data-design="portico"] .ev-header-action--write {
+  background: var(--ev-terracotta);
+  color: var(--ev-ink-on-color);
+}
+html[data-design="portico"] .ev-header-action--write:hover { background: #A43120; }
+html[data-design="portico"] .ev-header-action--login {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+html[data-design="portico"] .ev-icon-action,
+html[data-design="portico"] .ev-account-trigger {
+  position: relative;
+  width: 2.45rem;
+  padding: 0.3rem;
+  border-color: var(--border);
+}
+html[data-design="portico"] .ev-icon-action:hover,
+html[data-design="portico"] .ev-account-trigger:hover {
+  border-color: var(--primary);
+  background: var(--ev-raised);
+}
+html[data-design="portico"] .ev-notification-count {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  display: grid;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  place-items: center;
+  padding-inline: 0.2rem;
+  border: 2px solid var(--ev-paper);
+  border-radius: 999px;
+  color: white;
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+html[data-design="portico"] .ev-topnav {
+  display: flex;
+  min-height: 3.1rem;
+  align-items: stretch;
+  gap: 1.25rem;
+  max-width: 88rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 2.2rem);
+  border-bottom: 1px solid var(--border);
+  background: var(--ev-paper);
+}
+html[data-design="portico"] .ev-nav-overline,
+html[data-design="portico"] .ev-nav-edition {
+  display: flex;
+  flex: none;
+  align-items: center;
+  color: var(--muted-foreground);
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+html[data-design="portico"] .ev-topnav-links {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: stretch;
+  gap: 0.2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+html[data-design="portico"] .ev-topnav-links::-webkit-scrollbar { display: none; }
+html[data-design="portico"] .ev-topnav-link {
+  display: inline-flex;
+  min-height: 3.1rem;
+  flex: none;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.85rem;
+  border-bottom: 3px solid transparent;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 720;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+html[data-design="portico"] .ev-topnav-link:hover {
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+  color: var(--foreground);
+}
+html[data-design="portico"] .ev-topnav-link.is-active { background: color-mix(in srgb, var(--primary) 7%, transparent); }
+html[data-design="portico"] .ev-topnav-unread {
+  min-width: 1.1rem;
+  padding: 0.05rem 0.2rem;
+  background: var(--ev-terracotta);
+  color: white;
+  text-align: center;
+  font-size: 0.58rem;
+  font-weight: 850;
+}
+html[data-design="portico"] .ev-bottom-dock {
+  display: flex;
+  min-height: 4.15rem;
+  align-items: center;
+  justify-content: space-around;
+  gap: 0.1rem;
+  padding: 0.28rem 0.38rem calc(0.28rem + env(safe-area-inset-bottom));
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--ev-surface);
+  box-shadow: 0 7px 24px -17px rgb(16 40 46 / 0.42);
+}
+html[data-design="portico"] .ev-bottom-item {
+  display: flex;
+  min-width: 0;
+  min-height: 3.25rem;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.05rem;
+  padding: 0.15rem 0.08rem;
+  border-radius: 0.4rem;
+  color: var(--muted-foreground);
+  font-size: 0.58rem;
+  font-weight: 750;
+  line-height: 1.1;
+  text-decoration: none;
+}
+html[data-design="portico"] .ev-bottom-item.is-active { color: var(--primary); }
+html[data-design="portico"] .ev-bottom-icon {
+  display: grid;
+  width: 2.3rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 0.35rem;
+}
+html[data-design="portico"] .ev-bottom-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html[data-design="portico"] .ev-bottom-create {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 2.5rem;
+  place-items: center;
+  margin-inline: 0.12rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: var(--ev-terracotta);
+  color: var(--ev-ink-on-color);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+html[data-design="portico"] .ev-bottom-create:hover { background: #A43120; }
+html[data-design="portico"] .ev-bottom-create:active { transform: scale(0.96); }
+html[data-design="portico"] .ev-bottom-login,
+html[data-design="portico"] .ev-bottom-signup {
+  display: inline-flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.73rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+html[data-design="portico"] .ev-bottom-login { color: var(--foreground); }
+html[data-design="portico"] .ev-bottom-signup { background: var(--ev-terracotta); color: var(--ev-ink-on-color); }
+html[data-design="portico"] [data-site-header] :focus-visible,
+html[data-design="portico"] [data-site-bottom-nav] :focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (max-width: 1023px) {
+  html[data-design="portico"] .ev-header-top {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 3.95rem;
+    gap: 0.45rem;
+    padding: 0.45rem 0.65rem;
+  }
+  html[data-design="portico"] .ev-header-manifesto,
+  html[data-design="portico"] .ev-topnav { display: none; }
+  html[data-design="portico"] .ev-header-leading { gap: 0.38rem; }
+  html[data-design="portico"] .nc-brand-mark { width: 1.9rem; height: 1.9rem; }
+  html[data-design="portico"] .nc-brand-wordmark { width: clamp(6.1rem, 31vw, 8.1rem); max-width: 31vw; }
+  html[data-design="portico"] [data-ev-back] { width: 1.9rem; height: 1.9rem; }
+  html[data-design="portico"] .ev-header-actions { gap: 0.22rem; }
+  html[data-design="portico"] .ev-icon-action,
+  html[data-design="portico"] .ev-account-trigger { width: 2.1rem; min-height: 2.1rem; }
+  html[data-design="portico"] .ev-header-action--write { width: 2.1rem; min-height: 2.1rem; padding: 0; }
+  html[data-design="portico"] .ev-header-action--write span,
+  html[data-design="portico"] .ev-header-action--login span { display: none; }
+  html[data-design="portico"] .ev-header-action--login { width: 2.1rem; min-height: 2.1rem; padding: 0; }
+  html[data-design="portico"] body:has([data-ev-bottom-nav]) { padding-bottom: calc(5.2rem + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 360px) {
+  html[data-design="portico"] .ev-header-leading { gap: 0.25rem; }
+  html[data-design="portico"] .nc-brand-mark { display: none; }
+  html[data-design="portico"] .nc-brand-wordmark { width: 7rem; max-width: 30vw; }
+  html[data-design="portico"] .ev-bottom-icon { width: 1.9rem; }
+  html[data-design="portico"] .ev-bottom-create { width: 2.15rem; height: 2.15rem; flex-basis: 2.15rem; }
+  html[data-design="portico"] .ev-bottom-login,
+  html[data-design="portico"] .ev-bottom-signup { padding-inline: 0.35rem; font-size: 0.68rem; }
+}
+
+/* Páginas: identidade de publicação viva, não um painel SaaS recolorido. */
+html[data-design="portico"] [data-ev-page-head] { margin-bottom: clamp(1rem, 2.6vw, 2rem); }
+html[data-design="portico"] .ev-page-masthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.72fr);
+  align-items: stretch;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: clamp(1.25rem, 3.8vw, 2.8rem) 0 1.5rem;
+  border-top: 1px solid var(--border);
+}
+html[data-design="portico"] .ev-page-masthead-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0.3rem 0;
+}
+html[data-design="portico"] .ev-page-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+  color: var(--ev-terracotta);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  line-height: 1.35;
+}
+html[data-design="portico"] .ev-page-kicker-mark {
+  display: inline-block;
+  width: 1.45rem;
+  height: 0.2rem;
+  background: var(--ev-terracotta);
+}
+html[data-design="portico"] .ev-page-title {
+  max-width: 13ch;
+  margin: 0;
+  color: var(--ev-petrol);
+  font-family: "Fraunces", "Libre Baskerville", Georgia, serif;
+  font-size: clamp(2.25rem, 5.5vw, 4.5rem);
+  font-weight: 620;
+  letter-spacing: -0.055em;
+  line-height: 0.99;
+  text-wrap: balance;
+}
+html[data-design="portico"].dark .ev-page-title { color: var(--foreground); }
+html[data-design="portico"] .ev-page-description {
+  max-width: 37rem;
+  margin: 1rem 0 0;
+  color: var(--muted-foreground);
+  font-size: clamp(0.9rem, 1.35vw, 1.08rem);
+  line-height: 1.58;
+}
+html[data-design="portico"] .ev-page-annotation {
+  display: flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+html[data-design="portico"] .ev-page-annotation-line {
+  width: clamp(1.5rem, 5vw, 4rem);
+  height: 1px;
+  flex: none;
+  background: var(--border);
+}
+html[data-design="portico"] .ev-page-visual {
+  position: relative;
+  display: flex;
+  min-height: 13rem;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 0.9rem;
+  border-radius: 0.5rem;
+  background: var(--ev-page-color, var(--ev-petrol));
+  color: white;
+}
+html[data-design="portico"] .ev-page-visual img {
+  position: absolute;
+  inset: 2.7rem 0 2.2rem;
+  width: 100%;
+  height: calc(100% - 4.9rem);
+  object-fit: cover;
+  mix-blend-mode: multiply;
+  opacity: 0.82;
+  filter: saturate(0.82) contrast(1.06);
+}
+html[data-design="portico"].dark .ev-page-visual img { mix-blend-mode: normal; opacity: 0.52; }
+html[data-design="portico"] .ev-page-visual-number,
+html[data-design="portico"] .ev-page-visual-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: white;
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+}
+html[data-design="portico"] .ev-page-visual-number span { opacity: 0.6; }
+html[data-design="portico"] .ev-page-visual-stamp {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 3rem;
+  z-index: 1;
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 0.7);
+  border-radius: 50%;
+  background: rgb(15 76 92 / 0.35);
+  color: white;
+  backdrop-filter: blur(4px);
+}
+html[data-design="portico"] .ev-page-masthead-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 3px double var(--foreground);
+}
+html[data-design="portico"] .ev-page-masthead-rule span:first-child { width: 2.75rem; height: 0.25rem; background: var(--ev-terracotta); }
+html[data-design="portico"] .ev-page-masthead-rule span:nth-child(2) { width: 0.65rem; height: 0.25rem; background: var(--ev-olive); }
+html[data-design="portico"] .ev-page-masthead-rule span:last-child { flex: 1; height: 1px; background: var(--border); }
+@media (max-width: 639px) {
+  html[data-design="portico"] .ev-page-masthead {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding-top: 1.2rem;
+  }
+  html[data-design="portico"] .ev-page-title { max-width: 11ch; font-size: clamp(2.2rem, 10vw, 3.25rem); }
+  html[data-design="portico"] .ev-page-description { margin-top: 0.8rem; font-size: 0.92rem; }
+  html[data-design="portico"] .ev-page-annotation { flex-wrap: wrap; margin-top: 1rem; font-size: 0.53rem; }
+  html[data-design="portico"] .ev-page-visual { min-height: 7.5rem; }
+  html[data-design="portico"] .ev-page-visual img { inset: 2.25rem 0 1.8rem; height: calc(100% - 4.05rem); }
+  html[data-design="portico"] .ev-page-visual-stamp { right: 0.65rem; bottom: 2.35rem; width: 2.4rem; height: 2.4rem; }
+}
+
+/* Componentes funcionais: menus, diálogos, tabelas e formulários mantêm a mesma linguagem. */
+html[data-design="portico"] .nc-menu {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--ev-surface);
+  box-shadow: 0 8px 24px -18px rgb(16 40 46 / 0.5);
+}
+html[data-design="portico"] .nc-menu-item {
+  border-radius: 0.25rem;
+  color: var(--foreground);
+  font-family: "Inter Tight", sans-serif;
+  font-size: 0.82rem;
+}
+html[data-design="portico"] .nc-menu-item[data-highlighted] {
+  background: var(--ev-raised);
+  color: var(--foreground);
+}
+html[data-design="portico"] [role="dialog"] {
+  border-color: var(--border);
+  border-radius: 0.65rem;
+  background: var(--ev-surface);
+  color: var(--foreground);
+  box-shadow: 0 18px 48px -32px rgb(16 40 46 / 0.65);
+}
+html[data-design="portico"] :is(input, textarea, select) {
+  border-radius: 0.3rem;
+  background: var(--ev-surface);
+  color: var(--foreground);
+}
+html[data-design="portico"] :is(input, textarea, select)::placeholder { color: var(--muted-foreground); }
+html[data-design="portico"] :is(button, a)[class*="bg-primary"] {
+  box-shadow: none;
+}
+html[data-design="portico"] table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+html[data-design="portico"] thead { background: var(--ev-raised); }
+html[data-design="portico"] th {
+  color: var(--foreground);
+  font-size: 0.67rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+html[data-design="portico"] :is(th, td) { border-color: var(--border); }
+html[data-design="portico"] :is(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-design="portico"] [data-ev-header],
+  html[data-design="portico"] [data-site-bottom-nav],
+  html[data-design="portico"] .ev-topnav-link,
+  html[data-design="portico"] .ev-header-action,
+  html[data-design="portico"] .ev-icon-action,
+  html[data-design="portico"] .ev-bottom-create {
+    transition: none !important;
+  }
+}
+html[data-motion="reduce"][data-design="portico"] [data-ev-header],
+html[data-motion="reduce"][data-design="portico"] [data-site-bottom-nav],
+html[data-motion="reduce"][data-design="portico"] .ev-topnav-link,
+html[data-motion="reduce"][data-design="portico"] .ev-header-action,
+html[data-motion="reduce"][data-design="portico"] .ev-icon-action,
+html[data-motion="reduce"][data-design="portico"] .ev-bottom-create {
+  transition: none !important;
+}

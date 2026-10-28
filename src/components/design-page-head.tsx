@@ -479,15 +479,22 @@ export function DesignPageHead() {
 
   if (design === "portico") {
     return (
-      <div data-design-head className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
-        <div className="nc-tile-in grid overflow-hidden rounded-[10px] border border-border sm:grid-cols-[minmax(0,1fr)_32%]" style={{ background: "color-mix(in srgb, " + head.color + " 78%, #10282e)", color: "#ffffff" }}>
-          <div className="relative flex min-w-0 flex-col justify-center p-5 sm:p-7">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white/80">{tr(["Comunidade NutriConnect", "NutriConnect community", "Comunidad NutriConnect", "Communauté NutriConnect"])}</p>
-            <p className="font-display text-2xl font-semibold leading-tight text-white sm:text-4xl">{tr(head.title)}</p>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">{tr(head.text)}</p>
+      <div data-design-head data-ev-page-head className="nc-tile-in mx-auto w-full max-w-6xl px-4 pt-5 sm:px-6 lg:px-8">
+        <section className="ev-page-masthead" aria-label={tr(["Cabeçalho da seção", "Section header", "Cabecera de sección", "En-tête de rubrique"])}>
+          <div className="ev-page-masthead-copy">
+            <div className="ev-page-kicker"><span className="ev-page-kicker-mark" />{tr(["UM ESPAÇO PARA COMPARTILHAR", "A SPACE TO SHARE", "UN ESPACIO PARA COMPARTIR", "UN ESPACE À PARTAGER"])}</div>
+            <p className="ev-page-title">{tr(head.title)}</p>
+            <p className="ev-page-description">{tr(head.text)}</p>
+            <div className="ev-page-annotation"><span>NutriConnect</span><span className="ev-page-annotation-line" /><span>{tr(["ALIMENTAÇÃO EM COMUNIDADE", "FOOD IN COMMUNITY", "ALIMENTACIÓN EN COMUNIDAD", "L’ALIMENTATION EN COMMUNAUTÉ"])}</span></div>
           </div>
-          <div className="hidden min-h-36 min-w-0 sm:block"><img src={head.photo} alt="" aria-hidden="true" loading="lazy" decoding="async" className="h-full min-h-36 w-full object-cover" /></div>
-        </div>
+          <div className="ev-page-visual" style={{ ["--ev-page-color" as string]: head.color }}>
+            <div className="ev-page-visual-number">NC <span>—</span> CADERNO DE COMUNIDADE</div>
+            <img src={head.photo} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <div className="ev-page-visual-stamp"><Icon className="h-7 w-7" strokeWidth={1.6} aria-hidden="true" /></div>
+            <div className="ev-page-visual-foot">{tr(["IDEIAS QUE NUTREM", "IDEAS THAT NOURISH", "IDEAS QUE NUTREN", "DES IDÉES QUI NOURRISSENT"])}</div>
+          </div>
+        </section>
+        <div className="ev-page-masthead-rule" aria-hidden="true"><span /><span /><span /></div>
       </div>
     );
   }
