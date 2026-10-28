@@ -342,7 +342,7 @@ function LoginLink() {
 
 // ───────────────────────── Pórtico: masthead editorial contemporâneo ───────────────────────
 
-export function PorticoChrome() {
+export function EditorialVibranteChrome() {
   const { user } = useAuth();
   const { t } = useI18n();
   const tr = useTr();
@@ -382,8 +382,9 @@ export function PorticoChrome() {
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex min-h-[4.25rem] items-center justify-between gap-3 border-b border-foreground/20 py-2.5">
             <Link to="/" aria-label={t("nav.homeAria")} className="flex min-w-0 items-center gap-2.5">
-              <span data-portico-mark className="grid h-10 w-10 shrink-0 place-items-center" aria-hidden="true"><svg viewBox="0 0 40 40" width="36" height="36" fill="none"><path d="M7 15h26M10 15c0 8 4.5 13 10 13s10-5 10-13M12 32h16M20 6v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square"/><circle cx="20" cy="5" r="2" fill="#c8402a"/><circle cx="8" cy="32" r="2" fill="#6b3a6e"/><circle cx="32" cy="32" r="2" fill="#d4a017"/></svg></span>
-              <Wordmark className="truncate text-base sm:text-lg" />
+              <img src="/brand/nutriconnect-mark.svg" alt="" width="36" height="36" className="nc-brand-mark" />
+              <img src="/brand/nutriconnect-wordmark.svg" alt="NutriConnect" width="180" height="20" className="nc-brand-wordmark nc-brand-wordmark--light" />
+              <img src="/brand/nutriconnect-wordmark-reverse.svg" alt="" aria-hidden="true" width="180" height="20" className="nc-brand-wordmark nc-brand-wordmark--dark" />
             </Link>
             <p className="hidden max-w-xs text-center text-xs font-medium leading-relaxed text-muted-foreground xl:block">{tr(["Alimentação melhor se constrói em comunidade.", "Better food habits grow in community.", "Los mejores hábitos alimentarios se construyen en comunidad.", "De meilleures habitudes alimentaires se construisent en communauté."])}</p>
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">{write}{account}</div>

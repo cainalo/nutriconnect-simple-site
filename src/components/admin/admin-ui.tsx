@@ -110,6 +110,7 @@ export function StatCard({
     <Tag
       type={onClick ? "button" : undefined}
       onClick={onClick}
+      data-admin-stat
       className={`flex items-start gap-3 rounded-3xl border border-border/80 bg-card p-4 text-left shadow-xs transition ${
         onClick ? "cursor-pointer hover:shadow-soft" : ""
       } ${compact ? "flex-col gap-2 p-3.5 sm:flex-row sm:gap-3 sm:p-4" : ""}`}
