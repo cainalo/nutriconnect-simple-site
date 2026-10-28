@@ -382,7 +382,7 @@ export function PorticoChrome() {
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex min-h-[4.25rem] items-center justify-between gap-3 border-b border-foreground/20 py-2.5">
             <Link to="/" aria-label={t("nav.homeAria")} className="flex min-w-0 items-center gap-2.5">
-              <span data-portico-mark className="grid h-10 w-10 shrink-0 place-items-center" aria-hidden="true"><svg viewBox="0 0 40 40" width="36" height="36" fill="none"><path d="M5 24h30M8 24c2 6.5 6 10 12 10s10-3.5 12-10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="square"/><path d="M18 23C13 15 20 8 30 7c.5 9-4 15-12 16Z" fill="var(--primary)" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M17.5 24 27 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M8 8.5 9.5 11 12 12.5 9.5 14 8 16.5 6.5 14 4 12.5 6.5 11Z" fill="#d4a017"/></svg></span>
+              <span data-portico-mark className="grid h-10 w-10 shrink-0 place-items-center" aria-hidden="true"><svg viewBox="0 0 40 40" width="36" height="36" fill="none"><path d="M7 15h26M10 15c0 8 4.5 13 10 13s10-5 10-13M12 32h16M20 6v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square"/><circle cx="20" cy="5" r="2" fill="#c8402a"/><circle cx="8" cy="32" r="2" fill="#6b3a6e"/><circle cx="32" cy="32" r="2" fill="#d4a017"/></svg></span>
               <Wordmark className="truncate text-base sm:text-lg" />
             </Link>
             <p className="hidden max-w-xs text-center text-xs font-medium leading-relaxed text-muted-foreground xl:block">{tr(["Alimentação melhor se constrói em comunidade.", "Better food habits grow in community.", "Los mejores hábitos alimentarios se construyen en comunidad.", "De meilleures habitudes alimentaires se construisent en communauté."])}</p>
@@ -393,7 +393,7 @@ export function PorticoChrome() {
               <NavItem key={def.key} def={def}>
                 {({ active, color, unread }) => (
                   <Link to={def.to} aria-current={active ? "page" : undefined} className={"flex min-h-11 shrink-0 items-center gap-2 border-b-2 border-transparent px-3 py-2 text-xs font-semibold transition-colors sm:px-4 " + (active ? "text-foreground" : "text-muted-foreground hover:text-foreground")} style={active ? { color, borderBottomColor: color, background: "color-mix(in srgb, var(--primary) 7%, transparent)" } : undefined}>
-                    <def.icon className="h-4 w-4" aria-hidden="true" />
+                    <span className="portico-nav-icon"><def.icon className="h-4 w-4" aria-hidden="true" /></span>
                     <span>{def.label}</span>
                     {unread > 0 && <span className="ml-0.5 min-w-4 rounded-sm bg-accent px-1 text-center text-[10px] font-bold leading-4 text-accent-foreground">{unread > 99 ? "99+" : unread}</span>}
                   </Link>

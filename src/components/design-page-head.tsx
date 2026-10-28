@@ -477,6 +477,21 @@ export function DesignPageHead() {
     );
   }
 
+  if (design === "portico") {
+    return (
+      <div data-design-head className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+        <div className="nc-tile-in grid overflow-hidden rounded-[10px] border border-border sm:grid-cols-[minmax(0,1fr)_32%]" style={{ background: "color-mix(in srgb, " + head.color + " 78%, #10282e)", color: "#ffffff" }}>
+          <div className="relative flex min-w-0 flex-col justify-center p-5 sm:p-7">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white/80">{tr(["Comunidade NutriConnect", "NutriConnect community", "Comunidad NutriConnect", "Communauté NutriConnect"])}</p>
+            <p className="font-display text-2xl font-semibold leading-tight text-white sm:text-4xl">{tr(head.title)}</p>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">{tr(head.text)}</p>
+          </div>
+          <div className="hidden min-h-36 min-w-0 sm:block"><img src={head.photo} alt="" aria-hidden="true" loading="lazy" decoding="async" className="h-full min-h-36 w-full object-cover" /></div>
+        </div>
+      </div>
+    );
+  }
+
   if (design === "editorial") {
     // A foto entra como gravura de jornal: tons de sépia e moldura fina, sob o título.
     return (
@@ -584,6 +599,24 @@ function PlainHead({ design, head }: { design: string; head: HeadDef }) {
             </p>
             <p className="!text-left text-sm text-white/90">{tr(head.text)}</p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (design === "portico") {
+    return (
+      <div data-design-head className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+        <div className="nc-tile-in relative flex items-center gap-4 overflow-hidden rounded-[10px] p-5 text-white sm:p-7" style={{ background: "color-mix(in srgb, " + head.color + " 78%, #10282e)" }}>
+          <span className="relative grid h-12 w-12 shrink-0 place-items-center sm:h-14 sm:w-14">
+            <Icon className="h-7 w-7 sm:h-8 sm:w-8" />
+            <span className="absolute -bottom-1 -right-1 h-1.5 w-1.5 rounded-full bg-[#d4a017]" />
+          </span>
+          <div className="relative min-w-0 flex-1"><p className="font-display text-2xl font-semibold leading-tight text-white sm:text-3xl">{tr(head.title)}</p><p className="mt-1 text-sm leading-relaxed text-white/90">{tr(head.text)}</p></div>
+          <svg viewBox="0 0 100 100" aria-hidden="true" className="pointer-events-none absolute -right-3 -top-5 hidden h-32 w-32 opacity-25 sm:block" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M8 70h84M17 70c0-24 14-40 33-40s33 16 33 40M28 70V50c0-14 9-24 22-24s22 10 22 24v20M15 82h70" />
+            <circle cx="50" cy="15" r="3" fill="#d4a017" stroke="none" />
+          </svg>
         </div>
       </div>
     );

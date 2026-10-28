@@ -86,15 +86,15 @@ export const SITE_DESIGNS: SiteDesign[] = [
   {
     id: "portico",
     name: "Pórtico",
-    tagline: "Editorial contemporâneo",
+    tagline: "Cartões-pôster e cores chapadas",
     description:
-      "Papel quente, títulos Fraunces, texto Inter Tight, azul-petróleo, terracota, ocre e ameixa. Cards chapados, linhas firmes e ícones lineares — sem vidro, sombras pesadas ou degradês.",
+      "Inspirado no visual atual do Portico: cartões grandes de cores fortes, títulos Fraunces, texto Inter Tight, ilustrações e ícones de traço, fundo limpo e movimento curto. Sem jornal antigo, textura pesada ou vidro.",
     swatch: {
-      bg: "#f7efdf",
-      card: "#fff9ef",
+      bg: "#f7f6f2",
+      card: "#ffffff",
       primary: "#c8402a",
       accent: "#0f4c5c",
-      ink: "#0f4c5c",
+      ink: "#123b46",
       darkBg: "#10282e",
       darkCard: "#143840",
     },
