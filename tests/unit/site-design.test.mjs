@@ -38,3 +38,12 @@ test("Pórtico fonts are loaded in the app shell", async () => {
   assert.match(shell, /family=Fraunces:wght@400;500;600;700;800/);
   assert.match(shell, /family=Inter\+Tight:wght@400;500;600;700;800/);
 });
+
+test("the visual CI sweep includes Pórtico in its design matrix", async () => {
+  const [workflow, smoke] = await Promise.all([
+    read("../../.github/workflows/verificacoes.yml"),
+    read("../e2e/smoke.mjs"),
+  ]);
+  assert.match(workflow, /--designs natural,vibrante,editorial,portico,aurora/);
+  assert.match(smoke, /--designs natural,vibrante,editorial,portico,aurora/);
+});

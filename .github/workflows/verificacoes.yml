@@ -60,7 +60,7 @@ jobs:
           node run-local.mjs "$GITHUB_WORKSPACE" | tee resultado.txt
           grep -q " 0 falharam" resultado.txt
 
-  # Varredura de páginas com dados sintéticos: 4 designs, claro/escuro, celular e desktop.
+  # Varredura de páginas com dados sintéticos: 5 designs, claro/escuro, celular e desktop.
   # Inclui rotas dinâmicas; mede rolagem, alvos de toque, erros JS e WCAG (axe-core).
   telas:
     runs-on: ubuntu-24.04
@@ -89,7 +89,7 @@ jobs:
           E2E_TOOLS: /tmp/e2e
         run: |
           node tests/e2e/smoke.mjs --widths 390,1280 --axe --dark --params \
-            --designs natural,vibrante,editorial,aurora
+            --designs natural,vibrante,editorial,portico,aurora
 
       - name: Relatório
         if: always()

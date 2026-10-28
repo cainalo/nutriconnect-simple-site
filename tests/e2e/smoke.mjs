@@ -3,7 +3,7 @@
 // rolagem lateral, alvos de toque < 24 px (WCAG 2.5.8), erros de JavaScript e, se o axe-core
 // estiver disponível, violações WCAG A/AA (sem "document-title", que é do harness).
 //
-// Uso: npm run test:e2e -- [--designs natural,vibrante,editorial,aurora] [--dark] [--widths 390,1280]
+// Uso: npm run test:e2e -- [--designs natural,vibrante,editorial,portico,aurora] [--dark] [--widths 390,1280]
 //      [--pages espaco,cardapio] [--axe]
 // Precisa de um Chromium (PLAYWRIGHT_BROWSERS_PATH ou CHROMIUM_PATH) e de playwright-core.
 import { spawn, spawnSync } from "node:child_process";
