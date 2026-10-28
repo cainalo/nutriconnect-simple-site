@@ -3453,24 +3453,16 @@ html[data-design="portico"] svg.lucide {
   stroke-linejoin: round;
 }
 html[data-design="portico"] [data-portico-mark] {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--primary-foreground) 55%, var(--primary));
-  border-radius: 0.25rem !important;
-  background: var(--primary) !important;
-  color: var(--primary-foreground) !important;
+  overflow: visible;
+  border: 0;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--foreground) !important;
   box-shadow: none !important;
-  font-family: "Fraunces", "Libre Baskerville", ui-serif, Georgia, serif;
-  font-weight: 800;
 }
-html[data-design="portico"] [data-portico-mark] [data-portico-star] {
-  position: absolute;
-  top: 0.25rem;
-  right: 0.25rem;
-  width: 0.32rem;
-  height: 0.32rem;
-  background: #d4a017;
-  clip-path: polygon(50% 0, 62% 36%, 100% 50%, 62% 64%, 50% 100%, 38% 64%, 0 50%, 38% 36%);
+html[data-design="portico"] [data-portico-mark] svg {
+  display: block;
+  flex: none;
 }
 html[data-design="portico"] [data-site-header] {
   border-bottom: 1px solid var(--border);
