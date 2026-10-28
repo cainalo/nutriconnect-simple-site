@@ -3331,51 +3331,59 @@ html[data-motion="reduce"] .nc-menu-item {
   );
 }
 
-/* Pórtico: editorial contemporâneo inspirado no sistema visual de Portico.
-   Papel quente, tinta azul-petróleo, terracota, ocre e ameixa; sem vidro nem degradês. */
+
+/* Pórtico — adaptação do sistema visual atual: cards-pôster chapados, cores fortes,
+   ilustração de traço, tipografia expressiva, fundo limpo e movimento breve. Não é jornal antigo. */
 html[data-design="portico"] {
   color-scheme: light;
   --radius: 0.625rem;
   --font-sans: "Inter Tight", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", "Libre Baskerville", ui-serif, Georgia, serif;
-  --background: #f7efdf;
-  --foreground: #0f4c5c;
-  --card: #fff9ef;
-  --card-foreground: #0f4c5c;
-  --popover: #fff9ef;
-  --popover-foreground: #0f4c5c;
+  --font-display: "Fraunces", Georgia, ui-serif, serif;
+  --background: #f7f6f2;
+  --foreground: #123b46;
+  --card: #ffffff;
+  --card-foreground: #123b46;
+  --popover: #ffffff;
+  --popover-foreground: #123b46;
   --primary: #c8402a;
   --primary-foreground: #fff9ef;
-  --primary-hover: #a0301c;
-  --primary-soft: #f2d7ca;
-  --secondary: #efe2cd;
-  --secondary-foreground: #0f4c5c;
-  --muted: #efe2cd;
-  --muted-foreground: #52646a;
+  --primary-hover: #a43120;
+  --primary-soft: #f1d8cf;
+  --secondary: #eceee8;
+  --secondary-foreground: #123b46;
+  --muted: #eceee8;
+  --muted-foreground: #52656a;
   --accent: #0f4c5c;
-  --accent-foreground: #fff9ef;
-  --accent-hover: #0a3b48;
-  --accent-soft: #d6e5e5;
-  --warning: #8b5e10;
-  --warning-foreground: #fff9ef;
+  --accent-foreground: #ffffff;
+  --accent-hover: #0b3d4a;
+  --accent-soft: #d7e5e7;
+  --warning: #87580c;
+  --warning-foreground: #ffffff;
   --destructive: #ae2f24;
-  --destructive-foreground: #fff9ef;
-  --border: #d9c9af;
-  --input: #d9c9af;
+  --destructive-foreground: #ffffff;
+  --border: #d6ddd9;
+  --input: #c8d3d1;
   --ring: #c8402a;
   --chart-1: #c8402a;
-  --chart-2: #0f4c5c;
+  --chart-2: #245f7a;
   --chart-3: #6b3a6e;
-  --chart-4: #d4a017;
-  --chart-5: #556b2f;
-  --sidebar: #efe2cd;
-  --sidebar-foreground: #0f4c5c;
+  --chart-4: #8b5e10;
+  --chart-5: #346834;
+  --sidebar: #eef0ea;
+  --sidebar-foreground: #123b46;
   --sidebar-primary: #c8402a;
-  --sidebar-primary-foreground: #fff9ef;
-  --sidebar-accent: #e5d5ba;
-  --sidebar-accent-foreground: #0f4c5c;
-  --sidebar-border: #d9c9af;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #dfe7e2;
+  --sidebar-accent-foreground: #123b46;
+  --sidebar-border: #d6ddd9;
   --sidebar-ring: #c8402a;
+  --portico-food: #c8402a;
+  --portico-story: #346834;
+  --portico-question: #245f7a;
+  --portico-conversation: #6b3a6e;
+  --portico-challenge: #87580c;
+  --portico-community: #0f4c5c;
+  --portico-pink: #8f2f50;
 }
 html[data-design="portico"].dark {
   color-scheme: dark;
@@ -3385,42 +3393,50 @@ html[data-design="portico"].dark {
   --card-foreground: #f7efdf;
   --popover: #143840;
   --popover-foreground: #f7efdf;
-  --primary: #f0937d;
+  --primary: #ef927b;
   --primary-foreground: #10282e;
-  --primary-hover: #f5aa99;
+  --primary-hover: #f5a995;
   --primary-soft: #4b2b29;
-  --secondary: #1d4650;
+  --secondary: #1b3e46;
   --secondary-foreground: #f7efdf;
-  --muted: #1d4650;
+  --muted: #1b3e46;
   --muted-foreground: #b6c4c3;
-  --accent: #6eabb9;
+  --accent: #83bdc8;
   --accent-foreground: #10282e;
-  --accent-hover: #8ac0ca;
-  --accent-soft: #22464d;
-  --warning: #eabf60;
+  --accent-hover: #a0d1d8;
+  --accent-soft: #214850;
+  --warning: #eac36e;
   --warning-foreground: #10282e;
   --destructive: #f0786c;
   --destructive-foreground: #10282e;
   --border: #315760;
-  --input: #315760;
-  --ring: #f0937d;
-  --chart-1: #f0937d;
-  --chart-2: #6eabb9;
+  --input: #40646b;
+  --ring: #ef927b;
+  --chart-1: #ef927b;
+  --chart-2: #83bdc8;
   --chart-3: #c29ac6;
-  --chart-4: #eabf60;
+  --chart-4: #eac36e;
   --chart-5: #a3ba6f;
   --sidebar: #0d2227;
   --sidebar-foreground: #f7efdf;
-  --sidebar-primary: #f0937d;
+  --sidebar-primary: #ef927b;
   --sidebar-primary-foreground: #10282e;
-  --sidebar-accent: #1d4650;
+  --sidebar-accent: #1b3e46;
   --sidebar-accent-foreground: #f7efdf;
   --sidebar-border: #315760;
-  --sidebar-ring: #f0937d;
+  --sidebar-ring: #ef927b;
+  --portico-food: #a83d29;
+  --portico-story: #2c5d30;
+  --portico-question: #28577a;
+  --portico-conversation: #613467;
+  --portico-challenge: #79500b;
+  --portico-community: #0d4856;
+  --portico-pink: #842b49;
 }
 html[data-design="portico"] body {
   font-family: "Inter Tight", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  background-image: none;
+  background-image: none !important;
+  background-color: var(--background);
   background-attachment: initial;
 }
 html[data-design="portico"] .font-sans,
@@ -3428,75 +3444,56 @@ html[data-design="portico"] :is(input, textarea, select, button, label) {
   font-family: "Inter Tight", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
 }
 html[data-design="portico"] :is(h1, h2, h3, .font-display, .font-logo-serif) {
-  font-family: "Fraunces", "Libre Baskerville", ui-serif, Georgia, serif;
+  font-family: "Fraunces", Georgia, ui-serif, serif;
   font-weight: 650;
   letter-spacing: -0.025em;
   text-wrap: balance;
 }
-html[data-design="portico"] .font-logo-serif {
-  font-weight: 750;
-  letter-spacing: -0.045em;
-}
+html[data-design="portico"] .font-logo-serif { font-weight: 750; letter-spacing: -0.045em; }
 html[data-design="portico"] :is(article, [class*="bg-card"]):not(footer, [data-no-design]) {
-  border-color: color-mix(in srgb, var(--foreground) 18%, var(--border));
-  box-shadow: none;
+  border-color: var(--border);
+  box-shadow: none !important;
 }
 html[data-design="portico"] :is([class*="rounded-2xl"], [class*="rounded-3xl"]):not([role="switch"], [role="switch"] *, svg, svg *, canvas) {
   border-radius: 0.625rem !important;
 }
-html[data-design="portico"] :is(button, input, textarea, select):not([role="switch"]) {
-  border-radius: 0.375rem;
-}
-html[data-design="portico"] svg.lucide {
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-html[data-design="portico"] [data-portico-mark] {
-  overflow: visible;
-  border: 0;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--foreground) !important;
-  box-shadow: none !important;
-}
-html[data-design="portico"] [data-portico-mark] svg {
-  display: block;
-  flex: none;
-}
-html[data-design="portico"] [data-site-header] {
-  border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--background) 96%, transparent);
-}
-html[data-design="portico"] [data-site-header] nav a {
-  border-radius: 0.25rem 0.25rem 0 0;
-  text-decoration: none;
-}
-html[data-design="portico"] [data-site-header] nav a[aria-current="page"] {
-  box-shadow: inset 0 -2px 0 var(--primary);
-}
-html[data-design="portico"] .post-card {
-  border-top: 4px solid var(--pt, var(--primary)) !important;
-  border-radius: 0.625rem !important;
-  box-shadow: none !important;
-  background-image: none !important;
-}
-html[data-design="portico"] .post-card :is(h2, h3) {
-  font-family: "Fraunces", "Libre Baskerville", ui-serif, Georgia, serif;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-}
-html[data-design="portico"] .post-card :is(button, a) {
-  text-transform: none;
-  letter-spacing: 0;
-}
-html[data-design="portico"] hr {
-  border-color: var(--border);
-}
+html[data-design="portico"] :is(button, input, textarea, select):not([role="switch"]) { border-radius: 0.375rem; }
+html[data-design="portico"] svg.lucide { stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round; }
+html[data-design="portico"] [data-portico-mark] { overflow: visible; border: 0; border-radius: 0 !important; background: transparent !important; color: var(--foreground) !important; box-shadow: none !important; }
+html[data-design="portico"] [data-portico-mark] svg { display: block; flex: none; }
+html[data-design="portico"] [data-site-header] { border-bottom: 1px solid var(--border); background: var(--background); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-design="portico"] [data-site-header] nav a { border-radius: 0.25rem 0.25rem 0 0; text-decoration: none; }
+html[data-design="portico"] [data-site-header] nav a[aria-current="page"] { box-shadow: inset 0 -2px 0 currentColor; }
+html[data-design="portico"] .portico-nav-icon { position: relative; display: inline-grid; place-items: center; flex: none; }
+html[data-design="portico"] .portico-nav-icon::after { content: ""; position: absolute; right: -2px; bottom: -2px; width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+html[data-design="portico"] .post-card { border: 1px solid var(--border) !important; border-left: 5px solid var(--pt, var(--primary)) !important; border-radius: 0.625rem !important; background: var(--card) !important; background-image: none !important; box-shadow: none !important; --post-fade: var(--card) !important; }
+html[data-design="portico"] .post-card[data-post-type="receita"] { --pt: var(--portico-food) !important; }
+html[data-design="portico"] .post-card[data-post-type="experiencia"] { --pt: var(--portico-story) !important; }
+html[data-design="portico"] .post-card[data-post-type="pergunta"] { --pt: var(--portico-question) !important; }
+html[data-design="portico"] .post-card[data-post-type="geral"] { --pt: var(--portico-conversation) !important; }
+html[data-design="portico"] .post-card :is(h2, h3) { font-family: "Fraunces", Georgia, ui-serif, serif; font-weight: 650; letter-spacing: -0.02em; line-height: 1.12; border-bottom: 0; text-transform: none; }
+html[data-design="portico"] .post-card [style*="var(--pt) 65%"] { color: var(--pt) !important; }
+html[data-design="portico"] .post-card :is(button, a) { text-transform: none; letter-spacing: 0; }
+html[data-design="portico"] .post-card img { filter: none !important; mix-blend-mode: normal !important; }
+html[data-design="portico"] .post-tile { border-radius: 0.625rem !important; box-shadow: none !important; transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease; }
+html[data-design="portico"] .post-tile[data-post-type="receita"] { --portico-tile-color: var(--portico-food); }
+html[data-design="portico"] .post-tile[data-post-type="experiencia"] { --portico-tile-color: var(--portico-story); }
+html[data-design="portico"] .post-tile[data-post-type="pergunta"] { --portico-tile-color: var(--portico-question); }
+html[data-design="portico"] .post-tile[data-post-type="geral"] { --portico-tile-color: var(--portico-conversation); }
+html[data-design="portico"] .post-tile:not(:has(> img)) { background-color: var(--portico-tile-color) !important; border-color: var(--portico-tile-color) !important; color: #ffffff !important; }
+html[data-design="portico"] .post-tile:not(:has(> img)) .text-foreground { color: #ffffff !important; }
+html[data-design="portico"] .post-tile:not(:has(> img)) .text-muted-foreground { color: rgb(255 255 255 / 0.86) !important; }
+html[data-design="portico"] .post-tile:not(:has(> img)) .blur-xl { display: none !important; }
+html[data-design="portico"] .post-tile img { filter: none !important; mix-blend-mode: normal !important; }
+html[data-design="portico"] .portico-poster { border: 1px solid rgb(18 59 70 / 0.12); border-radius: 0.625rem; box-shadow: none; transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease; }
+html[data-design="portico"] .portico-section-title { display: flex; align-items: baseline; gap: 0.75rem; }
+html[data-design="portico"] .portico-section-title::after { content: ""; height: 1px; flex: 1; background: var(--border); }
+html[data-design="portico"] hr { border-color: var(--border); }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  html[data-design="portico"] :is(a, button)[class*="bg-card"]:hover,
-  html[data-design="portico"] a:is(article, [class*="bg-card"]):hover {
-    border-color: var(--primary);
-    box-shadow: 0 3px 0 color-mix(in srgb, var(--primary) 25%, transparent);
-  }
+  html[data-design="portico"] .portico-poster:hover,
+  html[data-design="portico"] .post-tile:hover { transform: translateY(-3px); box-shadow: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-design="portico"] .portico-poster,
+  html[data-design="portico"] .post-tile { transition: none !important; }
 }

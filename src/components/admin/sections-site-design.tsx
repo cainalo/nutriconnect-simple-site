@@ -21,7 +21,7 @@ function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
     <div
       className="relative overflow-hidden border border-black/10 p-3"
       style={{
-        background: glass
+        background: portico ? bg : glass
           ? `radial-gradient(circle at 15% 10%, ${s.primary}55, transparent 55%), radial-gradient(circle at 90% 90%, ${s.accent}55, transparent 55%), ${bg}`
           : d.id === "vibrante"
             ? `linear-gradient(160deg, ${bg}, ${dark ? s.darkBg : "#e8f6ec"})`
@@ -50,28 +50,29 @@ function Mini({ d, dark }: { d: SiteDesign; dark: boolean }) {
             key={c}
             className="p-2"
             style={{
-              background: glass ? `${card}${dark ? "99" : "b3"}` : card,
-              border: `1px solid ${ink}${d.id === "editorial" || portico ? "55" : "1f"}`,
-              borderRadius: Math.min(d.radius, 16),
-              boxShadow: d.id === "editorial" || portico ? "none" : "0 6px 14px -8px rgba(0,0,0,0.35)",
+              background: portico ? c : glass ? `${card}${dark ? "99" : "b3"}` : card,
+              color: portico ? (c === "#d4a017" ? "#123b46" : "#ffffff") : ink,
+              border: `1px solid ${portico ? c : `${ink}${d.id === "editorial" ? "55" : "1f"}`}`,
+              borderRadius: portico || d.id === "editorial" ? 3 : Math.min(d.radius, 16),
+              boxShadow: "none",
               backdropFilter: glass ? "blur(6px)" : undefined,
             }}
           >
             <div
               className="mb-1.5 h-4 w-4"
               style={{
-                background: c,
-                borderRadius: d.id === "editorial" ? 2 : portico ? 3 : 999,
+                background: portico ? (c === "#d4a017" ? "#123b46" : "#ffffff") : c,
+                borderRadius: portico || d.id === "editorial" ? 2 : 999,
               }}
             />
-            <div className="h-1.5 w-4/5 rounded-full" style={{ background: `${ink}40` }} />
-            <div className="mt-1 h-1.5 w-3/5 rounded-full" style={{ background: `${ink}25` }} />
+            <div className="h-1.5 w-4/5 rounded-full" style={{ background: portico ? "currentColor" : `${ink}40` }} />
+            <div className="mt-1 h-1.5 w-3/5 rounded-full" style={{ background: portico ? "currentColor" : `${ink}25` }} />
             <div
               className="mt-2 h-4 w-12 text-center text-[8px] font-bold leading-4"
               style={{
-                background: i ? s.accent : s.primary,
-                color: "#fff",
-                borderRadius: d.id === "editorial" ? 2 : 999,
+                background: portico ? "#ffffff" : i ? s.accent : s.primary,
+                color: portico ? (c === "#d4a017" ? "#123b46" : c) : "#fff",
+                borderRadius: portico || d.id === "editorial" ? 2 : 999,
               }}
             >
               {tr(["Abrir", "Open", "Abrir", "Ouvrir"])}

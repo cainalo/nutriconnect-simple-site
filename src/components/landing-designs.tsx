@@ -819,3 +819,106 @@ export function LandingAurora() {
     </div>
   );
 }
+
+// ───────────────────────── Pórtico: cartões-pôster e fundo limpo ───────────────────────────
+
+export function LandingPortico() {
+  const tr = useTr();
+  const security = SecurityItems();
+  const posterColors = ["#c8402a", "#245f7a", "#87580c", "#6b3a6e", "#346834", "#8f2f50"];
+  return (
+    <div data-landing className="min-h-screen bg-background text-foreground [&_p]:text-left">
+      <header className="sticky top-0 z-30 border-b border-border bg-background">
+        <div className="mx-auto flex min-h-16 max-w-6xl items-center gap-3 px-4 py-2 sm:px-6">
+          <span className="grid h-9 w-9 shrink-0 place-items-center" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="36" height="36" fill="none">
+              <path d="M7 15h26M10 15c0 8 4.5 13 10 13s10-5 10-13M12 32h16M20 6v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" />
+              <circle cx="20" cy="5" r="2" fill="#c8402a" /><circle cx="8" cy="32" r="2" fill="#6b3a6e" /><circle cx="32" cy="32" r="2" fill="#d4a017" />
+            </svg>
+          </span>
+          <Wordmark className="text-lg sm:text-xl" />
+          <nav className="ml-4 hidden items-center gap-5 text-sm font-semibold text-muted-foreground lg:flex">
+            <a href="#recursos" className="hover:text-foreground">{tr(COPY.navFeatures)}</a>
+            <a href="#profissionais" className="hover:text-foreground">{tr(COPY.navPros)}</a>
+            <a href="#duvidas" className="hover:text-foreground">{tr(COPY.navFaq)}</a>
+          </nav>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <LangSelect />
+            <Link to="/login" className="hidden min-h-10 items-center px-3 text-sm font-semibold hover:text-primary sm:inline-flex">{tr(COPY.login)}</Link>
+            <Link to="/cadastro" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-bold text-primary-foreground transition hover:brightness-95">{tr(COPY.signup)} <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+        </div>
+      </header>
+      <main>
+        <section className="mx-auto grid w-full max-w-6xl gap-4 px-4 py-6 sm:px-6 sm:py-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="portico-poster flex min-w-0 flex-col justify-center p-6 text-white sm:p-9 lg:p-11" style={{ background: "#c8402a" }}>
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-white/85">{tr(COPY.badge)}</p>
+            <h1 className="font-display text-4xl font-semibold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">{tr(COPY.h1a)} <span className="text-[#ffcf9f]">{tr(COPY.h1b)}</span></h1>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">{tr(COPY.lead)}</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link to="/cadastro" className="inline-flex min-h-11 items-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-bold text-[#a43120] transition hover:brightness-95">{tr(COPY.start)} <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/apresentacao" className="inline-flex min-h-11 items-center rounded-md border border-white/60 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">{tr(COPY.presentation)}</Link>
+            </div>
+            <div className="mt-4"><AndroidDownloadButton /></div>
+            <p className="mt-3 text-xs text-white/80">{tr(COPY.freeNote)}</p>
+          </div>
+          <div className="grid min-w-0 grid-rows-[minmax(15rem,1fr)_auto] gap-3">
+            <div className="relative min-h-60 overflow-hidden rounded-[10px] border border-border bg-card">
+              <img src="/images/presentation/cooking-together.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-[#0f4c5c] px-4 py-3 text-white"><span className="font-display text-xl font-semibold">{tr(["Uma mesa para todo mundo", "A table for everyone", "Una mesa para todos", "Une table pour tous"])}</span><span className="shrink-0 text-xs font-bold uppercase tracking-wider">NutriConnect</span></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="portico-poster min-h-28 p-4 text-white" style={{ background: "#245f7a" }}><span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">01</span><p className="mt-5 font-display text-xl font-semibold leading-tight">{tr(["Receitas reais", "Real recipes", "Recetas reales", "Recettes réelles"])}</p></div>
+              <div className="portico-poster min-h-28 p-4 text-white" style={{ background: "#346834" }}><span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">02</span><p className="mt-5 font-display text-xl font-semibold leading-tight">{tr(["Hábitos em conjunto", "Habits together", "Hábitos juntos", "Des habitudes ensemble"])}</p></div>
+            </div>
+          </div>
+        </section>
+        <section id="recursos" className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+          <div className="mb-5"><p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-accent">{tr(COPY.featuresTitle)}</p><h2 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">{tr(["Um lugar para descobrir, trocar e cuidar", "A place to discover, share and care", "Un lugar para descubrir, compartir y cuidar", "Un lieu pour découvrir, échanger et prendre soin"])}</h2></div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((feature, i) => {
+              const Icon = feature.icon;
+              return (
+                <article key={feature.title[0]} className="portico-poster flex min-h-[14.5rem] flex-col p-5 text-white sm:p-6" style={{ background: posterColors[i % posterColors.length] }}>
+                  <div className="flex items-start justify-between gap-3"><Icon className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" /><span className="text-xs font-semibold tabular-nums text-white/80">{String(i + 1).padStart(2, "0")}</span></div>
+                  <h3 className="mt-auto pt-8 font-display text-2xl font-semibold leading-tight">{tr(feature.title)}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/90">{tr(feature.text)}</p>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+        <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+          <div className="mb-5 flex items-baseline gap-3"><h2 className="font-display text-3xl font-semibold sm:text-4xl">{tr(COPY.howTitle)}</h2><span className="h-px flex-1 bg-border" /></div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {STEPS.map((step, i) => (
+              <article key={step.title[0]} className="relative rounded-[10px] border border-border bg-card p-5 sm:p-6">
+                <span className="inline-grid h-9 w-9 place-items-center rounded-md text-sm font-bold text-white" style={{ background: posterColors[i] }}>{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="mt-5 font-display text-2xl font-semibold leading-tight">{tr(step.title)}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tr(step.text)}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section id="profissionais" className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+          <div className="portico-poster grid gap-7 p-6 text-white sm:p-9 lg:grid-cols-[0.9fr_1.1fr] lg:items-center" style={{ background: "#0f4c5c" }}>
+            <div><p className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-white/80">{tr(COPY.profBadge)}</p><h2 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">{tr(COPY.profTitle)}</h2><p className="mt-4 text-sm leading-relaxed text-white/85">{tr(["Crie sua presença na comunidade, compartilhe conhecimento e ofereça acompanhamento quando fizer sentido.", "Build your presence in the community, share knowledge and offer follow-up when it makes sense.", "Crea tu presencia en la comunidad, comparte conocimiento y ofrece seguimiento cuando tenga sentido.", "Construisez votre présence dans la communauté, partagez votre savoir et proposez un suivi lorsque cela a du sens."])}</p><Link to="/cadastro" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-bold text-[#0f4c5c]">{tr(COPY.signup)} <ArrowRight className="h-4 w-4" /></Link></div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {PROFESSIONS.map((profession) => { const Icon = profession.icon; return <div key={profession.label[0]} className="flex min-h-20 items-center gap-2 rounded-md border border-white/25 px-3 py-3 text-sm font-semibold"><Icon className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" /><span>{tr(profession.label)}</span></div>; })}
+            </div>
+          </div>
+        </section>
+        <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+          <div className="mb-5 flex items-baseline gap-3"><h2 className="font-display text-3xl font-semibold sm:text-4xl">{tr(["Cuidado com transparência", "Care, with transparency", "Cuidado con transparencia", "Prendre soin en toute transparence"])}</h2><span className="h-px flex-1 bg-border" /></div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {security.map((item, i) => { const Icon = item.icon; return <article key={item.title} className="rounded-[10px] border border-border bg-card p-5 sm:p-6"><Icon className="h-6 w-6" style={{ color: posterColors[(i + 1) % posterColors.length] }} strokeWidth={1.5} aria-hidden="true" /><h3 className="mt-4 font-display text-xl font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.text}</p></article>; })}
+          </div>
+        </section>
+        <section id="duvidas" className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+          <div className="mb-5 flex items-baseline gap-3"><h2 className="font-display text-3xl font-semibold sm:text-4xl">{tr(COPY.navFaq)}</h2><span className="h-px flex-1 bg-border" /></div>
+          <Faq className="divide-y divide-border border-y border-border" itemClass="border-border" />
+        </section>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}

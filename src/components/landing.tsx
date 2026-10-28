@@ -32,7 +32,7 @@ import { LOCALES, isLocale } from "@/lib/i18n/locales";
 import { cn } from "@/lib/utils";
 import { AndroidDownloadButton } from "@/components/android-app";
 import { FAQ, FEATURES, PROFESSIONS, STEPS } from "@/components/landing-data";
-import { LandingAurora, LandingEditorial, LandingVibrante } from "@/components/landing-designs";
+import { LandingAurora, LandingEditorial, LandingPortico, LandingVibrante } from "@/components/landing-designs";
 import { useDesignId } from "@/lib/site-design";
 
 export function Section({
@@ -500,6 +500,7 @@ export function Landing() {
   const design = useDesignId();
   if (design === "vibrante") return <LandingVibrante />;
   if (design === "editorial") return <LandingEditorial />;
+  if (design === "portico") return <LandingPortico />;
   if (design === "aurora") return <LandingAurora />;
   return <LandingNatural />;
 }
