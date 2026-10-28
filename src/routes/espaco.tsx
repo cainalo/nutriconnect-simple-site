@@ -66,6 +66,7 @@ function EmptyState({ message }: { message: string }) {
   const { t } = useI18n();
   const tr = useTr();
   const photos = useSitePhotos();
+  const design = useDesignId();
   return (
     <div className="mx-auto max-w-lg overflow-hidden rounded-3xl border border-dashed border-border bg-card/40 p-12 text-center">
       <EmptyPhoto src="/images/heads/convites.jpg" className="-mx-12 -mt-12 mb-0" />
@@ -84,23 +85,25 @@ function EmptyState({ message }: { message: string }) {
           </button>
         }
       />
-      {/* Feed vazio também mostra onde achar gente e conversas para seguir. */}
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <Link
-          to="/explorar"
-          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground transition hover:bg-secondary"
-        >
-          <UserPlus className="h-4 w-4" />
-          {tr(["Encontrar pessoas", "Find people", "Encontrar personas", "Trouver des personnes"])}
-        </Link>
-        <Link
-          to="/comunidades"
-          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground transition hover:bg-secondary"
-        >
-          <Users className="h-4 w-4" />
-          {tr(["Ver comunidades", "See communities", "Ver comunidades", "Voir les communautés"])}
-        </Link>
-      </div>
+      {/* No Editorial Vibrante, a navegação entre páginas fica nas barras do app. */}
+      {design !== "portico" && (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Link
+            to="/explorar"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground transition hover:bg-secondary"
+          >
+            <UserPlus className="h-4 w-4" />
+            {tr(["Encontrar pessoas", "Find people", "Encontrar personas", "Trouver des personnes"])}
+          </Link>
+          <Link
+            to="/comunidades"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground transition hover:bg-secondary"
+          >
+            <Users className="h-4 w-4" />
+            {tr(["Ver comunidades", "See communities", "Ver comunidades", "Voir les communautés"])}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
@@ -210,6 +213,7 @@ function NewPostsButton({ onClick }: { onClick: () => void }) {
 
 function EspacoDeHojePage() {
   const { user } = useRequireAuth();
+  const design = useDesignId();
   const { t, locale } = useI18n();
   const [filter, setFilter] = useState<Filter>("todos");
   const pageSize = PAGE_SIZE;
@@ -308,12 +312,14 @@ function EspacoDeHojePage() {
               {text.question && (
                 <p className="mt-3 text-sm font-semibold text-foreground">{text.question}</p>
               )}
-              <Link
-                to="/tema-da-semana"
-                className="mt-4 inline-block text-xs font-semibold text-accent hover:underline"
-              >
-                {t("espaco.theme.open")}
-              </Link>
+              {design !== "portico" && (
+                <Link
+                  to="/tema-da-semana"
+                  className="mt-4 inline-block text-xs font-semibold text-accent hover:underline"
+                >
+                  {t("espaco.theme.open")}
+                </Link>
+              )}
             </div>
           ) : (
             !theme.isLoading && (

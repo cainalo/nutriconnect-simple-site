@@ -4203,7 +4203,7 @@ html[data-motion="reduce"][data-design="portico"] .ev-bottom-create {
 /* Abertura e feed do Espaço: composição editorial exclusiva, em vez do masonry padrão. */
 html[data-design="portico"] .ev-feed-intro {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(19rem, 1.15fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(1rem, 2vw, 1.5rem);
   margin-bottom: clamp(1.5rem, 3vw, 2.75rem);
 }
@@ -4254,82 +4254,6 @@ html[data-design="portico"] .ev-feed-intro-lead {
   font-size: clamp(0.9rem, 1.2vw, 1rem);
   line-height: 1.6;
 }
-html[data-design="portico"] .ev-feed-weekly-link {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.3rem 0.7rem;
-  align-items: center;
-  width: 100%;
-  margin-top: 1.2rem;
-  padding: 0.75rem 0.85rem;
-  border-left: 3px solid var(--ev-terracotta);
-  background: var(--ev-surface);
-  color: var(--foreground);
-  text-decoration: none;
-}
-html[data-design="portico"] .ev-feed-weekly-link > span {
-  grid-column: 1 / -1;
-  color: var(--ev-terracotta);
-  font-size: 0.56rem;
-  font-weight: 850;
-  letter-spacing: 0.12em;
-}
-html[data-design="portico"] .ev-feed-weekly-link > strong {
-  min-width: 0;
-  font-family: "Fraunces", "Libre Baskerville", Georgia, serif;
-  font-size: 1.08rem;
-  font-weight: 600;
-  line-height: 1.2;
-}
-html[data-design="portico"] .ev-feed-shortcuts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
-  min-width: 0;
-}
-html[data-design="portico"] .ev-feed-shortcut {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  min-height: 7rem;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 0.7rem;
-  overflow: hidden;
-  padding: 0.85rem;
-  border: 1px solid transparent;
-  border-radius: 0.45rem;
-  text-decoration: none;
-  transition: transform 180ms ease, filter 180ms ease;
-}
-html[data-design="portico"] .ev-feed-shortcut:first-child {
-  grid-column: 1 / -1;
-  min-height: 8rem;
-}
-html[data-design="portico"] .ev-feed-shortcut-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.59rem;
-  font-weight: 850;
-  letter-spacing: 0.1em;
-}
-html[data-design="portico"] .ev-feed-shortcut-title {
-  max-width: 17ch;
-  font-family: "Fraunces", "Libre Baskerville", Georgia, serif;
-  font-size: clamp(0.95rem, 1.6vw, 1.3rem);
-  font-weight: 650;
-  line-height: 1.08;
-  text-wrap: balance;
-}
-html[data-design="portico"] .ev-feed-shortcut-arrow {
-  position: absolute;
-  right: 0.8rem;
-  bottom: 0.8rem;
-  opacity: 0.75;
-}
-html[data-design="portico"] .ev-feed-shortcut:hover { filter: brightness(1.045); transform: translateY(-2px); }
 html[data-design="portico"] [data-ev-feed-filters] {
   display: flex;
   width: fit-content;
@@ -4356,6 +4280,28 @@ html[data-design="portico"] [data-ev-feed-filters] button[aria-pressed="true"] {
   background: var(--ev-petrol);
   color: var(--ev-ink-on-color);
   box-shadow: none;
+}
+html[data-design="portico"] .ev-feed-theme-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem 0.65rem;
+  margin: 1rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+html[data-design="portico"] .ev-feed-theme-inline > span {
+  color: var(--ev-terracotta);
+  font-size: 0.59rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+html[data-design="portico"] .ev-feed-theme-inline > strong {
+  font-family: "Fraunces", "Libre Baskerville", Georgia, serif;
+  font-weight: 620;
 }
 html[data-design="portico"] .ev-feed-grid {
   display: grid;
@@ -4394,19 +4340,12 @@ html[data-design="portico"] main[data-no-bottom-pad] .overflow-y-auto {
   padding-bottom: calc(5.8rem + env(safe-area-inset-bottom)) !important;
 }
 @media (max-width: 1023px) {
-  html[data-design="portico"] .ev-feed-intro { grid-template-columns: minmax(0, 1fr); }
   html[data-design="portico"] .ev-feed-intro-main { padding: 1.2rem; }
   html[data-design="portico"] .ev-feed-intro-main h1 { font-size: clamp(2.45rem, 9vw, 3.7rem); }
-  html[data-design="portico"] .ev-feed-shortcuts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  html[data-design="portico"] .ev-feed-shortcut:first-child { grid-column: auto; }
-  html[data-design="portico"] .ev-feed-shortcut { min-height: 7rem; padding: 0.7rem; }
-  html[data-design="portico"] .ev-feed-shortcut-title { font-size: 0.97rem; }
   html[data-design="portico"] .ev-feed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   html[data-design="portico"] .ev-feed-grid-item.is-lead { grid-column: 1 / -1; }
 }
 @media (max-width: 639px) {
-  html[data-design="portico"] .ev-feed-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  html[data-design="portico"] .ev-feed-shortcut:first-child { grid-column: 1 / -1; }
   html[data-design="portico"] .ev-feed-grid { grid-template-columns: minmax(0, 1fr); gap: 0.65rem; }
   html[data-design="portico"] .ev-feed-grid-item.is-lead { grid-column: auto; }
   html[data-design="portico"] .ev-feed-grid-item .post-card,
@@ -4415,11 +4354,6 @@ html[data-design="portico"] main[data-no-bottom-pad] .overflow-y-auto {
   html[data-design="portico"] .ev-feed-grid-item.is-lead .post-card :is(h2, h3) { font-size: 1.38rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  html[data-design="portico"] .ev-feed-shortcut { transition: none !important; }
-}
-html[data-motion="reduce"][data-design="portico"] .ev-feed-shortcut {
-  transition: none !important;
-  transform: none !important;
 }
 
 
