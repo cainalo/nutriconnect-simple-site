@@ -3480,10 +3480,10 @@ html[data-design="portico"] .post-tile[data-post-type="receita"] { --portico-til
 html[data-design="portico"] .post-tile[data-post-type="experiencia"] { --portico-tile-color: var(--portico-story); }
 html[data-design="portico"] .post-tile[data-post-type="pergunta"] { --portico-tile-color: var(--portico-question); }
 html[data-design="portico"] .post-tile[data-post-type="geral"] { --portico-tile-color: var(--portico-conversation); }
-html[data-design="portico"] .post-tile:not(:has(img)) { background-color: var(--portico-tile-color) !important; border-color: var(--portico-tile-color) !important; color: #ffffff !important; }
-html[data-design="portico"] .post-tile:not(:has(img)) .text-foreground { color: #ffffff !important; }
-html[data-design="portico"] .post-tile:not(:has(img)) .text-muted-foreground { color: rgb(255 255 255 / 0.86) !important; }
-html[data-design="portico"] .post-tile:not(:has(img)) .blur-xl { display: none !important; }
+html[data-design="portico"] .post-tile:not(:has(> img)) { background-color: var(--portico-tile-color) !important; border-color: var(--portico-tile-color) !important; color: #ffffff !important; }
+html[data-design="portico"] .post-tile:not(:has(> img)) .text-foreground { color: #ffffff !important; }
+html[data-design="portico"] .post-tile:not(:has(> img)) .text-muted-foreground { color: rgb(255 255 255 / 0.86) !important; }
+html[data-design="portico"] .post-tile:not(:has(> img)) .blur-xl { display: none !important; }
 html[data-design="portico"] .post-tile img { filter: none !important; mix-blend-mode: normal !important; }
 html[data-design="portico"] .portico-poster { border: 1px solid rgb(18 59 70 / 0.12); border-radius: 0.625rem; box-shadow: none; transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease; }
 html[data-design="portico"] .portico-section-title { display: flex; align-items: baseline; gap: 0.75rem; }
