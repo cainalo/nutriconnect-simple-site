@@ -1,7 +1,7 @@
 // Abertura do Espaço de hoje em cada design do site, acima da lista de posts. O design Natural não
 // tem abertura. Os posts, os filtros e a rolagem do feed não mudam.
 import { Link } from "@tanstack/react-router";
-import { Award, ChefHat, LayoutGrid, Refrigerator, Sparkles, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Award, ChefHat, LayoutGrid, Refrigerator, Sparkles, type LucideIcon } from "lucide-react";
 import { useTr } from "@/components/settings-ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -127,6 +127,33 @@ export function EspacoIntro({ themeTitle }: { themeTitle?: string | null }) {
             ])}
           </p>
         )}
+      </section>
+    );
+  }
+
+  if (design === "portico") {
+    const posterColors = ["#0F4C5C", "#C8402A", "#6B3A6E", "#556B2F", "#D4A017"];
+    const posterInk = posterColors.map((color) => color === "#D4A017" ? "#10282E" : "#FFF9EF");
+    return (
+      <section data-ev-espaco-intro className="ev-feed-intro">
+        <div className="ev-feed-intro-main">
+          <p className="ev-feed-intro-kicker"><span />{tr(["ESPAÇO DE HOJE · UM LUGAR EM COMUM", "TODAY’S SPACE · A PLACE IN COMMON", "ESPACIO DE HOY · UN LUGAR EN COMÚN", "L’ESPACE DU JOUR · UN LIEU EN COMMUN"])}</p>
+          <h1>{greeting}{name ? `, ${name}` : ""}.</h1>
+          <p className="ev-feed-intro-lead">{themeTitle ? tr(["A conversa desta semana começa à mesa.", "This week’s conversation starts at the table.", "La conversación de esta semana empieza en la mesa.", "La conversation de cette semaine commence à table."]) : tr(["Uma boa ideia, uma receita ou uma experiência podem mudar o dia de alguém.", "A good idea, recipe or experience can change someone’s day.", "Una buena idea, receta o experiencia puede cambiarle el día a alguien.", "Une bonne idée, une recette ou une expérience peut changer la journée de quelqu’un."])}</p>
+          {themeTitle && <Link to="/tema-da-semana" className="ev-feed-weekly-link"><span>{tr(["À MESA ESTA SEMANA", "AT THE TABLE THIS WEEK", "EN LA MESA ESTA SEMANA", "À TABLE CETTE SEMAINE"])}</span><strong>{themeTitle}</strong><ArrowUpRight className="h-4 w-4" aria-hidden="true" /></Link>}
+        </div>
+        <div className="ev-feed-shortcuts" aria-label={tr(["Atalhos para cuidar e compartilhar", "Shortcuts to care and share", "Accesos para cuidar y compartir", "Raccourcis pour prendre soin et partager"])}>
+          {SHORTCUTS.map((shortcut, i) => {
+            const Icon = shortcut.icon;
+            const color = posterColors[i % posterColors.length];
+            const ink = posterInk[i % posterInk.length];
+            return <Link key={shortcut.to} to={shortcut.to} className="ev-feed-shortcut" style={{ background: color, color: ink }}>
+              <span className="ev-feed-shortcut-top"><span>{String(i + 1).padStart(2, "0")}</span><Icon className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" /></span>
+              <span className="ev-feed-shortcut-title">{tr(shortcut.label)}</span>
+              <ArrowUpRight className="ev-feed-shortcut-arrow h-4 w-4" aria-hidden="true" />
+            </Link>;
+          })}
+        </div>
       </section>
     );
   }

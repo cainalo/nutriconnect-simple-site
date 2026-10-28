@@ -487,7 +487,7 @@ export function DesignPageHead() {
             <p className="ev-page-description">{tr(head.text)}</p>
             <div className="ev-page-annotation"><span>NutriConnect</span><span className="ev-page-annotation-line" /><span>{tr(["ALIMENTAÇÃO EM COMUNIDADE", "FOOD IN COMMUNITY", "ALIMENTACIÓN EN COMUNIDAD", "L’ALIMENTATION EN COMMUNAUTÉ"])}</span></div>
           </div>
-          <div className="ev-page-visual" style={{ ["--ev-page-color" as string]: head.color }}>
+          <div className="ev-page-visual" style={{ backgroundColor: head.color }}>
             <div className="ev-page-visual-number">NC <span>—</span> CADERNO DE COMUNIDADE</div>
             <img src={head.photo} alt="" aria-hidden="true" loading="lazy" decoding="async" />
             <div className="ev-page-visual-stamp"><Icon className="h-7 w-7" strokeWidth={1.6} aria-hidden="true" /></div>

@@ -108,3 +108,21 @@ test("Editorial Vibrante section pages use a unique masthead and functional comp
     assert.ok(styles.includes(selector), selector);
   }
 });
+
+test("The home feed has a dedicated Editorial Vibrante intro, poster grid, filters, and reserved space for the bottom dock", async () => {
+  const [intro, feed, styles] = await Promise.all([
+    read("../../src/components/espaco-intro.tsx"),
+    read("../../src/routes/espaco.tsx"),
+    read("../../src/styles.css"),
+  ]);
+  assert.ok(intro.includes('if (design === "portico")'));
+  assert.ok(intro.includes("data-ev-espaco-intro"));
+  assert.ok(intro.includes("ev-feed-shortcut"));
+  assert.ok(feed.includes("function EditorialPosterGrid"));
+  assert.ok(feed.includes("design === \"portico\" ? <EditorialPosterGrid posts={posts} />"));
+  assert.ok(feed.includes("data-ev-feed-filters"));
+  assert.ok(feed.includes("data-ev-weekly-panel"));
+  for (const selector of [".ev-feed-intro-main", ".ev-feed-shortcuts", ".ev-feed-grid-item.is-lead", "[data-ev-feed-filters] button[aria-pressed=\"true\"]"]) {
+    assert.ok(styles.includes(selector), selector);
+  }
+});
